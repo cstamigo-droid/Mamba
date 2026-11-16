@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Looks
+## Title: Polestar Looks · Mamba
 ## Notes: Part of Polestar: the WoW Forever, Blizzard, Classic and Hearth skins. Loaded when you pick one.
-## Title-deDE: Polestar: Designs
+## Title-deDE: Polestar: Designs · Mamba
 ## Notes-deDE: Teil von Polestar: die Designs WoW Forever, Blizzard, Classic und Hearth. Wird geladen, wenn du eines auswählst.
-## Title-esES: Polestar: temas
+## Title-esES: Polestar: temas · Mamba
 ## Notes-esES: Parte de Polestar: los temas WoW Forever, Blizzard, Classic y Hearth. Se carga cuando eliges uno.
-## Title-esMX: Polestar: temas
+## Title-esMX: Polestar: temas · Mamba
 ## Notes-esMX: Parte de Polestar: los temas WoW Forever, Blizzard, Classic y Hearth. Se carga cuando eliges uno.
-## Title-frFR: Polestar : habillages
+## Title-frFR: Polestar : habillages · Mamba
 ## Notes-frFR: Fait partie de Polestar : les habillages WoW Forever, Blizzard, Classic et Hearth. Chargé quand vous en choisissez un.
-## Title-koKR: Polestar 스킨
+## Title-koKR: Polestar 스킨 · Mamba
 ## Notes-koKR: Polestar의 일부: WoW Forever, Blizzard, Classic, Hearth 스킨. 하나를 고를 때 불러옵니다.
-## Title-ptBR: Polestar: temas
+## Title-ptBR: Polestar: temas · Mamba
 ## Notes-ptBR: Parte do Polestar: os temas WoW Forever, Blizzard, Classic e Hearth. Carregado quando você escolhe um.
-## Title-ruRU: Polestar: оформления
+## Title-ruRU: Polestar: оформления · Mamba
 ## Notes-ruRU: Часть Polestar: оформления WoW Forever, Blizzard, Classic и Hearth. Загружается, когда вы выбираете одно из них.
-## Title-zhCN: Polestar 皮肤
+## Title-zhCN: Polestar 皮肤 · Mamba
 ## Notes-zhCN: Polestar 的组成部分：WoW Forever、Blizzard、Classic 和 Hearth 皮肤。选择其中一个时加载。
-## Title-zhTW: Polestar 皮膚
+## Title-zhTW: Polestar 皮膚 · Mamba
 ## Notes-zhTW: Polestar 的一部分：WoW Forever、Blizzard、Classic 和 Hearth 皮膚。選擇其中一個時載入。
 ## Author: Polestar
 ## Version: 0.4.0
@@ -27,6 +27,7 @@
 ## Dependencies: Polestar
 ## X-License: GPL-3.0-only
 ## X-Website: https://github.com/fitzforge/polestar
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 GameArt.lua
 GameSkins.lua

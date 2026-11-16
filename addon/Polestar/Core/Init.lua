@@ -43,9 +43,10 @@ function ns.DocsURL()
 end
 
 -- The Polestar Discord's invite: where players report problems (UI/Report.lua).
-ns.DiscordURL = "https://discord.gg/polestar"
+ns.DiscordURL = "https://github.com/cstamigo-droid/Mamba/issues" -- Mamba (PARCHES.md P1): los avisos del fork no van al Discord de Polestar
 -- A new issue on Polestar's GitHub: the report window fills one in (UI/Report.lua).
-ns.IssueURL = "https://github.com/fitzforge/polestar/issues/new"
+ns.IssueURL = "https://github.com/cstamigo-droid/Mamba/issues/new" -- Mamba (PARCHES.md P1)
+ns.mamba = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(ADDON, "X-Mamba")) or nil
 
 local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostring
 

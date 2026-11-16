@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar
+## Title: Polestar · Mamba
 ## Notes: Leveling guides for World of Warcraft: Forever.
-## Title-deDE: Polestar
+## Title-deDE: Polestar · Mamba
 ## Notes-deDE: Leveling-Guides für World of Warcraft: Forever.
-## Title-esES: Polestar
+## Title-esES: Polestar · Mamba
 ## Notes-esES: Guías para subir de nivel en World of Warcraft: Forever.
-## Title-esMX: Polestar
+## Title-esMX: Polestar · Mamba
 ## Notes-esMX: Guías para subir de nivel en World of Warcraft: Forever.
-## Title-frFR: Polestar
+## Title-frFR: Polestar · Mamba
 ## Notes-frFR: Guides de montée en niveau pour World of Warcraft: Forever.
-## Title-koKR: Polestar
+## Title-koKR: Polestar · Mamba
 ## Notes-koKR: World of Warcraft: Forever 레벨업 가이드.
-## Title-ptBR: Polestar
+## Title-ptBR: Polestar · Mamba
 ## Notes-ptBR: Guias de evolução para World of Warcraft: Forever.
-## Title-ruRU: Polestar
+## Title-ruRU: Polestar · Mamba
 ## Notes-ruRU: Гайды по прокачке для World of Warcraft: Forever.
-## Title-zhCN: Polestar
+## Title-zhCN: Polestar · Mamba
 ## Notes-zhCN: 魔兽世界：Forever 练级指南。
-## Title-zhTW: Polestar
+## Title-zhTW: Polestar · Mamba
 ## Notes-zhTW: World of Warcraft: Forever 的升級指南。
 ## Author: Polestar
 ## X-License: GPL-3.0-only
@@ -31,6 +31,7 @@
 ## OptionalDeps: EllesmereUI, TomTom, OpenMap, ErgoBars, ForeverLevelingBiS
 ## SavedVariables: PolestarDB
 ## SavedVariablesPerCharacter: PolestarCharDB
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 ClientInfo.lua
 Core\Core.xml

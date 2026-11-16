@@ -1,0 +1,168 @@
+# Archivos GENERADOS de Polestar que están en git (ARQUITECTURA §13f.3). No editar: lo escribe
+# tools/asistente/generados.py.
+# Al fusionar una versión nueva de Polestar: git checkout --theirs -- <estos> y regenerarlos con nuestras opciones.
+# [AJENO] = hecho con fuentes de permiso solo para Polestar (Leffe, QuestieDB, DingDB, forever-vo):
+#           NO va en un zip de Mamba hasta regenerarlo sin ellas (forge --no-questie --nav grid).
+# [REGENERAR] = sale de data/forever, que en la máquina de Polestar incluye la capa de QuestieDB:
+#           se regenera desde nuestra construcción --no-questie antes de repartir un zip.
+# Sin marca = sale solo de las tablas del cliente, de fuentes libres o del propio Polestar.
+[REGENERAR] addon/Polestar/Core/ClassTrainers.lua
+addon/Polestar/Core/Credits.lua
+[AJENO] addon/Polestar/Core/GatherData.lua
+[REGENERAR] addon/Polestar/Core/LegacySteps.lua
+addon/Polestar/Gear/SpecData.lua
+addon/Polestar/Maps/FlightPaths.lua
+[REGENERAR] addon/Polestar/Maps/ZoneLevels.lua
+[REGENERAR] addon/Polestar/Nav/TravelData.lua
+addon/Polestar/QoL/ClassSpells.lua
+[REGENERAR] addon/Polestar/QoL/Data.lua
+[REGENERAR] addon/Polestar/Quests/NewQuestIds.lua
+addon/Polestar/Quests/QuestDB.lua
+addon/Polestar/Talents/Builds.lua
+[REGENERAR] addon/Polestar/UI/ClassRewards.lua
+addon/Polestar/UI/ZoneArtOverlays.lua
+[AJENO] addon/Polestar_Experimental/Guides.lua
+[AJENO] addon/Polestar_Experimental/MapFrames.lua
+[AJENO] addon/Polestar_Experimental/Pack.lua
+[AJENO] addon/Polestar_Guides/Guides.lua
+[AJENO] addon/Polestar_Guides/MapFrames.lua
+[AJENO] addon/Polestar_Guides/Pack.lua
+[AJENO] addon/Polestar_Guides_Alliance/Guides.lua
+[AJENO] addon/Polestar_Guides_Dwarf/Legs.lua
+[AJENO] addon/Polestar_Guides_Gnome/Legs.lua
+[AJENO] addon/Polestar_Guides_Horde/Guides.lua
+[AJENO] addon/Polestar_Guides_Human/Legs.lua
+[AJENO] addon/Polestar_Guides_NightElf/Legs.lua
+[AJENO] addon/Polestar_Guides_Orc/Legs.lua
+[AJENO] addon/Polestar_Guides_Scourge/Legs.lua
+[AJENO] addon/Polestar_Guides_Skyborne/Legs.lua
+[AJENO] addon/Polestar_Guides_Tauren/Legs.lua
+[AJENO] addon/Polestar_Guides_Troll/Legs.lua
+addon/Polestar_ItemDB/Forever.lua
+addon/Polestar_ItemDB/Items.lua
+addon/Polestar_Looks/GameArt.lua
+[AJENO] addon/Polestar_Nav/Nav/Chokepoints.lua
+[AJENO] addon/Polestar_Nav/Nav/Nav0.lua
+[AJENO] addon/Polestar_Nav/Nav/Nav1.lua
+[AJENO] addon/Polestar_Nav/Nav/Nav2991.lua
+[AJENO] addon/Polestar_Nav/Nav/Nav2991_1.lua
+[AJENO] addon/Polestar_Nav/Nav/Nav2991_2.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_1.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_10.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_11.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_12.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_13.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_14.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_15.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_16.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_17.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_18.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_19.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_2.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_20.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_21.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_22.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_23.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_24.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_25.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_26.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_27.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_28.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_29.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_3.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_30.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_31.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_32.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_33.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_34.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_35.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_36.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_37.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_38.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_39.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_4.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_40.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_41.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_5.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_6.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_7.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_8.lua
+[AJENO] addon/Polestar_Nav_EK/Nav0_9.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_1.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_10.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_11.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_12.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_13.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_14.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_15.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_16.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_17.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_18.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_19.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_2.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_20.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_21.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_22.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_23.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_24.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_25.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_26.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_27.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_28.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_29.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_3.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_30.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_31.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_32.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_33.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_34.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_35.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_36.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_37.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_38.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_39.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_4.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_40.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_41.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_42.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_43.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_44.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_45.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_46.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_47.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_48.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_49.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_5.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_50.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_51.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_6.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_7.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_8.lua
+[AJENO] addon/Polestar_Nav_Kalimdor/Nav1_9.lua
+[AJENO] addon/Polestar_deDE/Names.lua
+[AJENO] addon/Polestar_deDE/Subzones.lua
+[AJENO] addon/Polestar_deDE/Texts.lua
+[AJENO] addon/Polestar_esES/Names.lua
+[AJENO] addon/Polestar_esES/Subzones.lua
+[AJENO] addon/Polestar_esES/Texts.lua
+[AJENO] addon/Polestar_esMX/Names.lua
+[AJENO] addon/Polestar_esMX/Subzones.lua
+[AJENO] addon/Polestar_esMX/Texts.lua
+[AJENO] addon/Polestar_frFR/Names.lua
+[AJENO] addon/Polestar_frFR/Subzones.lua
+[AJENO] addon/Polestar_frFR/Texts.lua
+[AJENO] addon/Polestar_koKR/Names.lua
+[AJENO] addon/Polestar_koKR/Subzones.lua
+[AJENO] addon/Polestar_koKR/Texts.lua
+[AJENO] addon/Polestar_ptBR/Names.lua
+[AJENO] addon/Polestar_ptBR/Subzones.lua
+[AJENO] addon/Polestar_ptBR/Texts.lua
+[AJENO] addon/Polestar_ruRU/Names.lua
+[AJENO] addon/Polestar_ruRU/Subzones.lua
+[AJENO] addon/Polestar_ruRU/Texts.lua
+[AJENO] addon/Polestar_zhCN/Names.lua
+[AJENO] addon/Polestar_zhCN/Subzones.lua
+[AJENO] addon/Polestar_zhCN/Texts.lua
+[AJENO] addon/Polestar_zhTW/Names.lua
+[AJENO] addon/Polestar_zhTW/Subzones.lua
+[AJENO] addon/Polestar_zhTW/Texts.lua

@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Nav (Kalimdor)
+## Title: Polestar Nav (Kalimdor) · Mamba
 ## Notes: Walking maps of Kalimdor for Polestar's arrow, from Leffe's navigation maps. Loaded on demand on that continent.
-## Title-deDE: Polestar Navigation (Kalimdor)
+## Title-deDE: Polestar Navigation (Kalimdor) · Mamba
 ## Notes-deDE: Laufkarten von Kalimdor für Polestars Pfeil, aus Leffes Navigationskarten. Wird auf diesem Kontinent bei Bedarf geladen.
-## Title-esES: Polestar: navegación (Kalimdor)
+## Title-esES: Polestar: navegación (Kalimdor) · Mamba
 ## Notes-esES: Mapas a pie de Kalimdor para la flecha de Polestar, a partir de los mapas de navegación de Leffe. Se carga bajo demanda en ese continente.
-## Title-esMX: Polestar: navegación (Kalimdor)
+## Title-esMX: Polestar: navegación (Kalimdor) · Mamba
 ## Notes-esMX: Mapas a pie de Kalimdor para la flecha de Polestar, a partir de los mapas de navegación de Leffe. Se carga bajo demanda en ese continente.
-## Title-frFR: Polestar : navigation (Kalimdor)
+## Title-frFR: Polestar : navigation (Kalimdor) · Mamba
 ## Notes-frFR: Cartes de marche de Kalimdor pour la flèche de Polestar, tirées des cartes de navigation de Leffe. Chargé à la demande sur ce continent.
-## Title-koKR: Polestar 길찾기 (칼림도어)
+## Title-koKR: Polestar 길찾기 (칼림도어) · Mamba
 ## Notes-koKR: Polestar 화살표용 칼림도어 도보 지도. Leffe의 길찾기 지도에서 만들었습니다. 그 대륙에서 필요할 때 불러옵니다.
-## Title-ptBR: Polestar: navegação (Kalimdor)
+## Title-ptBR: Polestar: navegação (Kalimdor) · Mamba
 ## Notes-ptBR: Mapas a pé de Kalimdor para a seta do Polestar, a partir dos mapas de navegação do Leffe. Carregado sob demanda nesse continente.
-## Title-ruRU: Polestar: навигация (Калимдор)
+## Title-ruRU: Polestar: навигация (Калимдор) · Mamba
 ## Notes-ruRU: Пешие карты Калимдора для стрелки Polestar, из навигационных карт Leffe. Загружается по требованию на этом континенте.
-## Title-zhCN: Polestar 导航（卡利姆多）
+## Title-zhCN: Polestar 导航（卡利姆多） · Mamba
 ## Notes-zhCN: Polestar 箭头使用的卡利姆多步行地图，来自 Leffe 的导航地图。在该大陆上按需加载。
-## Title-zhTW: Polestar 導航（卡林多）
+## Title-zhTW: Polestar 導航（卡林多） · Mamba
 ## Notes-zhTW: Polestar 箭頭使用的卡林多步行地圖，來自 Leffe 的導航地圖。在該大陸上按需載入。
 ## Author: Polestar; walking maps: Leffe's navigation maps
 ## Version: 0.4.0
@@ -26,6 +26,7 @@
 ## LoadOnDemand: 1
 ## Dependencies: Polestar_Nav
 ## X-License: GPL-3.0-or-later
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 # Written by forge nav pack: the map parts Polestar_Nav's router loads when it first searches Kalimdor.
 
 Nav1_1.lua

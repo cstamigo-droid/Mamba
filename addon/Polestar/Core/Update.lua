@@ -112,6 +112,7 @@ end
 
 -- Our own version, when it is one (a dev build's "dev" is not).
 local function mine()
+	if ns.mamba then return nil end -- Mamba (PARCHES.md P2): el fork no se compara con Polestar oficial
 	local v = tostring(ns.version or "")
 	return U.Parse(v) and v or nil
 end
@@ -311,7 +312,7 @@ end
 
 -- The release notes' page for version v (nil: the newest release's).
 function U.ReleaseURL(v)
-	local base = "https://github.com/fitzforge/polestar/releases"
+	local base = "https://github.com/cstamigo-droid/Mamba/releases" -- Mamba (PARCHES.md P2)
 	return v and (base .. "/tag/v" .. v) or (base .. "/latest")
 end
 

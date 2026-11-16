@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Recorder
+## Title: Polestar Recorder · Mamba
 ## Notes: Records quests, routes and world data while you play, for authoring Polestar guides. /psrec
-## Title-deDE: Polestar Recorder
+## Title-deDE: Polestar Recorder · Mamba
 ## Notes-deDE: Zeichnet beim Spielen Quests, Wege und Weltdaten auf, um Polestar-Guides zu schreiben. /psrec
-## Title-esES: Polestar Recorder
+## Title-esES: Polestar Recorder · Mamba
 ## Notes-esES: Graba misiones, rutas y datos del mundo mientras juegas, para crear guías de Polestar. /psrec
-## Title-esMX: Polestar Recorder
+## Title-esMX: Polestar Recorder · Mamba
 ## Notes-esMX: Graba misiones, rutas y datos del mundo mientras juegas, para crear guías de Polestar. /psrec
-## Title-frFR: Polestar : enregistreur
+## Title-frFR: Polestar : enregistreur · Mamba
 ## Notes-frFR: Enregistre les quêtes, les trajets et les données du monde pendant que vous jouez, pour écrire des guides Polestar. /psrec
-## Title-koKR: Polestar 기록기
+## Title-koKR: Polestar 기록기 · Mamba
 ## Notes-koKR: 플레이하는 동안 퀘스트, 경로, 월드 데이터를 기록해 Polestar 가이드 작성에 씁니다. /psrec
-## Title-ptBR: Polestar: gravador
+## Title-ptBR: Polestar: gravador · Mamba
 ## Notes-ptBR: Grava missões, rotas e dados do mundo enquanto você joga, para criar guias do Polestar. /psrec
-## Title-ruRU: Polestar: запись
+## Title-ruRU: Polestar: запись · Mamba
 ## Notes-ruRU: Записывает задания, маршруты и данные мира во время игры, для создания гайдов Polestar. /psrec
-## Title-zhCN: Polestar 记录器
+## Title-zhCN: Polestar 记录器 · Mamba
 ## Notes-zhCN: 在游戏时记录任务、路线和世界数据，用于编写 Polestar 指南。/psrec
-## Title-zhTW: Polestar 記錄器
+## Title-zhTW: Polestar 記錄器 · Mamba
 ## Notes-zhTW: 在遊戲時記錄任務、路線與世界資料，用於撰寫 Polestar 指南。/psrec
 ## Author: Polestar
 ## X-License: GPL-3.0-only
@@ -27,6 +27,7 @@
 ## SavedVariables: PolestarRecorderDB
 ## SavedVariablesPerCharacter: PolestarRecorderCharDB
 ## OptionalDeps: Polestar
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 Ack.lua
 Recorder.lua

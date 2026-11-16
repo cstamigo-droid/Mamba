@@ -288,7 +288,7 @@ fn whats_new_copies_the_release_notes_link_and_the_lines_update_brings_the_card_
 		emit({ command = card() ~= false })"#,
 		account("", ""),
 	);
-	assert_eq!(out[0], json!({ "title": "Polestar 0.3.7: what's new", "link": "https://github.com/fitzforge/polestar/releases/tag/v0.3.7", "card": true }));
+	assert_eq!(out[0], json!({ "title": "Polestar 0.3.7: what's new", "link": "https://github.com/cstamigo-droid/Mamba/releases/tag/v0.3.7" /* Mamba (PARCHES.md P2) */, "card": true }));
 	assert_eq!(out[1], json!({ "back": true }));
 	assert_eq!(out[2], json!({ "command": true }));
 }

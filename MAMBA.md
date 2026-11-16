@@ -1,34 +1,85 @@
 # Mamba: un fork de Polestar
 
-**Mamba no es el Polestar oficial.** Es un fork de [fitzforge/polestar](https://github.com/fitzforge/polestar) (GPL-3.0), hecho por Cristian Amigo para *World of Warcraft: Forever*. Parte del código fuente de Polestar 0.4.0 y le suma módulos propios: la base (guía paso a paso, GPS, rutas y viajes) es la de Polestar.
+**Mamba no es el Polestar oficial.** Es un fork de [fitzforge/polestar](https://github.com/fitzforge/polestar) (GPL-3.0), hecho por Cristian Amigo para *World of Warcraft: Forever*. Parte del código fuente de Polestar 0.4.0 y le suma módulos propios. La base (guía paso a paso, GPS, rutas y viajes) es la de Polestar.
 
-- Creado: 2026-11-16, desde la etiqueta `v0.4.0` de Polestar (commit `59071e2`).
+- Creado el 2026-11-16 desde la etiqueta `v0.4.0` de Polestar (commit `59071e2`).
 - Rama de trabajo: `asistente`. Las versiones nuevas de Polestar se traen **fusionando** sus etiquetas `vX.Y.Z`.
-- Licencia: **GPL-3.0-only**, igual que Polestar (`LICENSE`, con sus permisos extra en `LICENSE-EXCEPTION.md`). Gratis, sin publicidad.
+- Licencia: **GPL-3.0-only**, igual que Polestar (`LICENSE`, con sus permisos extra en `LICENSE-EXCEPTION.md`). Es gratis y no tiene publicidad. Los addons de otros autores que Mamba lleva dentro conservan su propia licencia (ver "Addons incluidos").
 - Para errores o dudas de Mamba, abre un issue **aquí**, no en Polestar.
+- **Ojo:** si la app de CurseForge o Polestar Client actualizan Polestar, **reemplazan las carpetas del fork por las oficiales**. Hay que desactivar las actualizaciones automáticas de Polestar.
 
-## Qué agrega Mamba (16-11-2026)
+## La meta
+Que Mamba reemplace **todos** los addons que usa Cristian, igual o mejor. La tabla de cada addon, con su versión y su "hecho cuando", está en `ARQUITECTURA.md` §16 del proyecto. Versiones: **1.0** cubre lo que Polestar ya hace, más los addons libres y el fork limpio; **1.5** profesiones, subasta, recolección y JcJ; **2.0** bolsas, barras, botín, mazmorras, sanación, medidor y mapa; **3.0** la interfaz completa.
+
+## Mamba 1.0: qué reemplaza
+| Addon que se apaga | Qué hace Mamba en su lugar | Probado con |
+|---|---|---|
+| TomTom | Polestar responde `/way` y la API de puntos de TomTom, y Mamba lo deja **encendido por defecto** (parche P3) | `tests/mamba-reemplazos.test.js` |
+| Pawn | La línea del cuadro del objeto: "Polestar \| +12% upgrade · Head" (`Gear` de Polestar, encendido por defecto) | ídem |
+| GearQuestForever | La recompensa recomendada sale marcada al entregar, y nunca se elige sola (`QoL/Rewards.lua`) | ídem |
+| SkillUpForever (+ ForeverCore) | Se incluyen **sin cambios de código** (GPL-3.0-or-later, de cjber) | `tools/asistente/incluidos.py revisar` |
+| WhatsTraining | Se incluye **sin cambios de código** (MIT, de Sveng/fusionpit) | ídem |
+| ForeverLootSparkles | Se incluye **sin cambios de código** (GPL-3.0-or-later, de Ashtar Senior). Estaba en la 2.0; entra antes porque es un solo archivo | ídem |
+| MyLayerTracker | `Asistente/Capa.lua`, **escrito de cero** (MyLayerTracker no tiene licencia): la capa del PNJ en el objetivo **o bajo el ratón**, aviso al cambiar, `/capa` y `/layer`. Estaba en la 2.0 | `tools/asistente/pruebas/test_capa.py` |
+
+## Qué agrega Mamba
 | Carpeta | Qué hace |
 |---|---|
-| `addon/Asistente` | Núcleo de los módulos de Mamba: ajustes comunes, estilo del juego, `/asis` |
+| `addon/Asistente` | Núcleo de los módulos de Mamba: ajustes comunes, estilo del juego, `/asis`, y la capa del servidor (`/capa`) |
 | `addon/Asistente_Servicios` | "¿Qué hay en esta ciudad?": banco, subasta, buzón, posada, vuelo, establos, reparar, instructores y vendedores, con búsqueda en español. El viaje lo hace la flecha de Polestar (`Polestar.Nav.API`). `/servicios` |
-| `addon/Asistente_Datos` | Qué material juntar en cada zona mientras haces misiones, para qué receta sirve, y qué misiones regalan bolsas |
-| `addon/Tasador` | Qué hacer con cada objeto (vender, subastar, guardar) y un escaneo propio de la subasta, que solo lee precios |
+| `addon/Asistente_Datos` | Qué material juntar en cada zona mientras haces misiones, para qué receta sirve y qué misiones regalan bolsas |
+| `addon/Tasador` | Qué hacer con cada objeto (vender, subastar o guardar) y un escaneo propio de la subasta, que solo lee precios |
 | `addon/Medidor` | Experiencia, oro, botín y profesión por hora, por zona y actividad |
-| `tools/asistente/` | Generadores de datos (Python, desde `forever-db`) y pruebas (Lua 5.1 con `lupa`). Guías: `*_LEEME.md` |
+| `tools/asistente/` | Generadores de datos (Python, desde `forever-db`), pruebas (Lua 5.1 con `lupa`) y los controles del fork (abajo) |
 
-Todo lo de Polestar sigue **sin cambios** en este primer paso. No se editó ningún archivo suyo.
+## Addons incluidos (de otros autores)
+Van en `addon/` con su carpeta, su `LICENSE` y sus créditos **tal como los publicó su autor**. El único cambio está en su `.toc`: el título dice "· Mamba" y hay una línea `X-Mamba` que avisa de la modificación (GPL-3.0 §5a). `tools/asistente/incluidos.json` guarda la versión, la fuente y la huella de cada archivo, y `incluidos.py revisar` falla si alguien les cambió el código.
+
+| Carpeta | Autor | Licencia | Versión | Código fuente |
+|---|---|---|---|---|
+| `ForeverCore` | cjber | GPL-3.0-or-later | v1.12.0 | https://github.com/cjber/forever-core |
+| `SkillUpForever` | cjber | GPL-3.0-or-later | v1.10.1 | https://github.com/cjber/skillup-forever |
+| `WhatsTraining` | Sveng (fusionpit) | MIT | 11.4.8 | https://github.com/fusionpit/WhatsTraining |
+| `ForeverLootSparkles` | Ashtar Senior | GPL-3.0-or-later | v2.0.0 | CurseForge, proyecto 1729017 (el código es el del zip) |
+
+WhatsTraining trae librerías de terceros: LibStub, LibBabble-3.0 y LibDataBroker-1.1 (dominio público); LibBabble-CreatureType-3.0 (MIT); CallbackHandler-1.0 y LibDBIcon-1.0 (Ace3, licencia BSD que prohíbe repartirlas sueltas; aquí van dentro de WhatsTraining, como las publica su autor); y FusionIgnoreStore (del autor de WhatsTraining, MIT, verificado en su repositorio). WhatsTraining es un addon aparte dentro del paquete (GPL-3.0 §5, "agregado"): su licencia MIT y la de sus librerías no cambian.
+
+## Cambios dentro de Polestar
+Son solo los de `PARCHES.md` (P1-P4): los errores van a este repositorio, no hay aviso de "actualiza Polestar", TomTom viene encendido y cada `.toc` lleva el aviso de modificación. Los aplica `tools/asistente/parches.py`.
 
 ## Lo que todavía NO está listo (léelo antes de repartir un zip)
-Este repositorio hereda el historial y los archivos de Polestar. Algunos de sus archivos generados usan datos cuyo permiso es **solo para Polestar**:
-- las caminatas y los mapas a pie hechos con los mapas privados de Leffe (`Legs.lua`, `Polestar_Nav_*`, "`--leffe`");
-- los nombres y hechos que vienen de QuestieDB y DingDB (`Polestar_<idioma>/Names.lua`, guías);
-- quién da y recibe cada misión, de forever-vo (sin licencia declarada).
+Este repositorio hereda el historial y los archivos de Polestar. `GENERADOS.txt` lista los archivos generados que están en git:
+- **[AJENO] (144):** hechos con fuentes cuyo permiso es **solo para Polestar**. Son las caminatas y mapas a pie hechos con los mapas privados de Leffe (`Legs.lua`, `Polestar_Nav*`); los nombres de QuestieDB y DingDB (`Polestar_<idioma>/Names.lua`); y las guías, con hechos de QuestieDB y de forever-vo, que no declara licencia.
+- **[REGENERAR] (7):** salen de `data/forever`, que en la máquina de Polestar lleva la capa de QuestieDB.
 
-Mamba **no reparte un zip** hasta reconstruir esos datos con la herramienta de Polestar sin esas fuentes (`forge ... --no-questie --nav grid`) y pasar un control que rechace cualquier archivo generado con ellas. El plan completo está en `ARQUITECTURA.md` §13-§15 del proyecto. Mientras tanto, para jugar, instala **Polestar oficial** y agrega las carpetas `addon/Asistente*`, `addon/Tasador` y `addon/Medidor`.
+Mamba **no reparte un zip** hasta reconstruir esos archivos con la herramienta de Polestar sin esas fuentes (`forge data build --no-questie`, `forge build --nav grid`, sin `--kb` para dejar fuera forever-vo) y hasta que `tools/asistente/control_zip.py --estricto --manifiesto <construcción>` dé 0 rechazos. Hoy, sobre `addon/`, da **245 rechazos** (lo esperado). Construir `forge` requiere Rust.
+
+Los datos **propios** de Mamba (Servicios, Datos, Tasador, Medidor) salen de `forever-db` (GPL-3.0). Su `NOTICE.md` dice: "Every value in its tables is held by at least one of the independent sources below" (EG Link CC BY 4.0, CMaNGOS GPL-3.0, VMaNGOS, ForeverTDB, pfQuest MIT, el cliente). Las tablas que usamos (`npc`, `object`, `spawn`, `ui_map`, `item_source`) son GPL-3.0-only en su `datapackage.json`.
+
+Mientras tanto, para jugar: **Polestar oficial** + las carpetas de Mamba (`Asistente*`, `Tasador`, `Medidor` y las de "Addons incluidos").
+
+## Pruebas
+```
+# módulos de Mamba (Python + lupa)
+cd tools/asistente/pruebas
+python test_capa.py ../../../addon
+python test_servicios.py ../../../addon ../../..
+python test_tasador.py ../../../addon/Tasador
+python test_escaneo.py ../../../addon/Tasador
+python test_medidor.py ../../../addon/Medidor
+# filas de la 1.0 que cubre Polestar, con el Polestar del fork (Node 24 + Lua 5.1)
+LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js
+# controles del fork
+python -I tools/asistente/parches.py --revisar
+python -I tools/asistente/incluidos.py revisar
+python -I tools/asistente/generados.py --revisar
+python -I tools/asistente/control_zip.py addon
+```
+`tools/asistente/lua51/` es un intérprete Lua 5.1 mínimo sobre `lupa`, para correr las pruebas de Polestar en Windows sin instalar Lua. Con él, `tests/ui-report.test.js` falla 4 de 43 **igual con y sin los parches**: son diferencias de este intérprete, no de Mamba.
 
 ## Créditos
-- **Polestar**, de "The Polestar authors" (Fitz y colaboradores): todo lo que no está en la tabla de arriba. Ver `LICENSE`, `THIRD_PARTY.md`, los `LICENSE-DATA.txt` y los `CREDITS.md` de cada carpeta, que se conservan intactos.
+- **Polestar**, de "The Polestar authors" (Fitz y colaboradores): todo lo que no está en las tablas de arriba. Ver `LICENSE`, `THIRD_PARTY.md`, los `LICENSE-DATA.txt` y los `CREDITS.md` de cada carpeta, que se conservan intactos.
 - Shortest Path Forever, de Cillian Berragan (rutas a pie, dentro de Polestar).
+- Los autores de los addons incluidos (tabla de arriba).
 - **forever-db** (de Polestar, GPL-3.0) para los datos de los módulos de Mamba. Sus fuentes están en `forever-db/NOTICE.md` y en `addon/Asistente_Servicios/NOTICE-forever-db.md`.
 - World of Warcraft y Blizzard Entertainment son marcas de Blizzard Entertainment, Inc. Ni Mamba ni Polestar están hechos ni respaldados por Blizzard.

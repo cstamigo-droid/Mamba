@@ -13,7 +13,7 @@ const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
-const INVITE = 'https://discord.gg/polestar';
+const INVITE = 'https://github.com/cstamigo-droid/Mamba/issues'; // Mamba (PARCHES.md P1)
 
 function run(script, before = '') {
 	return runAddon({
@@ -565,7 +565,7 @@ test('the report names the other addons that are loaded; "Open on GitHub" gives 
 	assert.equal(out.step.title, 'Open on GitHub');
 	assert.equal(out.step.focus, true, 'the link is selected for Ctrl+C');
 	const url = new URL(out.step.url);
-	assert.equal(url.origin + url.pathname, 'https://github.com/fitzforge/polestar/issues/new');
+	assert.equal(url.origin + url.pathname, 'https://github.com/cstamigo-droid/Mamba/issues/new'); // Mamba (PARCHES.md P1)
 	const q = Object.fromEntries(url.searchParams);
 	assert.deepEqual(Object.keys(q).sort(), ['addons', 'steps', 'template', 'title', 'version'], 'only the Bug report form\'s fields');
 	assert.equal(q.template, 'bug-report.yml', 'a step on screen, no spot marked: a bug report');

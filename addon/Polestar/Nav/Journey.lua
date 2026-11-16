@@ -67,7 +67,7 @@ Nav.journey = Journey
 
 ns.RegisterDefaults("nav", {
 	mapPlan = true,
-	answerTomTom = false, -- the stand-in has methods only: an addon reading TomTom.db would error
+	answerTomTom = true, -- Mamba (PARCHES.md P3): reemplaza a TomTom (/way y su API de puntos). The stand-in has methods only: an addon reading TomTom.db would error
 	followTomTom = false,
 })
 

@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Item Data
+## Title: Polestar Item Data · Mamba
 ## Notes: Item stats for Polestar's gear advice. Loaded on demand.
-## Title-deDE: Polestar Gegenstandsdaten
+## Title-deDE: Polestar Gegenstandsdaten · Mamba
 ## Notes-deDE: Gegenstandswerte für Polestars Ausrüstungsratschläge. Wird bei Bedarf geladen.
-## Title-esES: Polestar: datos de objetos
+## Title-esES: Polestar: datos de objetos · Mamba
 ## Notes-esES: Estadísticas de objetos para los consejos de equipo de Polestar. Se carga bajo demanda.
-## Title-esMX: Polestar: datos de objetos
+## Title-esMX: Polestar: datos de objetos · Mamba
 ## Notes-esMX: Estadísticas de objetos para los consejos de equipo de Polestar. Se carga bajo demanda.
-## Title-frFR: Polestar : données d'objets
+## Title-frFR: Polestar : données d'objets · Mamba
 ## Notes-frFR: Caractéristiques des objets pour les conseils d'équipement de Polestar. Chargé à la demande.
-## Title-koKR: Polestar 아이템 데이터
+## Title-koKR: Polestar 아이템 데이터 · Mamba
 ## Notes-koKR: Polestar 장비 조언에 쓰는 아이템 능력치. 필요할 때 불러옵니다.
-## Title-ptBR: Polestar: dados de itens
+## Title-ptBR: Polestar: dados de itens · Mamba
 ## Notes-ptBR: Atributos de itens para as dicas de equipamento do Polestar. Carregado sob demanda.
-## Title-ruRU: Polestar: данные предметов
+## Title-ruRU: Polestar: данные предметов · Mamba
 ## Notes-ruRU: Характеристики предметов для советов Polestar по снаряжению. Загружается по требованию.
-## Title-zhCN: Polestar 物品数据
+## Title-zhCN: Polestar 物品数据 · Mamba
 ## Notes-zhCN: Polestar 装备建议所用的物品属性。按需加载。
-## Title-zhTW: Polestar 物品資料
+## Title-zhTW: Polestar 物品資料 · Mamba
 ## Notes-zhTW: Polestar 裝備建議所用的物品屬性。按需載入。
 ## Author: Polestar
 ## X-License: GPL-3.0-only
@@ -26,6 +26,7 @@
 ## Group: Polestar
 ## LoadOnDemand: 1
 ## Dependencies: Polestar
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 Items.lua
 Forever.lua

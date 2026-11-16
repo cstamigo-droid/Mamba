@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Skin: Lanterns
+## Title: Polestar Skin: Lanterns · Mamba
 ## Notes: Ten mood colours for Polestar, each a pair: rounded windows, pill-shaped tabs and buttons, tinted grounds and two soft lights in opposite corners.
-## Title-deDE: Polestar-Design: Lanterns
+## Title-deDE: Polestar-Design: Lanterns · Mamba
 ## Notes-deDE: Zehn Stimmungsfarben für Polestar, je ein Paar: abgerundete Fenster, pillenförmige Reiter und Schaltflächen, getönte Flächen und zwei sanfte Lichter in gegenüberliegenden Ecken.
-## Title-esES: Polestar, tema: Lanterns
+## Title-esES: Polestar, tema: Lanterns · Mamba
 ## Notes-esES: Diez colores de ambiente para Polestar, cada uno un par: ventanas redondeadas, pestañas y botones en forma de píldora, fondos teñidos y dos luces suaves en esquinas opuestas.
-## Title-esMX: Polestar, tema: Lanterns
+## Title-esMX: Polestar, tema: Lanterns · Mamba
 ## Notes-esMX: Diez colores de ambiente para Polestar, cada uno un par: ventanas redondeadas, pestañas y botones en forma de píldora, fondos teñidos y dos luces suaves en esquinas opuestas.
-## Title-frFR: Polestar, habillage : Lanterns
+## Title-frFR: Polestar, habillage : Lanterns · Mamba
 ## Notes-frFR: Dix ambiances colorées pour Polestar, chacune une paire : des fenêtres arrondies, des onglets et boutons en pilule, des fonds teintés et deux lueurs douces aux coins opposés.
-## Title-koKR: Polestar 스킨: Lanterns
+## Title-koKR: Polestar 스킨: Lanterns · Mamba
 ## Notes-koKR: Polestar의 분위기 색 열 가지, 각각 한 쌍: 둥근 창, 알약 모양 탭과 버튼, 물든 바탕과 마주 보는 모서리의 부드러운 빛 두 개.
-## Title-ptBR: Polestar, tema: Lanterns
+## Title-ptBR: Polestar, tema: Lanterns · Mamba
 ## Notes-ptBR: Dez cores de clima para o Polestar, cada uma um par: janelas arredondadas, abas e botões em pílula, fundos tingidos e duas luzes suaves em cantos opostos.
-## Title-ruRU: Polestar, оформление: Lanterns
+## Title-ruRU: Polestar, оформление: Lanterns · Mamba
 ## Notes-ruRU: Десять цветовых настроений для Polestar, каждое парой: скруглённые окна, вкладки и кнопки-капсулы, подкрашенный фон и два мягких огня в противоположных углах.
-## Title-zhCN: Polestar 皮肤：Lanterns
+## Title-zhCN: Polestar 皮肤：Lanterns · Mamba
 ## Notes-zhCN: Polestar 的十种氛围配色，每种一对颜色：圆角窗口，胶囊形标签与按钮，染色底面和对角两盏柔光。
-## Title-zhTW: Polestar 皮膚：Lanterns
+## Title-zhTW: Polestar 皮膚：Lanterns · Mamba
 ## Notes-zhTW: Polestar 的十種氛圍配色，每種一對顏色：圓角視窗，膠囊形標籤與按鈕，染色底面和對角兩盞柔光。
 ## Author: Polestar
 ## X-License: GPL-3.0-only
@@ -28,5 +28,6 @@
 ## Dependencies: Polestar
 ## LoadOnDemand: 1
 ## X-Polestar-Skin: lanterns
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 Lanterns.lua

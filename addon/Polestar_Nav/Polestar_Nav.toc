@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Nav
+## Title: Polestar Nav · Mamba
 ## Notes: Part of Polestar: walking routes for the arrow, by Polestar's walking router, started from Shortest Path Forever's pathing (Cillian Berragan, github.com/cjber/shortest-path-forever, used with his permission). Loaded on demand.
-## Title-deDE: Polestar Navigation
+## Title-deDE: Polestar Navigation · Mamba
 ## Notes-deDE: Teil von Polestar: Laufwege für den Pfeil, mit Polestars eigener Wegfindung, entstanden aus der Wegfindung von Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, mit seiner Erlaubnis verwendet). Wird bei Bedarf geladen.
-## Title-esES: Polestar: navegación
+## Title-esES: Polestar: navegación · Mamba
 ## Notes-esES: Parte de Polestar: rutas a pie para la flecha, con el cálculo de rutas propio de Polestar, que partió del de Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, usado con su permiso). Se carga bajo demanda.
-## Title-esMX: Polestar: navegación
+## Title-esMX: Polestar: navegación · Mamba
 ## Notes-esMX: Parte de Polestar: rutas a pie para la flecha, con el cálculo de rutas propio de Polestar, que partió del de Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, usado con su permiso). Se carga bajo demanda.
-## Title-frFR: Polestar : navigation
+## Title-frFR: Polestar : navigation · Mamba
 ## Notes-frFR: Fait partie de Polestar : itinéraires à pied pour la flèche, calculés par le routeur de Polestar, issu de celui de Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, utilisé avec sa permission). Chargé à la demande.
-## Title-koKR: Polestar 길찾기
+## Title-koKR: Polestar 길찾기 · Mamba
 ## Notes-koKR: Polestar의 일부: 화살표용 도보 경로. Shortest Path Forever의 길찾기(Cillian Berragan, github.com/cjber/shortest-path-forever, 허락을 받아 사용)에서 출발한 Polestar 자체 길찾기를 씁니다. 필요할 때 불러옵니다.
-## Title-ptBR: Polestar: navegação
+## Title-ptBR: Polestar: navegação · Mamba
 ## Notes-ptBR: Parte do Polestar: rotas a pé para a seta, com o cálculo de rotas próprio do Polestar, que partiu do Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, usado com permissão dele). Carregado sob demanda.
-## Title-ruRU: Polestar: навигация
+## Title-ruRU: Polestar: навигация · Mamba
 ## Notes-ruRU: Часть Polestar: пешие маршруты для стрелки, построенные собственным алгоритмом Polestar, выросшим из алгоритма Shortest Path Forever (Cillian Berragan, github.com/cjber/shortest-path-forever, используется с его разрешения). Загружается по требованию.
-## Title-zhCN: Polestar 导航
+## Title-zhCN: Polestar 导航 · Mamba
 ## Notes-zhCN: Polestar 的组成部分：为箭头提供步行路线，采用 Polestar 自己的寻路，源自 Shortest Path Forever 的寻路（Cillian Berragan，github.com/cjber/shortest-path-forever，经其许可使用）。按需加载。
-## Title-zhTW: Polestar 導航
+## Title-zhTW: Polestar 導航 · Mamba
 ## Notes-zhTW: Polestar 的一部分：為箭頭提供步行路線，採用 Polestar 自己的尋路，源自 Shortest Path Forever 的尋路（Cillian Berragan，github.com/cjber/shortest-path-forever，經其許可使用）。按需載入。
 ## Author: Polestar; router started from Cillian Berragan's Shortest Path Forever
 ## Version: 0.4.0
@@ -27,6 +27,7 @@
 ## Dependencies: Polestar
 ## X-License: GPL-3.0-or-later
 ## X-Website: https://github.com/fitzforge/polestar
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 Nav\Nav.xml
 Routing\Costs.lua

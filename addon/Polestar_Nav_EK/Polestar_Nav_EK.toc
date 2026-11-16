@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Nav (Eastern Kingdoms)
+## Title: Polestar Nav (Eastern Kingdoms) · Mamba
 ## Notes: Walking maps of the Eastern Kingdoms for Polestar's arrow, from Leffe's navigation maps. Loaded on demand on that continent.
-## Title-deDE: Polestar Navigation (Östliche Königreiche)
+## Title-deDE: Polestar Navigation (Östliche Königreiche) · Mamba
 ## Notes-deDE: Laufkarten der Östlichen Königreiche für Polestars Pfeil, aus Leffes Navigationskarten. Wird auf diesem Kontinent bei Bedarf geladen.
-## Title-esES: Polestar: navegación (Reinos del Este)
+## Title-esES: Polestar: navegación (Reinos del Este) · Mamba
 ## Notes-esES: Mapas a pie de los Reinos del Este para la flecha de Polestar, a partir de los mapas de navegación de Leffe. Se carga bajo demanda en ese continente.
-## Title-esMX: Polestar: navegación (Reinos del Este)
+## Title-esMX: Polestar: navegación (Reinos del Este) · Mamba
 ## Notes-esMX: Mapas a pie de los Reinos del Este para la flecha de Polestar, a partir de los mapas de navegación de Leffe. Se carga bajo demanda en ese continente.
-## Title-frFR: Polestar : navigation (Royaumes de l'Est)
+## Title-frFR: Polestar : navigation (Royaumes de l'Est) · Mamba
 ## Notes-frFR: Cartes de marche des Royaumes de l'Est pour la flèche de Polestar, tirées des cartes de navigation de Leffe. Chargé à la demande sur ce continent.
-## Title-koKR: Polestar 길찾기 (동부 왕국)
+## Title-koKR: Polestar 길찾기 (동부 왕국) · Mamba
 ## Notes-koKR: Polestar 화살표용 동부 왕국 도보 지도. Leffe의 길찾기 지도에서 만들었습니다. 그 대륙에서 필요할 때 불러옵니다.
-## Title-ptBR: Polestar: navegação (Reinos do Leste)
+## Title-ptBR: Polestar: navegação (Reinos do Leste) · Mamba
 ## Notes-ptBR: Mapas a pé dos Reinos do Leste para a seta do Polestar, a partir dos mapas de navegação do Leffe. Carregado sob demanda nesse continente.
-## Title-ruRU: Polestar: навигация (Восточные королевства)
+## Title-ruRU: Polestar: навигация (Восточные королевства) · Mamba
 ## Notes-ruRU: Пешие карты Восточных королевств для стрелки Polestar, из навигационных карт Leffe. Загружается по требованию на этом континенте.
-## Title-zhCN: Polestar 导航（东部王国）
+## Title-zhCN: Polestar 导航（东部王国） · Mamba
 ## Notes-zhCN: Polestar 箭头使用的东部王国步行地图，来自 Leffe 的导航地图。在该大陆上按需加载。
-## Title-zhTW: Polestar 導航（東部王國）
+## Title-zhTW: Polestar 導航（東部王國） · Mamba
 ## Notes-zhTW: Polestar 箭頭使用的東部王國步行地圖，來自 Leffe 的導航地圖。在該大陸上按需載入。
 ## Author: Polestar; walking maps: Leffe's navigation maps
 ## Version: 0.4.0
@@ -26,6 +26,7 @@
 ## LoadOnDemand: 1
 ## Dependencies: Polestar_Nav
 ## X-License: GPL-3.0-or-later
+## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 # Written by forge nav pack: the map parts Polestar_Nav's router loads when it first searches the Eastern Kingdoms.
 
 Nav0_1.lua

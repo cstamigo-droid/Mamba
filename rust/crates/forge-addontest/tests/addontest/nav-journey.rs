@@ -457,7 +457,8 @@ fn tomtom_stand_in_off_by_default_so_no_tomtom_global_an_addon_reading_tomtom_db
 		emit({ tomtom = TomTom == nil, answering = J.AnsweringTomTom(), way = SLASH_POLESTARWAY1 == nil,
 			default = Polestar.Get("nav.answerTomTom") })
 	"#);
-	assert_eq!(out[0], json!({ "tomtom": true, "answering": false, "way": true, "default": false }));
+	// Mamba (PARCHES.md P3): on by default, so the stand-in and /way answer.
+	assert_eq!(out[0], json!({ "tomtom": false, "answering": true, "way": false, "default": true }));
 }
 
 #[test]

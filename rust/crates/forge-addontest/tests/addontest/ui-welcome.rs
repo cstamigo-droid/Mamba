@@ -1032,7 +1032,7 @@ fn the_last_page_invites_the_player_to_the_discord_community_its_mark_and_the_in
 		link:Click()
 		emit({ seen = seen, copy = PolestarCopy ~= nil and PolestarCopy:IsShown() and PolestarCopy.Box:GetText(),
 			shared = Polestar.DiscordURL })"#);
-	assert_eq!(out["seen"], json!({ "link": "discord.gg/polestar", "head": true, "line": true, "mark": true, "own": true, "kind": "Button" }), "the address reads as a link, not a field");
+	assert_eq!(out["seen"], json!({ "link": "github.com/cstamigo-droid/Mamba/issues", /* Mamba (PARCHES.md P1) */ "head": true, "line": true, "mark": true, "own": true, "kind": "Button" }), "the address reads as a link, not a field");
 	assert!(truthy(&out["shared"]) && out["copy"] == out["shared"], "the copy window holds the shared invite: {}", out["copy"]);
 }
 
