@@ -1,0 +1,14 @@
+## Interface: 16001
+## Title: Asistente
+## Notes: El asistente de Hope en un solo addon: buscador de servicios con flecha, y los módulos que se cargan cuando hacen falta. /asis · /servicios
+## Author: Cristian Amigo
+## Version: 0.1.0
+## Group: Asistente
+## Category: Asistente
+## X-License: GPL-3.0-only
+## SavedVariables: AsistenteDB
+## OptionalDeps: Polestar
+
+Nucleo.lua
+Estilo.lua
+Comandos.lua

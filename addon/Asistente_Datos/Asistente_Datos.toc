@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Asistente (datos de subida + profesiones)
+## Notes: Dice qué material juntar en cada zona mientras haces misiones, para qué receta sirve y qué misiones regalan bolsas. /asistente · /asistente fuentes
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## X-Datos: forever-db de Polestar (GPL-3.0) + guías de profesiones de Polestar (GPL-3.0). Ver LICENSE-DATA.txt
+
+Datos.lua
+Nombres_enUS.lua
+Consejos.lua

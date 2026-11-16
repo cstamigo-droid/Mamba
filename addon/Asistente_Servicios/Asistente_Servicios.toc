@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: Asistente: servicios
+## Notes: ¿Qué hay en esta ciudad? Banco, subasta, buzón, posada, vuelo, establos, reparar, instructores y vendedores, con marca en el mapa y flecha. /servicios
+## Author: Cristian Amigo
+## Version: 0.1.0
+## Group: Asistente
+## Category: Asistente
+## Dependencies: Asistente
+## OptionalDeps: Polestar
+## LoadOnDemand: 1
+## X-License: GPL-3.0-only
+## X-Datos: forever-db de Polestar (GPL-3.0). Ver NOTICE-forever-db.md
+
+Ciudades.lua
+Logica.lua
+Flecha.lua
+Mapa.lua
+Ventana.lua

@@ -1,0 +1,28 @@
+Asistente_Datos: de dónde sale cada dato
+=======================================
+
+Build del juego: 1.60.1.70532. Licencia de este paquete: GPL-3.0.
+
+[fdb] forever-db de Polestar
+  URL: https://github.com/fitzforge/polestar/tree/next/forever-db
+  Versión: 2026.11.1 · commit productor: 6d0de256e66674512e453a2990076d84f7e979bb
+  Licencia: GPL-3.0-only (tablas quest*, npc, object, item, item_source, spawn, ui_map).
+  Se usa: misiones, objetivos, PNJ, apariciones, botín de objetos de misión, telas y hierbas, recompensas.
+  Créditos de forever-db (su NOTICE.md): EG Link (CC BY 4.0), CMaNGOS classic-db (GPL-3.0), VMaNGOS/Factoruide
+  (GPL-2.0-or-later), ForeverTDB (GPL-2.0), QuestieDB, tablas del cliente, pfQuest (MIT).
+  Nombres y títulos del juego son de Blizzard; ninguna licencia los cubre (NOTICE.md).
+
+[pg] Guías de profesiones de Polestar
+  URL: https://github.com/fitzforge/polestar/tree/next/guides/forever/professions
+  Licencia: GPL-3.0 (repositorio de Polestar). Huellas de los archivos leídos:
+    alchemy.guide: sha256:47ba1e446458539518b01917eda2b272836ebf6fcba1f87b11ec0e7e31d46adb
+    cooking.guide: sha256:c5d0516e45f650d23589ab752ed13278591581fcac8c38b8220b58e23e7b3338
+    first-aid.guide: sha256:c44bf7fc8003f453ef9b09271e7b6faabc97b010188e7202f6ab5fb644291d99
+    herbalism.guide: sha256:301c95b9d47ed0a8801a715c6c64f94a68df72f8f20f89e029b95b2059d69a94
+  Solo números e ids; el texto de las guías no se copia. Origen de los % según Polestar: sus datos de referencia (NO VERIFICADO cuál).
+
+[fdbapi] ForeverDB.net — APAGADA en esta versión (sin clave). Si se activa: crédito visible con enlace a
+  https://foreverdb.net donde se muestren sus datos; la clave nunca va dentro del addon.
+
+World of Warcraft y Blizzard Entertainment son marcas de Blizzard Entertainment, Inc.
+Este paquete no está hecho ni respaldado por Blizzard.

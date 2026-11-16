@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: Medidor
+## Notes: Mide experiencia, oro, valor del botín y puntos de profesión por hora, separados por zona y actividad. /medidor
+## Author: Cristian Amigo
+## Version: 0.2.0
+## X-License: GPL-3.0-only
+## SavedVariables: MedidorDB
+## OptionalDeps: Auctionator
+
+Nucleo.lua
+Juego.lua
+Comandos.lua
