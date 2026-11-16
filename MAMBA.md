@@ -14,13 +14,13 @@ Que Mamba reemplace **todos** los addons que usa Cristian, igual o mejor. La tab
 ## Mamba 1.0: qué reemplaza
 | Addon que se apaga | Qué hace Mamba en su lugar | Probado con |
 |---|---|---|
-| TomTom | Polestar responde `/way` y la API de puntos de TomTom, y Mamba lo deja **encendido por defecto** (parche P3) | `tests/mamba-reemplazos.test.js` |
+| TomTom | Polestar responde `/way` y la API de puntos de TomTom, y Mamba lo deja **encendido por defecto** (parche P3) | `tests/mamba-reemplazos.test.js`: `/way x y`, `reset` y `AddWaypoint` de otro addon. `/way <zona> x y` y `#mapa` los prueba Polestar (`nav-journey.rs`, sin correr aquí) |
 | Pawn | La línea del cuadro del objeto: "Polestar \| +12% upgrade · Head" (`Gear` de Polestar, encendido por defecto) | ídem |
-| GearQuestForever | La recompensa recomendada sale marcada al entregar, y nunca se elige sola (`QoL/Rewards.lua`) | ídem |
-| SkillUpForever (+ ForeverCore) | Se incluyen **sin cambios de código** (GPL-3.0-or-later, de cjber) | `tools/asistente/incluidos.py revisar` |
+| GearQuestForever | La recompensa recomendada sale marcada al entregar, y nunca se elige sola (`QoL/Rewards.lua`) | ídem: prueba que viene encendido y que marca la mejora. La comparación de equipo se simula; la real la prueba la fila Pawn |
+| SkillUpForever (+ ForeverCore) | Se incluyen **sin cambios de código** (GPL-3.0-or-later, de cjber) | `incluidos.py revisar`: licencia, versión y que el código es idéntico al de su autor. Que cargan bien se ve en el juego (ya los usa Cristian) |
 | WhatsTraining | Se incluye **sin cambios de código** (MIT, de Sveng/fusionpit) | ídem |
 | ForeverLootSparkles | Se incluye **sin cambios de código** (GPL-3.0-or-later, de Ashtar Senior). Estaba en la 2.0; entra antes porque es un solo archivo | ídem |
-| MyLayerTracker | `Asistente/Capa.lua`, **escrito de cero** (MyLayerTracker no tiene licencia): la capa del PNJ en el objetivo **o bajo el ratón**, aviso al cambiar, `/capa` y `/layer`. Estaba en la 2.0 | `tools/asistente/pruebas/test_capa.py` |
+| MyLayerTracker | `Asistente/Capa.lua`, **implementación propia del mismo método** (MyLayerTracker no tiene licencia y no se copió su archivo; comparte lo funcional: qué campo del GUID se lee): la capa del PNJ en el objetivo **o bajo el ratón**, aviso al cambiar, `/capa` y `/layer`. Estaba en la 2.0 | `tools/asistente/pruebas/test_capa.py` |
 
 ## Qué agrega Mamba
 | Carpeta | Qué hace |
@@ -42,19 +42,21 @@ Van en `addon/` con su carpeta, su `LICENSE` y sus créditos **tal como los publ
 | `WhatsTraining` | Sveng (fusionpit) | MIT | 11.4.8 | https://github.com/fusionpit/WhatsTraining |
 | `ForeverLootSparkles` | Ashtar Senior | GPL-3.0-or-later | v2.0.0 | CurseForge, proyecto 1729017 (el código es el del zip) |
 
-WhatsTraining trae librerías de terceros: LibStub, LibBabble-3.0 y LibDataBroker-1.1 (dominio público); LibBabble-CreatureType-3.0 (MIT); CallbackHandler-1.0 y LibDBIcon-1.0 (Ace3, licencia BSD que prohíbe repartirlas sueltas; aquí van dentro de WhatsTraining, como las publica su autor); y FusionIgnoreStore (del autor de WhatsTraining, MIT, verificado en su repositorio). WhatsTraining es un addon aparte dentro del paquete (GPL-3.0 §5, "agregado"): su licencia MIT y la de sus librerías no cambian.
+Los textos de licencia que faltan en los archivos de esas librerías están en `LICENCIAS_TERCEROS.md`, que va en cada zip. WhatsTraining trae librerías de terceros: LibStub, LibBabble-3.0 y LibDataBroker-1.1 (dominio público); LibBabble-CreatureType-3.0 (MIT); CallbackHandler-1.0 y LibDBIcon-1.0 (Ace3, licencia BSD que prohíbe repartirlas sueltas; aquí van dentro de WhatsTraining, como las publica su autor); y FusionIgnoreStore (del autor de WhatsTraining, MIT, verificado en su repositorio). WhatsTraining es un addon aparte dentro del paquete (GPL-3.0 §5, "agregado"): su licencia MIT y la de sus librerías no cambian.
 
 ## Cambios dentro de Polestar
-Son solo los de `PARCHES.md` (P1-P4): los errores van a este repositorio, no hay aviso de "actualiza Polestar", TomTom viene encendido y cada `.toc` lleva el aviso de modificación. Los aplica `tools/asistente/parches.py`.
+Son solo los de `PARCHES.md` (P1-P4). Conocido y aceptado: el botón "Discord" de la ventana de errores conserva su texto y su logo, pero abre los issues de Mamba. los errores van a este repositorio, no hay aviso de "actualiza Polestar" (ni en la tarjeta ni en el grupo), TomTom viene encendido y cada `.toc` lleva el aviso de modificación. Los aplica `tools/asistente/parches.py`.
 
 ## Lo que todavía NO está listo (léelo antes de repartir un zip)
 Este repositorio hereda el historial y los archivos de Polestar. `GENERADOS.txt` lista los archivos generados que están en git:
-- **[AJENO] (144):** hechos con fuentes cuyo permiso es **solo para Polestar**. Son las caminatas y mapas a pie hechos con los mapas privados de Leffe (`Legs.lua`, `Polestar_Nav*`); los nombres de QuestieDB y DingDB (`Polestar_<idioma>/Names.lua`); y las guías, con hechos de QuestieDB y de forever-vo, que no declara licencia.
-- **[REGENERAR] (7):** salen de `data/forever`, que en la máquina de Polestar lleva la capa de QuestieDB.
+- **[AJENO] (146):** hechos con fuentes cuyo permiso es **solo para Polestar**. Son las caminatas y mapas a pie hechos con los mapas privados de Leffe (`Legs.lua`, `Polestar_Nav*`); los nombres de QuestieDB y DingDB (`Polestar_<idioma>/Names.lua`); y las guías, con hechos de QuestieDB y de forever-vo, que no declara licencia.
+- **[REGENERAR] (5):** salen de `data/forever`, que en la máquina de Polestar lleva la capa de QuestieDB.
 
-Mamba **no reparte un zip** hasta reconstruir esos archivos con la herramienta de Polestar sin esas fuentes (`forge data build --no-questie`, `forge build --nav grid`, sin `--kb` para dejar fuera forever-vo) y hasta que `tools/asistente/control_zip.py --estricto --manifiesto <construcción>` dé 0 rechazos. Hoy, sobre `addon/`, da **245 rechazos** (lo esperado). Construir `forge` requiere Rust.
+Mamba **no reparte un zip** hasta reconstruir esos archivos con la herramienta de Polestar sin esas fuentes (`forge data build --no-questie`, `forge build --nav grid`, sin `--kb` para dejar fuera forever-vo) y hasta que `tools/asistente/control_zip.py --estricto --manifiesto <construcción>` dé 0 rechazos. Hoy, sobre `addon/`, da **272 rechazos** (lo esperado). Construir `forge` requiere Rust (ya instalado en `D:\rust`) y un compilador de C (pendiente de permiso).
 
-Los datos **propios** de Mamba (Servicios, Datos, Tasador, Medidor) salen de `forever-db` (GPL-3.0). Su `NOTICE.md` dice: "Every value in its tables is held by at least one of the independent sources below" (EG Link CC BY 4.0, CMaNGOS GPL-3.0, VMaNGOS, ForeverTDB, pfQuest MIT, el cliente). Las tablas que usamos (`npc`, `object`, `spawn`, `ui_map`, `item_source`) son GPL-3.0-only en su `datapackage.json`.
+Los datos **propios** de Mamba (Servicios, Datos, Tasador, Medidor) salen de `forever-db` (GPL-3.0). Su `NOTICE.md` dice: "Every value in its tables is held by at least one of the independent sources below" (EG Link CC BY 4.0, CMaNGOS GPL-3.0, VMaNGOS, ForeverTDB, pfQuest MIT, el cliente). Las tablas que usamos (`quest`, `quest_start`, `quest_end`, `quest_objective`, `quest_reward`, `npc`, `object`, `item`, `item_source`, `spawn`, `ui_map`) son GPL-3.0-only en su `datapackage.json`. De ellas Mamba toma ids y números, no textos de objetivos.
+
+**Criterio, uno solo (lo aplican `control_zip.py` y `generados.py`):** forever-db se acepta porque Polestar lo publica como conjunto de datos GPL-3.0 y declara que cada valor lo tiene al menos una fuente independiente. QuestieDB figura entre sus créditos, no como única fuente. Lo que se rechaza son los archivos de Polestar que declaran llevar hechos de QuestieDB "with the Questie maintainers' agreement" (guías, nombres) o caminatas de Leffe. Si Questie o Polestar dicen otra cosa de forever-db, este criterio cae y los datos de Mamba se regeneran.
 
 Mientras tanto, para jugar: **Polestar oficial** + las carpetas de Mamba (`Asistente*`, `Tasador`, `Medidor` y las de "Addons incluidos").
 

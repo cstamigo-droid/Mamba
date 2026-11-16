@@ -931,7 +931,7 @@ local function noticeVersion(key, name, version)
 	-- The update card (UI/UpdateCard.lua) already says a newer version is out
 	-- when it has shown, or will this session, for that one (Update.Covers).
 	local U = ns.Update
-	if newer and not (U and U.Covers(version)) then
+	if newer and not ns.mamba and not (U and U.Covers(version)) then -- Mamba (PARCHES.md P2): sin "A newer version is out"
 		ns.Print(L["%s is on Polestar %s: your guides can differ. A newer version is out."]:format(name, version))
 	else
 		ns.Print(L["%s is on Polestar %s: your guides can differ."]:format(name, version))

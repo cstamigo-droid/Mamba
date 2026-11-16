@@ -5,8 +5,9 @@
 
 Un archivo es [AJENO] si su cabecera o su marca de datos nombra Leffe, QuestieDB, DingDB
 o forever-vo (mismo criterio que control_zip.py), o si el LICENSE-DATA.txt de su carpeta
-dice que sus datos salen de una de esas fuentes. Solo se miran las carpetas de Polestar:
-los addons incluidos (incluidos.py) van como los publica su autor.
+dice que sus datos salen de una de esas fuentes, o si sale de las guias de Polestar (que son [AJENO]).
+Se miran las carpetas de Polestar y las de Mamba (Asistente*, Tasador, Medidor); los addons
+incluidos (incluidos.py) van como los publica su autor.
 """
 from __future__ import annotations
 
@@ -43,7 +44,7 @@ def lista() -> list[str]:
     lineas = []
     for rel in archivos:
         partes = rel.split("/")
-        if len(partes) < 3 or not partes[1].startswith("Polestar") or not rel.endswith(".lua"):
+        if len(partes) < 3 or not partes[1].startswith(("Polestar", "Asistente", "Tasador", "Medidor")) or not rel.endswith(".lua"):
             continue
         datos = (RAIZ / rel).read_bytes()
         cab = cz._cabecera(datos)
@@ -55,7 +56,9 @@ def lista() -> list[str]:
                  or carpeta_ajena(RAIZ / partes[0] / partes[1]))
         # data/forever se construye por capas y en la máquina de Polestar lleva la de QuestieDB
         # (docs/forge/data.md, "How the merge works"): lo que sale de ahí se regenera con --no-questie.
-        regenerar = not ajeno and ("data/forever" in fuentes or "earlier releases' leveling guides" in fuentes)
+        # Lo que sale de las guías de Polestar hereda su marca: --no-questie no lo limpia (revisor, M4).
+        ajeno = ajeno or "leveling guides" in fuentes or "guides' `reward` lines" in fuentes
+        regenerar = not ajeno and "data/forever" in fuentes
         lineas.append(("[AJENO] " if ajeno else "[REGENERAR] " if regenerar else "") + rel)
     return lineas
 

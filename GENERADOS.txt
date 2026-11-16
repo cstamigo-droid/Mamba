@@ -6,10 +6,13 @@
 # [REGENERAR] = sale de data/forever, que en la máquina de Polestar incluye la capa de QuestieDB:
 #           se regenera desde nuestra construcción --no-questie antes de repartir un zip.
 # Sin marca = sale solo de las tablas del cliente, de fuentes libres o del propio Polestar.
+addon/Asistente_Datos/Datos.lua
+addon/Asistente_Datos/Nombres_enUS.lua
+addon/Asistente_Servicios/Ciudades.lua
 [REGENERAR] addon/Polestar/Core/ClassTrainers.lua
 addon/Polestar/Core/Credits.lua
 [AJENO] addon/Polestar/Core/GatherData.lua
-[REGENERAR] addon/Polestar/Core/LegacySteps.lua
+[AJENO] addon/Polestar/Core/LegacySteps.lua
 addon/Polestar/Gear/SpecData.lua
 addon/Polestar/Maps/FlightPaths.lua
 [REGENERAR] addon/Polestar/Maps/ZoneLevels.lua
@@ -19,7 +22,7 @@ addon/Polestar/QoL/ClassSpells.lua
 [REGENERAR] addon/Polestar/Quests/NewQuestIds.lua
 addon/Polestar/Quests/QuestDB.lua
 addon/Polestar/Talents/Builds.lua
-[REGENERAR] addon/Polestar/UI/ClassRewards.lua
+[AJENO] addon/Polestar/UI/ClassRewards.lua
 addon/Polestar/UI/ZoneArtOverlays.lua
 [AJENO] addon/Polestar_Experimental/Guides.lua
 [AJENO] addon/Polestar_Experimental/MapFrames.lua

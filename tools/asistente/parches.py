@@ -19,7 +19,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
 ADDON = RAIZ / "addon"
-FECHA = "2026-11-16"
+FECHA = __import__("datetime").date.today().isoformat()  # el día en que se aplica (GPL-3.0 §5a)
 REPO = "https://github.com/cstamigo-droid/Mamba"
 CR = chr(13)
 LF = chr(10)
@@ -41,6 +41,9 @@ PARCHES = [
     ("P2-version", "Polestar/Core/Update.lua",
      'local base = "https://github.com/fitzforge/polestar/releases"',
      f'local base = "{REPO}/releases" -- Mamba (PARCHES.md P2)'),
+    ("P2-version", "Polestar/Quests/Party.lua",
+     '	if newer and not (U and U.Covers(version)) then',
+     '	if newer and not ns.mamba and not (U and U.Covers(version)) then -- Mamba (PARCHES.md P2): sin "A newer version is out"'),
     ("P3-tomtom", "Polestar/Nav/Journey.lua",
      "answerTomTom = false, -- the stand-in has methods only: an addon reading TomTom.db would error",
      "answerTomTom = true, -- Mamba (PARCHES.md P3): reemplaza a TomTom (/way y su API de puntos). "
@@ -76,7 +79,7 @@ def _toc(texto: str) -> str:
     texto = TITULO.sub(lambda m: f"{m.group(1)}{m.group(2)} · Mamba{m.group(3)}", texto)
     marca = f"## X-Mamba: fork de Polestar, modificado {FECHA} ({REPO}). No es el Polestar oficial."
     if MARCA.search(texto):
-        return MARCA.sub(marca, texto)
+        return texto  # ya avisado: se conserva la fecha en que se aplicó
     lineas = texto.splitlines(keepends=True)
     ultimo = max(i for i, l in enumerate(lineas) if l.startswith("## "))
     fin = CR + LF if lineas[ultimo].endswith(CR + LF) else LF

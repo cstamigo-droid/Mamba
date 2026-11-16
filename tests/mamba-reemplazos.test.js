@@ -162,6 +162,38 @@ test('Parches P1/P2: los errores van al repositorio de Mamba y no hay aviso de "
 	assert.deepEqual(out[1], { counts: false, notice: true, release: 'https://github.com/cstamigo-droid/Mamba/releases/latest' });
 });
 
+// Como party.rs (party_a_member_s_version_is_said_once...): Ben, en el grupo, trae un Polestar más nuevo.
+function grupo(mamba) {
+	const xmamba = mamba ? `stub.addonMeta.Polestar = { ["X-Mamba"] = "fork", Version = "0.3.7" }` : '';
+	return runAddon({
+		stubs: ['stub_world.lua', 'stub_party.lua'],
+		before: xmamba,
+		saved: { Polestar: 'PolestarDB = { schema = 1, settings = { party = { share = true, show = true } } }' },
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Quests/Party.lua'] }],
+		login: true,
+		script: `
+		local p = stub.party
+		local E = Polestar.Engine
+		E.GetGuide = function() return { id = "test/g", pack = "test" } end
+		E.GetLiveStep = function() return 5 end
+		Polestar.Guides.Pack = function(id) if id == "test" then return { id = "test", title = "Test", version = "3" } end end
+		E.GetStepView = function(i) if i == 5 then return { goals = {} } end end
+		stub.messages = {}
+		Polestar.version = "0.3.7"
+		p.join("Ben")
+		p.receive("Ben-TestRealm", "1Y|0.3.8")
+		local out = {}
+		for _, m in ipairs(stub.messages) do if m:find("Ben is on", 1, true) then out[#out + 1] = m:gsub("^.-: ", "") end end
+		emit(out)
+	`,
+	}).emitted;
+}
+
+test('P2 en el grupo: Mamba sigue diciendo "your guides can differ" pero no "A newer version is out"', () => {
+	assert.deepEqual(grupo(false)[0], ['Ben is on Polestar 0.3.8: your guides can differ. A newer version is out.'], 'sin Mamba: Polestar tal cual');
+	assert.deepEqual(grupo(true)[0], ['Ben is on Polestar 0.3.8: your guides can differ.'], 'con Mamba: sin pedir actualizar');
+});
+
 test('Aviso de modificación (GPL-3.0 §5a): cada .toc de Polestar dice "· Mamba" y X-Mamba con fecha', () => {
 	for (const dir of fs.readdirSync(ADDON).filter((d) => d.startsWith('Polestar'))) {
 		const toc = path.join(ADDON, dir, `${dir}.toc`);

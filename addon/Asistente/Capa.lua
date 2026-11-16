@@ -1,5 +1,8 @@
--- Asistente: capa del servidor ("layer"). Reemplaza a MyLayerTracker, escrito de cero
--- (MyLayerTracker no declara licencia: no se copia nada suyo).
+-- Asistente: capa del servidor ("layer"). Reemplaza a MyLayerTracker con una implementación
+-- propia del mismo método: leer el formato público del GUID de un PNJ. MyLayerTracker no declara
+-- licencia y no se copió su archivo, pero se escribió conociéndolo (revisor externo, 16-11):
+-- comparte lo funcional (qué campo del GUID, Creature/Vehicle, la clave servidor:instancia:zona).
+-- /layer choca con MyLayerTracker si los dos están activos: es su reemplazo, se apaga el otro.
 -- Licencia: GPL-3.0-only. Autor: Cristian Amigo.
 --
 -- Cómo se sabe la capa: el GUID de un PNJ es
