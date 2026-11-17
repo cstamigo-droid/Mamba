@@ -50,6 +50,13 @@ PARCHES = [
      "The stand-in has methods only: an addon reading TomTom.db would error"),
 ]
 
+# Parches al código de forge (la herramienta de Polestar que construye los datos), relativos a la raíz.
+PARCHES_FORGE = [
+    ("P5-idioma", "rust/crates/forge-gamedata/src/lib.rs",
+     '\tpub fn db2_bytes(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\tlet flag',
+     '\tpub fn db2_bytes(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\t// Mamba (PARCHES.md P5): a client installed in another text language (esMX) lacks the enUS\n\t\t// copy of a table. With POLESTAR_TEXT_LOCALE_FALLBACK=esMX[,..] the first installed copy is\n\t\t// read instead, with a warning; without it nothing changes.\n\t\tmatch self.db2_bytes_at(table, locale) {\n\t\t\tErr(e) => {\n\t\t\t\tif let Ok(alt) = std::env::var("POLESTAR_TEXT_LOCALE_FALLBACK") {\n\t\t\t\t\tfor l in alt.split(\',\').map(str::trim).filter(|l| !l.is_empty() && *l != locale) {\n\t\t\t\t\t\tif let Ok(d) = self.db2_bytes_at(table, l) {\n\t\t\t\t\t\t\teprintln!("forge: {table}: no {locale} copy installed; read the {l} copy (POLESTAR_TEXT_LOCALE_FALLBACK)");\n\t\t\t\t\t\t\treturn Ok(d);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tErr(e)\n\t\t\t}\n\t\t\tok => ok,\n\t\t}\n\t}\n\n\tfn db2_bytes_at(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\tlet flag'),
+]
+
 # Las pruebas de Polestar que fijan esos mismos valores (rutas relativas a la raíz del repositorio).
 PARCHES_PRUEBAS = [
     ("P1-errores", "tests/ui-report.test.js",
@@ -96,6 +103,7 @@ def aplicar(solo_revisar: bool) -> int:
     faltan, cambiados = [], []
     todos = [(pid, ADDON / rel, viejo, nuevo) for pid, rel, viejo, nuevo in PARCHES]
     todos += [(pid, RAIZ / rel, viejo, nuevo) for pid, rel, viejo, nuevo in PARCHES_PRUEBAS]
+    todos += [(pid, RAIZ / rel, viejo, nuevo) for pid, rel, viejo, nuevo in PARCHES_FORGE]
     for pid, p, viejo, nuevo in todos:
         rel = p.relative_to(RAIZ).as_posix()
         t = p.read_bytes().decode("utf-8")

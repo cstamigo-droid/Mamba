@@ -60,6 +60,26 @@ impl Client {
 
 	/// The raw DB2 bytes of a table (and the TACT keys of chunks left zero-filled).
 	pub fn db2_bytes(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {
+		// Mamba (PARCHES.md P5): a client installed in another text language (esMX) lacks the enUS
+		// copy of a table. With POLESTAR_TEXT_LOCALE_FALLBACK=esMX[,..] the first installed copy is
+		// read instead, with a warning; without it nothing changes.
+		match self.db2_bytes_at(table, locale) {
+			Err(e) => {
+				if let Ok(alt) = std::env::var("POLESTAR_TEXT_LOCALE_FALLBACK") {
+					for l in alt.split(',').map(str::trim).filter(|l| !l.is_empty() && *l != locale) {
+						if let Ok(d) = self.db2_bytes_at(table, l) {
+							eprintln!("forge: {table}: no {locale} copy installed; read the {l} copy (POLESTAR_TEXT_LOCALE_FALLBACK)");
+							return Ok(d);
+						}
+					}
+				}
+				Err(e)
+			}
+			ok => ok,
+		}
+	}
+
+	fn db2_bytes_at(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {
 		let flag = casc::locale_flag(locale).ok_or_else(|| format!("unknown locale {locale}"))?;
 		let fdid = self.fdid(table)?;
 		let s = &self.storage;

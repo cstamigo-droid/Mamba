@@ -18,6 +18,10 @@ F=/d/rust/target/release/forge.exe
 mkdir -p "$NOCHE"
 source /d/rust/entorno.sh
 cd "$RAIZ"
+# El cliente de Cristian tiene los textos en español (esMX), no en inglés: las tablas que forge pide en
+# enUS al cliente (Map, para la geometría de la grilla) se leen de la copia esMX (PARCHES.md P5).
+# Las tablas con nombres para los datos se leen de wago.tools en inglés (--forever-tables wago).
+export POLESTAR_TEXT_LOCALE_FALLBACK=esMX
 
 ahora() { date '+%Y-%m-%d %H:%M:%S'; }
 log() { echo "[$(ahora)] $*" | tee -a "$LOG"; }
@@ -62,11 +66,13 @@ log "enlaces simbólicos: $([ $ENLACES = 1 ] && echo sí || echo NO)"
 
 if [ $ENLACES = 1 ]; then
 	# 3a. La construcción completa: datos, grilla, caminatas, rutas, guías y su informe.
+	#     La grilla lee data/forever/map-frames.json: en un checkout nuevo hay que hacer antes los datos.
+	paso "datos" "$F" data build --no-questie --forever-tables wago
 	paso "forge build" "$F" build --wow "$WOW" --no-questie --nav grid --accept-fewer-quests \
-		--forever-tables client --out "$OUT" --threads 8
+		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8
 else
 	# 3b. Sin enlaces: lo que no los necesita (datos y grilla). Las guías quedan para la mañana.
-	paso "datos" "$F" data build --no-questie --forever-tables client
+	paso "datos" "$F" data build --no-questie
 	paso "grilla" "$F" nav grid --out 'D:\rust\forge-out\grid' --wow "$WOW" --threads 8
 	fin "PARCIAL: datos (--no-questie) y grilla listos en D:. forge build no corrió porque Windows no deja crear enlaces simbólicos (activar Modo de desarrollador: Configuración › Sistema › Para desarrolladores). Ver $LOG" 0
 fi
