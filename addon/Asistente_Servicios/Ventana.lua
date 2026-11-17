@@ -112,17 +112,16 @@ local function crear()
 		b.texto:SetPoint("RIGHT", b.dist, "LEFT", -6, 0)
 		b:SetScript("OnClick", function(self) if self.g then S.Elegir(self.g) end end)
 		b:SetScript("OnEnter", function(self)
-			if not (self.g and GameTooltip and GameTooltip.SetOwner) then return end
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:AddLine(self.g.etiqueta)
+			if not self.g then return end
+			local lineas = {}
 			for k, l in ipairs(self.g.lugares) do
 				if k > 6 then break end
-				GameTooltip:AddLine(l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist), 1, 1, 1)
+				lineas[#lineas + 1] = A.Color("blanco", l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist))
 			end
-			GameTooltip:AddLine(A.CONFIANZA[self.g.conf] or "", 0.6, 0.6, 0.6)
-			GameTooltip:Show()
+			lineas[#lineas + 1] = A.Color("gris", A.CONFIANZA[self.g.conf] or "")
+			A.Ayuda(self, self.g.etiqueta, lineas)
 		end)
-		b:SetScript("OnLeave", function() if GameTooltip and GameTooltip.Hide then GameTooltip:Hide() end end)
+		b:SetScript("OnLeave", function() A.OcultarAyuda() end)
 		v.filas[i] = b
 	end
 	v:EnableMouseWheel(true)
@@ -159,10 +158,13 @@ function S.AlEntrar(uiMap)
 	if A.MapaActual() ~= uiMap then return end
 	S.ciudadActual = uiMap
 	if A.EnCombate() or not A.Ajuste("servicios", "abrirAlEntrar") then return end
+	crear()
+	v.abiertaSola = true -- se abrió sola: con mando no le quita el foco al jugador
 	S.Abrir(uiMap)
 end
 
 function S.Comando(arg)
+	if v then v.abiertaSola = false end -- la pidió el jugador
 	arg = S.Normal(arg)
 	if arg == "parar" or arg == "quitar" then
 		S.Detener(false)
@@ -187,6 +189,8 @@ end
 
 if A then
 	A.Registrar("servicios", S)
+	-- Los colores de las filas van dentro del texto (A.Color): al cambiar de apariencia se reescriben.
+	A.AlCambiarApariencia(function() if v and v:IsShown() then S.Refrescar() end end)
 	-- Su ajuste, en la ventana de ajustes de Polestar (página Mamba), además de "/servicios auto si|no".
 	A.Opciones("Servicios", "Buscador de servicios de la ciudad", {
 		{ kind = "toggle", label = "Abrir la lista al entrar a una ciudad",

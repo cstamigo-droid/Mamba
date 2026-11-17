@@ -130,3 +130,44 @@ test('módulo de prueba: la ventana de Servicios (/servicios) se dibuja con Pole
 	assert.match(out.titulo, /^Servicios de /);
 	assert.equal(out.ajuste, 'Abrir la lista al entrar a una ciudad');
 });
+
+test('módulo de prueba: al cambiar de apariencia, las filas de Servicios se reescriben con los colores nuevos (no quedan pegados)', () => {
+	const [out] = runAddon({
+		stubs: ['stub_ui.lua'],
+		addons: [POLESTAR, 'Asistente', 'Asistente_Servicios'],
+		script: `uistub.install()
+stub.login()
+			local A, T = Asistente, Polestar.Theme
+			local S = A.modulos.servicios
+			S.Abrir(next(S.datos.ciudades))
+			local v = AsistenteServiciosVentana
+			local vistas = {}
+			for _, c in ipairs(T.SkinChoices()) do
+				Polestar.Set("ui.skin", c.value)
+				T.Refresh()
+				local fila = v.filas[1]:IsShown() and v.filas[1].texto:GetText() or ""
+				local pie = v.pie:GetText() or ""
+				vistas[#vistas + 1] = { skin = c.value, fila = fila:find(T.Hex("text"), 1, true) ~= nil or fila:find(T.Hex("textMuted"), 1, true) ~= nil,
+					pie = pie:find(T.Hex("textMuted"), 1, true) ~= nil, hex = T.Hex("textMuted") }
+			end
+			emit(vistas)
+		`,
+	}).emitted;
+	assert.ok(out.length >= 6);
+	for (const x of out) {
+		assert.equal(x.fila, true, `apariencia ${x.skin}: la fila no tiene el color de la apariencia`);
+		assert.equal(x.pie, true, `apariencia ${x.skin}: el pie no tiene el color de la apariencia`);
+	}
+	assert.ok(new Set(out.map((x) => x.hex)).size >= 2, 'las apariencias cambian el color de verdad (si no, la prueba no mide nada)');
+});
+
+test('la ventana vuelve al lugar guardado (AsistenteDB.ventanas, lo guarda el onStop del arrastre de Polestar)', () => {
+	const [out] = run(`
+		AsistenteDB = AsistenteDB or { ajustes = {} }
+		AsistenteDB.ventanas = { MambaPruebaLugar = { 111, 555 } }
+		local f = A.CrearVentana("MambaPruebaLugar", "x", 200, 100)
+		local p, rel, relp, x, y = f:GetPoint(1)
+		emit({ p = p, relp = relp, x = x, y = y })
+	`);
+	assert.deepEqual(out, { p: 'TOPLEFT', relp: 'BOTTOMLEFT', x: 111, y: 555 });
+});

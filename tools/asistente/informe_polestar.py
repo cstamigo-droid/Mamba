@@ -29,6 +29,8 @@ ESTETICA = ["addon/Polestar/Theme", "addon/Polestar_Looks", "addon/Polestar_Skin
 
 def git(*args: str) -> str:
     r = subprocess.run(["git", *args], cwd=RAIZ, capture_output=True)
+    if r.returncode != 0:  # una lectura fallida no puede pasar por "todo es nuevo" o "nada cambió"
+        raise SystemExit(f"git {' '.join(args)} falló: {r.stderr.decode('utf-8', errors='replace').strip()}")
     return r.stdout.decode("utf-8", errors="replace")
 
 
@@ -70,8 +72,8 @@ def main(argv: list[str]) -> int:
          "completa la tarea que sigue a Polestar, en español simple, antes de dar la versión por lista.", "",
          "## 1. Qué funciones nuevas trae", "",
          "### En español, para Cristian (POR COMPLETAR)",
-         "Una línea por novedad que se nota al jugar, agrupadas: guía y rutas · ventanas y ajustes · equipo · profesiones · otras.", "",
-         "### Notas originales de Polestar (inglés, CHANGELOG.md)", "", "```text", notas(antes, nueva), "```", "",
+         "Una línea por novedad que se nota al jugar, agrupadas: guía y rutas · ventanas y ajustes · equipo · profesiones · otras.",
+         "Lo de autores de guías y colaboradores no va aquí. Las notas originales, en inglés, están en el anexo al final.", "",
          "## 2. ¿Choca con Mamba?", "",
          f"- Archivos con parche de Mamba (PARCHES.md) que esta versión tocó: {', '.join(choque_parches) or 'ninguno'}"
          + (" → `parches.py` tiene que volver a calzar; si no, se resuelve a mano." if choque_parches else "."),
@@ -88,9 +90,12 @@ def main(argv: list[str]) -> int:
           f"- Apariencias nuevas: {', '.join(sorted(skins_nueva - skins_antes)) or 'ninguna'}; quitadas: {', '.join(sorted(skins_antes - skins_nueva)) or 'ninguna'}.",
           "- Cambios en cómo dibuja Polestar (Theme, Widgets, apariencias, ajustes):", "", "```text", est or "sin cambios", "```", "",
           "- `tests/mamba-estetica.test.js` (prueba cada apariencia contra una ventana de Polestar): POR COMPLETAR (OK o qué falló).",
-          "- Criterio E1–E6 de HOJA_DE_RUTA_MAMBA §7: POR COMPLETAR.", "",
+          "- Criterio E1–E7 de HOJA_DE_RUTA_MAMBA §7: POR COMPLETAR.",
+          "- ¿Polestar trajo una pieza o regla de dibujo nueva (en Theme/Widgets o en docs/DESIGN.md) que `Asistente/Estilo.lua` deba adoptar? POR COMPLETAR.", "",
           "## 5. Veredicto (POR COMPLETAR)", "",
-          "LISTA PARA INSTALAR · o · BLOQUEADA porque … (y qué falta, con dueño).", ""]
+          "LISTA PARA INSTALAR · o · BLOQUEADA porque … (y qué falta, con dueño).", "",
+          "---", "", "## Anexo: notas originales de Polestar (inglés, CHANGELOG.md)", "",
+          "<details><summary>Abrir</summary>", "", "```text", notas(antes, nueva), "```", "", "</details>", ""]
     Path(salida).parent.mkdir(parents=True, exist_ok=True)
     Path(salida).write_text("\n".join(L), encoding="utf-8")
     print("Informe:", salida)

@@ -95,8 +95,8 @@ INTERNAS += [(ITEMDB, "DB", "Get", "Asistente_Equipo (Polestar.ItemDB.Get)"),
 # Polestar. Si cambian, revisar Estilo.lua y correr tests/mamba-estetica.test.js.
 THEME, WIDGETS, INIT = "addon/Polestar/Theme/Theme.lua", "addon/Polestar/Theme/Widgets.lua", "addon/Polestar/Core/Init.lua"
 ESTILO = "Asistente/Estilo.lua (estética)"
-INTERNAS += [(THEME, "Theme", n, ESTILO) for n in ["Skin", "Band", "BandCoords", "Hex"]]
-INTERNAS += [(WIDGETS, "W", n, ESTILO) for n in ["Text", "IconButton", "FrameClose", "SearchBox", "Hover", "Rim", "Haze"]]
+INTERNAS += [(THEME, "Theme", n, ESTILO) for n in ["Skin", "Band", "BandCoords", "Hex", "OnChanged"]]
+INTERNAS += [(WIDGETS, "W", n, ESTILO) for n in ["Text", "IconButton", "FrameClose", "SearchBox", "Hover", "Rim", "Haze", "Tooltip"]]
 INTERNAS += [(WIDGETS, "ns", "RegisterOptions", ESTILO), (INIT, "ns", "DragWindow", ESTILO), (INIT, "ns", "CloseOnEscape", ESTILO)]
 # archivos de datos cuyo FORMATO de entrada leemos (las líneas "-- Entry:" de su cabecera)
 FORMATOS = ["addon/Polestar_ItemDB/Items.lua", "addon/Polestar_ItemDB/Forever.lua"]  # los lee generador/equipo.py

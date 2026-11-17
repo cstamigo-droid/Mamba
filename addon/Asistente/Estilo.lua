@@ -11,8 +11,8 @@ local A = _G.Asistente
 function A.Polestar()
 	local P = _G.Polestar
 	local T, W = P and P.Theme, P and P.Widgets
-	if T and W and T.Skin and T.Band and T.BandCoords and T.Hex and W.Text and W.IconButton and W.SearchBox
-		and W.Hover and P.DragWindow and P.CloseOnEscape then
+	if T and W and T.Skin and T.Band and T.BandCoords and T.Hex and T.OnChanged and W.Text and W.IconButton
+		and W.SearchBox and W.Hover and W.Tooltip and P.DragWindow and P.CloseOnEscape then
 		return P, T, W
 	end
 end
@@ -36,6 +36,41 @@ function A.Color(nombre, texto)
 		if ok and hex then return "|c" .. hex .. tostring(texto) .. "|r" end
 	end
 	return "|cff" .. (A.COLOR[nombre] or "ffffff") .. tostring(texto) .. "|r"
+end
+
+-- fn() cada vez que Polestar repinta (cambio de apariencia, esquema, acento, brillo o letra). Un texto con
+-- A.Color lleva el color DENTRO del texto: el módulo lo vuelve a escribir aquí para que cambie al instante.
+function A.AlCambiarApariencia(fn)
+	local _, T = A.Polestar()
+	if T then T.OnChanged(fn) end
+end
+
+-- Cuadro de ayuda al pasar el ratón: el de Polestar (W.Tooltip: colores de la apariencia) o el del juego.
+-- lineas: textos; se pueden colorear con A.Color.
+function A.Ayuda(dueno, titulo, lineas)
+	local _, _, W = A.Polestar()
+	if W then return W.Tooltip(dueno, "ANCHOR_RIGHT", titulo, lineas) end
+	if not (GameTooltip and GameTooltip.SetOwner) then return end
+	GameTooltip:SetOwner(dueno, "ANCHOR_RIGHT")
+	GameTooltip:AddLine(titulo or "")
+	for _, l in ipairs(lineas or {}) do GameTooltip:AddLine(l) end
+	GameTooltip:Show()
+end
+
+function A.OcultarAyuda()
+	if GameTooltip and GameTooltip.Hide then GameTooltip:Hide() end
+end
+
+-- Lugar guardado de cada ventana (AsistenteDB.ventanas[nombre] = { izquierda, arriba }).
+local function lugar(nombre)
+	local db = _G.AsistenteDB
+	return db and db.ventanas and db.ventanas[nombre]
+end
+local function guardarLugar(nombre, f)
+	local db = _G.AsistenteDB
+	if not (db and f.GetLeft and f:GetLeft() and f:GetTop()) then return end
+	db.ventanas = db.ventanas or {}
+	db.ventanas[nombre] = { f:GetLeft(), f:GetTop() }
 end
 
 -- Marca de confianza de cada dato (ALCANCE §2).
@@ -70,13 +105,17 @@ local CABEZA, MARGEN = 56, 24
 -- Ventana de un módulo como las de Polestar: fondo y borde de la apariencia elegida, banda de estrellas
 -- con el título, cruz para cerrar, se arrastra por la cabecera, se cierra con Escape y se acuerda de su
 -- lugar. f.cuerpo = cuánto baja la cabecera (el contenido empieza ahí); f.margen = margen lateral.
+-- f.abiertaSola = true cuando se abrió sin que el jugador la pidiera (con mando no le quita el foco).
 function A.CrearVentana(nombre, titulo, ancho, alto)
 	local P, T, W = A.Polestar()
 	local f
 	if P then
-		f = CreateFrame("Frame", nombre, P.UIParent or UIParent)
+		-- Bajo UIParent, no bajo la capa de Polestar: una ventana que el jugador pidió se ve aunque haya
+		-- escondido Polestar.
+		f = CreateFrame("Frame", nombre, UIParent)
 		f:SetSize(ancho, alto)
-		f:SetPoint("CENTER", UIParent, "CENTER", 300, 0)
+		local l = lugar(nombre)
+		if l then f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l[1], l[2]) else f:SetPoint("CENTER", UIParent, "CENTER", 300, 0) end
 		f:SetFrameStrata("MEDIUM")
 		f:SetToplevel(true)
 		f:SetClampedToScreen(true)
@@ -87,7 +126,7 @@ function A.CrearVentana(nombre, titulo, ancho, alto)
 		cab:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
 		cab:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -1)
 		cab:SetHeight(CABEZA)
-		P.DragWindow(cab, f)
+		P.DragWindow(cab, f, { onStop = function(v) guardarLugar(nombre, v) end })
 		f.cabeza = cab
 		f.banda = T.Band(cab, "BACKGROUND", -5)
 		f.banda:SetAllPoints(cab)
@@ -102,7 +141,7 @@ function A.CrearVentana(nombre, titulo, ancho, alto)
 		f.titulo:SetPoint("RIGHT", f.cerrar, "LEFT", -8, 0)
 		f.cuerpo, f.margen, f.polestar = CABEZA, MARGEN, true
 		P.CloseOnEscape(nombre)
-		if P.Gamepad and P.Gamepad.Register then P.Gamepad.Register(f, {}) end
+		if P.Gamepad and P.Gamepad.Register then P.Gamepad.Register(f, { unasked = function() return f.abiertaSola end }) end
 	else
 		f = A.CrearMarcoBajo("Frame", nombre, UIParent, "BasicFrameTemplateWithInset")
 		f:SetSize(ancho, alto)

@@ -23,22 +23,27 @@ export PYTHONIOENCODING=utf-8
 # Rama con la regla de estética y estas herramientas, mientras no esté dentro de asistente.
 EXTRA_RAMA=mamba/estetica-y-polestar
 
-fin() { echo "$(date '+%Y-%m-%d %H:%M') $1" > "$ESTADO"; echo "ESTADO: $1"; rm -f "$CERROJO"; exit "${2:-0}"; }
+fin() { echo "$(date '+%Y-%m-%d %H:%M') $1" > "$ESTADO"; echo "ESTADO: $1"; exit "${2:-0}"; }
 forge_corriendo() { tasklist //FI "IMAGENAME eq forge.exe" 2>/dev/null | grep -qi "forge.exe"; }
 
-# Una sola corrida a la vez (un cerrojo de más de 6 h es de una corrida que murió).
+# Argumentos ANTES del cerrojo (un error aquí no deja el cerrojo puesto).
+MODO=fusion; TAG=""
+case "${1:-}" in
+	--construir) MODO=construir ;;
+	--seco) MODO=seco; TAG="${2:-}"; [[ "$TAG" =~ ^v[0-9] ]] || { echo "uso: seguir_polestar.sh --seco vX.Y.Z"; exit 1; } ;;
+	"") ;;
+	*) echo "uso: seguir_polestar.sh [--construir | --seco vX.Y.Z]"; exit 1 ;;
+esac
+
+# Una sola corrida a la vez (un cerrojo de más de 6 h es de una corrida que murió). El nuestro se quita al
+# salir por cualquier camino (fin, error, Ctrl+C); el de otra corrida no se toca.
 if [ -f "$CERROJO" ] && [ -n "$(find "$CERROJO" -mmin -360 2>/dev/null)" ]; then
 	echo "ESTADO: OCUPADO: otra corrida empezó $(cat "$CERROJO")"; exit 3
 fi
 date '+%Y-%m-%d %H:%M' > "$CERROJO"
-
-MODO=fusion; TAG=""
-case "${1:-}" in
-	--construir) MODO=construir ;;
-	--seco) MODO=seco; TAG="${2:?uso: --seco vX.Y.Z}" ;;
-	"") ;;
-	*) fin "uso: seguir_polestar.sh [--construir | --seco vX.Y.Z]" 1 ;;
-esac
+trap 'rm -f "$CERROJO"' EXIT
+HECHAS="$DIR/hechas" # una marca por etiqueta fusionada y probada con éxito (la rama sola no prueba nada)
+mkdir -p "$HECHAS"
 
 # Copia aparte con las uniones a los datos y cachés compartidos (no están en git).
 preparar_copia() {
@@ -64,8 +69,14 @@ preparar_copia() {
 	fi
 	local w
 	w="$(cygpath -w "$FUSION")"
+	# data/local es carpeta PROPIA de la copia (forge escribe ahí): nunca una unión a la carpeta de trabajo.
+	# Solo ForeverTDB (de lectura) se enlaza; kb y nav-layers se copian una vez, como caché.
+	mkdir -p "$FUSION/data/local"
+	for c in kb nav-layers; do
+		[ -e "$FUSION/data/local/$c" ] || [ ! -d "$REPO/data/local/$c" ] || cp -r "$REPO/data/local/$c" "$FUSION/data/local/" || return 1
+	done
 	for par in "data\\forever|D:\\rust\\polestar-data\\forever" "data\\sources|D:\\rust\\polestar-data\\sources" \
-		"data\\local|$(cygpath -w "$REPO")\\data\\local"; do
+		"data\\local\\forever-tdb|D:\\rust\\forever-tdb"; do
 		local en="${par%%|*}" a="${par##*|}"
 		# unión de Windows con PowerShell (mklink por cmd pierde las comillas que le pasa Git Bash)
 		[ -e "$FUSION/${en//\\//}" ] || powershell -NoProfile -Command \
@@ -85,7 +96,9 @@ fusionar() {
 	fi
 	python -I "$FUSION/tools/asistente/informe_polestar.py" "$antes" "$tag" "$INFORMES/$tag.md" >> "$log" 2>&1 \
 		|| fin "FALLÓ el informe de $tag. Ver $log" 1
+	[[ "$rama" == fusion/* ]] || return 0 # la prueba en seco no deja marcas
 	echo "$tag" > "$DIR/ULTIMA_FUSION"
+	date '+%Y-%m-%d %H:%M' > "$HECHAS/$tag"
 }
 
 case "$MODO" in
@@ -94,16 +107,18 @@ seco)
 	fin "PRUEBA EN SECO OK: $TAG fusionado y probado en la rama prueba/$TAG ($FUSION), sin construir. Lista: $INFORMES/$TAG.md" 0
 	;;
 fusion)
-	SALIDA="$(python -I "$REPO/tools/asistente/generador/polestar_al_dia.py" --fork "$REPO" 2>&1 \
-		|| python -I "$(dirname "$0")/generador/polestar_al_dia.py" --fork "$REPO" 2>&1)"
+	# Una sola llamada, a la vigía que viaja con este script (la de asistente puede no conocer --fork).
+	SALIDA="$(python -I "$(cd "$(dirname "$0")" && pwd)/generador/polestar_al_dia.py" --fork "$REPO" 2>&1)"
 	r=$?
+	SALIDA="$(echo "$SALIDA" | head -1)"
 	echo "$SALIDA"
 	case "$SALIDA" in
 		"AL DÍA"*) fin "$SALIDA" 0 ;;
 		FUSIONAR*) TAG="$(echo "$SALIDA" | awk '{print $2}')" ;;
 		*) fin "NO SE PUDO REVISAR (salida $r): $SALIDA" 1 ;;
 	esac
-	if git -C "$REPO" rev-parse -q --verify "refs/heads/fusion/$TAG" >/dev/null; then
+	# Preparada = marca de éxito + rama. Una rama sin marca es de una corrida que falló: se rehace.
+	if [ -f "$HECHAS/$TAG" ] && git -C "$REPO" rev-parse -q --verify "refs/heads/fusion/$TAG" >/dev/null; then
 		fin "YA PREPARADA: $TAG espera en la rama fusion/$TAG (falta construir o que Cristian la pase a asistente). Lista: $INFORMES/$TAG.md" 0
 	fi
 	fusionar "$TAG" "fusion/$TAG"
@@ -112,7 +127,7 @@ fusion)
 construir)
 	TAG="$(cat "$DIR/ULTIMA_FUSION" 2>/dev/null)"
 	[ -n "$TAG" ] && [ "$(git -C "$FUSION" branch --show-current)" = "fusion/$TAG" ] || fin "NADA QUE CONSTRUIR: no hay una fusión preparada" 0
-	forge_corriendo && { rm -f "$CERROJO"; echo "ESTADO: OCUPADO: forge.exe corre (otra construcción)"; exit 3; }
+	forge_corriendo && { echo "ESTADO: OCUPADO: forge.exe corre (otra construcción)"; exit 3; }
 	[ -f "$FUSION/tools/asistente/compilar_addon.sh" ] || fin "BLOQUEADA: falta tools/asistente/compilar_addon.sh en asistente (la sesión de construcción todavía no lo commiteó)" 1
 	log="$DIR/construir_$TAG.log"
 	# construir_noche.sh se niega con el juego abierto: entonces queda para la próxima corrida.
