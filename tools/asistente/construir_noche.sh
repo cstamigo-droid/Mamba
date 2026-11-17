@@ -119,6 +119,22 @@ if [ $ENLACES = 1 ]; then
 	# hechizos sin nombre…), con el arreglo que el propio mensaje de forge da; informe en
 	# D:/rust/guias-mamba_ARREGLOS.md (17-11).
 	paso "arreglos de guías" python -I "$RAIZ/tools/asistente/arreglar_guias.py" "$GUIAS"
+	# Si forge rehace la grilla o prepare en esta misma corrida (forge nuevo, cliente actualizado), queda una
+	# máscara de caminos nueva junto a la vieja y walks falla con "expected one road mask tag" (17-11, dos
+	# veces). Entonces se aparta la vieja y forge build se repite una vez: grilla y prepare ya quedan en caché.
+	if ! "$F" build --wow "$WOW" --no-questie --nav grid --accept-fewer-quests \
+		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8 \
+		--starts "$STARTS" --guides "$GUIAS" >> "$LOG" 2>&1; then
+		if tail -5 "$LOG" | grep -q "expected one road mask tag"; then
+			log "walks: dos máscaras de caminos; se aparta la vieja y se repite forge build"
+			paso "máscaras de caminos (2)" python -I "$RAIZ/tools/asistente/apartar_roads.py" D:/rust/forge-out
+		else
+			fin "FALLÓ en «forge build». Nada más corrió. Ver $LOG" 1
+		fi
+	else
+		touch "$NOCHE/.build_ok"
+	fi
+	[ -f "$NOCHE/.build_ok" ] && rm -f "$NOCHE/.build_ok" || \
 	paso "forge build" "$F" build --wow "$WOW" --no-questie --nav grid --accept-fewer-quests \
 		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8 \
 		--starts "$STARTS" --guides "$GUIAS"
