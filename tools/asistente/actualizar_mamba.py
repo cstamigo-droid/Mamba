@@ -98,7 +98,16 @@ class Corrida:
 
     def forzar(self, etapa):
         if self.a.forzar_fallo == etapa:
+            if etapa == "limpiar":  # simula que el proceso MUERE (corte de luz): sin avisos ni limpieza propia
+                self.anota("MUERTE SIMULADA durante la limpieza (prueba)")
+                os._exit(9)
             raise Fallo(f"fallo forzado a propósito en «{etapa}» (prueba)")
+
+    def escribir_diario(self, d):
+        """De una sola vez: un corte a mitad no deja un diario roto (temporal + reemplazo atómico)."""
+        tmp = self.diario.with_suffix(".tmp")
+        tmp.write_text(json.dumps(d), encoding="utf-8")
+        os.replace(tmp, self.diario)
 
     def mandar(self, texto) -> bool:
         if self.a.sin_aviso:
@@ -149,7 +158,17 @@ class Corrida:
             d = json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             d = {}
-        quedan = {k: t for k, t in d.items() if not self.mandar(t)}
+        quedan, marcas = {}, self.dir / "avisos.json"
+        try:
+            m = json.loads(marcas.read_text(encoding="utf-8"))
+        except Exception:
+            m = {}
+        for k, t in d.items():
+            if self.mandar(t):
+                m[k] = dt.datetime.now().timestamp()  # ya dado: si el mismo fallo sigue, no sale dos veces
+            else:
+                quedan[k] = t
+        marcas.write_text(json.dumps(m), encoding="utf-8")
         if quedan:
             p.write_text(json.dumps(quedan, ensure_ascii=False), encoding="utf-8")
         else:
@@ -193,9 +212,14 @@ class Corrida:
                     errores.append(f"{v.name}: {e}")
             for n in nuevas:
                 shutil.rmtree(n, ignore_errors=True)
-            if errores:
-                raise Fallo("no pude terminar de borrar las copias viejas: " + "; ".join(errores[:5]))
+            if errores:  # la instalación está bien: no es un "falló"; se reintenta borrar en la próxima corrida
+                self.anota("quedan copias viejas por borrar: " + "; ".join(errores[:5]))
+                return
             self.diario.unlink(missing_ok=True)
+            # el proceso que instaló murió antes de avisar: el aviso de éxito sale ahora (misma clave: no se repite)
+            if d.get("tag"):
+                self.avisar(f"Mamba actualizada a {d['tag']} (la corrida que instaló se cortó al final; ya quedó limpia).",
+                            clave=f"exito_{d['tag']}")
             return
         self.anota(f"RECUPERANDO una instalación cortada: {len(viejas)} carpetas viejas, {len(nuevas)} a medio copiar")
         # las carpetas que la instalación cortada AGREGÓ (no existían antes) se quitan
@@ -236,6 +260,11 @@ class Corrida:
         self.anota(f"última publicada {ultima} · instalada {self.instalada or 'ninguna'} · carpeta {self.addons}")
         if not self.instalada:
             raise Fallo(f"no encuentro Polestar instalado en {self.addons}")
+        # Si lo instalado es Polestar OFICIAL (sin la marca X-Mamba en Polestar.toc: CurseForge o Polestar Client lo
+        # reemplazaron, MAMBA.md), hay que poner Mamba aunque el número de versión sea el mismo.
+        if "X-Mamba" not in toc.read_text(encoding="utf-8", errors="replace"):
+            self.anota("lo instalado es Polestar OFICIAL (sin X-Mamba): se instala Mamba")
+            return ultima if v.numeros(ultima) >= v.numeros(self.instalada) else None
         return ultima if v.numeros(ultima) > v.numeros(self.instalada) else None
 
     def marca_construida(self):
@@ -337,7 +366,7 @@ class Corrida:
         self.etapa = "instalar"
         diario = {"tag": self.tag, "desde": self.instalada, "instalar": instalar, "quitar": quitar, "fase": "cambiando",
                   "agregadas": [c for c in instalar if not (self.addons / c).exists()], "inicio": dt.datetime.now().isoformat()}
-        self.diario.write_text(json.dumps(diario), encoding="utf-8")
+        self.escribir_diario(diario)
         hechas = []  # (carpeta, había vieja)
         try:
             for c in instalar + quitar:
@@ -374,12 +403,19 @@ class Corrida:
         # Todo comprobado: desde aquí solo se avanza. Si la corrida muere borrando lo viejo, «recuperar» lo termina
         # (no vuelve atrás: eso mezclaría versiones).
         diario["fase"] = "limpiando"
-        self.diario.write_text(json.dumps(diario), encoding="utf-8")
+        self.escribir_diario(diario)
         self.forzar("limpiar")
+        restos = []
         for c, habia in hechas:
             if habia:
-                shutil.rmtree(self.addons / (c + VIEJA))  # sin ignore_errors: si no se pudo, el diario queda
-        self.diario.unlink(missing_ok=True)
+                try:
+                    shutil.rmtree(self.addons / (c + VIEJA))
+                except Exception as e:  # instalada y comprobada: no es un fallo; el diario queda y se termina después
+                    restos.append(f"{c}: {e}")
+        if restos:
+            self.anota("quedan copias viejas por borrar (se terminan en la próxima corrida): " + "; ".join(restos[:5]))
+        else:
+            self.diario.unlink(missing_ok=True)
 
     def volver_atras(self, hechas):
         self.anota(f"VUELTA ATRÁS de {len(hechas)} carpetas")
@@ -434,7 +470,7 @@ class Corrida:
             self.avisar(f"Mamba actualizada a {self.tag} ({len(instalar)} carpetas"
                         + (f", {len(quitar)} quitadas porque Polestar ya no las trae" if quitar else "")
                         + f"). Lo nuevo de Polestar y la revisión de estética quedan para mirar con calma en "
-                          f"polestar_versiones/{self.tag}.md.")
+                          f"polestar_versiones/{self.tag}.md.", clave=f"exito_{self.tag}")
             return 0
         except Espera as e:
             self.estado(f"EN ESPERA ({self.tag}): {e}")
@@ -471,8 +507,14 @@ def main():
     if (a.ignorar_juego or a.forzar_fallo or a.sin_construir) and not (a.prueba and a.addons):
         p.error("--ignorar-juego, --forzar-fallo y --sin-construir solo valen con --prueba y una carpeta --addons de prueba")
     CERROJO.parent.mkdir(parents=True, exist_ok=True)
-    if CERROJO.exists() and dt.datetime.now().timestamp() - CERROJO.stat().st_mtime > 8 * 3600:
-        CERROJO.unlink(missing_ok=True)  # de una corrida que murió
+    if CERROJO.exists():  # de una corrida que murió (corte de luz): su proceso ya no existe, o pasaron 8 h
+        m = re.search(r"pid (\d+)", CERROJO.read_text(encoding="utf-8", errors="replace"))
+        vivo = False
+        if m:
+            r = subprocess.run(["tasklist", "/FI", f"PID eq {m.group(1)}"], capture_output=True)
+            vivo = r.returncode != 0 or f" {m.group(1)} " in r.stdout.decode("utf-8", errors="replace")
+        if not vivo or dt.datetime.now().timestamp() - CERROJO.stat().st_mtime > 8 * 3600:
+            CERROJO.unlink(missing_ok=True)
     try:
         fd = os.open(CERROJO, os.O_CREAT | os.O_EXCL | os.O_WRONLY)  # crear-si-no-existe en un solo paso
     except FileExistsError:
