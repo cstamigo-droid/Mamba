@@ -24,6 +24,8 @@ addon/Polestar/Quests/QuestDB.lua
 addon/Polestar/Talents/Builds.lua
 [AJENO] addon/Polestar/UI/ClassRewards.lua
 addon/Polestar/UI/ZoneArtOverlays.lua
+addon/Polestar_Arcade/data/assets.lua
+addon/Polestar_Arcade/data/maps.lua
 [AJENO] addon/Polestar_Experimental/Guides.lua
 [AJENO] addon/Polestar_Experimental/MapFrames.lua
 [AJENO] addon/Polestar_Experimental/Pack.lua

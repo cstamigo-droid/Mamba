@@ -1,23 +1,23 @@
 ## Interface: 16001
-## Title: Polestar Arcade
+## Title: Polestar Arcade · Mamba
 ## Notes: Part of Polestar: Freedoom Arcade by petllama, three levels of Freedoom to play on a flight. Loaded when you press Play.
-## Title-deDE: Polestar Arcade
+## Title-deDE: Polestar Arcade · Mamba
 ## Notes-deDE: Teil von Polestar: Freedoom Arcade von petllama, drei Freedoom-Level zum Spielen während eines Flugs. Wird geladen, wenn du auf Spielen klickst.
-## Title-esES: Polestar: arcade
+## Title-esES: Polestar: arcade · Mamba
 ## Notes-esES: Parte de Polestar: Freedoom Arcade de petllama, tres niveles de Freedoom para jugar durante un vuelo. Se carga cuando pulsas Jugar.
-## Title-esMX: Polestar: arcade
+## Title-esMX: Polestar: arcade · Mamba
 ## Notes-esMX: Parte de Polestar: Freedoom Arcade de petllama, tres niveles de Freedoom para jugar durante un vuelo. Se carga cuando pulsas Jugar.
-## Title-frFR: Polestar : arcade
+## Title-frFR: Polestar : arcade · Mamba
 ## Notes-frFR: Fait partie de Polestar : Freedoom Arcade de petllama, trois niveaux de Freedoom à jouer pendant un vol. Chargé quand vous cliquez sur Jouer.
-## Title-koKR: Polestar 아케이드
+## Title-koKR: Polestar 아케이드 · Mamba
 ## Notes-koKR: Polestar의 일부: petllama의 Freedoom Arcade, 비행 중에 즐기는 Freedoom 세 레벨. 플레이를 누르면 불러옵니다.
-## Title-ptBR: Polestar: arcade
+## Title-ptBR: Polestar: arcade · Mamba
 ## Notes-ptBR: Parte do Polestar: Freedoom Arcade de petllama, três níveis de Freedoom para jogar durante um voo. Carregado quando você clica em Jogar.
-## Title-ruRU: Polestar: аркада
+## Title-ruRU: Polestar: аркада · Mamba
 ## Notes-ruRU: Часть Polestar: Freedoom Arcade от petllama, три уровня Freedoom, чтобы поиграть в полёте. Загружается, когда вы нажимаете «Играть».
-## Title-zhCN: Polestar 街机
+## Title-zhCN: Polestar 街机 · Mamba
 ## Notes-zhCN: Polestar 的组成部分：petllama 的 Freedoom Arcade，飞行途中可玩的三个 Freedoom 关卡。点击“开始游戏”时加载。
-## Title-zhTW: Polestar 街機
+## Title-zhTW: Polestar 街機 · Mamba
 ## Notes-zhTW: Polestar 的一部分：petllama 的 Freedoom Arcade，飛行途中可玩的三個 Freedoom 關卡。點擊「開始遊戲」時載入。
 ## Author: Polestar; Freedoom Arcade by petllama
 ## Version: 0.4.1
@@ -28,6 +28,7 @@
 ## SavedVariables: Polestar_ArcadeDB
 ## X-License: GPL-2.0-or-later (Freedoom Arcade, with petllama's permission); BSD-3-Clause (Freedoom's data, FREEDOOM-COPYING.txt)
 ## X-Website: https://github.com/petllama/FreedoomArcade
+## X-Mamba: fork de Polestar, modificado 2026-11-17 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 src\core.lua
 data\info.lua
