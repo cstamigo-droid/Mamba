@@ -95,7 +95,7 @@ INTERNAS += [(ITEMDB, "DB", "Get", "Asistente_Equipo (Polestar.ItemDB.Get)"),
 # Polestar. Si cambian, revisar Estilo.lua y correr tests/mamba-estetica.test.js.
 THEME, WIDGETS, INIT = "addon/Polestar/Theme/Theme.lua", "addon/Polestar/Theme/Widgets.lua", "addon/Polestar/Core/Init.lua"
 ESTILO = "Asistente/Estilo.lua (estética)"
-INTERNAS += [(THEME, "Theme", n, ESTILO) for n in ["Skin", "Band", "BandCoords", "Hex", "OnChanged"]]
+INTERNAS += [(THEME, "Theme", n, ESTILO) for n in ["Skin", "Band", "BandCoords", "Hex", "OnChanged", "TipColor"]]
 INTERNAS += [(WIDGETS, "W", n, ESTILO) for n in ["Text", "IconButton", "FrameClose", "SearchBox", "Hover", "Rim", "Haze", "Tooltip"]]
 INTERNAS += [(WIDGETS, "ns", "RegisterOptions", ESTILO), (INIT, "ns", "DragWindow", ESTILO), (INIT, "ns", "CloseOnEscape", ESTILO)]
 # archivos de datos cuyo FORMATO de entrada leemos (las líneas "-- Entry:" de su cabecera)
@@ -122,6 +122,13 @@ def cuerpo_definicion(fuente, prefijo, nombre):
         if re.match(inicio, l):
             for k in range(i + 1, len(lineas)):
                 if lineas[k] == fin:
+                    return "\n".join(lineas[i:k + 1])
+    # definida con sangría (dentro de un bloque do ... end, como Theme.TipColor): hasta el `end` con su misma sangría
+    for i, l in enumerate(lineas):
+        m = re.match(rf"^(\s+)function {p}\.{n}\(", l)
+        if m:
+            for k in range(i + 1, len(lineas)):
+                if lineas[k] == m.group(1) + "end":
                     return "\n".join(lineas[i:k + 1])
     raise ValueError(f"no encuentro {prefijo}.{nombre} en Polestar: ¿la quitaron o la renombraron?")
 

@@ -136,7 +136,7 @@ construir)
 	bash "$FUSION/tools/asistente/compilar_addon.sh" >> "$log" 2>&1 || fin "FALLÓ compilar_addon.sh. Ver $log" 1
 	(cd "$FUSION" && LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js tests/mamba-estetica.test.js) >> "$log" 2>&1 \
 		|| fin "FALLARON las pruebas después de construir. Ver $log" 1
-	(cd "$FUSION" && git add -A addon guides GENERADOS.txt && git commit -q -m "Mamba: datos reconstruidos sobre Polestar $TAG") >> "$log" 2>&1
+	(cd "$FUSION" && git add -A addon guides GENERADOS.txt && { git diff --cached --quiet || git commit -q -m "Mamba: datos reconstruidos sobre Polestar $TAG"; }) >> "$log" 2>&1 		|| fin "FALLÓ el commit de la construcción. Ver $log" 1
 	fin "LISTA PARA INSTALAR: $TAG construido y probado en $FUSION (rama fusion/$TAG). Lista: $INFORMES/$TAG.md" 0
 	;;
 esac

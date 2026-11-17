@@ -60,7 +60,9 @@ A.Defaults("nucleo", { avisos = true })
 
 ---------------------------------------------------------------- mensajes
 function A.Decir(texto)
-	if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffffd100Asistente:|r " .. tostring(texto)) end
+	-- el chat tiene fondo oscuro: el nombre va en el acento de la apariencia, aclarado si hace falta (Estilo.lua)
+	local nombre = A.ColorOscuro and A.ColorOscuro("titulo", "Asistente:") or "|cffffd100Asistente:|r"
+	if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage(nombre .. " " .. tostring(texto)) end
 end
 
 ---------------------------------------------------------------- combate

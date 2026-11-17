@@ -21,7 +21,7 @@ end
 function A.Ayuda()
 	A.Decir("versión " .. A.version .. ". Módulos:")
 	for _, m in ipairs(MODULOS) do
-		local estado = cargado(m[1]) and A.Color("bueno", "cargado") or A.Color("gris", "se carga cuando haga falta")
+		local estado = cargado(m[1]) and A.ColorOscuro("bueno", "cargado") or A.ColorOscuro("gris", "se carga cuando haga falta")
 		A.Decir("  " .. m[1] .. ": " .. m[3] .. " · " .. estado)
 	end
 	A.Decir("/asis creditos: de dónde viene cada dato.")

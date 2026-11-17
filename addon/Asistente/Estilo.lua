@@ -28,15 +28,32 @@ A.COLOR = {
 }
 local TOKEN = { titulo = "accent", bueno = "success", dudoso = "warning", gris = "textMuted", blanco = "text" }
 
-function A.Color(nombre, texto)
+-- Dónde va el texto decide el color (docs/DESIGN.md de Polestar, "Theme.TipColor"):
+--   A.Color(nombre, texto)        en una ventana de Mamba: el color de la apariencia sobre su fondo;
+--   A.ColorOscuro(nombre, texto)  en el cuadro de ayuda o en el chat, que tienen SIEMPRE fondo oscuro:
+--                                 Polestar aclara el color hasta que se lea (una apariencia clara como
+--                                 Vellum tiene tinta casi negra, que ahí no se vería).
+local function hexDe(r, g, b)
+	local f = function(x) return math.floor((x or 1) * 255 + 0.5) end
+	return string.format("ff%02x%02x%02x", f(r), f(g), f(b))
+end
+function A.Color(nombre, texto, fondo)
 	local _, T = A.Polestar()
 	local tok = TOKEN[nombre]
 	if T and tok then
-		local ok, hex = pcall(T.Hex, tok)
+		local ok, hex
+		if fondo == "oscuro" and T.TipColor then
+			local r, g, b
+			ok, r, g, b = pcall(T.TipColor, tok)
+			hex = ok and r and hexDe(r, g, b)
+		else
+			ok, hex = pcall(T.Hex, tok)
+		end
 		if ok and hex then return "|c" .. hex .. tostring(texto) .. "|r" end
 	end
 	return "|cff" .. (A.COLOR[nombre] or "ffffff") .. tostring(texto) .. "|r"
 end
+function A.ColorOscuro(nombre, texto) return A.Color(nombre, texto, "oscuro") end
 
 -- fn() cada vez que Polestar repinta (cambio de apariencia, esquema, acento, brillo o letra). Un texto con
 -- A.Color lleva el color DENTRO del texto: el módulo lo vuelve a escribir aquí para que cambie al instante.
@@ -145,14 +162,15 @@ function A.CrearVentana(nombre, titulo, ancho, alto)
 	else
 		f = A.CrearMarcoBajo("Frame", nombre, UIParent, "BasicFrameTemplateWithInset")
 		f:SetSize(ancho, alto)
-		f:SetPoint("CENTER", UIParent, "CENTER", 300, 0)
+		local l = lugar(nombre)
+		if l then f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l[1], l[2]) else f:SetPoint("CENTER", UIParent, "CENTER", 300, 0) end
 		f:SetFrameStrata("MEDIUM")
 		f:SetClampedToScreen(true)
 		f:SetMovable(true)
 		f:EnableMouse(true)
 		f:RegisterForDrag("LeftButton")
 		f:SetScript("OnDragStart", f.StartMoving)
-		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); guardarLugar(nombre, self) end)
 		-- la plantilla ya trae su título (TitleText): se usa ese, no uno encima
 		local tt = type(f.TitleText) == "table" and f.TitleText or nil
 		f.titulo = tt or f:CreateFontString(nil, "OVERLAY", "GameFontNormal")

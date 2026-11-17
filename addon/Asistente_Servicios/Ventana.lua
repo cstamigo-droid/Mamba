@@ -34,7 +34,7 @@ function S.Elegir(g)
 	if not (g and g.mejor and S.ciudadActual) then return end
 	S.IrA(g.mejor, S.ciudadActual, g.etiqueta)
 	local donde = g.mejor.titulo and (g.mejor.nombre .. " <" .. g.mejor.titulo .. ">") or g.mejor.nombre
-	local aviso = g.conf == "titulo" and (" " .. A.Color("dudoso", "(" .. A.CONFIANZA.titulo .. ")")) or ""
+	local aviso = g.conf == "titulo" and (" " .. A.ColorOscuro("dudoso", "(" .. A.CONFIANZA.titulo .. ")")) or ""
 	A.Decir(g.etiqueta .. ": " .. donde .. ", " .. S.TextoDistancia(g.mejor.dist) .. ". Sigue la flecha." .. aviso)
 end
 
@@ -116,9 +116,9 @@ local function crear()
 			local lineas = {}
 			for k, l in ipairs(self.g.lugares) do
 				if k > 6 then break end
-				lineas[#lineas + 1] = A.Color("blanco", l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist))
+				lineas[#lineas + 1] = A.ColorOscuro("blanco", l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist))
 			end
-			lineas[#lineas + 1] = A.Color("gris", A.CONFIANZA[self.g.conf] or "")
+			lineas[#lineas + 1] = A.ColorOscuro("gris", A.CONFIANZA[self.g.conf] or "")
 			A.Ayuda(self, self.g.etiqueta, lineas)
 		end)
 		b:SetScript("OnLeave", function() A.OcultarAyuda() end)

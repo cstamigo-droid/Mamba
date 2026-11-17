@@ -9,12 +9,18 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
 
-const POLESTAR = { name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'] };
+// Con Nav y Maps: las apariencias de carpeta traen ajustes de la línea de ruta (nav.lineWidth…) y sin ellos
+// Polestar las rechaza ("preset: Polestar has no setting").
+const POLESTAR = { name: 'Polestar', files: ['Core/Core.xml', 'Nav/Nav.xml', 'Theme/Theme.xml', 'UI/UI.xml', 'Maps/Maps.xml'] };
+// Las apariencias de las carpetas Polestar_Skin_* (sin Example): sin cargarlas, solo se prueban las integradas.
+const fs = require('node:fs');
+const path = require('node:path');
+const PIELES = fs.readdirSync(path.join(__dirname, '..', 'addon')).filter((d) => d.startsWith('Polestar_Skin_') && d !== 'Polestar_Skin_Example');
 
 function run(script, conPolestar = true) {
 	return runAddon({
-		stubs: ['stub_ui.lua'],
-		addons: conPolestar ? [POLESTAR, 'Asistente'] : ['Asistente'],
+		stubs: ['stub_nav.lua', 'stub_ui.lua'],
+		addons: conPolestar ? [POLESTAR, ...PIELES, 'Asistente'] : ['Asistente'],
 		script: `${conPolestar ? 'uistub.install()\n' : ''}stub.login()\nlocal A = Asistente\n${script}`,
 	}).emitted;
 }
@@ -65,7 +71,7 @@ test('con Polestar: al cambiar de apariencia, el texto del módulo cambia igual 
 		emit(vistas)
 	`);
 	const vistas = out[0];
-	assert.ok(vistas.length >= 6, `hay apariencias para probar (${vistas.length})`);
+	assert.ok(vistas.length >= 6 + PIELES.length, `todas las apariencias: integradas + ${PIELES.length} de carpetas (${vistas.length})`);
 	for (const v of vistas) assert.equal(v.igual, true, `apariencia ${v.skin}: el texto de Mamba no sigue a Polestar: ${JSON.stringify(v)}`);
 	const distintas = new Set(vistas.map((v) => `${v.cara}|${v.color}`));
 	assert.ok(distintas.size >= 2, 'las apariencias cambian de verdad la letra o el color (si no, la prueba no mide nada)');
@@ -107,8 +113,8 @@ test('sin Polestar: la ventana cae a la plantilla del juego y nada se rompe', ()
 
 test('módulo de prueba: la ventana de Servicios (/servicios) se dibuja con Polestar y su ajuste está en la página Mamba', () => {
 	const [out] = runAddon({
-		stubs: ['stub_ui.lua'],
-		addons: [POLESTAR, 'Asistente', 'Asistente_Servicios'],
+		stubs: ['stub_nav.lua', 'stub_ui.lua'],
+		addons: [POLESTAR, ...PIELES, 'Asistente', 'Asistente_Servicios'],
 		script: `uistub.install()\nstub.login()
 			local A = Asistente
 			local S = A.modulos.servicios
@@ -133,8 +139,8 @@ test('módulo de prueba: la ventana de Servicios (/servicios) se dibuja con Pole
 
 test('módulo de prueba: al cambiar de apariencia, las filas de Servicios se reescriben con los colores nuevos (no quedan pegados)', () => {
 	const [out] = runAddon({
-		stubs: ['stub_ui.lua'],
-		addons: [POLESTAR, 'Asistente', 'Asistente_Servicios'],
+		stubs: ['stub_nav.lua', 'stub_ui.lua'],
+		addons: [POLESTAR, ...PIELES, 'Asistente', 'Asistente_Servicios'],
 		script: `uistub.install()
 stub.login()
 			local A, T = Asistente, Polestar.Theme
@@ -179,4 +185,32 @@ test('la página Mamba › Servicios existe desde el inicio, antes de que Servic
 		emit({ hay = pagina ~= nil, cargado = A.modulos.servicios ~= nil, valor = pagina and pagina.controls[1].get() })
 	`);
 	assert.deepEqual(out, { hay: true, cargado: false, valor: true });
+});
+
+test('cuadro de ayuda y chat (fondo siempre oscuro): A.ColorOscuro se lee en TODAS las apariencias, también las claras (Vellum)', () => {
+	const [out] = run(`
+		local T = Polestar.Theme
+		local function rgb(cod) -- "|cffRRGGBB..." -> {r,g,b}
+			local h = cod:match("^|cff(%x%x%x%x%x%x)")
+			return { tonumber(h:sub(1, 2), 16) / 255, tonumber(h:sub(3, 4), 16) / 255, tonumber(h:sub(5, 6), 16) / 255 }
+		end
+		local vistas = {}
+		for _, c in ipairs(T.SkinChoices()) do
+			Polestar.Set("ui.skin", c.value)
+			T.Refresh()
+			local peor, peorVentana = 99, 99
+			for _, n in ipairs({ "titulo", "bueno", "dudoso", "gris", "blanco" }) do
+				peor = math.min(peor, T.Contrast(rgb(A.ColorOscuro(n, "x")), T.TIP_GROUND))
+				peorVentana = math.min(peorVentana, T.Contrast(rgb(A.Color(n, "x")), T.TIP_GROUND))
+			end
+			vistas[#vistas + 1] = { skin = c.value, peor = peor, peorVentana = peorVentana }
+		end
+		emit(vistas)
+	`);
+	const nombres = out.map((v) => v.skin);
+	assert.ok(nombres.includes('vellum'), `la prueba incluye una apariencia clara (Vellum): ${nombres.join(', ')}`);
+	// 4,45: Polestar aclara hasta 4,5 exacto y el color pasa a 8 bits (|cffRRGGBB), que puede bajar unas centésimas.
+	for (const v of out) assert.ok(v.peor >= 4.45, `apariencia ${v.skin}: un color de Mamba en el cuadro de ayuda/chat no se lee (contraste ${v.peor.toFixed(2)} < 4.45)`);
+	// control: con el color de ventana, alguna apariencia clara NO se leería sobre fondo oscuro (si no, la prueba no mide nada)
+	assert.ok(out.some((v) => v.peorVentana < 4.5), 'control: el color de ventana sobre fondo oscuro falla en alguna apariencia clara');
 });
