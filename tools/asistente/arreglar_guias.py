@@ -34,6 +34,44 @@ FLOW = Path(r"D:\rust\forge-out\.forge\flow")
 ERR = re.compile(r"^(?P<f>.+?\.guide):(?P<l>\d+): error: (?P<m>.*)$")
 PACK = re.compile(r"^(?P<f>.+?\.guide):(?P<l>\d+) (?P<m>.*)$")
 NUNCA = re.compile(r"^`(turnin|collect|kill)` for quest (\d+) that is never accepted")
+# Los pack-errors de cada construcción se acumulan aquí: la copia de las guías se rehace desde cero en
+# cada corrida y una construcción que ya pasó no vuelve a listar lo que se arregló (17-11).
+ACUMULADOS = RAIZ / "data" / "local" / "pack-errors-acumulados.txt"
+META = re.compile(r"^\s*(tip|when|zone|only|map|note|#|--)")
+
+
+def pack_errores() -> list[tuple[str, str]]:
+    """(start, línea) de los pack-errors actuales más los acumulados; guarda la unión."""
+    vistos: set[tuple[str, str]] = set()
+    if ACUMULADOS.is_file():
+        for l in ACUMULADOS.read_text(encoding="utf-8").splitlines():
+            if "\t" in l:
+                s, x = l.split("\t", 1)
+                vistos.add((s, x))
+    for f in FLOW.glob("*.pack-errors.txt"):
+        start = f.name.split(".pack-errors")[0]
+        for l in f.read_text(encoding="utf-8", errors="replace").splitlines():
+            if PACK.match(l):
+                vistos.add((start, l))
+    ACUMULADOS.parent.mkdir(parents=True, exist_ok=True)
+    ACUMULADOS.write_text("".join(f"{s}\t{x}" + chr(10) for s, x in sorted(vistos)), encoding="utf-8")
+    return sorted(vistos)
+
+
+def sin_pasos_vacios(lineas: list[str], tocadas: list[int]) -> list[str]:
+    """Saca los pasos donde se quitó una línea y no quedó ninguna meta (solo tip/when/zone…)."""
+    inicios = [i for i, x in enumerate(lineas) if x.startswith("step ")]
+    fuera: list[tuple[int, int]] = []
+    for k, ini in enumerate(inicios):
+        fin = inicios[k + 1] if k + 1 < len(inicios) else len(lineas)
+        if not any(ini < t < fin + 1 for t in tocadas):
+            continue
+        cuerpo = [x for x in lineas[ini + 1 : fin] if x.strip()]
+        if not any(not META.match(x) for x in cuerpo):
+            fuera.append((ini, fin))
+    for ini, fin in reversed(fuera):
+        del lineas[ini:fin]
+    return lineas
 
 
 def lint(guias: Path) -> list[tuple[Path, int, str]]:
@@ -61,8 +99,7 @@ def lint(guias: Path) -> list[tuple[Path, int, str]]:
 def nunca_en_build() -> set[tuple[str, int]]:
     """(guía relativa, misión) que forge build marcó como "never accepted"."""
     s = set()
-    for f in FLOW.glob("*.pack-errors.txt"):
-        for l in f.read_text(encoding="utf-8", errors="replace").splitlines():
+    for _start, l in pack_errores():
             m = PACK.match(l)
             if not m:
                 continue
@@ -126,9 +163,7 @@ def desde_build(guias: Path) -> list[tuple[str, int, str, str]]:
     """
     hechos = []
     errores: set[tuple[str, int, str]] = set()
-    for f in FLOW.glob("*.pack-errors.txt"):
-        start = f.name.split(".pack-errors")[0]
-        for l in f.read_text(encoding="utf-8", errors="replace").splitlines():
+    for start, l in pack_errores():
             m = PACK.match(l)
             if m:
                 rel = m["f"].replace("\\", "/").split("/flow/", 1)[-1].split("/", 1)[-1]
@@ -174,16 +209,72 @@ def _arreglo_build(g: Path, rel: str, rel_flujo: str, fl: int, msg: str, start: 
         if m:
             quitar = [i for i, x in enumerate(lineas) if re.match(rf"^\s*\w+ until {re.escape(m[1])}\s*$", x.split("--")[0])]
             que = f"línea fuera (la etiqueta {m[1]} quedó en un paso que la ruta no usa)"
+        # Una misión con título comodín ("<UNUSED>"): v0.4.1 no deja mostrarlo; la misión sale de la guía.
+        if re.match(r"^`\w+` shows the game's placeholder name", msg):
+            flujo = FLOW / start / rel_flujo
+            fll = flujo.read_text(encoding="utf-8", errors="replace").split("\n") if flujo.is_file() else []
+            qm = re.search(r"^\s*(?:accept|turnin|complete|skip) (\d+)\b|\bquest (\d+)", fll[fl - 1]) if 0 < fl <= len(fll) else None
+            if qm:
+                q = qm[1] or qm[2]
+                quitar = [i for i, x in enumerate(lineas) if re.match(rf"^\s*(accept|turnin|complete|skip) {q}\b", x) or re.search(rf"\bquest {q}(\.\d+)?\b", x.split("--")[0])]
+                que = f"línea fuera (la misión {q} tiene un título comodín del juego, \"<UNUSED>\")"
         if quitar:
             for i in reversed(quitar):
                 hechos.append((rel, i + 1, que, lineas[i].strip()))
                 del lineas[i]
+            lineas = sin_pasos_vacios(lineas, [i - k for k, i in enumerate(sorted(quitar))])
             g.write_bytes("\n".join(lineas).encode("utf-8"))
+            return hechos
+        # Recompensa sin datos en ninguna fuente autorizada: el id sale de la cabecera `reward item`.
+        m = re.match(r"^reward item (\d+) is not in data", msg)
+        if m:
+            for i, x in enumerate(lineas):
+                cod = x.split("--")[0].split()
+                if cod[:2] == ["reward", "item"] and m[1] in cod[2:]:
+                    resto = [w for w in cod[2:] if w != m[1]]
+                    hechos.append((rel, i + 1, f"recompensa {m[1]} fuera (sin datos: NO VERIFICADO)", x.strip()))
+                    if resto:
+                        cr = "\r" if x.endswith("\r") else ""
+                        lineas[i] = "reward item " + " ".join(resto) + cr
+                    else:
+                        del lineas[i]
+                    break
+            g.write_bytes("\n".join(lineas).encode("utf-8"))
+            return hechos
+        # Paso `when group N` con todas sus metas `optional` (el arreglo de élites las dejó así): se
+        # quita `optional`, como dice forge; el consejo de élite queda.
+        if "step is `optional`" in msg or re.match(r"^every goal of this `when group", msg):
+            flujo = FLOW / start / rel_flujo
+            fll = flujo.read_text(encoding="utf-8", errors="replace").split("\n") if flujo.is_file() else []
+            titulo = next((fll[i] for i in range(min(fl, len(fll)) - 1, -1, -1) if fll[i].startswith("step ")), None)
+            if titulo:
+                ini = next((i for i, x in enumerate(lineas) if x.strip() == titulo.strip()), None)
+                if ini is not None:
+                    for i in range(ini + 1, len(lineas)):
+                        if lineas[i].startswith("step "):
+                            break
+                        cod, sep, com = lineas[i].partition("--")
+                        if re.search(r"\boptional\b", cod):
+                            nuevo = re.sub(r"\s+optional\b", "", cod)
+                            hechos.append((rel, i + 1, "sin `optional` (paso de `when group`)", lineas[i].strip()))
+                            lineas[i] = nuevo + sep + com
+                    g.write_bytes("\n".join(lineas).encode("utf-8"))
             return hechos
         m = re.match(r'^`collect` item (\d+) \((.+?)\) drops only from elites.*with the tip "(.+?)"', msg)
         if m:
+            def en_when_group(i: int) -> bool:
+                # Un paso `when group N` lo ve solo quien eligió el grupo: no puede quedar todo optional.
+                for j in range(i, -1, -1):
+                    if lineas[j].startswith("step "):
+                        k = j + 1
+                        while k < len(lineas) and not lineas[k].startswith("step "):
+                            if re.match(r"^\s*when group\b", lineas[k]):
+                                return True
+                            k += 1
+                        return False
+                return False
             for i, x in enumerate(lineas):
-                if re.match(rf"^\s*collect {m[1]}\b", x) and "optional" not in x.split("--")[0]:
+                if re.match(rf"^\s*collect {m[1]}\b", x) and "optional" not in x.split("--")[0] and not en_when_group(i):
                     cr = "\r" if x.endswith("\r") else ""
                     ind = x[: len(x) - len(x.lstrip())]
                     lineas[i] = con_comentario(x.rstrip("\r"), "optional") + cr
