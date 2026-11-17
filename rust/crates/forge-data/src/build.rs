@@ -500,6 +500,11 @@ pub fn run(o: &Options, log: &dyn Fn(&str)) -> Result<Output, String> {
 	}
 
 	lap("questie merge");
+	// Mamba (PARCHES.md P7): without QuestieDB, Forever's own quests (and the npcs, objects and items
+	// they name) from forever-db, with POLESTAR_FOREVER_DB_QUESTS=1; without it nothing changes.
+	if qz.is_none() && std::env::var_os(crate::mamba_foreverdb::ENV).is_some() {
+		crate::mamba_foreverdb::apply(&o.root, &norm.quests, &norm.npcs, &norm.objects, &norm.items, log)?;
+	}
 	// A spawn listed on a continent's map and on a zone's or a city's stays off the continent's
 	// (spawns::drop_map_copies; the merge already left out pfQuest's other copies).
 	let (mut points, mut npcs, mut objects) = (0, 0, 0);

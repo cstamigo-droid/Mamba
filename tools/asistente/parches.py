@@ -58,6 +58,12 @@ PARCHES_FORGE = [
     ("P5-idioma", "rust/crates/forge-gamedata/src/lib.rs",
      '\tpub fn db2_bytes(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\tlet flag',
      '\tpub fn db2_bytes(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\t// Mamba (PARCHES.md P5): a client installed in another text language (esMX) lacks the enUS\n\t\t// copy of a table. With POLESTAR_TEXT_LOCALE_FALLBACK=esMX[,..] the first installed copy is\n\t\t// read instead, with a warning; without it nothing changes.\n\t\tmatch self.db2_bytes_at(table, locale) {\n\t\t\tErr(e) => {\n\t\t\t\tif let Ok(alt) = std::env::var("POLESTAR_TEXT_LOCALE_FALLBACK") {\n\t\t\t\t\tfor l in alt.split(\',\').map(str::trim).filter(|l| !l.is_empty() && *l != locale) {\n\t\t\t\t\t\tif let Ok(d) = self.db2_bytes_at(table, l) {\n\t\t\t\t\t\t\teprintln!("forge: {table}: no {locale} copy installed; read the {l} copy (POLESTAR_TEXT_LOCALE_FALLBACK)");\n\t\t\t\t\t\t\treturn Ok(d);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tErr(e)\n\t\t\t}\n\t\t\tok => ok,\n\t\t}\n\t}\n\n\tfn db2_bytes_at(&self, table: &str, locale: &str) -> Result<blte::Decoded, String> {\n\t\tlet flag'),
+    ("P7-forever-db", "rust/crates/forge-data/src/lib.rs",
+     'pub mod jsv;\npub mod kb;',
+     'pub mod jsv;\npub mod kb;\n/// Mamba (PARCHES.md P7): forever-db\'s quests in a build without QuestieDB.\npub mod mamba_foreverdb;'),
+    ("P7-forever-db", "rust/crates/forge-data/src/build.rs",
+     '\tlap("questie merge");\n',
+     '\tlap("questie merge");\n\t// Mamba (PARCHES.md P7): without QuestieDB, Forever\'s own quests (and the npcs, objects and items\n\t// they name) from forever-db, with POLESTAR_FOREVER_DB_QUESTS=1; without it nothing changes.\n\tif qz.is_none() && std::env::var_os(crate::mamba_foreverdb::ENV).is_some() {\n\t\tcrate::mamba_foreverdb::apply(&o.root, &norm.quests, &norm.npcs, &norm.objects, &norm.items, log)?;\n\t}\n'),
 ]
 
 # Las pruebas de Polestar que fijan esos mismos valores (rutas relativas a la raíz del repositorio).

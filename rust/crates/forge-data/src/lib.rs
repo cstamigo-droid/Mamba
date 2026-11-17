@@ -19,6 +19,8 @@ pub mod gear;
 pub mod itemdb;
 pub mod jsv;
 pub mod kb;
+/// Mamba (PARCHES.md P7): forever-db's quests in a build without QuestieDB.
+pub mod mamba_foreverdb;
 pub mod learn;
 pub mod lua;
 pub mod maps;

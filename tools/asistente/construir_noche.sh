@@ -22,6 +22,10 @@ cd "$RAIZ"
 # enUS al cliente (Map, para la geometría de la grilla) se leen de la copia esMX (PARCHES.md P5).
 # Las tablas con nombres para los datos se leen de wago.tools en inglés (--forever-tables wago).
 export POLESTAR_TEXT_LOCALE_FALLBACK=esMX
+# Sin QuestieDB faltan las misiones propias de Forever: forge las toma de forever-db (GPL-3.0, de
+# Polestar) con sus PNJ, objetos y objetos de inventario (PARCHES.md P7). Vale para el paso de datos y
+# para la etapa de datos de forge build.
+export POLESTAR_FOREVER_DB_QUESTS=1
 
 ahora() { date '+%Y-%m-%d %H:%M:%S'; }
 log() { echo "[$(ahora)] $*" | tee -a "$LOG"; }
@@ -79,6 +83,9 @@ if [ $ENLACES = 1 ]; then
 	# entren nombres en español desde el cliente (forge avisa y sigue sin ItemSparse/GameObjects; 17-11:
 	# con el respaldo entraban 857 nombres en español). P6 deja seguir las correcciones públicas que
 	# apuntan a pasos que sin QuestieDB no existen.
+	# Los objetos de inventario, PNJ y objetos del mundo que nombran las guías: P7 agrega desde
+	# forever-db los que faltan en los datos (17-11).
+	paso "lo que nombran las guías" python -I "$RAIZ/tools/asistente/guias_sin_fuente.py" --necesita "$RAIZ/data/local/forever-db-need.txt"
 	paso "datos" env -u POLESTAR_TEXT_LOCALE_FALLBACK POLESTAR_KB_SKIP_MISSING_STEPS=1 \
 		"$F" data build --no-questie --forever-tables wago --kb --offline
 	# Capas del suelo para las caminatas (preferir caminos, evitar pueblos enemigos), propias: los caminos
@@ -104,9 +111,17 @@ if [ $ENLACES = 1 ]; then
 	# Sin QuestieDB no hay ninguna misión de Zephras Isle: Skyborne no tiene inicio ("no Alliance start for
 	# race Skyborne", 17-11). Se construyen las 8 razas clásicas; Skyborne queda para la 1.1 (forever-db).
 	STARTS="${MAMBA_STARTS:-Orc,Troll,Tauren,Undead,Human,Dwarf,Gnome,NightElf}"
+	# Las ~126 misiones que ni forever-db tiene salen de las guías (NO VERIFICADO, informe en
+	# D:\rust\guias-mamba_SIN_FUENTE.md); forge lee esa copia en vez de guides/ (17-11).
+	GUIAS='D:\rust\guias-mamba'
+	paso "guías sin fuente" python -I "$RAIZ/tools/asistente/guias_sin_fuente.py" "$RAIZ/data/forever/quests.json" "$GUIAS"
+	# Lo que forge rechaza porque los datos sin QuestieDB difieren (índice de objetivo, élites, `direct`,
+	# hechizos sin nombre…), con el arreglo que el propio mensaje de forge da; informe en
+	# D:/rust/guias-mamba_ARREGLOS.md (17-11).
+	paso "arreglos de guías" python -I "$RAIZ/tools/asistente/arreglar_guias.py" "$GUIAS"
 	paso "forge build" "$F" build --wow "$WOW" --no-questie --nav grid --accept-fewer-quests \
 		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8 \
-		--starts "$STARTS"
+		--starts "$STARTS" --guides "$GUIAS"
 else
 	# 3b. Sin enlaces: lo que no los necesita (datos y grilla). Las guías quedan para la mañana.
 	paso "datos" "$F" data build --no-questie
