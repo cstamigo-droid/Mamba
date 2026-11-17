@@ -43,7 +43,7 @@ echo "== 4. Listas y controles"
 python -I tools/asistente/generados.py
 python -I tools/asistente/incluidos.py revisar || alto "un addon incluido cambió"
 python -I tools/asistente/internas_entre.py "$ANTES" "$TAG" --vigia tools/asistente/generador/polestar_al_dia.py \
-	|| echo "AVISO: cambió una función interna que usa Asistente_Equipo: avisar a la sesión de equipo y correr sus pruebas"
+	|| echo "AVISO: cambió una función interna de Polestar que usa un módulo de Mamba (la línea CAMBIÓ de arriba dice cuál): revisar ese módulo y correr sus pruebas"
 
 echo "== 5. Pruebas"
 LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js || alto "falló mamba-reemplazos"
