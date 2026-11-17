@@ -9,9 +9,9 @@ cd "$RAIZ"
 export PYTHONIOENCODING=utf-8
 alto() { echo "ALTO: $*"; exit 1; }
 
-# En la rama asistente, o en una rama fusion/vX de la copia aparte que arma seguir_polestar.sh.
+# En la rama asistente, o en una rama fusion/vX de la copia aparte que arma seguir_polestar.sh (prueba/ para la prueba en seco).
 RAMA="$(git branch --show-current)"
-[ "$RAMA" = asistente ] || [[ "$RAMA" == fusion/* ]] || alto "no estás en la rama asistente (ni en una fusion/*)"
+[ "$RAMA" = asistente ] || [[ "$RAMA" == fusion/* || "$RAMA" == prueba/* ]] || alto "no estás en la rama asistente (ni en una fusion/* o prueba/*)"
 [ -z "$(git status --porcelain)" ] || alto "hay cambios sin commitear; commitea o descártalos primero"
 git fetch upstream --tags || alto "no pude traer las etiquetas de upstream (fitzforge/polestar)"
 git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || alto "no existe la etiqueta $TAG"
