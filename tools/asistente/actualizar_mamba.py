@@ -132,17 +132,26 @@ class Corrida:
             if clave:
                 m[clave] = ahora
                 marcas.write_text(json.dumps(m), encoding="utf-8")
-        else:
-            with open(self.dir / "avisos_pendientes.txt", "a", encoding="utf-8") as f:
-                f.write(texto.replace("\n", " ") + "\n")
+        else:  # queda pendiente UNA vez por clave (sin Telegram un día entero no se juntan 12 iguales)
+            pend = self.dir / "avisos_pendientes.json"
+            try:
+                d = json.loads(pend.read_text(encoding="utf-8"))
+            except Exception:
+                d = {}
+            d[clave or texto] = texto
+            pend.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
 
     def reintentar_avisos(self):
-        p = self.dir / "avisos_pendientes.txt"
+        p = self.dir / "avisos_pendientes.json"
         if not p.exists():
             return
-        quedan = [t for t in p.read_text(encoding="utf-8").splitlines() if t.strip() and not self.mandar(t)]
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            d = {}
+        quedan = {k: t for k, t in d.items() if not self.mandar(t)}
         if quedan:
-            p.write_text("\n".join(quedan) + "\n", encoding="utf-8")
+            p.write_text(json.dumps(quedan, ensure_ascii=False), encoding="utf-8")
         else:
             p.unlink()
 
@@ -169,8 +178,34 @@ class Corrida:
             return
         if self.juego_abierto():
             raise Espera("hay una instalación cortada para recuperar, pero el juego está abierto")
-        self.anota(f"RECUPERANDO una instalación cortada: {len(viejas)} carpetas viejas, {len(nuevas)} a medio copiar")
+        try:
+            d = json.loads(self.diario.read_text(encoding="utf-8")) if self.diario.exists() else {}
+        except Exception:
+            d = {}
         errores = []
+        if d.get("fase") == "limpiando":
+            # La instalación ya estaba COMPROBADA completa y se cortó al borrar lo viejo: se termina hacia adelante.
+            self.anota(f"TERMINANDO la limpieza de una instalación ya comprobada: {len(viejas)} carpetas viejas")
+            for v in viejas:
+                try:
+                    shutil.rmtree(v)
+                except Exception as e:
+                    errores.append(f"{v.name}: {e}")
+            for n in nuevas:
+                shutil.rmtree(n, ignore_errors=True)
+            if errores:
+                raise Fallo("no pude terminar de borrar las copias viejas: " + "; ".join(errores[:5]))
+            self.diario.unlink(missing_ok=True)
+            return
+        self.anota(f"RECUPERANDO una instalación cortada: {len(viejas)} carpetas viejas, {len(nuevas)} a medio copiar")
+        # las carpetas que la instalación cortada AGREGÓ (no existían antes) se quitan
+        for c in d.get("agregadas", []):
+            dst = self.addons / c
+            if dst.is_dir() and not (self.addons / (c + VIEJA)).exists():
+                try:
+                    shutil.rmtree(dst)
+                except Exception as e:
+                    errores.append(f"{c}: {e}")
         for v in viejas:
             dst = self.addons / v.name[: -len(VIEJA)]
             try:
@@ -294,19 +329,20 @@ class Corrida:
             raise Fallo(f"el respaldo {dest} no se puede releer bien ({total} de {n} archivos, dañado={malo})")
         self.anota(f"respaldo: {dest} ({n} archivos)")
         # se guardan solo los 5 respaldos más nuevos de Mamba (cada uno ~40 MB)
-        for viejo in sorted(dest.parent.glob("Mamba_antes_de_*.zip"))[:-5]:
+        for viejo in sorted(dest.parent.glob("Mamba_antes_de_*.zip"), key=lambda p: p.stat().st_mtime)[:-5]:
             viejo.unlink(missing_ok=True)
         return dest
 
     def instalar(self, instalar, quitar):
         self.etapa = "instalar"
-        self.diario.write_text(json.dumps({"tag": self.tag, "desde": self.instalada, "instalar": instalar,
-                                           "quitar": quitar, "inicio": dt.datetime.now().isoformat()}), encoding="utf-8")
+        diario = {"tag": self.tag, "desde": self.instalada, "instalar": instalar, "quitar": quitar, "fase": "cambiando",
+                  "agregadas": [c for c in instalar if not (self.addons / c).exists()], "inicio": dt.datetime.now().isoformat()}
+        self.diario.write_text(json.dumps(diario), encoding="utf-8")
         hechas = []  # (carpeta, había vieja)
         try:
             for c in instalar + quitar:
                 if self.juego_abierto():
-                    raise Fallo("el juego se abrió en medio de la instalación")
+                    raise Espera("el juego se abrió en medio de la instalación: se volvió atrás y se reintenta después")
                 dst, nueva, vieja = self.addons / c, self.addons / (c + NUEVA), self.addons / (c + VIEJA)
                 if nueva.exists():
                     shutil.rmtree(nueva)
@@ -335,9 +371,14 @@ class Corrida:
         except Exception:
             self.volver_atras(hechas)
             raise
+        # Todo comprobado: desde aquí solo se avanza. Si la corrida muere borrando lo viejo, «recuperar» lo termina
+        # (no vuelve atrás: eso mezclaría versiones).
+        diario["fase"] = "limpiando"
+        self.diario.write_text(json.dumps(diario), encoding="utf-8")
+        self.forzar("limpiar")
         for c, habia in hechas:
             if habia:
-                shutil.rmtree(self.addons / (c + VIEJA), ignore_errors=True)
+                shutil.rmtree(self.addons / (c + VIEJA))  # sin ignore_errors: si no se pudo, el diario queda
         self.diario.unlink(missing_ok=True)
 
     def volver_atras(self, hechas):
@@ -422,7 +463,7 @@ def main():
     p.add_argument("--estado", help="carpeta de registros y estado")
     p.add_argument("--version", help="tratar esta etiqueta como la última publicada (pruebas)")
     p.add_argument("--prueba", action="store_true", help="avisos marcados [PRUEBA]; respaldo en la carpeta de estado")
-    p.add_argument("--forzar-fallo", choices=["fusion", "construir", "controles", "respaldo", "instalar"])
+    p.add_argument("--forzar-fallo", choices=["fusion", "construir", "controles", "respaldo", "instalar", "limpiar"])
     p.add_argument("--sin-construir", action="store_true")
     p.add_argument("--sin-aviso", action="store_true", help="no mandar Telegram (solo registro)")
     p.add_argument("--ignorar-juego", action="store_true", help="solo con --prueba: instalar aunque el juego esté abierto")
