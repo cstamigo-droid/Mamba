@@ -45,3 +45,9 @@ POSSIBILITY OF SUCH DAMAGE.
 ## FusionIgnoreStore (dentro de `addon/WhatsTraining/libs/`)
 
 Es del autor de WhatsTraining (fusionpit): sus commits están en https://github.com/fusionpit/WhatsTraining, que es MIT (verificado el 16-11 con la API de GitHub).
+
+## ForeverTDB (solo para construir los datos; no va en ningún zip)
+
+- Base de datos del servidor de Forever: https://github.com/advocaite/TrinityCore/tree/forever (fork de TrinityCore), **GPL-2.0**. Release `forever-tdb-2026-10-14`, asset `TDB_full_forever_2026_10_14.7z`, SHA-256 `373cdca7…4f41` (igual al `digest` del release), commit `f2b20d1863`.
+- Autorizada por Cristian el 17-11-2026. Se usa **como hechos** (costos y niveles de entrenador, recompensas), igual que Polestar: forge la lee desde `data/local/forever-tdb/world.sqlite` (ignorado por git) y lo que llega al addon son valores derivados, que se acreditan en los `LICENSE-DATA.txt` / `NOTICE` de los datos.
+- El SQLite se arma con `tools/asistente/tdb_a_sqlite.py`; el procedimiento está en la cabecera del script.

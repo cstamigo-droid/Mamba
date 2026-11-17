@@ -39,7 +39,9 @@ paso() {
 log "Mamba: construcción nocturna. Repo $RAIZ, commit $(git rev-parse --short HEAD)"
 
 # 0. Controles previos: juego cerrado y espacio en D:
-if tasklist //FI "IMAGENAME eq Wow.exe" 2>/dev/null | grep -qi "wow.exe"; then
+# MAMBA_JUEGO_ABIERTO_OK=1: correr igual con el juego abierto. forge solo LEE el cliente (nunca escribe), y
+# con la grilla ya hecha casi no lo toca; el riesgo es que el lanzador lo actualice a mitad (se repite).
+if [ -z "${MAMBA_JUEGO_ABIERTO_OK:-}" ] && tasklist //FI "IMAGENAME eq Wow.exe" 2>/dev/null | grep -qi "wow.exe"; then
 	fin "NO CORRIÓ: el juego (Wow.exe) está abierto. Ciérralo y vuelve a correr el script." 1
 fi
 libre=$(df -BG /d | awk 'NR==2 {gsub("G","",$4); print $4}')
@@ -54,6 +56,11 @@ log "forge: $("$F" version 2>&1 | head -1)"
 # 1. Fuentes autorizadas por Cristian (16-11): tablas del juego (wago.tools), pfQuest (MIT),
 #    CMaNGOS classic-db (GPL-3.0) y WoWDBDefs. NO: eglink, forever-vo, webxp, QuestieDB.
 paso "fuentes" "$F" data sources --only wago,builders,pfquest,cmangos,wowdbdefs
+# ForeverTDB (autorizada por Cristian el 17-11, GPL-2.0, solo como hechos, nunca va en un zip): el paso
+# de profesiones de forge build exige sus listas de entrenador. La arma tools/asistente/tdb_a_sqlite.py.
+if [ ! -f "$RAIZ/data/local/forever-tdb/world.sqlite" ]; then
+	fin "FALLÓ antes de empezar: falta data/local/forever-tdb/world.sqlite (armarlo con tools/asistente/tdb_a_sqlite.py, ver su cabecera)." 1
+fi
 
 # 2. ¿Se pueden crear enlaces simbólicos? forge build los usa (Modo de desarrollador o administrador).
 prueba="D:\\rust\\tmp\\prueba_enlace_$$"
@@ -67,9 +74,39 @@ log "enlaces simbólicos: $([ $ENLACES = 1 ] && echo sí || echo NO)"
 if [ $ENLACES = 1 ]; then
 	# 3a. La construcción completa: datos, grilla, caminatas, rutas, guías y su informe.
 	#     La grilla lee data/forever/map-frames.json: en un checkout nuevo hay que hacer antes los datos.
-	paso "datos" "$F" data build --no-questie --forever-tables wago
+	# Con --kb (la base de conocimiento que pide la etapa routes, data/local/kb/forever-kb.sqlite):
+	# --offline para NO bajar eglink ni forever-vo (no autorizados); sin el respaldo esMX, para que no
+	# entren nombres en español desde el cliente (forge avisa y sigue sin ItemSparse/GameObjects; 17-11:
+	# con el respaldo entraban 857 nombres en español). P6 deja seguir las correcciones públicas que
+	# apuntan a pasos que sin QuestieDB no existen.
+	paso "datos" env -u POLESTAR_TEXT_LOCALE_FALLBACK POLESTAR_KB_SKIP_MISSING_STEPS=1 \
+		"$F" data build --no-questie --forever-tables wago --kb --offline
+	# Capas del suelo para las caminatas (preferir caminos, evitar pueblos enemigos), propias: los caminos
+	# salen de las texturas del cliente instalado y los hubs de la grilla y los datos. Sin la capa de
+	# caminos la etapa walks falla ("expected one road mask tag", 17-11). Si ya están, no se rehacen (para rehacerlas, borrar la carpeta).
+	if [ ! -d "$RAIZ/data/local/nav-layers/roads" ]; then
+		paso "capa caminos" "$F" nav layers roads --wow "$WOW" --root "$RAIZ"
+	fi
+	if [ ! -f "$RAIZ/data/local/nav-layers/hubs.json" ]; then
+		# La capa de hubs pide FactionTemplate y AreaTable de la build EXACTA de la grilla (la del cliente),
+		# que `data sources` no baja porque wago.tools no la lista; wago sí la sirve (17-11: 70938).
+		gb=$(python -I -c "import json,sys;print(json.load(open(sys.argv[1]))['build'])" 'D:\rust\forge-out\grid\index.json')
+		for t in FactionTemplate AreaTable; do
+			c="$RAIZ/data/sources/wago/$gb/$t.csv"
+			[ -s "$c" ] || paso "wago $t $gb" curl -sf --create-dirs -o "$c" "https://wago.tools/db2/$t/csv?build=$gb"
+		done
+		paso "capa hubs" "$F" nav layers hubs --dir 'D:\rust\forge-out\grid' --root "$RAIZ"
+	fi
+	# Una sola máscara de caminos en grid/walk (walks exige una; si no, "expected one road mask tag", 17-11):
+	# se apartan las que no registró la prepare vigente y se quitan de la caché de la grilla (si no, forge
+	# rehace la grilla, prepare crea otra máscara y vuelve a fallar).
+	paso "máscaras de caminos" python -I "$RAIZ/tools/asistente/apartar_roads.py" D:/rust/forge-out
+	# Sin QuestieDB no hay ninguna misión de Zephras Isle: Skyborne no tiene inicio ("no Alliance start for
+	# race Skyborne", 17-11). Se construyen las 8 razas clásicas; Skyborne queda para la 1.1 (forever-db).
+	STARTS="${MAMBA_STARTS:-Orc,Troll,Tauren,Undead,Human,Dwarf,Gnome,NightElf}"
 	paso "forge build" "$F" build --wow "$WOW" --no-questie --nav grid --accept-fewer-quests \
-		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8
+		--forever-tables wago --allow-build-mismatch --out "$OUT" --threads 8 \
+		--starts "$STARTS"
 else
 	# 3b. Sin enlaces: lo que no los necesita (datos y grilla). Las guías quedan para la mañana.
 	paso "datos" "$F" data build --no-questie

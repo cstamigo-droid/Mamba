@@ -3325,7 +3325,15 @@ fn apply_mech_correction(c: &V, kinds: &mut Vec<Obj>, params: &mut Vec<Obj>, ste
 		}
 	}
 	for (n, st) in c.get("steps").entries() {
-		let Some(s0) = steps.iter().find(|x| x.get("n").to_js_string() == *n) else { return Err(format!("mechanics correction: no step {n} to correct")) };
+		let Some(s0) = steps.iter().find(|x| x.get("n").to_js_string() == *n) else {
+			// Mamba (PARCHES.md P6): sin QuestieDB/EG Link/forever-vo una misión puede quedar sin el paso que la
+			// corrección pública corrige; con POLESTAR_KB_SKIP_MISSING_STEPS=1 se avisa y se sigue.
+			if std::env::var_os("POLESTAR_KB_SKIP_MISSING_STEPS").is_some() {
+				eprintln!("forge: mechanics correction: no step {n} to correct (skipped, POLESTAR_KB_SKIP_MISSING_STEPS)");
+				continue;
+			}
+			return Err(format!("mechanics correction: no step {n} to correct"));
+		};
 		s0.set("confidence", "high");
 		s0.set("drives", true);
 		s0.set("_source", "correction");
