@@ -9,7 +9,9 @@ cd "$RAIZ"
 export PYTHONIOENCODING=utf-8
 alto() { echo "ALTO: $*"; exit 1; }
 
-[ "$(git branch --show-current)" = asistente ] || alto "no estás en la rama asistente"
+# En la rama asistente, o en una rama fusion/vX de la copia aparte que arma seguir_polestar.sh.
+RAMA="$(git branch --show-current)"
+[ "$RAMA" = asistente ] || [[ "$RAMA" == fusion/* ]] || alto "no estás en la rama asistente (ni en una fusion/*)"
 [ -z "$(git status --porcelain)" ] || alto "hay cambios sin commitear; commitea o descártalos primero"
 git fetch upstream --tags || alto "no pude traer las etiquetas de upstream (fitzforge/polestar)"
 git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || alto "no existe la etiqueta $TAG"
@@ -45,6 +47,8 @@ python -I tools/asistente/internas_entre.py "$ANTES" "$TAG" --vigia tools/asiste
 
 echo "== 5. Pruebas"
 LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js || alto "falló mamba-reemplazos"
+# Regla de estética: los módulos de Mamba siguen dibujándose con las piezas de Polestar (ESTETICA_MAMBA.md).
+LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-estetica.test.js || alto "falló mamba-estetica: Polestar cambió cómo dibuja; revisar addon/Asistente/Estilo.lua"
 (cd tools/asistente/pruebas && python test_capa.py ../../../addon && python test_servicios.py ../../../addon ../../.. \
 	&& python test_tasador.py ../../../addon/Tasador && python test_escaneo.py ../../../addon/Tasador \
 	&& python test_medidor.py ../../../addon/Medidor) || alto "falló una prueba de los módulos de Mamba"
@@ -53,4 +57,4 @@ if ! git diff --quiet; then
 	git add -A addon GENERADOS.txt tests rust/crates/forge-addontest
 	git commit -m "Mamba: parches y listas sobre Polestar $TAG" || alto "no pude commitear"
 fi
-echo "LISTO: $TAG fusionado en asistente, sin push. La próxima construcción (construir_noche.sh) recompila forge y usa esta base."
+echo "LISTO: $TAG fusionado en $RAMA, sin push. La próxima construcción (construir_noche.sh) recompila forge y usa esta base."

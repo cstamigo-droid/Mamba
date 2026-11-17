@@ -82,34 +82,34 @@ end
 
 local function crear()
 	if v then return v end
-	v = A.CrearVentana("AsistenteServiciosVentana", "Servicios", 320, 120 + FILAS * ALTO_FILA)
-	v.buscar = A.CrearMarcoBajo("EditBox", nil, v, "InputBoxTemplate")
-	v.buscar:SetSize(220, 20)
-	v.buscar:SetPoint("TOPLEFT", v, "TOPLEFT", 18, -32)
-	v.buscar:SetAutoFocus(false)
-	v.buscar:SetScript("OnTextChanged", function() desplaza = 0; S.Refrescar() end)
-	v.buscar:SetScript("OnEnterPressed", function(self)
-		self:ClearFocus()
-		if #vistos >= 1 then S.Elegir(vistos[1]) end
-	end)
-	v.buscar:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-	local ayuda = v:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	ayuda:SetPoint("LEFT", v.buscar, "RIGHT", 8, 0)
-	ayuda:SetText("buscar")
+	-- Regla de estética (WOW_FOREVER/ESTETICA_MAMBA.md): ventana, letras, buscador y filas de Polestar.
+	local ANCHO = 340
+	v =A.CrearVentana("AsistenteServiciosVentana", "Servicios", ANCHO, 1)
+	local m, arriba = v.margen, v.cuerpo + 10
+	v.buscar = A.Buscador(v, "Buscar: banco, alquimia, reparar…",
+		function() desplaza = 0; S.Refrescar() end,
+		function() if #vistos >= 1 then S.Elegir(vistos[1]) end end)
+	v.buscar:SetPoint("TOPLEFT", v, "TOPLEFT", m, -arriba)
+	v.buscar:SetPoint("TOPRIGHT", v, "TOPRIGHT", -m, -arriba)
+	if not v.polestar then -- la caja del juego no trae texto de ayuda
+		v.buscar:SetPoint("TOPRIGHT", v, "TOPRIGHT", -m - 60, -arriba)
+		local ayuda = A.Texto(v, "note", "textMuted")
+		ayuda:SetPoint("LEFT", v.buscar, "RIGHT", 8, 0)
+		ayuda:SetText("buscar")
+	end
+	local y0 = arriba + (v.buscar:GetHeight() or 20) + 8
 	v.filas = {}
 	for i = 1, FILAS do
-		local b = A.CrearMarcoBajo("Button", nil, v)
-		b:SetSize(288, ALTO_FILA)
-		b:SetPoint("TOPLEFT", v, "TOPLEFT", 14, -58 - (i - 1) * ALTO_FILA)
-		b:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+		local b = A.Fila(v, ANCHO - 2 * m + 8, ALTO_FILA)
+		b:SetPoint("TOPLEFT", v, "TOPLEFT", m - 4, -y0 - (i - 1) * ALTO_FILA)
 		b.icono = b:CreateTexture(nil, "ARTWORK")
 		b.icono:SetSize(18, 18)
 		b.icono:SetPoint("LEFT", 2, 0)
-		b.texto = b:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+		b.texto = A.Texto(b, "body", "text")
 		b.texto:SetPoint("LEFT", b.icono, "RIGHT", 6, 0)
-		b.texto:SetJustifyH("LEFT")
-		b.dist = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+		b.dist = A.Texto(b, "small", "textMuted")
 		b.dist:SetPoint("RIGHT", -4, 0)
+		b.texto:SetPoint("RIGHT", b.dist, "LEFT", -6, 0)
 		b:SetScript("OnClick", function(self) if self.g then S.Elegir(self.g) end end)
 		b:SetScript("OnEnter", function(self)
 			if not (self.g and GameTooltip and GameTooltip.SetOwner) then return end
@@ -130,10 +130,11 @@ local function crear()
 		desplaza = math.max(0, math.min(desplaza - delta * 3, #vistos - FILAS))
 		S.Refrescar()
 	end)
-	v.pie = v:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	v.pie:SetPoint("BOTTOMLEFT", v, "BOTTOMLEFT", 16, 12)
-	v.pie:SetWidth(290)
-	v.pie:SetJustifyH("LEFT")
+	v.pie = A.Texto(v, "note", "textMuted")
+	v.pie:SetPoint("BOTTOMLEFT", v, "BOTTOMLEFT", m, 14)
+	v.pie:SetWidth(ANCHO - 2 * m)
+	if v.pie.SetWordWrap then v.pie:SetWordWrap(true) end
+	v:SetHeight(y0 + FILAS * ALTO_FILA + 46)
 	return v
 end
 
@@ -184,4 +185,13 @@ function S.Comando(arg)
 	end
 end
 
-if A then A.Registrar("servicios", S) end
+if A then
+	A.Registrar("servicios", S)
+	-- Su ajuste, en la ventana de ajustes de Polestar (página Mamba), además de "/servicios auto si|no".
+	A.Opciones("Servicios", "Buscador de servicios de la ciudad", {
+		{ kind = "toggle", label = "Abrir la lista al entrar a una ciudad",
+			help = "Al entrar a Orgrimmar, Cima del Trueno o Entrañas se abre esta lista. Lo mismo que /servicios auto si|no.",
+			get = function() return A.Ajuste("servicios", "abrirAlEntrar") and true or false end,
+			set = function(valor) A.FijarAjuste("servicios", "abrirAlEntrar", valor and true or false) end },
+	})
+end
