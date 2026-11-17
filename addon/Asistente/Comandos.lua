@@ -59,3 +59,14 @@ SLASH_ASISSERVICIOS2 = "/serv"
 SlashCmdList.ASISSERVICIOS = function(arg)
 	abrirServicios(arg)
 end
+
+-- Ajustes de los módulos en la ventana de ajustes de Polestar (Ajustes › Mamba), registrados aquí porque
+-- Asistente se carga siempre: los módulos se cargan cuando hacen falta (Servicios, al entrar a una ciudad)
+-- y su página tiene que estar desde el principio (ESTETICA_MAMBA.md, E5).
+A.Defaults("servicios", { abrirAlEntrar = true })
+A.Opciones("Servicios", "Buscador de servicios de la ciudad", {
+	{ kind = "toggle", label = "Abrir la lista al entrar a una ciudad",
+		help = "Al entrar a Orgrimmar, Cima del Trueno o Entrañas se abre esta lista. Lo mismo que /servicios auto si|no.",
+		get = function() return A.Ajuste("servicios", "abrirAlEntrar") and true or false end,
+		set = function(valor) A.FijarAjuste("servicios", "abrirAlEntrar", valor and true or false) end },
+})

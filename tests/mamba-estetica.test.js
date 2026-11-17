@@ -171,3 +171,12 @@ test('la ventana vuelve al lugar guardado (AsistenteDB.ventanas, lo guarda el on
 	`);
 	assert.deepEqual(out, { p: 'TOPLEFT', relp: 'BOTTOMLEFT', x: 111, y: 555 });
 });
+
+test('la página Mamba › Servicios existe desde el inicio, antes de que Servicios se cargue (E5)', () => {
+	const [out] = run(`
+		local pagina
+		Polestar.Widgets.OnOptionsRegistered(function(spec) if spec.page == "Mamba" and spec.tab == "Servicios" then pagina = spec end end)
+		emit({ hay = pagina ~= nil, cargado = A.modulos.servicios ~= nil, valor = pagina and pagina.controls[1].get() })
+	`);
+	assert.deepEqual(out, { hay: true, cargado: false, valor: true });
+});

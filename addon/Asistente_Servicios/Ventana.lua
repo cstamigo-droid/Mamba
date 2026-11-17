@@ -191,11 +191,4 @@ if A then
 	A.Registrar("servicios", S)
 	-- Los colores de las filas van dentro del texto (A.Color): al cambiar de apariencia se reescriben.
 	A.AlCambiarApariencia(function() if v and v:IsShown() then S.Refrescar() end end)
-	-- Su ajuste, en la ventana de ajustes de Polestar (página Mamba), además de "/servicios auto si|no".
-	A.Opciones("Servicios", "Buscador de servicios de la ciudad", {
-		{ kind = "toggle", label = "Abrir la lista al entrar a una ciudad",
-			help = "Al entrar a Orgrimmar, Cima del Trueno o Entrañas se abre esta lista. Lo mismo que /servicios auto si|no.",
-			get = function() return A.Ajuste("servicios", "abrirAlEntrar") and true or false end,
-			set = function(valor) A.FijarAjuste("servicios", "abrirAlEntrar", valor and true or false) end },
-	})
 end
