@@ -1,6 +1,6 @@
 # Mamba: un fork de Polestar
 
-**Mamba no es el Polestar oficial.** Es un fork de [fitzforge/polestar](https://github.com/fitzforge/polestar) (GPL-3.0), hecho por Cristian Amigo para *World of Warcraft: Forever*. Parte del código fuente de Polestar (hoy v0.4.0.1) y le suma módulos propios. La base (guía paso a paso, GPS, rutas y viajes) es la de Polestar.
+**Mamba no es el Polestar oficial.** Es un fork de [fitzforge/polestar](https://github.com/fitzforge/polestar) (GPL-3.0), hecho por Cristian Amigo para *World of Warcraft: Forever*. Parte del código fuente de Polestar (hoy v0.4.1) y le suma módulos propios. La base (guía paso a paso, GPS, rutas y viajes) es la de Polestar.
 
 - Creado el 2026-11-16 desde la etiqueta `v0.4.0` de Polestar (commit `59071e2`).
 - Rama de trabajo: `asistente`. Las versiones nuevas de Polestar se traen **fusionando** sus etiquetas `vX.Y.Z`.
@@ -47,8 +47,8 @@ Los textos de licencia que faltan en los archivos de esas librerías están en `
 ## Cambios dentro de Polestar
 Son solo los de `PARCHES.md` (P1-P4): los errores van a este repositorio, no hay aviso de "actualiza Polestar" (ni en la tarjeta ni en el grupo), TomTom viene encendido y cada `.toc` lleva el aviso de modificación. Los aplica `tools/asistente/parches.py`. Conocido y aceptado: el botón "Discord" de la ventana de errores conserva su texto y su logo, pero abre los issues de Mamba.
 
-## Cada versión nueva de Polestar (pasa seguido: v0.3.7.2 el 12-11, v0.4.0.1 el 16-11)
-Base actual: **Polestar v0.4.0.1** (fusionada el 17-11). Para traer la siguiente, desde Git Bash:
+## Cada versión nueva de Polestar (pasa seguido: v0.3.7.2 el 12-11, v0.4.0.1 el 16-11, v0.4.1 el 17-11)
+Base actual: **Polestar v0.4.1** (fusionada el 17-11; trae Polestar_Arcade: Freedoom Arcade GPL-2.0-or-later y arte Freedoom BSD-3-Clause). Para traer la siguiente, desde Git Bash:
 ```
 bash tools/asistente/fusionar_polestar.sh vX.Y.Z      # la etiqueta nueva de fitzforge/polestar
 ```

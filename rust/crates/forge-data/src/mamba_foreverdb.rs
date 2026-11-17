@@ -191,11 +191,14 @@ pub fn apply(root: &Path, quests: &Obj, npcs: &Obj, objects: &Obj, items: &Obj, 
 			"object" => (objects, &fobj),
 			_ => (items, &fitem),
 		};
+		// A placeholder target's name ("Credit", "[DNT] …", #2614) is not the quest log's words: no text,
+		// and credit.rs makes the objective an event (Polestar v0.4.1 stops the build on one that ships).
 		let have = t.get(&id.to_string());
-		if let Some(nm) = have.get("name").as_str() {
-			return V::str(nm);
+		let nm = have.get("name").as_str().map(str::to_string).or_else(|| f.get(&id).and_then(|r| s(r, "name")).map(str::to_string));
+		match nm {
+			Some(n) if !forge_guide::placeholder::banned(&n) => V::str(&n),
+			_ => V::Null,
 		}
-		f.get(&id).and_then(|r| s(r, "name")).map(V::str).unwrap_or(V::Null)
 	};
 	let objective = |r: &Value| -> Obj {
 		let kind = s(r, "kind").unwrap_or("");
