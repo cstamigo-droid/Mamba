@@ -45,7 +45,14 @@ preparar_copia() {
 	local rama="$1"
 	git -C "$REPO" fetch upstream --tags -q || return 1
 	if [ -d "$FUSION/.git" ] || [ -f "$FUSION/.git" ]; then
-		[ -z "$(git -C "$FUSION" status --porcelain)" ] || { echo "la copia $FUSION tiene cambios sin commitear"; return 1; }
+		if [ -n "$(git -C "$FUSION" status --porcelain)" ]; then
+			# La copia es desechable: lo que quedó de una corrida que se detuvo a medias (en una rama fusion/
+			# o prueba/) se descarta. Otra rama ahí = alguien la usa a mano: no se toca.
+			case "$(git -C "$FUSION" branch --show-current)" in
+				fusion/*|prueba/*) git -C "$FUSION" reset -q --hard && git -C "$FUSION" clean -qfd || return 1 ;;
+				*) echo "la copia $FUSION tiene cambios sin commitear en otra rama"; return 1 ;;
+			esac
+		fi
 		git -C "$FUSION" checkout -q -B "$rama" asistente || return 1
 	else
 		git -C "$REPO" worktree add -q -B "$rama" "$FUSION" asistente || return 1
