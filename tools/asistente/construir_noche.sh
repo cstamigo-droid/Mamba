@@ -42,6 +42,11 @@ libre=$(df -BG /d | awk 'NR==2 {gsub("G","",$4); print $4}')
 if [ "${libre:-0}" -lt 40 ]; then fin "NO CORRIÓ: D: tiene ${libre} GB libres (hacen falta 40)." 1; fi
 log "D: libre ${libre} GB; juego cerrado"
 
+# 0b. forge del commit actual: tras fusionar una versión nueva de Polestar su código Rust cambia.
+#     Si ya está al día, cargo no recompila nada (segundos).
+paso "compilar forge" cargo build --release --locked -p forge --manifest-path "$RAIZ/rust/Cargo.toml"
+log "forge: $("$F" version 2>&1 | head -1)"
+
 # 1. Fuentes autorizadas por Cristian (16-11): tablas del juego (wago.tools), pfQuest (MIT),
 #    CMaNGOS classic-db (GPL-3.0) y WoWDBDefs. NO: eglink, forever-vo, webxp, QuestieDB.
 paso "fuentes" "$F" data sources --only wago,builders,pfquest,cmangos,wowdbdefs
