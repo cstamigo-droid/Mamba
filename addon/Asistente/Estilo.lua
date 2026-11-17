@@ -64,7 +64,7 @@ end
 
 -- Cuadro de ayuda al pasar el ratón: el de Polestar (W.Tooltip: colores de la apariencia) o el del juego.
 -- lineas: textos; se pueden colorear con A.Color.
-function A.Ayuda(dueno, titulo, lineas)
+function A.CuadroAyuda(dueno, titulo, lineas)
 	local _, _, W = A.Polestar()
 	if W then return W.Tooltip(dueno, "ANCHOR_RIGHT", titulo, lineas) end
 	if not (GameTooltip and GameTooltip.SetOwner) then return end

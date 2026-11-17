@@ -119,7 +119,7 @@ local function crear()
 				lineas[#lineas + 1] = A.ColorOscuro("blanco", l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist))
 			end
 			lineas[#lineas + 1] = A.ColorOscuro("gris", A.CONFIANZA[self.g.conf] or "")
-			A.Ayuda(self, self.g.etiqueta, lineas)
+			A.CuadroAyuda(self, self.g.etiqueta, lineas)
 		end)
 		b:SetScript("OnLeave", function() A.OcultarAyuda() end)
 		v.filas[i] = b

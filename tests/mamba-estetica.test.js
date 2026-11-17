@@ -214,3 +214,23 @@ test('cuadro de ayuda y chat (fondo siempre oscuro): A.ColorOscuro se lee en TOD
 	// control: con el color de ventana, alguna apariencia clara NO se leería sobre fondo oscuro (si no, la prueba no mide nada)
 	assert.ok(out.some((v) => v.peorVentana < 4.5), 'control: el color de ventana sobre fondo oscuro falla en alguna apariencia clara');
 });
+
+test('pasar el ratón por una fila de Servicios muestra el cuadro de ayuda y no escribe nada en el chat', () => {
+	const [out] = runAddon({
+		stubs: ['stub_nav.lua', 'stub_ui.lua'],
+		addons: [POLESTAR, ...PIELES, 'Asistente', 'Asistente_Servicios'],
+		script: `uistub.install()\nstub.login()
+			local A = Asistente
+			local S = A.modulos.servicios
+			S.Abrir(next(S.datos.ciudades))
+			local fila = AsistenteServiciosVentana.filas[1]
+			local antes = #stub.messages
+			GameTooltip:Hide()
+			fila:GetScript("OnEnter")(fila)
+			emit({ cuadro = GameTooltip:IsShown() and true or false, chat = #stub.messages - antes, ayudaChat = type(A.Ayuda) == "function" })
+		`,
+	}).emitted;
+	assert.equal(out.chat, 0, 'no escribe en el chat al pasar el ratón');
+	assert.equal(out.cuadro, true, 'el cuadro de ayuda se muestra');
+	assert.equal(out.ayudaChat, true, '/asis ayuda (A.Ayuda) sigue existiendo');
+});
