@@ -31,8 +31,11 @@ MODO=fusion; TAG=""
 case "${1:-}" in
 	--construir) MODO=construir ;;
 	--seco) MODO=seco; TAG="${2:-}"; [[ "$TAG" =~ ^v[0-9] ]] || { echo "uso: seguir_polestar.sh --seco vX.Y.Z"; exit 1; } ;;
+	# --preparar vX.Y.Z: fusión + pruebas en fusion/vX.Y.Z aunque asistente ya la tenga (lo usa actualizar_mamba.py,
+	# que compara con lo INSTALADO, no con asistente).
+	--preparar) MODO=preparar; TAG="${2:-}"; [[ "$TAG" =~ ^v[0-9] ]] || { echo "uso: seguir_polestar.sh --preparar vX.Y.Z"; exit 1; } ;;
 	"") ;;
-	*) echo "uso: seguir_polestar.sh [--construir | --seco vX.Y.Z]"; exit 1 ;;
+	*) echo "uso: seguir_polestar.sh [--construir | --seco vX.Y.Z | --preparar vX.Y.Z]"; exit 1 ;;
 esac
 
 # Una sola corrida a la vez (un cerrojo de más de 6 h es de una corrida que murió). El nuestro se quita al
@@ -102,6 +105,10 @@ fusionar() {
 }
 
 case "$MODO" in
+preparar)
+	fusionar "$TAG" "fusion/$TAG"
+	fin "FUSIONADA Y PROBADA: $TAG en la rama fusion/$TAG ($FUSION). Lista: $INFORMES/$TAG.md" 0
+	;;
 seco)
 	fusionar "$TAG" "prueba/$TAG"
 	fin "PRUEBA EN SECO OK: $TAG fusionado y probado en la rama prueba/$TAG ($FUSION), sin construir. Lista: $INFORMES/$TAG.md" 0
