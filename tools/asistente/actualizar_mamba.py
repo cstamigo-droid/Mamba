@@ -214,6 +214,9 @@ class Corrida:
                 shutil.rmtree(n, ignore_errors=True)
             if errores:  # la instalación está bien: no es un "falló"; se reintenta borrar en la próxima corrida
                 self.anota("quedan copias viejas por borrar: " + "; ".join(errores[:5]))
+                self.avisar("Mamba está instalada bien, pero no pude borrar copias viejas en AddOns (" + "; ".join(errores[:3])
+                            + "). Bórralas a mano (carpetas que terminan en .mamba_vieja) con el juego cerrado.",
+                            clave="restos_viejos")
                 return
             self.diario.unlink(missing_ok=True)
             # el proceso que instaló murió antes de avisar: el aviso de éxito sale ahora (misma clave: no se repite)
@@ -263,6 +266,15 @@ class Corrida:
         # Si lo instalado es Polestar OFICIAL (sin la marca X-Mamba en Polestar.toc: CurseForge o Polestar Client lo
         # reemplazaron, MAMBA.md), hay que poner Mamba aunque el número de versión sea el mismo.
         if "X-Mamba" not in toc.read_text(encoding="utf-8", errors="replace"):
+            if (self.dir / f"instalada_v{self.instalada.lstrip('v')}").exists():
+                # Mamba ya había instalado esta versión y algo la pisó con la oficial (CurseForge, Polestar Client):
+                # no se pelea con él cada 2 horas. Se avisa una vez; lo arregla una persona.
+                self.anota("Polestar oficial PISÓ a Mamba ya instalada: no se reinstala solo")
+                self.avisar(f"Mamba: algo reemplazó Mamba {self.instalada} por el Polestar OFICIAL (casi seguro CurseForge o "
+                            "Polestar Client). Desactiva las actualizaciones automáticas de Polestar ahí; después borra "
+                            f"D:\\rust\\actualizar\\instalada_v{self.instalada.lstrip('v')} y Mamba se vuelve a instalar sola.",
+                            clave=f"pisada_{self.instalada}")
+                return None
             self.anota("lo instalado es Polestar OFICIAL (sin X-Mamba): se instala Mamba")
             return ultima if v.numeros(ultima) >= v.numeros(self.instalada) else None
         return ultima if v.numeros(ultima) > v.numeros(self.instalada) else None
@@ -395,6 +407,8 @@ class Corrida:
                 if (self.addons / c).exists():
                     raise Fallo(f"{c} debía quitarse y sigue ahí")
             toc = (self.addons / "Polestar" / "Polestar.toc").read_text(encoding="utf-8", errors="replace")
+            if "X-Mamba" not in toc:
+                raise Fallo("después de instalar, Polestar.toc no tiene la marca X-Mamba (¿falló el parche P4?)")
             if not re.search(rf"^## Version:\s*{re.escape(self.tag.lstrip('v'))}(\s|$)", toc, re.M):
                 raise Fallo("después de instalar, Polestar.toc no dice la versión nueva")
         except Exception:
@@ -466,6 +480,7 @@ class Corrida:
             antes = self.instaladas(instalar + quitar)
             self.respaldo(instalar + quitar)
             self.instalar(instalar, quitar)
+            (self.dir / f"instalada_{self.tag}").write_text(dt.datetime.now().isoformat(), encoding="utf-8")
             self.estado(f"ACTUALIZADA a {self.tag}")
             self.avisar(f"Mamba actualizada a {self.tag} ({len(instalar)} carpetas"
                         + (f", {len(quitar)} quitadas porque Polestar ya no las trae" if quitar else "")
