@@ -60,7 +60,9 @@ preparar_copia() {
 	for par in "data\\forever|D:\\rust\\polestar-data\\forever" "data\\sources|D:\\rust\\polestar-data\\sources" \
 		"data\\local|$(cygpath -w "$REPO")\\data\\local"; do
 		local en="${par%%|*}" a="${par##*|}"
-		[ -e "$FUSION/${en//\\//}" ] || cmd //c "mklink /J \"$w\\$en\" \"$a\"" >/dev/null || return 1
+		# unión de Windows con PowerShell (mklink por cmd pierde las comillas que le pasa Git Bash)
+		[ -e "$FUSION/${en//\\//}" ] || powershell -NoProfile -Command \
+			"New-Item -ItemType Junction -Path '$w\\$en' -Target '$a' | Out-Null" || return 1
 	done
 }
 
