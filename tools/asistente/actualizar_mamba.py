@@ -45,10 +45,10 @@ BASH = r"C:\Program Files\Git\bin\bash.exe"
 OLIMPO_ALERTAS = Path(r"C:\Users\<usuario>\OneDrive\Escritorio\OLIMPO\ALERTAS")
 CONSTRUCCION_ESTADO = Path("D:/rust/noche/ESTADO.txt")
 COMPILAR_LOG = Path("D:/rust/noche/compilar.log")
-# Carpetas propias de Mamba y addons incluidos: se instalan siempre. Las de Polestar, solo si ya están instaladas
-# (se respeta lo que el jugador tiene; un idioma o una apariencia que no instaló no se le agrega).
+# Qué se instala: las carpetas propias de Mamba y los addons incluidos, siempre; las de Polestar que ya están
+# instaladas (se respeta lo que el jugador eligió: un idioma o una apariencia que no instaló no se le agrega), y
+# las que la versión nueva trae y la instalada no tenía (Polestar_Arcade llegó en 0.4.1: sin ella, falta una parte).
 SIEMPRE = re.compile(r"^(Asistente.*|Tasador|Medidor|SkillUpForever|ForeverCore|WhatsTraining|ForeverLootSparkles)$")
-NUNCA = {"Polestar_Skin_Example"}
 
 
 class Espera(Exception):
@@ -118,6 +118,7 @@ class Corrida:
         toc = self.addons / "Polestar" / "Polestar.toc"
         m = re.search(r"^## Version:\s*(\S+)", toc.read_text(encoding="utf-8", errors="replace"), re.M) if toc.exists() else None
         instalada = re.sub(r"-asistente.*$", "", m.group(1)) if m else None
+        self.instalada = instalada
         self.anota(f"última publicada {ultima} · instalada {instalada or 'ninguna'} · carpeta {self.addons}")
         if not instalada:
             raise Fallo(f"no encuentro Polestar instalado en {self.addons}")
@@ -171,11 +172,15 @@ class Corrida:
 
     def carpetas(self):
         fuente = FUSION / "addon"
+        r = subprocess.run(["git", "-C", str(REPO), "ls-tree", "--name-only", f"v{self.instalada}:addon"], capture_output=True, text=True)
+        if r.returncode != 0:
+            raise Fallo(f"no pude leer las carpetas de la versión instalada v{self.instalada} en git: {r.stderr.strip()}")
+        antes = set(r.stdout.split())
         out = []
         for d in sorted(p for p in fuente.iterdir() if p.is_dir()):
-            if d.name in NUNCA or not any(d.glob("*.toc")):
+            if not any(d.glob("*.toc")):
                 continue
-            if SIEMPRE.match(d.name) or (self.addons / d.name).is_dir():
+            if SIEMPRE.match(d.name) or (self.addons / d.name).is_dir() or d.name not in antes:
                 out.append(d.name)
         if "Polestar" not in out:
             raise Fallo("la lista de carpetas a instalar no trae Polestar")
