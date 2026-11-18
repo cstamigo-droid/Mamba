@@ -37,6 +37,8 @@ NUNCA = re.compile(r"^`(turnin|collect|kill)` for quest (\d+) that is never acce
 # Los pack-errors de cada construcción se acumulan aquí: la copia de las guías se rehace desde cero en
 # cada corrida y una construcción que ya pasó no vuelve a listar lo que se arregló (17-11).
 ACUMULADOS = RAIZ / "data" / "local" / "pack-errors-acumulados.txt"
+NUNCA_REPORT = RAIZ / "data" / "local" / "nunca-report-acumulados.txt"
+REGISTRO = Path(r"D:\rust\noche\registro.log")
 META = re.compile(r"^\s*(tip|when|zone|only|map|note|#|--)")
 
 
@@ -107,6 +109,21 @@ def nunca_en_build() -> set[tuple[str, int]]:
             if n:
                 rel = m["f"].replace("\\", "/").split("/flow/", 1)[-1].split("/", 1)[-1]
                 s.add((rel, int(n[2])))
+    # La etapa final de forge build («report») revisa las guías de entrada y escribe sus errores solo en
+    # el registro, no en pack-errors (18-11: 5 "never accepted" de la Horda, guías de la semilla). Se
+    # guardan en NUNCA_REPORT porque cada corrida rehace el registro.
+    vistos = set(NUNCA_REPORT.read_text(encoding="utf-8").splitlines()) if NUNCA_REPORT.is_file() else set()
+    if REGISTRO.is_file():
+        for l in REGISTRO.read_text(encoding="utf-8", errors="replace").splitlines():
+            m = PACK.match(l)
+            if m and "guias-mamba" in m["f"] and NUNCA.match(m["m"]):
+                vistos.add(l)
+    NUNCA_REPORT.write_text("".join(x + chr(10) for x in sorted(vistos)), encoding="utf-8")
+    for l in vistos:
+        m = PACK.match(l)
+        n = NUNCA.match(m["m"]) if m else None
+        if n:
+            s.add((m["f"].replace("\\", "/").split("guias-mamba/", 1)[-1], int(n[2])))
     return s
 
 
