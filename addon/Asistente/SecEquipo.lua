@@ -142,6 +142,11 @@ local function textoMejora(c, p)
 	if act and act.ilegible then return "|cff9ba2b9mejora: sin datos aún (atributos de tu pieza sin leer)|r" end
 	if p.vacia or not (act and act.link) then return "|cff6bd999llena una ranura vacía|r" end
 	if act and not act.sabe then return "|cff9ba2b9mejora probable: no pude medir la tuya|r" end
+	-- sobre +200 % el porcentaje se lee raro (un collar de nivel 22 contra uno de 41: +443 %): «5,4 veces mejor que»
+	if (p.pctMejora or 0) >= 200 then
+		local veces = (string.format("%.1f", 1 + p.pctMejora / 100):gsub("%.0$", ""):gsub("%.", ","))
+		return "|cff6bd999" .. veces .. " veces mejor|r |cff9ba2b9que|r " .. nombreLink(act.link)
+	end
 	return "|cff6bd999+" .. A.Pct(p.pctMejora, 0) .. "|r |cff9ba2b9sobre|r " .. nombreLink(act.link)
 end
 
