@@ -4,10 +4,12 @@
 ## Author: Cristian Amigo
 ## Version: 0.1.0
 ## Group: Asistente
-## Category: Asistente
 ## X-License: GPL-3.0-only
 ## SavedVariables: AsistenteDB
 ## OptionalDeps: Polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Nucleo.lua
 Estilo.lua

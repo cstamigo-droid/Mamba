@@ -6,6 +6,9 @@
 ## X-License: GPL-3.0-only
 ## SavedVariables: TasadorDB
 ## OptionalDeps: Auctionator, Asistente, Polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Reglas.lua
 Mejora.lua

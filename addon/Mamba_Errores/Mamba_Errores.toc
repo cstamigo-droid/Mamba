@@ -5,5 +5,8 @@
 ## Version: 0.1.0
 ## X-License: GPL-3.0-only
 ## SavedVariables: MambaErroresDB
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Errores.lua

@@ -5,6 +5,9 @@
 ## Version: 0.1.0
 ## X-License: GPL-3.0-only
 ## X-Datos: forever-db de Polestar (GPL-3.0) + guías de profesiones de Polestar (GPL-3.0). Ver LICENSE-DATA.txt
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Datos.lua
 Nombres_enUS.lua

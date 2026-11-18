@@ -22,10 +22,12 @@
 ## Author: Polestar
 ## X-License: GPL-3.0-only
 ## Version: 0.4.1
-## Category: Polestar
 ## Group: Polestar
 ## LoadOnDemand: 1
 ## Dependencies: Polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 ## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 Items.lua

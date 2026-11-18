@@ -1,29 +1,28 @@
 ## Interface: 16001
-## Title: Polestar · Mamba
+## Title: Mamba (guías · Polestar)
 ## Notes: Leveling guides for World of Warcraft: Forever.
-## Title-deDE: Polestar · Mamba
+## Title-deDE: Mamba (guías · Polestar)
 ## Notes-deDE: Leveling-Guides für World of Warcraft: Forever.
-## Title-esES: Polestar · Mamba
+## Title-esES: Mamba (guías · Polestar)
 ## Notes-esES: Guías para subir de nivel en World of Warcraft: Forever.
-## Title-esMX: Polestar · Mamba
+## Title-esMX: Mamba (guías · Polestar)
 ## Notes-esMX: Guías para subir de nivel en World of Warcraft: Forever.
-## Title-frFR: Polestar · Mamba
+## Title-frFR: Mamba (guías · Polestar)
 ## Notes-frFR: Guides de montée en niveau pour World of Warcraft: Forever.
-## Title-koKR: Polestar · Mamba
+## Title-koKR: Mamba (guías · Polestar)
 ## Notes-koKR: World of Warcraft: Forever 레벨업 가이드.
-## Title-ptBR: Polestar · Mamba
+## Title-ptBR: Mamba (guías · Polestar)
 ## Notes-ptBR: Guias de evolução para World of Warcraft: Forever.
-## Title-ruRU: Polestar · Mamba
+## Title-ruRU: Mamba (guías · Polestar)
 ## Notes-ruRU: Гайды по прокачке для World of Warcraft: Forever.
-## Title-zhCN: Polestar · Mamba
+## Title-zhCN: Mamba (guías · Polestar)
 ## Notes-zhCN: 魔兽世界：Forever 练级指南。
-## Title-zhTW: Polestar · Mamba
+## Title-zhTW: Mamba (guías · Polestar)
 ## Notes-zhTW: World of Warcraft: Forever 的升級指南。
 ## Author: Polestar
 ## X-License: GPL-3.0-only
 ## X-Website: https://github.com/fitzforge/polestar
 ## Version: 0.4.1
-## Category: Polestar
 ## IconTexture: Interface\AddOns\Polestar\Media\UI\logo
 ## AddonCompartmentFunc: Polestar_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: Polestar_OnAddonCompartmentEnter
@@ -31,6 +30,9 @@
 ## OptionalDeps: EllesmereUI, TomTom, OpenMap, ErgoBars, ForeverLevelingBiS
 ## SavedVariables: PolestarDB
 ## SavedVariablesPerCharacter: PolestarCharDB
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 ## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 ClientInfo.lua

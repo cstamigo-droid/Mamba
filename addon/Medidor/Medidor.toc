@@ -6,6 +6,9 @@
 ## X-License: GPL-3.0-only
 ## SavedVariables: MedidorDB
 ## OptionalDeps: Auctionator
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Nucleo.lua
 Juego.lua

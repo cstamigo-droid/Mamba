@@ -4,12 +4,14 @@
 ## Author: Cristian Amigo
 ## Version: 0.1.0
 ## Group: Asistente
-## Category: Asistente
 ## Dependencies: Asistente
 ## OptionalDeps: Polestar
 ## LoadOnDemand: 1
 ## X-License: GPL-3.0-only
 ## X-Datos: forever-db de Polestar (GPL-3.0). Ver NOTICE-forever-db.md
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 
 Ciudades.lua
 Logica.lua

@@ -21,12 +21,14 @@
 ## Notes-zhTW: Polestar 的一部分：設定視窗、外觀頁面及其預覽。開啟設定時載入。
 ## Author: Polestar
 ## Version: 0.4.1
-## Category: Polestar
 ## Group: Polestar
 ## LoadOnDemand: 1
 ## Dependencies: Polestar
 ## X-License: GPL-3.0-only
 ## X-Website: https://github.com/fitzforge/polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 ## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 UI\Controls.lua

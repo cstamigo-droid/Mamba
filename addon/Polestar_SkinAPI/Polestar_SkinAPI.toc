@@ -21,12 +21,14 @@
 ## Notes-zhTW: Polestar 的一部分：其他插件提供的皮膚需通過的檢查。使用皮膚時載入。
 ## Author: Polestar
 ## Version: 0.4.1
-## Category: Polestar
 ## Group: Polestar
 ## LoadOnDemand: 1
 ## Dependencies: Polestar
 ## X-License: GPL-3.0-only
 ## X-Website: https://github.com/fitzforge/polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
 ## X-Mamba: fork de Polestar, modificado 2026-11-16 (https://github.com/cstamigo-droid/Mamba). No es el Polestar oficial.
 
 SkinCheck.lua

@@ -90,9 +90,31 @@ TITULO = re.compile(r"^(## Title(?:-\w+)?: )([^\r\n]*?)(?: · Mamba)?(\r?)$", re
 MARCA = re.compile(r"^## X-Mamba:[^\r\n]*", re.M)
 
 
-def _toc(texto: str) -> str:
-    """P4: título "… · Mamba" y la marca X-Mamba (aviso de modificación, GPL-3.0 §5a)."""
-    texto = TITULO.sub(lambda m: f"{m.group(1)}{m.group(2)} · Mamba{m.group(3)}", texto)
+CATEGORIA = re.compile(r"^## Category(?:-\w+)?:[^\r\n]*\r?\n", re.M)
+CATEGORIAS = ("## Category: Mamba", "## Category-esMX: Mamba", "## Category-esES: Mamba")
+TITULO_PRINCIPAL = "Mamba (guías · Polestar)"
+
+
+def con_categoria(texto: str) -> str:
+    """P4b (18-11): todo lo de Mamba en una sola categoría "Mamba" de la lista de Accesorios (Cristian no
+    encontraba Mamba: Polestar estaba en "Polestar" y lo propio sin categoría)."""
+    texto = CATEGORIA.sub("", texto)
+    lineas = texto.splitlines(keepends=True)
+    ultimo = max(i for i, l in enumerate(lineas) if l.startswith("## ") and not l.startswith("## X-Mamba:"))
+    fin = CR + LF if lineas[ultimo].endswith(CR + LF) else LF
+    for k, c in enumerate(CATEGORIAS):
+        lineas.insert(ultimo + 1 + k, c + fin)
+    return "".join(lineas)
+
+
+def _toc(texto: str, nombre: str = "") -> str:
+    """P4: título "… · Mamba" (el principal, "Mamba (guías · Polestar)"), categoría "Mamba" y la marca
+    X-Mamba (aviso de modificación, GPL-3.0 §5a)."""
+    if nombre == "Polestar":
+        texto = re.sub(r"^(## Title(?:-\w+)?: )[^\r\n]*?(\r?)$", lambda m: f"{m.group(1)}{TITULO_PRINCIPAL}{m.group(2)}", texto, flags=re.M)
+    else:
+        texto = TITULO.sub(lambda m: f"{m.group(1)}{m.group(2)} · Mamba{m.group(3)}", texto)
+    texto = con_categoria(texto)
     marca = f"## X-Mamba: fork de Polestar, modificado {FECHA} ({REPO}). No es el Polestar oficial."
     if MARCA.search(texto):
         return texto  # ya avisado: se conserva la fecha en que se aplicó
@@ -129,7 +151,7 @@ def aplicar(solo_revisar: bool) -> int:
         cambiados.append(f"{pid} {rel}")
     for toc in sorted(ADDON.glob("Polestar*/Polestar*.toc")):
         t = toc.read_bytes().decode("utf-8")
-        n = _toc(t)
+        n = _toc(t, toc.stem)
         if n != t:
             if solo_revisar:
                 faltan.append(f"P4-toc {toc.relative_to(ADDON).as_posix()}: sin aplicar")
