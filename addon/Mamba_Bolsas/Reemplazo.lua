@@ -19,6 +19,11 @@ diminuto:SetAlpha(0)
 diminuto:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -1000, 1000)
 diminuto:SetSize(1, 1)
 
+function M.EsconderBancoDelJuego()
+	local B = _G.BankFrame
+	if B and M.Activa() and M.bancoAbierto then B:SetParent(diminuto) end
+end
+
 M.OTROS = { "Bagnon", "BagBrother", "Baganator", "AdiBags", "ArkInventory", "BetterBags", "Combuctor" }
 
 local function otroCargado()

@@ -1,7 +1,8 @@
 """Pruebas de Mamba_Bolsas 0.2 con Lua 5.1 (lupa).
 Uso: python test_bolsas.py [carpeta de Mamba_Bolsas] [--romper]
---romper: control negativo; rompe a propósito tres reglas (crear casillas en combate, leer la bolsa 5 como banco
-y juntar dos "alternar" en dos) y las pruebas TIENEN que fallar."""
+--romper: control negativo; rompe a propósito cinco reglas (crear casillas en combate, leer la bolsa 5 como banco,
+juntar dos "alternar" en dos, escribir campos propios en el botón del juego y comprar aunque atrase la montura)
+y las pruebas TIENEN que fallar."""
 import sys, pathlib, re
 sys.stdout.reconfigure(encoding="utf-8")
 from lupa.lua51 import LuaRuntime
@@ -149,6 +150,10 @@ def nuevo(antes=""):
         src = (D / n).read_text(encoding="utf-8")
         if ROMPER and n == "Ventana.lua":
             src = src.replace("if InCombatLockdown and InCombatLockdown() then falta = true; break end", "")
+        if ROMPER and n == "Ventana.lua":
+            src = src.replace("-- sin escribir campos propios en el botón del juego", "b.hasItem = d.id and true or nil --")
+        if ROMPER and n == "Banco.lua":
+            src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
             src = src.replace("if E and E.CharacterBankTab_1 then", "if false then").replace("return E and E.CharacterBankTab_1 or nil", "return nil")
         if ROMPER and n == "Reemplazo.lua":
@@ -217,12 +222,22 @@ L.execute('MambaBolsas.ventanas.inventario.celdas[2]:Click()')
 check(visibles(L, fi) == 12 and fi.sola == 1, "clic en la bolsa 1 del pie: solo sus 12 casillas")
 L.execute('MambaBolsas.ventanas.inventario.celdas[2]:Click()')
 check(visibles(L, fi) == 44 and fi.sola is None, "otro clic: todas juntas")
-L.execute('MambaBolsas.ventanas.inventario.botonVista.scripts.OnClick(MambaBolsas.ventanas.inventario.botonVista)')
-check(fi.sola == 0 and visibles(L, fi) == 16, "botón Vista: una por una (empieza en la mochila)")
-L.execute('MambaBolsas.ventanas.inventario.botonVista.scripts.OnClick(MambaBolsas.ventanas.inventario.botonVista)')
+L.execute('MambaBolsas.ventanas.inventario.celdas[1]:Click()')
+check(fi.sola == 0 and visibles(L, fi) == 16, "clic en la mochila: solo la mochila")
+L.execute('MambaBolsas.ventanas.inventario.celdas[1]:Click()')
+# K104: la estructura de Bagnon
+check(fi.titulo.texto == "Inventario de Hope", "título como Bagnon: %s" % fi.titulo.texto)
+check(fi.retrato is not None and fi.botonRetrato is not None, "retrato (clic = otro personaje)")
+check(len(list(fi.pestanas.values())) == 7, "filtros como pestañas en el borde")
+check(L.eval("MambaBolsas.ventanas.inventario.filaBolsas.punto[5]") > -80, "la fila de bolsas va ARRIBA, bajo el buscador")
+L.execute('MambaBolsas.ventanas.inventario.botonFila.scripts.OnClick(MambaBolsas.ventanas.inventario.botonFila); Correr()')
+check(not fi.celdas[1].visible and G.MambaBolsasDB.opciones.verBolsas == False, "el botón esconde la fila de bolsas")
+L.execute('MambaBolsas.ventanas.inventario.botonFila.scripts.OnClick(MambaBolsas.ventanas.inventario.botonFila); Correr()')
+check(fi.celdas[1].visible, "y la vuelve a mostrar")
 c = fi.celdas[1]
 check(c.libres == 11 and c.total == 16, "pie: libres/total de la mochila (%s/%s)" % (c.libres, c.total))
-check("37 libres de 44" in (fi.totalTexto.texto or ""), "pie: total libres (%s)" % fi.totalTexto.texto)
+check(fi.libresTexto.texto == "37/44", "pie: libres/total (%s)" % fi.libresTexto.texto)
+check(fi.oroTexto.texto == "841200c", "pie: el oro (%s)" % fi.oroTexto.texto)
 # resaltar al pasar el ratón
 L.execute('local f = MambaBolsas.ventanas.inventario; f.celdas[4].scripts.OnEnter(f.celdas[4])')
 resaltadas = L.eval('function(f) local n = 0; for i, b in pairs(f.mostrados) do if b.mamba and b.mamba.resalte.__vis then n = n + 1 end end; return n end')
@@ -231,27 +246,27 @@ L.execute('local f = MambaBolsas.ventanas.inventario; f.celdas[4].scripts.OnLeav
 check(fi.resalte is None, "al salir se apaga")
 # filtros y buscador
 alfa = L.eval('function(f, bolsa, casilla) for i, d in ipairs(f.lista) do if d.bolsa == bolsa and d.casilla == casilla then return f.mostrados[i].alfa or 1 end end end')
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "basura":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 3) == 1 and alfa(fi, 0, 1) < 0.5, "filtro Basura: lo gris se ve, la hierba se apaga")
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "equipo":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 5) == 1 and alfa(fi, 0, 4) < 0.5, "filtro Equipo")
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "consumibles":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 4) == 1 and alfa(fi, 0, 5) < 0.5, "filtro Consumibles")
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "materiales":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 1) == 1 and alfa(fi, 5, 1) == 1 and alfa(fi, 0, 4) < 0.5, "filtro Materiales")
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "mision":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 2) == 1 and alfa(fi, 0, 1) < 0.5, "filtro Misión (lo que pide una misión, según Polestar)")
-for ch in fi.chips.values():
+for ch in fi.pestanas.values():
     if ch.clave == "nuevo":
         L.eval('function(c) c.scripts.OnClick(c) end')(ch)
 check(alfa(fi, 0, 4) == 1 and alfa(fi, 0, 1) < 0.5, "filtro Nuevo")
@@ -324,7 +339,7 @@ check(not okc and "combate" in msg, "en combate no se ordena")
 L.execute('COMBATE = false')
 # opciones
 L.execute('MambaBolsasDB.opciones.columnas = 8; MambaBolsasDB.opciones.tamano = 30; MambaBolsas.Dibujar(MambaBolsas.ventanas.inventario)')
-check(fi.anchoRejilla == 8 * 33 - 3, "columnas y tamaño cambian la rejilla (%s)" % fi.anchoRejilla)
+check(fi.anchoRejilla == 8 * 32 - 2, "columnas y tamaño cambian la rejilla (%s)" % fi.anchoRejilla)
 escala = L.eval('function(f) for _, m in pairs(f.marcos) do for _, b in ipairs(m.botones) do if b.visible then return b.escala, b.w end end end end')(fi)
 check(abs(escala[0] - 30 / 37) < 1e-6 and escala[1] is None, "las casillas del juego se ESCALAN (no se estiran): %s" % (escala,))
 L.execute('TAM[6] = 98; TAM[7] = 98; TAM[8] = 98; ABIERTO = true; MambaBolsas.bancoAbierto = true; MambaBolsas.AbrirBanco(MambaBolsas.Clave()); Correr()')
@@ -364,6 +379,51 @@ S.build(padre)
 for k in ["bolsas:buscar", "bolsas:Hope - Fé", "bolsas:opciones"]:
     S.onNav(k); S.render()
 check(not list(G3.ERRORES.values()), "panel sin errores: %s" % list(G3.ERRORES.values())[:3])
+
+# K102: el banco cuenta para los demás módulos
+t = M.Tengo(2447)
+check(t.bolsas == 8 and t.banco == 10 and t.otros == 4 and t.total == 22 and (t.bancoVisto or "").startswith("18-11"), "Tengo(): bolsas, banco y otros personajes (%s)" % dict(t))
+check(M.Banco()[4306] == 20, "Banco(): el banco guardado")
+L.execute('function GetMoney() return ORO end; ORO = 50000; C_Bank.FetchNextPurchasableBankTabData = function() return { tabCost = 100000 } end; C_Bank.CanPurchaseBankTab = function() return true end')
+c = M.ConsejoPestana(3)
+check(c and not c.conviene and "te faltan 5 o" in c.texto, "sin oro: dice cuánto falta (%s)" % (c and c.texto))
+L.execute('ORO = 2000000')
+c = M.ConsejoPestana(3)
+check(c and c.conviene and "3 casillas libres" in c.texto and "5 %" in c.texto, "pocas casillas libres: conviene, con números (%s)" % (c and c.texto))
+c = M.ConsejoPestana(30)
+check(c and not c.conviene and "30 casillas libres" in c.texto, "con espacio: todavía no hace falta (%s)" % (c and c.texto))
+L.execute('MambaPlan = { Estado = function() return {} end, RetrasaMontura = function(e, costo) return true, 400000 end }')
+c = M.ConsejoPestana(2)
+check(c and not c.conviene and "montura" in c.texto and "40 o" in c.texto, "si atrasa la montura, espera (R0 con Mi plan): %s" % (c and c.texto))
+L.execute('MambaPlan = nil; C_Bank.CanPurchaseBankTab = function() return false end')
+check(M.ConsejoPestana(2) is None, "sin pestañas por comprar: no se ofrece")
+L.execute('MambaBolsasDB.opciones.propia = true; MambaBolsas.AplicarReemplazo(); C_Bank.CanPurchaseBankTab = function() return true end; ABIERTO = true; Fire("BANKFRAME_OPENED"); Correr()')
+fb = M.ventanas.banco
+check(fb.compra is not None and fb.compra.visible and "Comprar pestaña" in (fb.compra.boton.texto or ""), "botón Comprar pestaña en el banco en vivo")
+L.execute('MambaBolsas.ventanas.banco.compra.boton.scripts.OnClick(MambaBolsas.ventanas.banco.compra.boton)')
+check(L.eval("BankFrame.padre == UIParent"), "Comprar pestaña muestra la compra DEL JUEGO (el clic que paga es del jugador)")
+L.execute('TAM[9] = 20; C_Bank.FetchPurchasedBankTabData = function() return { { ID = 6 }, { ID = 7 }, { ID = 8 }, { ID = 9 } } end; Fire("BANK_TABS_CHANGED"); Correr()')
+check(L.eval("BankFrame.padre ~= UIParent"), "comprada la pestaña, el banquero del juego se vuelve a esconder")
+L.execute('ABIERTO = false; Fire("BANKFRAME_CLOSED"); Correr()')
+
+# poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
+# La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.
+L.execute('OpenAllBags(); Correr()')
+camino = L.eval("""function(f)
+  local malos = {}
+  local permitidos = { mamba = true, vivo = true, icon = true, Cooldown = true, IconBorder = true,
+    ev = true, scripts = true, attr = true, nombre = true, padre = true, tipo = true, plantilla = true, visible = true,
+    punto = true, escala = true, alfa = true, id = true, w = true, h = true, tex = true, n = true }
+  for _, m in pairs(f.marcos) do for _, b in ipairs(m.botones) do
+    for _, k in ipairs({ "OnClick", "PreClick", "PostClick", "OnMouseDown", "OnMouseUp", "OnDragStart", "OnReceiveDrag" }) do
+      if b.scripts[k] then malos[#malos + 1] = k end
+    end
+    for k in pairs(b) do if not permitidos[k] then malos[#malos + 1] = "campo " .. tostring(k) end end
+    for k in pairs(m) do if k ~= "botones" and type(m[k]) == "function" then malos[#malos + 1] = "marco." .. k end end
+  end end
+  return table.concat(malos, ",")
+end""")(fi)
+check(camino == "", "camino del clic limpio (scripts y campos del juego solamente): %s" % camino[:200])
 
 # sin variables globales sueltas (solo las de Mamba_Bolsas y los nombres de sus marcos)
 L4, M4 = nuevo()

@@ -18,7 +18,7 @@ local POR_DEFECTO = {
 	propia = true,      -- la ventana de Mamba en vez de las bolsas del juego
 	unir = true,        -- sin la ventana de Mamba: la ventana unida del juego
 	cuadro = true,      -- "Tienes N…" en el cuadro del objeto
-	columnas = 12, tamano = 37, escala = 1, fondo = 0.96,
+	columnas = 10, tamano = 37, escala = 1, fondo = 1, verBolsas = true,
 	fija = false, separar = false, reves = false,
 	columnasBanco = 14,
 	marcas = true, nuevo = true, mejora = true,
