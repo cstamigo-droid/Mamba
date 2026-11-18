@@ -78,7 +78,10 @@ preparar_copia() {
 	for c in kb nav-layers; do
 		[ -e "$FUSION/data/local/$c" ] || [ ! -d "$REPO/data/local/$c" ] || cp -r "$REPO/data/local/$c" "$FUSION/data/local/" || return 1
 	done
-	for par in "data\\forever|D:\\rust\\polestar-data\\forever" "data\\sources|D:\\rust\\polestar-data\\sources" \
+	# data/forever también es PROPIA (18-11): forge data build la reescribe y con una unión pisaba los datos de la
+	# carpeta de trabajo C:\Users\<usuario>\Mamba con los de la versión nueva. Se copia una vez, como caché.
+	[ -e "$FUSION/data/forever" ] || cp -r /d/rust/polestar-data/forever "$FUSION/data/forever" || return 1
+	for par in "data\\sources|D:\\rust\\polestar-data\\sources" \
 		"data\\local\\forever-tdb|D:\\rust\\forever-tdb"; do
 		local en="${par%%|*}" a="${par##*|}"
 		# unión de Windows con PowerShell (mklink por cmd pierde las comillas que le pasa Git Bash)
@@ -137,6 +140,9 @@ construir)
 	forge_corriendo && { echo "ESTADO: OCUPADO: forge.exe corre (otra construcción)"; exit 3; }
 	[ -f "$FUSION/tools/asistente/compilar_addon.sh" ] || fin "BLOQUEADA: falta tools/asistente/compilar_addon.sh en asistente (la sesión de construcción todavía no lo commiteó)" 1
 	log="$DIR/construir_$TAG.log"
+	# Si forge frena porque los datos cambiaron más que su límite, una PERSONA lo revisa y, si es lo esperado de
+	# la versión nueva, crea D:\rust\seguir\aceptar_datos_<vX> (vacío): la próxima corrida pasa --accept.
+	[ -f "$DIR/aceptar_datos_$TAG" ] && export MAMBA_DATOS_ACEPTAR=1
 	# construir_noche.sh se niega con el juego abierto: entonces queda para la próxima corrida.
 	bash "$FUSION/tools/asistente/construir_noche.sh" > "$log" 2>&1
 	grep -q "^LISTO" /d/rust/noche/ESTADO.txt || fin "NO CONSTRUIDA: $(cat /d/rust/noche/ESTADO.txt). Ver $log" 1

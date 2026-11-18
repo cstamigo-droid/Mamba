@@ -378,6 +378,13 @@ class Corrida:
         nuevo = lambda p: p.exists() and p.stat().st_mtime > inicio  # noqa: E731
         guias = [p for p in (FUSION / "addon").glob("Polestar_Guides*/*.lua") if nuevo(p)]
         compilado = nuevo(COMPILAR_LOG) and COMPILAR_LOG.read_text(encoding="utf-8", errors="replace").rstrip().endswith("LISTO")
+        reg = Path("D:/rust/noche/registro.log")
+        if nuevo(reg) and "rerun with --accept" in reg.read_text(encoding="utf-8", errors="replace")[-20000:]:
+            # el control de forge frenó: los datos cambiaron más que su límite. Lo decide una persona.
+            raise Fallo(f"forge frenó porque los datos de {self.tag} cambian más que su límite (cuadro SHIFT al final de "
+                        f"D:\\rust\\noche\\registro.log). No es un error del programa: si el cambio es el esperado de la "
+                        f"versión nueva, crea el archivo vacío D:\\rust\\seguir\\aceptar_datos_{self.tag} y la próxima "
+                        f"corrida sigue sola")
         if not (nuevo(CONSTRUCCION_ESTADO) and est.startswith("LISTO") and compilado and guias and "LISTA PARA INSTALAR" in salida):
             raise Fallo(f"la construcción no quedó: estado «{est.strip()[:80]}», compilado={compilado}, "
                         f"guías regeneradas={len(guias)} (registros en D:/rust/noche)")

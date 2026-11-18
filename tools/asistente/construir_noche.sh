@@ -94,8 +94,11 @@ if [ $ENLACES = 1 ]; then
 	# Los objetos de inventario, PNJ y objetos del mundo que nombran las guías: P7 agrega desde
 	# forever-db los que faltan en los datos (17-11).
 	paso "lo que nombran las guías" python -I "$RAIZ/tools/asistente/guias_sin_fuente.py" --necesita "$RAIZ/data/local/forever-db-need.txt"
+	# MAMBA_DATOS_ACEPTAR=1 (seguir_polestar.sh, con el archivo aceptar_datos_<vX> que crea una persona): forge
+	# acepta que las estadísticas de los datos cambien más que su límite (versión nueva de Polestar, 18-11).
+	ACEPTAR=(); [ -n "${MAMBA_DATOS_ACEPTAR:-}" ] && ACEPTAR=(--accept) && log "datos: cambio aceptado por una persona (MAMBA_DATOS_ACEPTAR)"
 	paso "datos" env -u POLESTAR_TEXT_LOCALE_FALLBACK POLESTAR_KB_SKIP_MISSING_STEPS=1 \
-		"$F" data build --no-questie --forever-tables wago --kb --offline
+		"$F" data build --no-questie --forever-tables wago --kb --offline "${ACEPTAR[@]}"
 	# Capas del suelo para las caminatas (preferir caminos, evitar pueblos enemigos), propias: los caminos
 	# salen de las texturas del cliente instalado y los hubs de la grilla y los datos. Sin la capa de
 	# caminos la etapa walks falla ("expected one road mask tag", 17-11). Si ya están, no se rehacen (para rehacerlas, borrar la carpeta).
