@@ -4312,13 +4312,15 @@ function W.Shell(name, opts)
 	f.Tagline = W.Text(side, "small", "textDim")
 	f.Tagline:SetPoint("TOPLEFT", side, "TOPLEFT", textX, -(WORD_TOP + 30))
 	f.Tagline:SetText(opts.tagline or L["A community project"])
-	-- Mamba (Cristian, 18-11): arriba sigue POLESTAR; debajo, en vez de "Un proyecto comunitario", "Mamba" más
-	-- chico en el acento de la casa; el crédito a nnachit, en un tercer plano debajo.
-	f.Tagline:SetText("Mamba")
-	W.Color(f.Tagline, "accent")
-	f.MambaCredito = W.Text(side, "caption", "textMuted")
-	f.MambaCredito:SetPoint("TOPLEFT", f.Tagline, "BOTTOMLEFT", 0, -2)
-	f.MambaCredito:SetText((L["A community project"] or "Un proyecto comunitario") .. " · nnachit")
+	-- Mamba (Cristian, 18-11): POLESTAR y "Un proyecto comunitario" quedan como siempre; debajo, "Mamba" en el tono
+	-- de la mamba negra (gris casi negro con brillo verde oliva). La serpiente animada que rodea POLESTAR y termina
+	-- en esta palabra es K63 (MAMBA_ACEPTACION.md): f.MambaMarca es su punto final.
+	f.MambaMarca = W.Text(side, "label", "text")
+	f.MambaMarca:SetPoint("TOPLEFT", f.Tagline, "TOPLEFT", 0, -16)
+	f.MambaMarca:SetText("Mamba")
+	W.Uncolor(f.MambaMarca)
+	f.MambaMarca:SetTextColor(0.55, 0.62, 0.42) -- verde oliva del brillo de la mamba
+	if f.MambaMarca.SetShadowColor then f.MambaMarca:SetShadowColor(0.05, 0.06, 0.05, 1); f.MambaMarca:SetShadowOffset(1, -1) end
 	if opts.headerSearch then
 		-- The search is in the header (below); the navigation starts under
 		-- the band, a hairline over it.
