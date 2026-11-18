@@ -132,6 +132,9 @@ local function ponerEnSubasta(id, precio)
 	return false, "No encontré la ventana de la subasta."
 end
 
+-- Para otros módulos (MambaAPI.PonerEnSubasta): deja la subasta lista con su precio; publicar lo aprieta el jugador.
+A.PonerEnSubasta = function(id, precio) return ponerEnSubasta(id, precio) end
+
 local aviso -- lo último que pasó con un botón, para mostrarlo arriba de la lista
 local function marcar(id, que)
 	local m = db()

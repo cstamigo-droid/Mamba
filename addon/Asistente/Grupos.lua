@@ -162,3 +162,13 @@ function API.AbrirServicios(uiMap)
 	return S.Abrir(uiMap or API.CiudadMasCercana()) and true or false
 end
 
+-- Deja la pestaña Vender de la subasta lista con el objeto y su precio (cobre por unidad, o nil: el de la subasta
+-- lo pone el jugador). El último clic, publicar, es del jugador. -> true | false, motivo
+-- Solo funciona con el subastador abierto ("Habla con el subastador primero.").
+function API.PonerEnSubasta(id, precio)
+	if not (A.PonerEnSubasta and cargar("Tasador")) then return false, "Falta el Tasador." end
+	local ok, r, motivo = pcall(A.PonerEnSubasta, id, precio)
+	if not ok then return false, tostring(r) end
+	return r and true or false, motivo
+end
+

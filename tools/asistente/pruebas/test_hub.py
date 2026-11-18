@@ -450,6 +450,11 @@ MED = L.eval("""function()
 end""")
 check(MED() == 1, "clic con la rueda en el botón del minimapa abre los servicios")
 
+# 10e) MambaAPI.PonerEnSubasta: sin el subastador abierto no hace nada y dice por qué
+PS_ = L.eval("function() return MambaAPI.PonerEnSubasta(9001, 100) end")
+r = PS_()
+check(r[0] is False and "subastador" in str(r[1]), f"PonerEnSubasta sin la subasta abierta: no hace nada y lo dice ({r[1]})")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()
