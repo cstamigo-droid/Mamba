@@ -94,7 +94,14 @@ function M.MostrarCompraDelJuego()
 	if not (B and M.bancoAbierto) then return false end
 	M.pestanasAntes = #M.BolsasBanco()
 	B:SetParent(UIParent)
+	if B.GetFrameStrata and not M.estratoBanco then M.estratoBanco = B:GetFrameStrata() end
+	if B.SetFrameStrata then B:SetFrameStrata("DIALOG") end
+	if B.Raise then B:Raise() end
 	M.compraVisible = true
+	-- 14: por si la pestaña nueva tarda en aparecer, se vuelve a mirar
+	if C_Timer and C_Timer.After then
+		for _, t in ipairs({ 1, 3, 8 }) do C_Timer.After(t, function() M.RevisarCompra() end) end
+	end
 	return true
 end
 
@@ -115,7 +122,12 @@ function M.DibujarCompra(f)
 		f.compra.nota:SetPoint("RIGHT", f.compra.boton, "LEFT", -8, 0)
 		if f.compra.nota.SetWordWrap then f.compra.nota:SetWordWrap(true) end
 	end
-	local c = M.EsVivo(f) and M.ConsejoPestana(f.libresT or 0) or nil
+	local c
+	if M.EsVivo(f) then
+		local clave = tostring(M.CostoPestana()) .. ":" .. tostring(GetMoney and GetMoney() or 0) .. ":" .. tostring(f.libresT or 0)
+		if f.claveConsejo ~= clave then f.claveConsejo, f.consejoMemo = clave, M.ConsejoPestana(f.libresT or 0) end
+		c = f.consejoMemo
+	end
 	f.consejo = c
 	if not c then f.compra:Hide(); return 0 end
 	f.compra:ClearAllPoints()
@@ -125,18 +137,33 @@ function M.DibujarCompra(f)
 	f.compra.boton.texto = "Comprar pestaña · " .. M.Dinero(c.costo)
 	if f.compra.boton.Label and f.compra.boton.Label.SetText then f.compra.boton.Label:SetText(f.compra.boton.texto)
 	elseif f.compra.boton.SetText then f.compra.boton:SetText(f.compra.boton.texto) end
+	local etiqueta = f.compra.boton.Label or (f.compra.boton.GetFontString and f.compra.boton:GetFontString())
+	local w = etiqueta and etiqueta.GetStringWidth and etiqueta:GetStringWidth()
+	if w and w > 0 then f.compra.boton:SetWidth(math.max(90, w + 28)) end
 	if f.compra.boton.SetEnabled then f.compra.boton:SetEnabled(c.oro >= c.costo) end
 	f.compra:Show()
 	return 34
 end
 
 -- Comprada la pestaña (hay una más), la ventana del banquero del juego vuelve a esconderse.
-table.insert(M.alCambiar, function(motivo)
-	if not M.compraVisible then return end
-	if motivo == "banco-cerrado" then M.compraVisible = false; return end
-	if motivo ~= "bolsas" then return end
+function M.RevisarCompra()
+	if not M.compraVisible or not M.bancoAbierto then return end
 	if #M.BolsasBanco() > (M.pestanasAntes or 0) then
 		M.compraVisible = false
+		local B = _G.BankFrame
+		if B and B.SetFrameStrata and M.estratoBanco then B:SetFrameStrata(M.estratoBanco) end
 		if M.EsconderBancoDelJuego then M.EsconderBancoDelJuego() end
+		M.Avisar("bolsas", {})
 	end
+end
+
+table.insert(M.alCambiar, function(motivo)
+	if not M.compraVisible then return end
+	if motivo == "banco-cerrado" then
+		M.compraVisible = false
+		local B = _G.BankFrame
+		if B and B.SetFrameStrata and M.estratoBanco then B:SetFrameStrata(M.estratoBanco) end
+		return
+	end
+	if motivo == "bolsas" then M.RevisarCompra() end
 end)

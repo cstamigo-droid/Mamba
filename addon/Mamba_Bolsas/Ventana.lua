@@ -27,6 +27,7 @@ local PIE = 24          -- alto del pie (libres y oro)
 local PESTANA = 30      -- pestañas de filtro en el borde izquierdo
 local RETRATO = 48      -- el retrato redondo que sobresale de la esquina
 local MARGEN = 10
+local PRIMERA_PESTANA = 48 -- bajo el retrato
 local MIN_ANCHO = 340
 
 local function PS()
@@ -483,6 +484,11 @@ end
 
 function M.Dibujar(f)
 	if not (f and f:IsShown()) then return end
+	if InCombatLockdown and InCombatLockdown() and M.EsVivo(f) and f.lista then
+		f.pendiente = true -- al salir de combate se rehace entero (fuera-de-combate)
+		M.DibujarCasillas(f)
+		return
+	end
 	M.RefrescarSugerencias()
 	local vivo = M.EsVivo(f)
 	local bolsas = bolsasDe(f)
@@ -549,7 +555,8 @@ function M.Dibujar(f)
 	f.rejilla:SetPoint("TOPLEFT", f, "TOPLEFT", f.margen, -yRejilla)
 	f.rejilla:SetSize(anchoRejilla, math.max(1, altoRejilla))
 	local altoCompra = M.DibujarCompra and M.DibujarCompra(f) or 0
-	f:SetSize(ancho, yRejilla + altoRejilla + 8 + PIE + altoCompra + 6)
+	local altoMin = PRIMERA_PESTANA + #M.FILTROS * (PESTANA + 2) + 6
+	f:SetSize(ancho, math.max(altoMin, yRejilla + altoRejilla + 8 + PIE + altoCompra + 6))
 	f:SetScale(M.Op("escala") or 1)
 	f:SetAlpha(math.max(0.3, M.Op("fondo") or 1))
 	M.Titulo(f)
@@ -567,9 +574,12 @@ function M.Titulo(f)
 	if not M.EsVivo(f) then
 		local p = M.DB().personajes[f.dueno]
 		local fecha = p and (f.tipo == "banco" and p.fechaBanco or p.fecha)
-		t = t .. (fecha and ("  ·  visto el " .. fecha) or "")
+		if f.libresTexto and fecha then f.libresTexto:SetText((f.libresTexto:GetText() or "") .. "  ·  visto el " .. fecha) end
 	end
-	if f.titulo then f.titulo:SetText(t) end
+	if f.titulo then
+		if f.titulo.SetWordWrap then f.titulo:SetWordWrap(false) end
+		f.titulo:SetText(t)
+	end
 	if f.retrato then
 		local p = M.DB().personajes[f.dueno]
 		if f.dueno == M.Clave() and SetPortraitTexture then
@@ -630,7 +640,7 @@ local function pestanas(f)
 		local puesto = false
 		if ic[2] and c.icono.SetAtlas then puesto = pcall(c.icono.SetAtlas, c.icono, ic[2]) end
 		if not puesto then c.icono:SetTexture(ic[1] or ic[3]) end
-		c:SetPoint("TOPRIGHT", f, "TOPLEFT", 1, -(f.cuerpo + y))
+		c:SetPoint("TOPRIGHT", f, "TOPLEFT", 1, -(PRIMERA_PESTANA + y))
 		c:SetScript("OnClick", function(self)
 			f.filtro = (f.filtro == self.clave) and "todo" or self.clave
 			M.PintarPestanas(f)
@@ -792,10 +802,10 @@ function M.CrearVentanaBolsas(tipo)
 		f.buscador:SetScript("OnTextChanged", function(self) buscar(self:GetText()) end)
 	end
 	f.buscador:SetPoint("TOPLEFT", f, "TOPLEFT", RETRATO - 4, -(f.cuerpo - 2))
-	f.buscador:SetPoint("RIGHT", f, "RIGHT", -f.margen, 0)
+	f.buscador:SetPoint("TOPRIGHT", f, "TOPRIGHT", -f.margen, -(f.cuerpo - 2))
 	f.buscador:SetHeight(BUSCADOR)
 	f.aviso = P.Texto(f, "note", "warning")
-	f.aviso:SetPoint("BOTTOM", f.buscador, "TOP", 0, 2)
+	f.aviso:SetPoint("BOTTOM", f, "BOTTOM", 0, 9)
 	pestanas(f)
 	f.filaBolsas = CreateFrame("Frame", nil, f)
 	f.filaBolsas:SetSize(1, FILA_BOLSAS)
@@ -812,7 +822,7 @@ function M.CrearVentanaBolsas(tipo)
 	f:HookScript("OnShow", function(self) M.Dibujar(self) end)
 	f:HookScript("OnHide", function(self)
 		self.sola, self.resalte = nil, nil
-		if self.tipo == "banco" and M.bancoAbierto and self.dueno == M.Clave() then
+		if self.tipo == "banco" and M.bancoAbierto then
 			local B = C_Bank
 			if B and B.CloseBankFrame then pcall(B.CloseBankFrame) elseif CloseBankFrame then pcall(CloseBankFrame) end
 		end
@@ -844,7 +854,11 @@ function M.CrearVentanaBolsas(tipo)
 		elseif motivo == "oro" then
 			local p = M.DB().personajes[f.dueno]
 			if f.tipo ~= "banco" and p and p.oro and f.oroTexto then f.oroTexto:SetText(GetCoinTextureString and GetCoinTextureString(p.oro) or M.Dinero(p.oro)) end
-			if f.tipo == "banco" then programar(false) end -- la compra de pestaña depende del oro
+			if f.tipo == "banco" and M.DibujarCompra then
+				local antes = f.compra and f.compra:IsShown()
+				M.DibujarCompra(f)
+				if (f.compra and f.compra:IsShown()) ~= antes then programar(false) end
+			end
 		else
 			if M.EsVivo(f) then programar(false) end
 		end

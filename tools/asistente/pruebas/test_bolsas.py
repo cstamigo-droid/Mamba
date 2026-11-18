@@ -48,6 +48,9 @@ function Marco:Click() if self.scripts.OnClick then self.scripts.OnClick(self, "
 function Marco:GetNumPoints() return self.punto and 1 or 0 end
 function Marco:GetPoint() return unpack(self.punto or {}) end
 function Marco:GetTop() return 500 end
+function Marco:SetFrameStrata(s) self.estrato = s end
+function Marco:GetFrameStrata() return self.estrato or "MEDIUM" end
+function Marco:Raise() end
 local CF = CreateFrame
 CREADOS_EN_COMBATE = 0
 PLANTILLAS = {}
@@ -152,6 +155,8 @@ def nuevo(antes=""):
             src = src.replace("if InCombatLockdown and InCombatLockdown() then falta = true; break end", "")
         if ROMPER and n == "Ventana.lua":
             src = src.replace("-- sin escribir campos propios en el botón del juego", "b.hasItem = d.id and true or nil --")
+        if ROMPER and n == "Ventana.lua":
+            src = src.replace("if InCombatLockdown and InCombatLockdown() and M.EsVivo(f) and f.lista then", "if false then")
         if ROMPER and n == "Banco.lua":
             src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
@@ -302,7 +307,7 @@ L.execute('MambaBolsas.AbrirBanco(MambaBolsas.Clave()); Correr()')
 check(fb.visible and not M.EsVivo(fb), "banco guardado: se ve sin estar en el banco")
 n_guard = L.eval('function(f) local n = 0; for _, b in ipairs(f.guardados or {}) do if b.visible then n = n + 1 end end; return n end')(fb)
 check(n_guard == 66, "banco guardado: 66 casillas (%s)" % n_guard)
-check("visto el" in (fb.titulo.texto or ""), "título dice cuándo se vio (%s)" % fb.titulo.texto)
+check("visto el" in (fb.libresTexto.texto or "") and fb.titulo.texto == "Banco de Hope", "el pie dice cuándo se vio; el título no se alarga (%s | %s)" % (fb.titulo.texto, fb.libresTexto.texto))
 link = L.eval('function(f) for _, b in ipairs(f.guardados) do if b.link then return b.link end end end')(fb)
 check(link and "item:2447" in link, "casilla guardada con su enlace (cuadro del objeto y precio del Tasador)")
 L.execute('MambaBolsas.ventanas.banco:Hide()')
@@ -402,9 +407,26 @@ fb = M.ventanas.banco
 check(fb.compra is not None and fb.compra.visible and "Comprar pestaña" in (fb.compra.boton.texto or ""), "botón Comprar pestaña en el banco en vivo")
 L.execute('MambaBolsas.ventanas.banco.compra.boton.scripts.OnClick(MambaBolsas.ventanas.banco.compra.boton)')
 check(L.eval("BankFrame.padre == UIParent"), "Comprar pestaña muestra la compra DEL JUEGO (el clic que paga es del jugador)")
+check(G.BankFrame.estrato == "DIALOG", "la compra del juego queda ENCIMA de la ventana de Mamba")
 L.execute('TAM[9] = 20; C_Bank.FetchPurchasedBankTabData = function() return { { ID = 6 }, { ID = 7 }, { ID = 8 }, { ID = 9 } } end; Fire("BANK_TABS_CHANGED"); Correr()')
 check(L.eval("BankFrame.padre ~= UIParent"), "comprada la pestaña, el banquero del juego se vuelve a esconder")
+check(G.BankFrame.estrato == "MEDIUM", "y recupera su estrato")
 L.execute('ABIERTO = false; Fire("BANKFRAME_CLOSED"); Correr()')
+
+# el buscador: una sola fila (arriba izquierda y arriba derecha), no estirado hasta el centro
+anclas = L.eval("MambaBolsas.ventanas.inventario.buscador.punto[1]")
+check(anclas == "TOPRIGHT", "buscador anclado arriba a la derecha (%s)" % anclas)
+# en combate: un cambio de bolsas no mueve ni muestra casillas del juego; se rehace al salir
+L.execute("""OpenAllBags(); Correr()
+local Marco = getmetatable(CreateFrame("Frame")).__index
+MOVIDAS = 0
+local sp, sh = Marco.SetPoint, Marco.Show
+Marco.SetPoint = function(self, ...) if self.vivo and COMBATE then MOVIDAS = MOVIDAS + 1 end; return sp(self, ...) end
+Marco.Show = function(self, ...) if self.vivo and COMBATE then MOVIDAS = MOVIDAS + 1 end; return sh(self, ...) end
+COMBATE = true; Fire("BAG_UPDATE_DELAYED"); Correr(); COMBATE = false""")
+check(G.MOVIDAS == 0 and M.ventanas.inventario.pendiente, "en combate no se mueven casillas del juego (%s) y queda pendiente" % G.MOVIDAS)
+L.execute('Fire("PLAYER_REGEN_ENABLED"); Correr()')
+check(not M.ventanas.inventario.pendiente, "al salir de combate se rehace")
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.
