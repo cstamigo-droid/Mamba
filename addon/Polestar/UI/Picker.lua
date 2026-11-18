@@ -665,6 +665,12 @@ end
 local function load(id, inNewTab, asked)
 	local E = ns.Engine
 	if not (E and id) then return end
+	-- Mamba (PARCHES.md P11): another kind of guide (cooking, a dungeon...) never replaces the leveling guide: it opens
+	-- in a new tab.
+	if not inNewTab and E.OpenTab and E.GetGuide then
+		local cur, new = E.GetGuide(), ns.Guides and ns.Guides.Get and ns.Guides.Get(id)
+		if cur and new and (cur.category or "Leveling") == "Leveling" and (new.category or "Leveling") ~= "Leveling" then inNewTab = true end
+	end
 	if inNewTab and E.OpenTab then
 		if not E.OpenTab(id) then
 			ns.Print(L["Six tabs is the limit. Close one to open another."])

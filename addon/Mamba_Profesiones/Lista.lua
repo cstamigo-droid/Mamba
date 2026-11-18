@@ -151,9 +151,10 @@ function Lista.Nueva(parent)
 	return L
 end
 
--- K62: puntuación simple de impacto ÷ costo, en estrellas.
+-- K62: impacto ÷ costo en palabras. razon = unidades de mejora por minuto de esfuerzo (el oro, convertido a
+-- minutos con lo que vale tu hora): 1 o más = "Conviene mucho"; 0,35 o más = "Conviene".
 function Lista.Estrellas(razon)
 	if not razon then return "" end
-	if razon >= 2 then return "★★★" elseif razon >= 0.7 then return "★★☆" end
-	return "★☆☆"
+	if razon >= 1 then return "Conviene mucho" elseif razon >= 0.35 then return "Conviene" end
+	return "Conviene poco"
 end

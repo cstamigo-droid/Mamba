@@ -164,13 +164,31 @@ check(all(x.mapa not in (1436, 1438, 1429) for x in lug.values()), "sin zonas de
 _, motivo = C.Lugares("minerales", p)
 check(motivo is not None and "Minería" in motivo, "minerales sin Minería: dice qué falta")
 
+# ---------- revisión wow-economía (18-11): zonas, guardias, objeto de cada fila, unidades
+F = G.MambaProfesiones.FUENTES
+todas = [F[k][i] for k in F.keys() for i in range(1, len(F[k]) + 1)]
+check(not any("Guardia" in r[5] for r in todas), "sin guardias ni PNJ amistosos en las fuentes")
+osos = [r for r in todas if r[5] == "Oso cardo rabioso"]
+check(osos and all(r[2] == 1439 for r in osos), "Oso cardo rabioso en Costa Oscura (1439), no en Frondavil")
+check(all(r[10] is not None for r in todas), "cada fuente trae sus unidades por caída")
+veta = F[2770][1]
+check(veta[10] == 1.0, "una veta de cobre da 1 mineral por nodo, no 2")
+LUG = G.MambaProfesiones.LUGARES
+TELAS = {2589: 1, 2592: 2, 4306: 3, 4338: 4, 14047: 5}
+filas = [LUG.tela[i] for i in range(1, len(LUG.tela) + 1)]
+check(all(r[9] in TELAS for r in filas), "tela: cada lugar trae su tela")
+h2 = [LUG.hierbas[i] for i in range(1, len(LUG.hierbas) + 1) if LUG.hierbas[i][1] == 2]
+check(h2 and all(r[9] != 2453 for r in h2), "hierbas del tramo 2 (50-99): no usa Hierba cardenal (100)")
+lug = C.Lugares("tela", p)
+check(all(x.oroHora is None or abs(x.oroHora - C.Precio(x.item) * x.porHora * 0.95) < 0.01 for x in lug.values()), "oro por hora neto (menos 5 %)")
+
 # ---------- Recetas y ganar oro
 n = G.MambaProfesiones.Medir.LeerRecetas()
 check(n == 1, "lee solo las recetas aprendidas")
 res, leidas = C.Fabricar()
 check(leidas == 1 and len(res) == 1, "una receta leída")
 r1 = res[1]
-check(abs(r1.ganancia - (500 * 0.95 - 60)) < 0.01, "ganancia = 500 × 0,95 - 2 × 30")
+check(abs(r1.ganancia - (500 * 0.95 - 5 * 0.15 - 60)) < 0.01, "ganancia = 500 × 0,95 - depósito (15 % de 5) - 2 × 30")
 
 # ---------- sección: todas las partes se dibujan con su botón
 s = G.SECCION
@@ -192,6 +210,12 @@ if far:
     G.MambaProfesiones.Llevame(f.farmear.forma.mapa, f.farmear.forma.x, f.farmear.forma.y, "x")
     check(len(G.NAVEGO) == 1 and G.NAVEGO[1][1] == "MambaProfesiones", "Llévame pone la flecha de Polestar")
 check(abs(G.MambaProfesiones.MinutosViaje(1411, 50, 50) - 2) < 0.01, "minutos de viaje del motor de Ir a… (120 s = 2 min)")
+
+# ---------- K61/K62: recomendaciones para Mi plan
+rec = G.MambaProfesiones.Recomendaciones()
+check(len(rec) == 1 and rec[1].puntos == 35 and rec[1].solo and rec[1].estrellas != "", "recomendación con número, solo y estrellas")
+check(rec[1].como is not None and (rec[1].llevame is not None), "trae el cómo y el Llévame")
+check(len(G.MambaProfesiones.Recomendaciones(L.eval("{ minutos = 0 }"))) <= 1, "filtro de minutos")
 
 # ---------- sin SkillUp: mensaje, sin error
 G.SkillUpForever = None

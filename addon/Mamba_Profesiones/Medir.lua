@@ -74,7 +74,11 @@ local ev = CreateFrame("Frame")
 for _, e in ipairs({ "BAG_UPDATE_DELAYED", "ZONE_CHANGED_NEW_AREA", "TRADE_SKILL_SHOW", "TRADE_SKILL_LIST_UPDATE" }) do M.Escuchar(ev, e) end
 ev:SetScript("OnEvent", function(_, e)
 	if e == "TRADE_SKILL_SHOW" or e == "TRADE_SKILL_LIST_UPDATE" then
-		M.Proteger("recetas", Med.LeerRecetas)
+		-- las ráfagas de eventos se juntan en una sola lectura (como SkillUp Forever)
+		if Med.esperando then return end
+		Med.esperando = true
+		local leer = function() Med.esperando = false; M.Proteger("recetas", Med.LeerRecetas) end
+		if C_Timer and C_Timer.After then C_Timer.After(0.5, leer) else leer() end
 	else
 		M.Proteger("medir", Med.Tick)
 	end

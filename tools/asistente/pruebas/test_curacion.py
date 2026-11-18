@@ -87,7 +87,7 @@ L.execute('Fire("PLAYER_LOGIN")')
 check(G.MambaInterfaz.modulos["curacion"] is not None, "Curación en Interfaz")
 cab = G.MambaCuraCabecera
 check(cab is not None and cab.plantilla == "SecureGroupHeaderTemplate", "cabecera segura del juego")
-check(cab.attr["template"].find("SecureUnitButtonTemplate") >= 0, "botones con plantilla segura de unidad")
+check(cab.attr["template"].find("SecureActionButtonTemplate") >= 0 and cab.attr["template"].find("ShowHide") >= 0, "botones con plantilla segura de acción y ocultar (como HealBot)")
 
 at = Cu.Atributos(Cu.Perfil())
 check(at["type1"] == "spell" and at["spell1"] == "Rejuvenecimiento", "clic izquierdo = Rejuvenecimiento (druida)")
@@ -104,7 +104,9 @@ check('"spell1", "Rejuvenecimiento"' in frag and "_onenter" in frag, "el fragmen
 b = L.eval('CreateFrame("Button", "MambaCuraCabeceraUnitButton1", MambaCuraCabecera, "SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate")')
 b.attr["unit"] = "party1"
 cab.scripts["OnAttributeChanged"](cab, "child1", b)
-check(b.attr["_onenter"] is not None, "el botón ata la rueda al pasar el ratón")
+check(b.attr["_onenter"] is not None and b.attr["_onhide"] is not None, "el botón ata la rueda al pasar el ratón y la suelta al ocultarse")
+check(b.attr["useOnKeyDown"] is False and "RegisterForClicks" not in frag, "clic al soltar, sin RegisterForClicks en el fragmento")
+check("SHIFT-" in frag, "rueda con Mayús también")
 check(b.vida is not None and b.vida.valor == 800, "pinta la vida")
 # valores secretos
 G.SECRETOS = True

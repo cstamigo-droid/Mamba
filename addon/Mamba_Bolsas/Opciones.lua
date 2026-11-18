@@ -4,7 +4,7 @@ local _, M = ...
 local P = M.Piezas
 
 local elegido = "buscar"
-local panel, buscador, opciones, filas, hijo, sf = nil, nil, nil, {}, nil, nil
+local panel, buscador, opciones, filas, hijo, sf, sfOp = nil, nil, nil, {}, nil, nil, nil
 local texto = ""
 
 local function abrirBolsas()
@@ -54,7 +54,7 @@ end
 function M.RefrescarPanel()
 	if not panel then return end
 	buscador:SetShown(elegido == "buscar")
-	opciones:SetShown(elegido == "opciones")
+	sfOp:SetShown(elegido == "opciones")
 	sf:SetShown(elegido ~= "opciones")
 	if elegido == "buscar" then
 		local datos = {}
@@ -121,14 +121,24 @@ local function dibujar(p, ancho, alto)
 	sf:SetPoint("TOPLEFT", t, "BOTTOMLEFT", -12, -44)
 	sf:SetPoint("BOTTOMRIGHT", p, "BOTTOMRIGHT", -8, 8)
 	hijo:SetWidth(ancho - 30)
-	opciones = CreateFrame("Frame", nil, p)
-	opciones:SetPoint("TOPLEFT", t, "BOTTOMLEFT", -12, -10)
-	opciones:SetSize(ancho - 20, 600)
+	-- las opciones en su propio desplazamiento: son más de las que caben en el alto del menú
+	if W and W.Scroll then sfOp = W.Scroll(p); opciones = sfOp.Child
+	else
+		sfOp = CreateFrame("ScrollFrame", nil, p)
+		opciones = CreateFrame("Frame", nil, sfOp)
+		sfOp:SetScrollChild(opciones)
+		sfOp:EnableMouseWheel(true)
+		sfOp:SetScript("OnMouseWheel", function(self, dl) self:SetVerticalScroll(math.max(0, self:GetVerticalScroll() - dl * 48)) end)
+	end
+	sfOp:SetPoint("TOPLEFT", t, "BOTTOMLEFT", -12, -10)
+	sfOp:SetPoint("BOTTOMRIGHT", p, "BOTTOMRIGHT", -8, 8)
+	opciones:SetWidth(ancho - 30)
 	local d = M.DB().opciones
 	local anterior
+	local altoOp = 0
 	local function poner(fila)
 		if anterior then fila:SetPoint("TOPLEFT", anterior, "BOTTOMLEFT", 0, -4) else fila:SetPoint("TOPLEFT", opciones, "TOPLEFT", 0, 0) end
-		P.Acomodar(fila, ancho - 30)
+		altoOp = altoOp + (P.Acomodar(fila, ancho - 40) or 30) + 4
 		anterior = fila
 	end
 	local function redibujar() if M.Redibujar then M.Redibujar() end end

@@ -34,11 +34,14 @@ function M.Activa()
 end
 
 ---------------------------------------------------------------- abrir y cerrar
-function M.AbrirInventario(si)
+-- porJuego: la abrió el juego (vendedor, banco, correo); entonces el juego también la cierra. La que abriste tú
+-- (tecla B, mochila) queda abierta cuando cierras al vendedor, como en el juego.
+function M.AbrirInventario(si, porJuego)
 	if not M.Activa() then return end
 	local f = M.Ventana("inventario")
 	if si == nil then si = not f:IsShown() end
 	if si then
+		if not f:IsShown() then f.porJuego = porJuego and true or false end
 		f.dueno = M.Clave()
 		f:Show()
 	else f:Hide() end
@@ -63,9 +66,10 @@ local function pedir(que)
 	local function resolver()
 		local j = juntas
 		juntas = nil
+		local f = M.ventanas.inventario
 		if j.alternar then M.AbrirInventario(nil)
-		elseif j.ultimo == "abrir" then M.AbrirInventario(true)
-		elseif j.ultimo == "cerrar" then M.AbrirInventario(false) end
+		elseif j.ultimo == "abrir" then M.AbrirInventario(true, true)
+		elseif j.ultimo == "cerrar" and f and f.porJuego then M.AbrirInventario(false) end
 	end
 	if C_Timer and C_Timer.After then C_Timer.After(0, resolver) else resolver() end
 end
@@ -105,7 +109,15 @@ local function enganchar()
 	if enganchado or not hooksecurefunc then return end
 	enganchado = true
 	local function gancho(nombre, que)
-		if type(_G[nombre]) == "function" then hooksecurefunc(nombre, function() pedir(que) end) end
+		if type(_G[nombre]) ~= "function" then return end
+		hooksecurefunc(nombre, function()
+			-- el juego también abre y cierra bolsas por dentro (modo edición, "...Manager"): eso no es del jugador
+			if debugstack then
+				local ok, pila = pcall(debugstack, 3)
+				if ok and type(pila) == "string" and pila:find("Manager") then return end
+			end
+			pedir(que)
+		end)
 	end
 	gancho("ToggleAllBags", "alternar")
 	gancho("ToggleBackpack", "alternar")
@@ -121,7 +133,7 @@ local function enganchar()
 			if panel and panel == _G.BankFrame and M.Activa() then
 				panel:SetParent(diminuto)
 				M.AbrirBanco(M.Clave())
-				M.AbrirInventario(true)
+				M.AbrirInventario(true, true)
 			end
 		end)
 	end
@@ -132,7 +144,7 @@ table.insert(M.alCambiar, function(motivo)
 		local B = _G.BankFrame
 		if B and B.GetParent and B:GetParent() ~= diminuto then B:SetParent(diminuto) end
 		M.AbrirBanco(M.Clave())
-		M.AbrirInventario(true)
+		M.AbrirInventario(true, true)
 	elseif motivo == "banco-cerrado" then
 		local B = _G.BankFrame
 		local function devolver() if B and B.GetParent and B:GetParent() == diminuto then B:SetParent(UIParent) end end

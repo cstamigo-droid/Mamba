@@ -279,7 +279,7 @@ check("1. Piedra de hogar a Cima del Trueno" in tx and "15 s" in tx, "Ir a…: t
 check("Caminar 382 yd" in tx and "≈ 45 s" in tx, "Ir a…: tramo 2, a pie con sus yardas y su tiempo (≈)")
 check("Total ≈ 1:00" in tx, "Ir a…: el total, estimado (R0)")
 check("El más cercano en tiempo" in tx, "Ir a…: el banco elegido es el más cercano EN TIEMPO")
-check("Otras formas de llegar" in tx and "Sin piedra de hogar" in tx and "Sin pagar vuelos" in tx, "Ir a…: las alternativas sin piedra y sin vuelos")
+check("Otras formas de llegar" in tx and "Sin piedra de hogar" in tx and "Sin piedra ni vuelos" in tx, "Ir a…: las alternativas sin piedra y sin piedra ni vuelos (la más rápida no vuela)")
 check("≈ 5:18" in tx, "la alternativa sin piedra da su total (20 + 258 + 40 s)")
 L.execute("Polestar.Nav.EstimateTravel = nil; Asistente.Llevame.OlvidarCache()")
 R["MambaGrupoCiudad"].search("zzzz qqq")
