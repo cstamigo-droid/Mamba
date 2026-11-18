@@ -28,6 +28,8 @@ C_AddOns = {
 }
 function InCombatLockdown() return COMBATE end
 function GetRealmName() return "Reino" end
+function UnitRace() return "Tauren", "Tauren" end
+MAPA = 1456
 function UnitXP() return 1000 end
 function UnitXPMax() return 5000 end
 function GetMoney() return 10000 end
@@ -156,21 +158,24 @@ def revisar(nombre, minimo=3):
     return v
 
 
-# 1) registro: las 8 secciones, en orden, con nombre en español
+# 1) registro: 4 entradas en el riel (Equipo, Oro, Ciudad y Errores al pie) con las 8 partes dentro
 R = G.REGISTRADAS
+grupos = ["MambaGrupoEquipo", "MambaGrupoOro", "MambaGrupoCiudad", "MambaGrupoErrores"]
+for k in grupos:
+    check(R[k] is not None, f"entrada del riel registrada: {k}")
+check([str(R[k].label) for k in grupos if R[k]] == ["Equipo", "Oro", "Ciudad", "Errores"], "nombres del riel")
+check(R["MambaGrupoErrores"] is not None and R["MambaGrupoErrores"].foot is True, "Errores va al pie del riel")
 claves = ["MambaEquipo", "MambaSubasta", "MambaIrA", "MambaClase", "MambaServicios", "MambaCapa", "MambaMedidor", "MambaErrores"]
 for k in claves:
-    check(R[k] is not None, f"sección registrada: {k}")
-ordenes = [R[k].order for k in claves if R[k]]
-check(ordenes == sorted(ordenes), f"orden del riel: {ordenes}")
-check([str(R[k].label) for k in claves if R[k]] == ["Equipo", "Subasta", "Ir a…", "Clase", "Servicios", "Capa", "Medidor", "Errores"], "nombres del riel")
+    check(G.Asistente.Hub.grupoDe[k] is not None, f"parte dentro de un grupo: {k}")
+check(G.MambaAPI is not None, "existe la API pública MambaAPI")
 print("piezas reales de Polestar:", "SÍ" if W_REAL else "NO (simuladas, mismas firmas)")
 
 # 2) botón del minimapa: abre el hub en Equipo, sin comandos
 boton = G.MambaBotonMinimapa
 check(boton is not None, "existe el botón del minimapa")
 boton.Click(boton)
-check(G.SHOWPICKER >= 1 and str(G.SECCION) == "MambaEquipo", f"el botón abre el hub en Equipo ({G.SECCION})")
+check(G.SHOWPICKER >= 1 and str(G.SECCION) == "MambaGrupoEquipo", f"el botón abre el hub en Equipo ({G.SECCION})")
 L.execute("RunTimers()")
 G.Polestar.UI.Picker.Render()
 v = revisar("Equipo · Mejorar", 10)
@@ -212,7 +217,7 @@ check(any(x.startswith("a nivel ") for x in textos()), "Más adelante dice «a n
 
 # 5) cada sección se abre desde el riel y se arma sin errores
 for k in claves[1:]:
-    G.Polestar.UI.Picker.ShowSection(k)
+    G.MambaAPI.Abrir(k)
     L.execute("RunTimers()")
     G.Polestar.UI.Picker.Render()
     revisar(k, 2)
@@ -223,29 +228,29 @@ for k in claves[1:]:
         revisar(f"{k} · {t.key}", 1)
 
 # 6) Ir a…: sugiere la misma mazmorra; la ruta dice un tiempo REAL del planificador; «Llevarme» pone la flecha
-G.Polestar.UI.Picker.ShowSection("MambaIrA")
+G.MambaAPI.Abrir("MambaIrA")
 G.ON_TAB("buscar")
 G.Polestar.UI.Picker.Render()
 v = textos()
 check(any(recn in x for x in v), "Ir a… sugiere la misma mazmorra recomendada")
 check(any("Ruta a" in x for x in v), "Ir a… muestra la ruta")
-R["MambaIrA"].search("subasta")
+R["MambaGrupoCiudad"].search("subasta")
 v = textos()
 check(any("subastas" in x.lower() for x in v), "buscar «subasta» encuentra la casa de subastas")
 check(any("unos 7 min" in x for x in v), f"el tiempo sale de Nav.API.Estimate (420 s) ({[x for x in v if 'min' in x][:1]})")
-R["MambaIrA"].search("zzzz qqq")
+R["MambaGrupoCiudad"].search("zzzz qqq")
 check(any("Sin resultados" in x for x in textos()), "Ir a…: estado «Sin resultados»")
-R["MambaIrA"].search("")
+R["MambaGrupoCiudad"].search("")
 
 # 7) Subasta: interruptores conectados a Polestar (qol.sellJunk / qol.autoRepair)
-G.Polestar.UI.Picker.ShowSection("MambaSubasta")
+G.MambaAPI.Abrir("MambaSubasta")
 G.ON_TAB("vender")
 v = textos()
 check(any("Vender la basura sola" in x for x in v) and any("Reparar solo" in x for x in v), "interruptores en Vender lo mío")
 SW = L.eval("""function()
   for _, f in ipairs(TODOS) do
     if f.tipo == "CheckButton" and f:IsVisible() and f.scripts.OnClick then
-      f.marcado = not f.marcado
+      f.marcado = not AJUSTES["qol.sellJunk"] -- el marco simulado no guarda SetChecked: se parte del ajuste
       if not rawget(f, "GetChecked") or type(f.GetChecked) ~= "function" then end
       f.GetChecked = function(self) return self.marcado end
       f.scripts.OnClick(f); return true
@@ -258,16 +263,27 @@ check(G.AJUSTES["qol.sellJunk"] != antes, "el interruptor cambia qol.sellJunk de
 
 # 8) Errores: muestra lo guardado y se vacía con botón
 L.execute('MambaErroresDB = MambaErroresDB or {}; MambaErroresDB.lista = { { msg = "x.lua:1: prueba", hora = "hoy", veces = 2, tipo = "lua" } }')
-G.Polestar.UI.Picker.ShowSection("MambaErrores")
+G.MambaAPI.Abrir("MambaErrores")
 check(any("x.lua:1: prueba" in x for x in textos()), "Errores muestra el error guardado")
 
 # 9) los comandos viejos abren el hub
 L.execute('Slash("/equipo", "mazmorras")')
-check(str(G.SECCION) == "MambaEquipo", "/equipo abre la sección Equipo del hub")
+check(str(G.SECCION) == "MambaGrupoEquipo", "/equipo abre la sección Equipo del hub")
+
+# 9b) la API pública para «Mi plan»
+m = G.MambaAPI.MejorasPorRanura()
+check(m is not None and len(list(m.keys())) > 0, "MambaAPI.MejorasPorRanura devuelve piezas")
+r = G.MambaAPI.MazmorraRecomendada()
+check(r is not None and str(r.nombre) == recn, "MambaAPI.MazmorraRecomendada = la misma de la ventana")
+check(G.MambaAPI.Clase() is not None and G.MambaAPI.Clase().Builds is not None, "MambaAPI.Clase expone la lógica de clase")
+# navegar por la barra lateral del grupo: elegir la parte Clase
+R["MambaGrupoEquipo"].onNav("p:MambaClase")
+G.Polestar.UI.Picker.ShowSection("MambaGrupoEquipo")
+check(str(G.TITULO_VISTO[1]) == "Tu clase", "la barra lateral del grupo cambia a la parte Clase")
 
 # 10) en combate: se abre igual
 G.COMBATE = True
-G.Polestar.UI.Picker.ShowSection("MambaMedidor")
+G.MambaAPI.Abrir("MambaMedidor")
 revisar("Medidor en combate", 1)
 G.COMBATE = False
 

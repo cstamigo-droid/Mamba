@@ -151,6 +151,9 @@ local MOTIVO = {
 	sin_base = "Falta la base de mazmorras: activa «Polestar_Codex» en la lista de accesorios.",
 }
 
+-- Para la API pública (Grupos.lua): el contexto calculado (nil, motivo si falta algo).
+A.EquipoContexto = function() return contexto() end
+
 -- La mazmorra que recomienda «Mejorar» (la usa «Ir a…» para sugerirla: la misma en todas las pantallas).
 function A.MazmorraRecomendada()
 	local ok, c = pcall(contexto)

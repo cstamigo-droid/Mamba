@@ -12,7 +12,9 @@
 --     buscar = "texto de ayuda" | nil,   -- con buscar, el buscador del hub filtra (est.busqueda)
 --     dibujar = fn(est, V),              -- escribe el cuerpo con el constructor V (ver abajo)
 --   })
---   A.Hub.Abrir(clave) · A.Hub.Redibujar() · A.Hub.Disponible()
+--   A.Hub.Abrir(clave, pestana) · A.Hub.Redibujar() · A.Hub.Disponible()
+-- Las secciones se agrupan en el riel (Grupos.lua): Equipo (Equipo, Clase), Oro (Subasta, Medidor),
+-- Ciudad (Ir a…, Servicios, Capa) y Errores al pie. Abrir una parte abre su grupo con esa parte elegida.
 --
 -- Constructor V (todo se apila de arriba abajo; las filas miden 44 px):
 --   V:Panel{ titulo, texto, boton = {texto, fn}, boton2 = {texto, fn} }   (el boton es el único dorado)
@@ -434,15 +436,15 @@ function V:Interruptor(txt, valor, fn)
 end
 
 ---------------------------------------------------------------- registrar en el hub de Polestar
-local function construir(spec)
-	return function(parent)
-		local raiz = CreateFrame("Frame", nil, parent)
-		raiz:SetAllPoints(parent)
-		local sc = W().Scroll(raiz)
-		sc:SetPoint("TOPLEFT", raiz, "TOPLEFT", PAD, -12)
-		sc:SetPoint("BOTTOMRIGHT", raiz, "BOTTOMRIGHT", -PAD + 8, 12)
-		spec.psRaiz, spec.psScroll = raiz, sc
-	end
+-- Cada parte (Equipo, Clase, Subasta...) dibuja en su propio marco dentro del marco de su grupo.
+local function construirParte(spec, padre)
+	if spec.psRaiz then return end
+	local raiz = CreateFrame("Frame", nil, padre)
+	raiz:SetAllPoints(padre)
+	local sc = W().Scroll(raiz)
+	sc:SetPoint("TOPLEFT", raiz, "TOPLEFT", PAD, -12)
+	sc:SetPoint("BOTTOMRIGHT", raiz, "BOTTOMRIGHT", -PAD + 8, 12)
+	spec.psRaiz, spec.psScroll = raiz, sc
 end
 
 local function dibujarCuerpo(spec, est)
@@ -465,29 +467,52 @@ local function dibujarCuerpo(spec, est)
 	else
 		local ok, err = pcall(spec.dibujar, est, b)
 		if not ok then
-			b:Vacio("Algo falló al armar esta sección", "Abre «Errores» en el riel de la izquierda: ahí está el detalle para mandárselo a Cristian.")
+			b:Vacio("Algo falló al armar esta sección", "Abre «Errores», abajo en el riel de la izquierda: ahí está el detalle para mandárselo a Cristian.")
 			if geterrorhandler then geterrorhandler()(err) end
 		end
 	end
 	W().SetScrollContent(sc, b.y + 16, sc:GetHeight())
 end
 
+-- Una parte: se guarda; la registra su grupo (Hub.Grupo, en Grupos.lua).
 function Hub.Seccion(spec)
 	Hub.secciones[spec.clave] = spec
-	local p = PS()
+	return true
+end
+
+-- Un grupo = una entrada del riel de Polestar. Su barra lateral elige la parte (y, debajo, los filtros de esa
+-- parte); sus pestañas y su cuerpo son los de la parte elegida.
+--   Hub.Grupo({ clave, nombre, icono, orden, partes = { "MambaEquipo", "MambaClase" }, foot = true|nil })
+Hub.grupos, Hub.grupoDe = {}, {}
+local PREFIJO_PARTE, PREFIJO_FILTRO = "p:", "f:"
+
+function Hub.Grupo(g)
 	if not Hub.Disponible() then return false end
-	local UI = p.UI
-	local est = Hub.Est(spec.clave)
+	local partes = {}
+	for _, k in ipairs(g.partes) do
+		local s = Hub.secciones[k]
+		if s then partes[#partes + 1] = s; Hub.grupoDe[k] = g end
+	end
+	if #partes == 0 then return false end
+	g.lista = partes
+	g.activa = g.activa or partes[1].clave
+	Hub.grupos[g.clave] = g
+	local function parte() return Hub.secciones[g.activa] or partes[1] end
 	local reg = {
-		key = spec.clave, label = spec.nombre, icon = spec.icono or "compact", order = spec.orden or 100,
-		build = construir(spec),
+		key = g.clave, label = g.nombre, icon = g.icono or "compact", order = g.orden or 100, foot = g.foot,
+		build = function(parent)
+			g.psMarco = parent
+			for _, s in ipairs(partes) do construirParte(s, parent) end
+		end,
 		render = function()
+			local spec = parte()
+			local est = Hub.Est(spec.clave)
+			for _, s in ipairs(partes) do if s.psRaiz then s.psRaiz:SetShown(s == spec) end end
 			local w, win = W(), _G.PolestarPicker
 			est.pestana = est.pestana or (type(spec.pestanas) == "table" and spec.pestanas[1] and spec.pestanas[1].key)
 			if win then
 				local tabs = type(spec.pestanas) == "function" and spec.pestanas(est) or spec.pestanas
 				if tabs and #tabs > 0 then
-					if est.pestana ~= est.pestanaVista then spec.psScroll = spec.psScroll end
 					w.ShellTabs(win, tabs, est.pestana, function(key)
 						if est.pestana ~= key then est.filtro = nil end
 						est.pestana = key
@@ -498,46 +523,74 @@ function Hub.Seccion(spec)
 					local ok, t, s = pcall(spec.titulo, est)
 					if ok then w.ShellTitle(win, t, s) end
 				end
+				local caja = rawget(win, "Search")
+				if type(caja) == "table" then
+					if caja.SetShown then caja:SetShown(spec.buscar ~= nil) end
+					if spec.buscar and w.SetSearchPlaceholder then pcall(w.SetSearchPlaceholder, caja, spec.buscar) end
+				end
 			end
-			if est.pestana ~= est.pestanaVista and spec.psScroll and w.ScrollTo then w.ScrollTo(spec.psScroll, 0) end
-			est.pestanaVista = est.pestana
+			local vista = spec.clave .. "|" .. tostring(est.pestana)
+			if g.vista ~= vista and spec.psScroll and w.ScrollTo then w.ScrollTo(spec.psScroll, 0) end
+			g.vista = vista
 			dibujarCuerpo(spec, est)
 			Hub.ultima = spec.clave
 			if AsistenteDB then AsistenteDB.hubUltima = spec.clave end
 		end,
-	}
-	if spec.nav then
-		reg.nav = function()
-			local ok, items, activo = pcall(spec.nav, est)
-			if ok then return items, activo end
-			return {}, nil
-		end
-		reg.onNav = function(key)
-			if spec.onNav then spec.onNav(est, key) else est.filtro = key end
+		nav = function()
+			local spec = parte()
+			local items, activo = {}, nil
+			for _, s in ipairs(partes) do
+				items[#items + 1] = { key = PREFIJO_PARTE .. s.clave, label = s.nombre, icon = s.icono }
+				if s == spec then
+					activo = PREFIJO_PARTE .. s.clave
+					if s.nav then
+						local ok, sub, act = pcall(s.nav, Hub.Est(s.clave))
+						if ok and type(sub) == "table" then
+							for _, it in ipairs(sub) do
+								items[#items + 1] = { key = PREFIJO_FILTRO .. tostring(it.key), label = "     " .. tostring(it.label), count = it.count }
+							end
+							if act ~= nil then activo = PREFIJO_FILTRO .. tostring(act) end
+						end
+					end
+				end
+			end
+			if #partes == 1 and not spec.nav then return {}, nil end
+			return items, activo
+		end,
+		onNav = function(key)
+			key = tostring(key)
+			if key:sub(1, #PREFIJO_PARTE) == PREFIJO_PARTE then
+				g.activa = key:sub(#PREFIJO_PARTE + 1)
+			elseif key:sub(1, #PREFIJO_FILTRO) == PREFIJO_FILTRO then
+				local spec, k = parte(), key:sub(#PREFIJO_FILTRO + 1)
+				local est = Hub.Est(spec.clave)
+				if spec.onNav then spec.onNav(est, k) else est.filtro = k end
+			end
 			local P = Picker()
 			if P and P.Render then P.Render() end
-		end
-	end
-	if spec.buscar then
-		reg.searchPlaceholder = spec.buscar
-		reg.search = function(t)
-			est.busqueda = t
-			Hub.Redibujar()
-		end
-	end
-	return UI.RegisterSection(reg)
+		end,
+		searchPlaceholder = "Buscar",
+		search = function(t)
+			local spec = parte()
+			if spec.buscar then Hub.Est(spec.clave).busqueda = t; Hub.Redibujar() end
+		end,
+	}
+	return PS().UI.RegisterSection(reg)
 end
 
 -- Abre el hub en una sección de Mamba (la última que viste si clave es nil).
 function Hub.Abrir(clave, pestana)
 	if not Hub.Disponible() then return false end
 	clave = clave or Hub.ultima or (AsistenteDB and AsistenteDB.hubUltima) or "MambaEquipo"
-	if not Hub.secciones[clave] then clave = "MambaEquipo" end
+	if not Hub.grupoDe[clave] then clave = "MambaEquipo" end
+	local g = Hub.grupoDe[clave]
+	if not g then return false end
+	g.activa = clave
 	if pestana then Hub.Est(clave).pestana = pestana end
 	local p = PS()
 	if p.UI.ShowPicker then p.UI.ShowPicker() end
 	local P = Picker()
-	if P and P.ShowSection then P.ShowSection(clave) end
+	if P and P.ShowSection then P.ShowSection(g.clave) end
 	return true
 end
 
@@ -545,7 +598,7 @@ end
 function Hub.Abierto()
 	local win, P = _G.PolestarPicker, Picker()
 	if not (win and win:IsShown() and P and P.Section) then return false end
-	return Hub.secciones[P.Section()] ~= nil
+	return Hub.grupos[P.Section()] ~= nil
 end
 
 function Hub.Alternar()
