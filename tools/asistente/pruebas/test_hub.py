@@ -165,10 +165,10 @@ def revisar(nombre, minimo=3):
 
 # 1) registro: 4 entradas en el riel (Equipo, Oro, Ciudad y Errores al pie) con las 8 partes dentro
 R = G.REGISTRADAS
-grupos = ["MambaGrupoEquipo", "MambaGrupoOro", "MambaGrupoCiudad", "MambaGrupoErrores"]
+grupos = ["MambaGrupoEquipo", "MambaGrupoOro", "MambaGrupoIrA", "MambaGrupoCiudad", "MambaGrupoErrores"]
 for k in grupos:
     check(R[k] is not None, f"entrada del riel registrada: {k}")
-check([str(R[k].label) for k in grupos if R[k]] == ["Equipo", "Oro", "Ciudad", "Errores"], "nombres del riel")
+check([str(R[k].label) for k in grupos if R[k]] == ["Equipo", "Oro", "Ir a…", "Ciudad", "Errores"], "nombres del riel (Ir a… a la vista, con entrada propia)")
 check(R["MambaGrupoErrores"] is not None and R["MambaGrupoErrores"].foot is True, "Errores va al pie del riel")
 claves = ["MambaEquipo", "MambaSubasta", "MambaIrA", "MambaClase", "MambaServicios", "MambaCapa", "MambaMedidor", "MambaErrores"]
 for k in claves:
@@ -256,7 +256,7 @@ G.Polestar.UI.Picker.Render()
 v = textos()
 check(any(recn in x for x in v), "Ir a… sugiere la misma mazmorra recomendada")
 check(any("Ruta a" in x for x in v), "Ir a… muestra la ruta")
-R["MambaGrupoCiudad"].search("subasta")
+R["MambaGrupoIrA"].search("subasta")
 v = textos()
 check(any("subastas" in x.lower() for x in v), "buscar «subasta» encuentra la casa de subastas")
 check(any("≈ 7:00" in x for x in v), f"sin el parche P8 el tiempo total sale de Nav.API.Estimate (420 s = ≈ 7:00, R0) ({[x for x in v if 'otal' in x][:1]})")
@@ -272,7 +272,7 @@ Polestar.Nav.EstimateTravel = function(from, to, budgeted, noHearth, noFlights)
   return t, nil, legs
 end
 """)
-R["MambaGrupoCiudad"].search("banco")
+R["MambaGrupoIrA"].search("banco")
 v = textos()
 tx = " | ".join(v)
 check("1. Piedra de hogar a Cima del Trueno" in tx and "15 s" in tx, "Ir a…: tramo 1, la piedra con su tiempo")
@@ -282,9 +282,9 @@ check("El más cercano en tiempo" in tx, "Ir a…: el banco elegido es el más c
 check("Otras formas de llegar" in tx and "Sin piedra de hogar" in tx and "Sin piedra ni vuelos" in tx, "Ir a…: las alternativas sin piedra y sin piedra ni vuelos (la más rápida no vuela)")
 check("≈ 5:18" in tx, "la alternativa sin piedra da su total (20 + 258 + 40 s)")
 L.execute("Polestar.Nav.EstimateTravel = nil; Asistente.Llevame.OlvidarCache()")
-R["MambaGrupoCiudad"].search("zzzz qqq")
+R["MambaGrupoIrA"].search("zzzz qqq")
 check(any("Sin resultados" in x for x in textos()), "Ir a…: estado «Sin resultados»")
-R["MambaGrupoCiudad"].search("")
+R["MambaGrupoIrA"].search("")
 
 # 7) Subasta: interruptores conectados a Polestar (qol.sellJunk / qol.autoRepair)
 G.MambaAPI.Abrir("MambaSubasta")
@@ -426,6 +426,29 @@ COMB = L.eval("""function()
   return sigue
 end""")
 check(COMB() is True, "«Restablecer posiciones» en combate espera a que termine el combate")
+
+# 10d) K108: la ventana de servicios cuando el jugador quiera
+G.MAPA = 1456
+check(G.MambaAPI.CiudadMasCercana() == 1456, "en Cima del Trueno, la ciudad más cercana es la misma")
+check(G.MambaAPI.AbrirServicios() is True, "MambaAPI.AbrirServicios abre la ventana en una ciudad")
+G.MAPA = 1413  # Los Baldíos: no es ciudad
+CMAS = G.MambaAPI.CiudadMasCercana()
+check(CMAS in (1454, 1456, 1458), f"fuera de una ciudad, CiudadMasCercana da una ciudad con lista ({CMAS})")
+check(G.MambaAPI.AbrirServicios() is True, "fuera de una ciudad, AbrirServicios abre la más cercana (sin «Aquí no hay lista»)")
+G.MAPA = 1456
+G.MambaAPI.Abrir("MambaServicios")
+v = textos()
+check(any("Abrir la ventana de servicios" in x for x in v), "Ciudad › Servicios tiene el botón «Abrir la ventana de servicios»")
+check(any("Abrirla sola al entrar a una ciudad" in x for x in v), "Ciudad › Servicios tiene el interruptor de abrirla sola")
+MED = L.eval("""function()
+  local abierto = 0
+  local orig = MambaAPI.AbrirServicios
+  MambaAPI.AbrirServicios = function() abierto = abierto + 1; return true end
+  MambaBotonMinimapa.scripts.OnClick(MambaBotonMinimapa, "MiddleButton")
+  MambaAPI.AbrirServicios = orig
+  return abierto
+end""")
+check(MED() == 1, "clic con la rueda en el botón del minimapa abre los servicios")
 
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:

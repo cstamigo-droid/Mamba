@@ -315,7 +315,11 @@ check(F.destino is None and any("Cima del Trueno" in c for c in chat(L)), "/serv
 G.MAPA = 1411
 L.execute('chat = {}')
 L.execute('Slash("/servicios", "")')
-check(any("no hay lista" in c for c in chat(L)), "fuera de una ciudad lo dice")
+if L.eval("MambaAPI ~= nil and MambaAPI.CiudadMasCercana ~= nil"):
+    # K108 (18-11): fuera de una ciudad se abre la ciudad con lista más cercana, en vez de "aquí no hay lista"
+    check(not any("no hay lista" in c for c in chat(L)), "fuera de una ciudad abre la más cercana (K108)")
+else:
+    check(any("no hay lista" in c for c in chat(L)), "fuera de una ciudad lo dice (sin la API de Mamba)")
 L.execute('chat = {}')
 L.execute('Slash("/asis", "creditos")')
 check(any("forever-db" in c for c in chat(L)) and any("Cillian Berragan" in c for c in chat(L)), "/asis creditos")

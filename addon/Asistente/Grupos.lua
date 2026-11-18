@@ -1,13 +1,15 @@
 -- Asistente/Grupos.lua: las entradas de Mamba en el riel de Polestar y la API pública para los otros módulos.
--- Riel (acordado con Mamba_Plan, 18-11): Mi plan = 20 y la Interfaz = 210 (Mamba_*), Equipo = 100,
--- Oro = 110, Ciudad = 120, y Errores al pie, junto a Opciones. Así el riel cabe en el alto de la ventana.
+-- Riel (acordado con Mamba_Plan, 18-11): Mi plan = 21 y la Interfaz = 210 (Mamba_*), Equipo = 100,
+-- Oro = 110, Ir a… = 115, Ciudad = 120, y Errores al pie, junto a Opciones.
 -- Licencia: GPL-3.0-only.
 local A = _G.Asistente
 local Hub = A.Hub
 
 Hub.Grupo({ clave = "MambaGrupoEquipo", nombre = "Equipo", icono = "qol-upgrade", orden = 100, partes = { "MambaEquipo", "MambaClase" } })
 Hub.Grupo({ clave = "MambaGrupoOro", nombre = "Oro", icono = "qol-coin", orden = 110, partes = { "MambaSubasta", "MambaMedidor" } })
-Hub.Grupo({ clave = "MambaGrupoCiudad", nombre = "Ciudad", icono = "icon-goto", orden = 120, partes = { "MambaIrA", "MambaServicios", "MambaCapa" } })
+-- «Ir a…» con su propia entrada en el riel, a la vista (K58/K108); Ciudad = Servicios + Capa
+Hub.Grupo({ clave = "MambaGrupoIrA", nombre = "Ir a…", icono = "icon-goto", orden = 115, partes = { "MambaIrA" } })
+Hub.Grupo({ clave = "MambaGrupoCiudad", nombre = "Ciudad", icono = "icon-talk", orden = 120, partes = { "MambaServicios", "MambaCapa" } })
 Hub.Grupo({ clave = "MambaGrupoErrores", nombre = "Errores", icono = "bug", orden = 900, foot = true, partes = { "MambaErrores" } })
 
 ---------------------------------------------------------------- API pública (_G.MambaAPI)
@@ -109,4 +111,54 @@ end
 function API.Movible(marco, nombre, asa, opciones) return A.Ventanas and A.Ventanas.Movible(marco, nombre, asa, opciones) end
 function API.AlRestablecer(fn) if A.Ventanas then A.Ventanas.AlRestablecer(fn) end end
 function API.VentanasFijas() return A.Ventanas and A.Ventanas.Fijas() or false end
+
+-- La ventana «Servicios de <ciudad>» cuando el jugador quiera (K108). Fuera de una ciudad: la más cercana.
+--   API.CiudadMasCercana() -> uiMap de la ciudad con lista de servicios más cercana (la actual si estás en una)
+--   API.AbrirServicios(uiMap?) -> true si se abrió
+local function continenteDe(m)
+	local CM = C_Map
+	local tipo = Enum and Enum.UIMapType and Enum.UIMapType.Continent or 2
+	for _ = 1, 8 do
+		local i = m and CM and CM.GetMapInfo and CM.GetMapInfo(m)
+		if not i then return nil end
+		if i.mapType == tipo then return m end
+		m = i.parentMapID
+	end
+end
+
+function API.CiudadMasCercana()
+	if not cargar("Asistente_Servicios") then return nil end
+	local S = A.modulos and A.modulos.servicios
+	local ciudades = S and S.datos and S.datos.ciudades
+	if not ciudades then return nil end
+	local m = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+	if m and ciudades[m] then return m end
+	local cont = continenteDe(m)
+	local p = cont and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(cont, "player")
+	local px, py
+	if p then px, py = p:GetXY() end
+	local mejor, dist
+	for um in pairs(ciudades) do
+		if cont and continenteDe(um) == cont and px and C_Map.GetMapRectOnMap then
+			local ok, x1, x2, y1, y2 = pcall(C_Map.GetMapRectOnMap, um, cont)
+			if ok and x1 then
+				local d = ((x1 + x2) / 2 - px) ^ 2 + ((y1 + y2) / 2 - py) ^ 2
+				if not dist or d < dist then mejor, dist = um, d end
+			end
+		end
+	end
+	if mejor then return mejor end
+	-- en otro continente (o sin posición): la primera ciudad con lista, en orden fijo
+	local claves = {}
+	for um in pairs(ciudades) do claves[#claves + 1] = um end
+	table.sort(claves)
+	return claves[1]
+end
+
+function API.AbrirServicios(uiMap)
+	if not cargar("Asistente_Servicios") then return false end
+	local S = A.modulos and A.modulos.servicios
+	if not (S and S.Abrir) then return false end
+	return S.Abrir(uiMap or API.CiudadMasCercana()) and true or false
+end
 

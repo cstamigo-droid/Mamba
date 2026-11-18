@@ -234,6 +234,10 @@ Hub.Seccion({
 		local grupos = s.Grupos(est.ciudad, clase, enCiudad and x or nil, enCiudad and y or nil) or {}
 		if est.busqueda and est.busqueda ~= "" then grupos = s.Buscar(grupos, est.busqueda) end
 		if #grupos == 0 then V:Vacio("Sin resultados", "No encontré «" .. tostring(est.busqueda or "") .. "». Prueba con menos palabras.") return end
+		V:Botones({ { "Abrir la ventana de servicios", function() if _G.MambaAPI and _G.MambaAPI.AbrirServicios then _G.MambaAPI.AbrirServicios(est.ciudad) end end } },
+			"La ventana chica con la lista de esta ciudad, que se queda abierta mientras caminas.")
+		V:Interruptor("Abrirla sola al entrar a una ciudad", A.Ajuste("servicios", "abrirAlEntrar"),
+			function(v) A.FijarAjuste("servicios", "abrirAlEntrar", v and true or false) end)
 		if not enCiudad then V:Nota("No estás en esta ciudad: «Ir» te lleva desde donde estés, con la ruta de Polestar.") end
 		V:Columnas({ { "Servicio", 330 }, { "Quién", 300 }, { "Distancia", 150 } })
 		for _, g in ipairs(grupos) do

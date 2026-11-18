@@ -487,6 +487,10 @@ local function crearBoton()
 	borde:SetPoint("TOPLEFT", boton, "TOPLEFT", 0, 0)
 	boton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 	boton:SetScript("OnClick", function(_, cual)
+		if cual == "MiddleButton" then
+			if _G.MambaAPI and _G.MambaAPI.AbrirServicios then pcall(_G.MambaAPI.AbrirServicios) end
+			return
+		end
 		if cual and cual ~= "LeftButton" then return end
 		-- diagnóstico del último clic, para leerlo en las SavedVariables (AsistenteDB.diagBoton)
 		local d = { cuando = date and date("%H:%M:%S") or "", hub = A.Hub and A.Hub.Disponible() and "si" or "no" }
@@ -519,7 +523,7 @@ local function crearBoton()
 	end)
 	boton:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
 	boton:SetScript("OnEnter", function(self)
-		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Arrastrar con el botón derecho: mover este botón" })
+		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Clic con la rueda: servicios de la ciudad más cercana", "Arrastrar con el botón derecho: mover este botón" })
 	end)
 	boton:SetScript("OnLeave", alSalir)
 	ubicarBoton()
