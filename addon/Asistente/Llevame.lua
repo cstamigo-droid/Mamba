@@ -182,28 +182,44 @@ local function tramo(leg)
 	return t
 end
 
--- Une caminatas seguidas (los puntos de paso de Polestar) en un solo tramo "Caminar N yd".
+-- Une TODAS las caminatas seguidas en un solo tramo, con la suma de yardas y de segundos (prueba en el juego, tanda 3:
+-- 9 tramos seguidos de "Sigue el camino de salida (41 yd) ≈ 6 s"). Solo un cambio de medio (piedra, vuelo, barco,
+-- zepelín, portal, hechizo, ascensor) abre un tramo nuevo. El texto: el último que dice adónde ("Camina hasta el
+-- maestro de vuelo"); si ninguno lo dice (puntos de paso, "Sigue el camino…"), "Caminar N yd".
+local function generico(texto)
+	if not texto then return true end
+	local L = P() and P().L
+	for _, k in ipairs({ "Walk", "Follow the path", "Follow the path out" }) do
+		if texto == k or (L and texto == L[k]) then return true end
+	end
+	return texto == LL.TIPO.walk
+end
+
 function LL.Tramos(legs)
 	local out = {}
 	for _, leg in ipairs(legs or {}) do
 		local t = tramo(leg)
+		t.generico = t.tipo == "walk" and (t.via or generico(leg.label)) or nil
 		local u = out[#out]
-		if u and u.tipo == "walk" and t.tipo == "walk" and (u.via or t.via) then
+		if u and u.tipo == "walk" and t.tipo == "walk" then
 			u.seg = u.seg + t.seg
 			u.yardas = (u.yardas or 0) + (t.yardas or 0)
-			if not t.via then u.texto, u.via = t.texto, nil end
+			if not t.generico then u.texto, u.generico = t.texto, nil end
 			u.ajustado = u.ajustado or t.ajustado
+			u.estimado = u.estimado or t.estimado
+			u.medido = u.medido and t.medido or nil
+			u.partes = (u.partes or 1) + 1
 		else
 			out[#out + 1] = t
 		end
 	end
 	for _, t in ipairs(out) do
-		local camina = (P() and P().L and P().L["Walk"]) or "Walk"
-		if t.tipo == "walk" and t.yardas and (t.via or t.texto == camina or t.texto == "Walk" or t.texto == LL.TIPO.walk) then
-			t.texto = format("Caminar %d yd", floor(t.yardas + 0.5))
+		if t.tipo == "walk" and t.generico then
+			t.texto = format("Caminar %d yd", floor((t.yardas or 0) + 0.5))
 		elseif t.tipo == "walk" and t.yardas and t.yardas > 0 then
 			t.texto = format("%s (%d yd)", t.texto, floor(t.yardas + 0.5))
 		end
+		t.via = nil
 	end
 	return out
 end
