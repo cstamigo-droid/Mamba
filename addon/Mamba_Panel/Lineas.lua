@@ -234,6 +234,11 @@ function N.Lineas()
 	add(lineaLlenas(e))
 	for _, l in ipairs(lineasProfesion(2)) do add(l) end
 	for _, l in ipairs(lineasFarmeo(M, e)) do add(l) end
+	-- K103: los avisos de oportunidad (Avisos.lua), ordenados con lo demás
+	if N.AplicarAvisos then
+		local ok, err = pcall(N.AplicarAvisos, out, e)
+		if not ok then N.Falla("Avisos", err) end
+	end
 	if N.PJ().soloSolo then
 		for i = #out, 1, -1 do if out[i].grupo then table.remove(out, i) end end
 	end

@@ -11,5 +11,6 @@
 ## Category-esES: Mamba
 
 Lineas.lua
+Avisos.lua
 Pestanas.lua
 Panel.lua

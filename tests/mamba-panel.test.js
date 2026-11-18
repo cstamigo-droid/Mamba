@@ -260,3 +260,99 @@ test('profesiones: MambaProfesiones.Recomendaciones entra con su cómo, su Llév
 	assert.equal(out.txt, 'Llévame');
 	assert.equal(out.llevo, true, 'Llévame usa el de Profesiones (flecha al farmeo y medición)');
 });
+
+// K103: avisos de oportunidad
+const AVISOS = `
+C_Map = C_Map or {}
+C_Map.GetBestMapForUnit = function() return 1412 end
+GetRealZoneText = function() return "Mulgore" end
+MambaAPI = MambaAPI or {}
+local publicado
+MambaAPI.PonerEnSubasta = function(id, precio) publicado = { id, precio }; return true end
+function PUBLICADO() return publicado end
+MambaAPI.Bolsas = function() return {
+	{ id = 4306, link = "|cffffffff|Hitem:4306::::::::|h[Paño de seda]|h|r", cantidad = 20, sug = "subastar", precio = 900, motivo = "Hoy se paga bien" },
+	{ id = 2589, link = "|cffffffff|Hitem:2589::::::::|h[Paño de lino]|h|r", cantidad = 5, sug = "subastar", precio = 40 },
+	{ id = 4865, link = "|cff9d9d9d|Hitem:4865::::::::|h[Garra rota]|h|r", cantidad = 3, sug = "basura", vendedor = 5 },
+	{ id = 2770, cantidad = 10, sug = "guardar", vendedor = 1 },
+} end
+`;
+
+test('K103: avisos de lugar, subasta (con Publicar), espacio y botín; cada tipo se silencia', () => {
+	const [out] = run(`${AVISOS}
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local mont
+		for _, l in ipairs(N.lineas) do if l.clave == "montura40" then mont = l end end
+		local lugar = mont.titulo
+		-- en la subasta
+		stub.fire("AUCTION_HOUSE_SHOW")
+		local sub, esp
+		for _, l in ipairs(N.lineas) do
+			if l.aviso == "subasta" and not sub then sub = l end
+			if l.aviso == "espacio" then esp = l end
+		end
+		local txt, fn = N.Accion(sub)
+		fn()
+		local nSub = 0
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then nSub = nSub + 1 end end
+		local hayLlenas = false
+		for _, l in ipairs(N.lineas) do if l.clave == "llenas" then hayLlenas = true end end
+		-- botín: un material que vale 1 o en la subasta
+		MambaAPI.PrecioObjeto = function(id) return 10000, "subasta" end
+		GetNumLootItems = function() return 1 end
+		GetLootSlotLink = function() return "|cffffffff|Hitem:3667::::::::|h[Carne de kodo]|h|r" end
+		UnitExists = function() return true end
+		UnitIsDead = function() return true end
+		UnitName = function(u) if u == "target" then return "Kodo de las llanuras" end return "Hope" end
+		stub.fire("LOOT_READY")
+		N.Refrescar(true)
+		local bot
+		for _, l in ipairs(N.lineas) do if l.aviso == "botin" then bot = l end end
+		-- silenciar "subasta" y "lugar"
+		N.Silenciar("subasta"); N.Silenciar("lugar"); N.Refrescar(true)
+		local quedan = 0
+		local mont2
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then quedan = quedan + 1 end; if l.clave == "montura40" then mont2 = l end end
+		emit({ lugar = lugar, sub = sub.titulo, txt = txt, pub = PUBLICADO(), nSub = nSub, esp = esp and esp.titulo, llenas = hayLlenas,
+			bot = bot and bot.titulo, quedan = quedan, mont2 = mont2.titulo, fallas = MambaPanelPJ.diag.fallas and #MambaPanelPJ.diag.fallas or 0 })`);
+	assert.match(out.lugar, /^Ya que estás en Mulgore: Montura al 40/, 'la línea con lugar en tu mapa se vuelve aviso');
+	assert.equal(out.sub, 'Ya que estás en la subasta: vende Paño de seda a 9 p', 'lo que más deja primero');
+	assert.equal(out.txt, 'Publicar');
+	assert.deepEqual(out.pub, [4306, 900], 'deja la subasta lista con su precio');
+	assert.equal(out.nSub, 2, 'a lo sumo dos avisos de subasta');
+	assert.equal(out.esp, 'Vende Garra rota (15 c) para hacer espacio', 'con las bolsas llenas dice QUÉ vender (lo que menos vale)');
+	assert.equal(out.llenas, false, 'el aviso de espacio reemplaza la línea genérica');
+	assert.equal(out.bot, 'Kodo de las llanuras da Carne de kodo: se vende a 1 o en la subasta');
+	assert.equal(out.quedan, 0, 'silenciado por tipo');
+	assert.match(out.mont2, /^Montura al 40/, 'sin el aviso de lugar, la línea vuelve a la normal');
+	assert.equal(out.fallas, 0);
+});
+
+test('K103 control negativo: sin datos del Tasador ni subasta abierta, no hay avisos inventados', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local n = 0
+		for _, l in ipairs(N.lineas) do if l.aviso and l.aviso ~= "lugar" then n = n + 1 end end
+		emit({ n = n })`);
+	assert.equal(out.n, 0);
+});
+
+test('K108: el botón «Servicios de la ciudad» aparece solo si la ventana expone MambaAPI.AbrirServicios', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local _, cab = N._Piezas()
+		local antes = cab.Serv:IsShown()
+		local abierto
+		MambaAPI = MambaAPI or {}
+		MambaAPI.AbrirServicios = function() abierto = true end
+		N.Refrescar(true)
+		stub.RunScript(cab.Serv, "OnClick", "LeftButton")
+		emit({ antes = antes, despues = cab.Serv:IsShown(), abierto = abierto, texto = cab.Serv.Label:GetText() })`);
+	assert.equal(out.antes, false);
+	assert.equal(out.despues, true);
+	assert.equal(out.abierto, true);
+	assert.equal(out.texto, 'Servicios de la ciudad');
+});

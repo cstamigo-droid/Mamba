@@ -35,6 +35,7 @@ end
 -- El botón de la fila: lo que más acerca a cumplirla (K61).
 function N.Accion(l)
 	if l.tramo then return nil end -- un tramo del viaje en curso: se lee, no se hace
+	if l.accion then return l.accion[1], l.accion[2] end -- un aviso con su propio botón (K103: «Publicar»)
 	if l.llevar then return "Llévame", function() pcall(l.llevar) end end
 	if l.lugar or (l.destino and N.PuedeLlevar()) then return "Llévame", function() N.Llevame(l) end end
 	if l.guia then return "Guía", function() N.AbrirGuiaDe(l) end end
@@ -53,6 +54,11 @@ local function menuDe(r)
 	if l.guia then items[#items + 1] = { text = "Abrir la guía en otra pestaña", icon = "plus", onClick = function() N.AbrirGuiaDe(l) end } end
 	if l.ver then items[#items + 1] = { text = l.ver == "macro" and "Crear la macro" or "Ver en Mamba", icon = "search", onClick = function() verAlgo(l) end } end
 	items[#items + 1] = { separator = true }
+	if l.aviso then
+		local tipo = l.aviso
+		items[#items + 1] = { text = "No avisar más de esto (" .. (N.TIPOS_AVISO[tipo] or tipo) .. ")", icon = "close",
+			onClick = function() N.Silenciar(tipo); N.Refrescar(true) end }
+	end
 	items[#items + 1] = { text = "Hecho", icon = "check", onClick = function() N.Hecho(l); N.Refrescar(true) end }
 	items[#items + 1] = { text = "No me interesa", icon = "close", onClick = function() N.Hecho(l, true); N.Refrescar(true) end }
 	w.ShowMenu(r, items)
@@ -86,6 +92,18 @@ local function construir(GF, body, PAD, UP_TOGGLE)
 	cab.Icon:SetPoint("RIGHT", cab, "RIGHT", -PAD, 0)
 	cab.Icon:SetTexture(th.Media("chevron-down"))
 	w.Color(cab.Icon, "textMuted")
+	-- K108: «Servicios de la ciudad» cuando el jugador quiera (MambaAPI.AbrirServicios, de la ventana de Mamba)
+	cab.Serv = CreateFrame("Button", nil, cab)
+	cab.Serv:SetSize(112, 18)
+	cab.Serv:SetPoint("RIGHT", cab.Icon, "LEFT", -10, 0)
+	cab.Serv.Label = T(cab.Serv, "small", "accent")
+	cab.Serv.Label:SetPoint("RIGHT", cab.Serv, "RIGHT", 0, 0)
+	cab.Serv.Label:SetText("Servicios de la ciudad")
+	cab.Serv:SetScript("OnClick", function() N.AbrirServicios() end)
+	cab.Serv:SetScript("OnEnter", function(self) w.Color(self.Label, "text")
+		w.Tooltip(self, "ANCHOR_LEFT", "Servicios de la ciudad", { { "Todo lo que hay en la ciudad donde estás (o la más cercana), con su Llévame.", th.Color("textDim") } }) end)
+	cab.Serv:SetScript("OnLeave", function(self) w.Color(self.Label, "accent"); w.HideTooltip(self) end)
+	cab.Serv:Hide()
 	cab:SetScript("OnClick", function(_, boton)
 		if boton == "RightButton" then
 			local pj = N.PJ()
@@ -166,6 +184,7 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 	cont:Show()
 	local abierto = N.PJ().abierto
 	cab.Label:SetText(abierto and "Mamba · tu plan" or ("Mamba · tu plan (" .. #ls .. ")"))
+	cab.Serv:SetShown(N.HayServicios())
 	local th = Theme()
 	cab.Icon:SetTexture(th.Media(abierto and "chevron-up" or "chevron-down"))
 	local y = -UP_TOGGLE
@@ -237,6 +256,17 @@ function N.LineasViaje()
 	return out
 end
 
+---------------------------------------------------------------- K108
+function N.HayServicios()
+	local A = _G.MambaAPI
+	return A and A.AbrirServicios and true or false
+end
+
+function N.AbrirServicios()
+	local A = _G.MambaAPI
+	if A and A.AbrirServicios then return pcall(A.AbrirServicios) end
+end
+
 ---------------------------------------------------------------- refresco
 -- Arma las líneas (con sus textos) y le pide a Polestar que acomode la ventana.
 function N.Reacomodar()
@@ -297,13 +327,23 @@ local function enganchar()
 end
 
 local ev = CreateFrame("Frame")
-for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_LEVEL_UP", "PLAYER_MONEY", "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_TAB", "ZONE_CHANGED_NEW_AREA" }) do
+for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_LEVEL_UP", "PLAYER_MONEY", "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_TAB",
+	"ZONE_CHANGED_NEW_AREA", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "AUCTION_HOUSE_SHOW", "AUCTION_HOUSE_CLOSED", "MERCHANT_SHOW",
+	"MERCHANT_CLOSED", "LOOT_READY" }) do
 	pcall(ev.RegisterEvent, ev, e)
 end
 ev:SetScript("OnEvent", function(_, e)
 	if e == "PLAYER_LOGIN" then
 		enganchar()
 		return N.Refrescar(true)
+	end
+	-- K103: dónde está el jugador y qué saqueó
+	if e == "AUCTION_HOUSE_SHOW" then N.estado.subasta = true; return N.Refrescar(true) end
+	if e == "AUCTION_HOUSE_CLOSED" then N.estado.subasta = false; return N.Refrescar(true) end
+	if e == "MERCHANT_SHOW" then N.estado.vendedor = true elseif e == "MERCHANT_CLOSED" then N.estado.vendedor = false end
+	if e == "LOOT_READY" and N.Saqueo then
+		local ok, err = pcall(N.Saqueo)
+		if not ok then N.Falla("Saqueo", err) end
 	end
 	N.Refrescar()
 end)
