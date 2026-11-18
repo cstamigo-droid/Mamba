@@ -348,6 +348,48 @@ def _arreglo_build(g: Path, rel: str, rel_flujo: str, fl: int, msg: str, start: 
     return hechos
 
 
+def cascada(guias: Path) -> list[tuple[str, int, str, str]]:
+    """Entregas y objetivos huérfanos: lint dice "never accepted" y la misión no tiene `accept` en
+    NINGUNA guía de su bando (ni de class/, collectibles/…), así que ninguna cadena puede aceptarla.
+    Sale la línea; se repite hasta que no quede ninguna (una salida puede dejar otra huérfana).
+    18-11: la etapa report de forge build los encontraba de a uno por construcción (~55 min cada una);
+    las aceptaciones las habían sacado guias_sin_fuente, los arreglos o la semilla."""
+    hechos = []
+    for vuelta in range(6):
+        acepta: dict[str, set[int]] = {}
+        for g in guias.rglob("*.guide"):
+            r = g.relative_to(guias).as_posix()
+            b = next((x for x in ("alliance", "horde") if f"/{x}/" in "/" + r), "")
+            for x in g.read_text(encoding="utf-8").splitlines():
+                m = re.match(r"^\s*accept (\d+)\b", x)
+                if m:
+                    acepta.setdefault(b, set()).add(int(m[1]))
+        quitar: dict[Path, set[int]] = {}
+        for f, l, m in lint(guias):
+            n = NUNCA.match(m)
+            if not n or not f.is_file():
+                continue
+            r = f.resolve().relative_to(guias.resolve()).as_posix()
+            b = next((x for x in ("alliance", "horde") if f"/{x}/" in "/" + r), "")
+            q = int(n[2])
+            if q in acepta.get(b, set()) or q in acepta.get("", set()):
+                continue
+            quitar.setdefault(f, set()).add(l)
+        if not quitar:
+            break
+        for f, ls in quitar.items():
+            r = f.resolve().relative_to(guias.resolve()).as_posix()
+            lineas = f.read_bytes().decode("utf-8").split("\n")
+            for l in sorted(ls, reverse=True):
+                if 1 <= l <= len(lineas):
+                    hechos.append((r, l, "línea fuera (cascada: la misión no se acepta en ninguna guía del bando)", lineas[l - 1].strip()))
+                    del lineas[l - 1]
+            lineas = sin_pasos_vacios(lineas, [l - 1 - k for k, l in enumerate(sorted(ls))])
+            f.write_bytes("\n".join(lineas).encode("utf-8"))
+        print(f"cascada {vuelta + 1}: {sum(len(x) for x in quitar.values())} líneas huérfanas fuera")
+    return hechos
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print(__doc__)
@@ -402,7 +444,8 @@ def main() -> int:
         if cambios == 0:
             break
     hechos += desde_build(guias)
-    rep = guias.parent / (guias.name + "_ARREGLOS.md")
+    hechos += cascada(guias)
+    rep =guias.parent / (guias.name + "_ARREGLOS.md")
     with rep.open("w", encoding="utf-8") as h:
         h.write("# Arreglos mecánicos de las guías de Mamba (arreglar_guias.py)\n\n")
         h.write(f"{len(hechos)} arreglos; {len(pendientes)} errores de lint sin arreglo automático.\n\n| Guía | Línea | Qué | Antes |\n|---|---|---|---|\n")
