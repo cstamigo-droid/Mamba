@@ -7,6 +7,12 @@
 local _, M = ...
 
 local cabecera, ancla, asa
+local porUnidad = {} -- "party1" -> botón
+function M.Unidad(b, u)
+	for k, x in pairs(porUnidad) do if x == b then porUnidad[k] = nil end end
+	if type(u) == "string" then porUnidad[u] = b end
+end
+function M.BotonDe(u) return porUnidad[u] end
 local botones = {}
 local pendiente = false
 local function enCombate() return InCombatLockdown and InCombatLockdown() end
@@ -255,7 +261,10 @@ function M.NuevoBoton(b)
 	elseif enCombate() then
 		pendiente = true -- RegisterForClicks y el perfil, al salir de combate
 	end
-	if b.HookScript then b:HookScript("OnAttributeChanged", function(s, n) if n == "unit" then M.Proteger("pintar", M.Pintar, s) end end) end
+	if b.HookScript then b:HookScript("OnAttributeChanged", function(s, n, v)
+		if n == "unit" then M.Unidad(s, v); M.Proteger("pintar", M.Pintar, s) end
+	end) end
+	M.Unidad(b, b.GetAttribute and b:GetAttribute("unit"))
 	M.Proteger("pintar", M.Pintar, b)
 end
 
@@ -291,9 +300,14 @@ ev:SetScript("OnEvent", function(_, e, unidad)
 		M.Proteger("presteza", M.ActualizarPresteza)
 	else
 		if type(unidad) == "string" and not (unidad == "player" or unidad:find("^party") or unidad:find("^raid")) then return end
-		for _, b in ipairs(botones) do
-			if not unidad or (b.GetAttribute and b:GetAttribute("unit") and UnitIsUnit and UnitIsUnit(b:GetAttribute("unit"), unidad)) then
-				M.Proteger("pintar", M.Pintar, b)
+		-- tabla unidad -> botón: sin recorrer todos los botones en cada evento
+		local b = unidad and porUnidad[unidad]
+		if b then
+			M.Proteger("pintar", M.Pintar, b)
+		elseif not unidad or unidad == "player" then
+			for _, x in ipairs(botones) do
+				local u = x.GetAttribute and x:GetAttribute("unit")
+				if not unidad or (u and UnitIsUnit and UnitIsUnit(u, unidad)) then M.Proteger("pintar", M.Pintar, x) end
 			end
 		end
 	end
