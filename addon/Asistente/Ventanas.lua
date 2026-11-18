@@ -67,7 +67,7 @@ function V.Movible(marco, nombre, asa, opciones)
 	opciones = opciones or {}
 	marco:SetClampedToScreen(true)
 	marco:SetMovable(true)
-	local reg = { marco = marco, nombre = nombre, original = nil, etiqueta = opciones.etiqueta or nombre }
+	local reg = { marco = marco, nombre = nombre, original = nil, etiqueta = opciones.etiqueta or opciones.titulo or nombre } -- titulo: sinónimo de etiqueta
 	if marco.GetNumPoints and (marco:GetNumPoints() or 0) > 0 and marco:GetPoint(1) then reg.original = { marco:GetPoint(1) } end
 	V.marcos[nombre] = reg
 	if not opciones.yaArrastra and not opciones.sinAsa then
