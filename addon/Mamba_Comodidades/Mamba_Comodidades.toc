@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: Mamba: raros y comodidades
+## Notes: Raros y tesoros (ruta por la zona, macro de apuntado y la cara del raro en el aviso) y comodidades con un interruptor cada una: liberar en campos de batalla, invocación, resurrección, botín rápido, tiempo de vuelo y silenciar sonidos. En Interfaz.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariables: MambaComodidadesDB
+## OptionalDeps: Polestar, Asistente, ForeverLootSparkles
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Piezas.lua
+Interfaz.lua
+Inicio.lua
+Raros.lua
+Comodidades.lua
+Panel.lua
