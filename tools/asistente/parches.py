@@ -114,6 +114,10 @@ PARCHES = [
     ('P13-misiones', 'Polestar/UI/Dungeons.lua',
      '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\tb:Show()\nend',
      '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\t-- Mamba (PARCHES.md P13): K100, what is still to do and «Guíame» (Mamba_Panel/Misiones.lua).\n\tif UI.MambaMision then pcall(UI.MambaMision, b, q, key, state, target, tlabel, fin) end\n\tb:Show()\nend'),
+    # P14 (Mamba_Panel, prueba de la coordinadora 18-11): la facción de una misión de mazmorra desde el Codex.
+    ('P14-faccion', 'Polestar/Dungeons/Dungeons.lua',
+     '\tp.attunement = p.attunement or {}\n\tlocalisePage(p)\n\topenKey, openPage = key, p\n\treturn p\nend',
+     '\tp.attunement = p.attunement or {}\n\t-- Mamba (PARCHES.md P14): a quest the page gives no side takes the Codex\'s (Raleigh\'s "In the Name of the\n\t-- Light" is Alliance), so the faction filter leaves it out for the Horde, its chains too.\n\tlocal Cx = ns.Codex\n\tif Cx and Cx.Quest then\n\t\tfor _, list in ipairs({ p.quests, p.chain }) do\n\t\t\tfor _, q in pairs(list) do\n\t\t\t\tif type(q) == "table" and q.faction == nil and q.id then\n\t\t\t\t\tlocal ok, r = pcall(Cx.Quest, q.id)\n\t\t\t\t\tif ok and type(r) == "table" and (r.faction == "A" or r.faction == "H") then q.faction = r.faction end\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\tend\n\tlocalisePage(p)\n\topenKey, openPage = key, p\n\treturn p\nend'),
 ]
 
 # Parches al código de forge (la herramienta de Polestar que construye los datos), relativos a la raíz.

@@ -14,12 +14,13 @@ const fixture = require('./fixtures/codex/dungeons.json');
 const QUEST = 90044;
 const PRE = 90043;
 
-function card({ state, conPanel = true }) {
+function card({ state, conPanel = true, alianza = false }) {
 	const { codex, inputs } = structuredClone(fixture);
 	const base = { level: 15, minLevel: 10, faction: null, races: null, classes: null, end: { npc: [5767], object: [] },
 		objectives: [], zone: 1413, rewards: [], choices: [], preAny: [] };
 	codex.quests[PRE] = { ...base, id: PRE, title: 'Primer paso', start: { npc: [5767], object: [], item: [] }, pre: [] };
 	codex.quests[QUEST] = { ...base, id: QUEST, title: 'Segundo paso', start: { npc: [5767], object: [], item: [] }, pre: [PRE] };
+	if (alianza) codex.quests[QUEST].faction = 'A';
 	inputs.forever.quests[QUEST] = { area: 718 };
 	inputs.forever.quests[PRE] = { area: 718 };
 	const journal = buildJournal(inputs, codex);
@@ -32,6 +33,7 @@ function card({ state, conPanel = true }) {
 	q.chain = [PRE];
 	page.chain = page.chain || {};
 	page.chain[PRE] = { id: PRE, title: 'Primer paso', level: 15, start: { kind: 'npc', id: 5767, name: 'Nalpak', map: 1413, x: 46, y: 36, f: 'e' } };
+	if (alianza) delete q.faction;
 	page.quests = [q];
 	const pack = writeCodexPack(codex, { extraFiles: emitJournal(journal) });
 	const done = state === 'log' ? `id == ${PRE}` : 'false';
@@ -64,12 +66,15 @@ local b
 for _, v in ipairs(Polestar.UI.DungeonsSection.blocks) do
   if v:IsShown() and v.psQuest == ${QUEST} then b = v; break end
 end
+local horda = {}
+for _, x in ipairs(D.Quests('wailing-caverns', 'H')) do horda[#horda + 1] = x.id end
+if ${alianza} then emit({ horda = horda }); return end
 assert(b, 'quest card missing')
 local subs = {}
 for _, r in ipairs(b.Chains or {}) do if r:IsShown() then subs[#subs + 1] = r.Sub:GetText() end end
 local g = rawget(b, "MambaGuiame")
 if g and g:IsShown() then g:Click() end
-emit({ meta = b.Meta:GetText(), guiame = g and g:IsShown() or false, pedido = pedido, subs = subs })
+emit({ horda = horda, meta = b.Meta:GetText(), guiame = g and g:IsShown() or false, pedido = pedido, subs = subs })
 `,
 		}).emitted[0];
 	} finally { pack.cleanup(); }
@@ -95,4 +100,12 @@ test('K100 control negativo: sin Mamba_Panel la tarjeta queda como la de Polesta
 	const r = card({ state: 'log', conPanel: false });
 	assert.doesNotMatch(r.meta, /Falta/);
 	assert.equal(r.guiame, false);
+});
+
+test('P14: una misión sin bando en la página toma el del Codex y el filtro Horda la deja fuera', () => {
+	const lista = (h) => (Array.isArray(h) ? h : Object.values(h || {}));
+	const r = card({ state: 'open', alianza: true });
+	assert.ok(!lista(r.horda).includes(QUEST), `la misión de la Alianza no aparece para la Horda (${JSON.stringify(r.horda)})`);
+	const control = card({ state: 'open' });
+	assert.ok(lista(control.horda).includes(QUEST), 'control: sin bando en el Codex, sí aparece');
 });

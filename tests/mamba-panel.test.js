@@ -369,3 +369,25 @@ test('K108: el botón «Servicios de la ciudad» aparece solo si la ventana expo
 	assert.equal(out.abierto, true);
 	assert.equal(out.texto, 'Servicios de la ciudad');
 });
+
+test('botones: miden su texto (nunca "Llévam"); en un panel angosto bajan a su propia línea', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local function medir(ancho)
+			N.LayoutLineas(GF, GF.parts.body, ancho, true, 14, 39, 24, 30)
+			local _, _, filas = N._Piezas()
+			local r = filas[1]
+			local lw, sw = r.Ir.Label:GetWidth(), r.Ir.Label:GetStringWidth()
+			local p = { r.Ir:GetPoint(1) }
+			return { texto = r.Ir.Label:GetText(), cabe = lw >= sw, abajo = r.psAbajo and true or false, ancla = p[1] }
+		end
+		emit({ ancho = medir(420), angosto = medir(230) })`);
+	assert.equal(out.ancho.texto, 'Llévame');
+	assert.equal(out.ancho.cabe, true, 'el texto entra entero');
+	assert.equal(out.ancho.abajo, false);
+	assert.equal(out.ancho.ancla, 'TOPRIGHT');
+	assert.equal(out.angosto.cabe, true);
+	assert.equal(out.angosto.abajo, true, 'en un panel angosto el botón baja');
+	assert.equal(out.angosto.ancla, 'TOPLEFT');
+});

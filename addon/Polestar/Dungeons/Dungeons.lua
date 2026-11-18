@@ -215,6 +215,19 @@ local function page(key)
 	p.chain = p.chain or {}
 	p.bosses = p.bosses or {}
 	p.attunement = p.attunement or {}
+	-- Mamba (PARCHES.md P14): a quest the page gives no side takes the Codex's (Raleigh's "In the Name of the
+	-- Light" is Alliance), so the faction filter leaves it out for the Horde, its chains too.
+	local Cx = ns.Codex
+	if Cx and Cx.Quest then
+		for _, list in ipairs({ p.quests, p.chain }) do
+			for _, q in pairs(list) do
+				if type(q) == "table" and q.faction == nil and q.id then
+					local ok, r = pcall(Cx.Quest, q.id)
+					if ok and type(r) == "table" and (r.faction == "A" or r.faction == "H") then q.faction = r.faction end
+				end
+			end
+		end
+	end
 	localisePage(p)
 	openKey, openPage = key, p
 	return p

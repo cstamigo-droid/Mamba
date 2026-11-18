@@ -123,6 +123,13 @@ local ESTADO_CADENA = { hecha = "hecha", lista = "lista para entregar", ["en el 
 local function mision(b, q, key, state, target, tlabel, fin)
 	local P = PS()
 	if not (P and P.Widgets and b and q) then return end
+	-- una misión del otro bando (la página no lo dice; P14 lo completa desde el Codex): sin «Guíame» ni "Falta"
+	local lado = UnitFactionGroup and UnitFactionGroup("player")
+	lado = lado == "Alliance" and "A" or lado == "Horde" and "H" or nil
+	if q.faction and lado and q.faction ~= lado then
+		if rawget(b, "MambaGuiame") then b.MambaGuiame:Hide() end
+		return
+	end
 	local punto, nombre, texto, conKey = pendiente(q, key, state, target, tlabel, fin)
 	-- la línea de datos
 	if texto and b.Meta then

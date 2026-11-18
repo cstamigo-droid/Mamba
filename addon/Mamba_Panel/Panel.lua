@@ -206,11 +206,23 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 		r.Ir:SetShown(txt ~= nil)
 		r.Text:SetText(l.titulo or "")
 		r.Sub:SetText(l.sub or "")
-		local tw = width - TEXT_X - 14 - PAD - BOTON_W - 6
+		-- el botón mide lo que mide su texto (nunca "Llévam"); si no deja al menos 120 px para el texto de la
+		-- línea, baja a una línea propia debajo del cómo, alineado con el texto
+		local bw = 0
+		if txt then
+			r.Ir.Label:SetWidth(0)
+			bw = floor(r.Ir.Label:GetStringWidth() + 0.5) + 2
+			r.Ir.Label:SetWidth(bw)
+			r.Ir:SetWidth(bw + 4)
+		end
+		local libre = width - TEXT_X - 14 - PAD
+		local abajo = txt ~= nil and (libre - bw - 10) < 120
+		local tw = abajo and libre or (libre - (txt and (bw + 10) or 0))
 		r.Text:SetWidth(tw)
 		r.Sub:SetWidth(tw)
 		local inset = max(0, (UP_ROW - r.Text:GetLineHeight()) / 2)
 		local h = max(UP_ROW, floor(inset * 2 + r.Text:GetStringHeight() + 2 + r.Sub:GetStringHeight() + 0.5))
+		if abajo then h = h + 18 end
 		r.Icon:ClearAllPoints()
 		r.Icon:SetPoint("LEFT", r, "TOPLEFT", TEXT_X - 2, -UP_ROW / 2)
 		r.Text:ClearAllPoints()
@@ -218,7 +230,16 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 		r.Sub:ClearAllPoints()
 		r.Sub:SetPoint("TOPLEFT", r.Text, "BOTTOMLEFT", 0, -2)
 		r.Ir:ClearAllPoints()
-		r.Ir:SetPoint("TOPRIGHT", r, "TOPRIGHT", -PAD, -(UP_ROW - 18) / 2)
+		if abajo then
+			r.Ir:SetPoint("TOPLEFT", r.Sub, "BOTTOMLEFT", 0, -2)
+			r.Ir.Label:ClearAllPoints()
+			r.Ir.Label:SetPoint("LEFT", r.Ir, "LEFT", 0, 0)
+		else
+			r.Ir:SetPoint("TOPRIGHT", r, "TOPRIGHT", -PAD, -(UP_ROW - 18) / 2)
+			r.Ir.Label:ClearAllPoints()
+			r.Ir.Label:SetPoint("RIGHT", r.Ir, "RIGHT", 0, 0)
+		end
+		r.psAbajo = abajo
 		r:SetHeight(h)
 		r:ClearAllPoints()
 		r:SetPoint("TOPLEFT", cont, "TOPLEFT", 0, y)
