@@ -9,7 +9,21 @@ T.DEFAULTS = {
 	comision = 0.05,      -- comisión de la casa de subastas (5 %: NO VERIFICADO en Forever, por eso es ajustable)
 	margen = 1.5,         -- la subasta neta tiene que pagar al menos 1,5 veces lo del vendedor
 	minimoCobre = 2000,   -- y al menos 20 de plata más POR MONTÓN (por el tiempo y el depósito)
-	diasViejo = 7,        -- un precio de subasta de más de 7 días se marca como viejo
+	diasViejo = 1,        -- un precio de subasta de más de 1 día se marca con su edad (los precios de Forever cambian rápido)
+	-- Comerciante (Comercio.lua). Lo marcado NO VERIFICADO es un supuesto ajustable, no un dato de Forever.
+	depositoPct = 0.15,   -- depósito = 15 % de lo que paga el vendedor por unidad y por 12 h (MODELO, NO VERIFICADO)
+	depositoMin = 100,    -- mínimo por publicación: 1 plata (ORO.md: Timesaver, hasta el 17-11; el cambio a 1 cobre
+	                      -- que anunció Warcraft Tavern se postergó al 17-11 según Blizzard: revisar en el juego)
+	horasPublicacion = 24, -- duración de la publicación que usas (NO VERIFICADO cuáles ofrece Forever)
+	minVentasDia = 5,     -- reventa: solo si se venden al menos 5 unidades al día
+	minMargen = 0.10,     -- reventa: margen neto mínimo 10 % (para no confundir ruido con ventaja)
+	minGanancia = 10000,  -- reventa: ganancia neta mínima 1 oro por operación
+	minVendedor = 100,    -- reventa al vendedor: ganancia mínima 1 plata
+	probMin = 0.2,        -- reventa: probabilidad mínima de vender en una publicación
+	maxDiasVender = 2,    -- reventa: no comprar lo que tardaría más de 2 días en venderse
+	riesgoDia = 0.08,     -- reventa: se descuenta 8 % por día de espera (SUPUESTO; ORO.md: caídas de 50 % en una semana ≈ 7-10 %/día)
+	edadFotoMax = 3600,   -- comprar: el escaneo tiene que ser de hace 60 min o menos
+	edadFotoVenta = 21600, -- vender: el escaneo tiene que ser de hace 6 h o menos
 }
 
 -- Tipos del juego (Enum.ItemClass / bindType). Copiados como números por si el cliente no trae Enum.
@@ -128,7 +142,7 @@ function T.Evaluar(info, ajustes)
 		if tonumber(info.cantidad) then pila = math.max(1, math.min(pila, tonumber(info.cantidad))) end
 		if neto >= vendedor * ajustes.margen and (neto - vendedor) * pila >= ajustes.minimoCobre then
 			r.accion = T.ACCION.SUBASTA
-			r.motivo = "En subasta te quedan " .. T.Dinero(neto) .. " (el vendedor da " .. T.Dinero(vendedor) .. ")."
+			r.motivo = "En subasta te quedan " .. T.Dinero(neto) .. " si se vende (el vendedor da " .. T.Dinero(vendedor) .. "; si caduca, pierdes el depósito)."
 		elseif vendedor > 0 then
 			r.accion = T.ACCION.VENDEDOR
 			if neto < vendedor then
@@ -145,6 +159,12 @@ function T.Evaluar(info, ajustes)
 		end
 		if material and r.accion ~= T.ACCION.SUBASTA and neto >= vendedor then
 			r.accion, r.motivo = T.ACCION.GUARDAR, "Material de profesión y la subasta no paga mucho: úsalo."
+		end
+		-- Una o dos publicaciones no son "el mercado": con menos de 3 a la venta no se manda a subastar.
+		local hay = tonumber(info.disponible)
+		if r.accion == T.ACCION.SUBASTA and hay and hay < (T.MIN_DISPONIBLE or 3) then
+			r.accion = T.ACCION.REVISAR
+			r.motivo = "Solo había " .. hay .. " a la venta a " .. T.Dinero(info.subasta) .. ": eso no es el precio del mercado. Revisa la subasta."
 		end
 		return r
 	end

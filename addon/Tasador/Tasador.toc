@@ -1,17 +1,20 @@
 ## Interface: 16001
 ## Title: Tasador
-## Notes: Te dice qué hacer con cada objeto (vender, subastar, guardar o botar), cuánto vale, si el equipo es mejora para ti, qué está barato en la subasta y te avisa de enemigos cerca. /tasador
+## Notes: Te dice qué hacer con cada objeto (vender, subastar, guardar o botar), cuánto vale, si el equipo es mejora para ti, qué está barato en la subasta, qué revender y fabricar, y te avisa de enemigos cerca. /tasador
 ## Author: Cristian Amigo
-## Version: 0.3.0
+## Version: 0.4.0
 ## X-License: GPL-3.0-only
 ## SavedVariables: TasadorDB
-## OptionalDeps: Auctionator
+## OptionalDeps: Auctionator, Asistente, Polestar
 
 Reglas.lua
 Mejora.lua
 Mercado.lua
+Comercio.lua
 Escaneo.lua
 Juego.lua
 Tooltip.lua
 Alerta.lua
+Recetas.lua
+Oportunidades.lua
 Comandos.lua

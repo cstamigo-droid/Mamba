@@ -50,7 +50,15 @@ local AYUDA = {
 	"/tasador hierbas  → hierbas que más pagan hoy (para farmear)",
 	"/tasador rol sanacion | equilibrio | feral | auto  → para comparar equipo",
 	"/tasador alerta si | no  → aviso de enemigos cerca",
-	"/tasador comision 5  → comisión de la subasta en % (5 por defecto)",
+	"/tasador comision 5  → comisión de la subasta en % (5 por defecto, NO VERIFICADO)",
+	"/tasador op  → ventana de oportunidades: revender, vender al PNJ, qué vender tuyo y qué fabricar",
+	"/tasador reventa  → comprar barato para revender (con margen, ventas medidas y depósito)",
+	"/tasador pnj  → subastas más baratas que lo que paga el vendedor",
+	"/tasador vender  → a cuánto vender lo de tus bolsas y si es momento (\"vende ya\" o \"espera\")",
+	"/tasador fabricar  → qué recetas tuyas dejan ganancia hoy (abre antes tu ventana de profesión)",
+	"/tasador eventos  → mide si las bandas del 9-12 mueven hierbas y consumibles",
+	"/tasador deposito 15  → depósito en % de lo que paga el vendedor (supuesto, NO VERIFICADO)",
+	"/tasador duracion 24  → horas de tus publicaciones (las que te ofrezca la subasta: 2, 8, 12, 24, 48...)",
 	"Pasa el ratón sobre cualquier objeto para ver su tasación y si es mejora.",
 	"Precios de subasta: aprieta \"Escanear (Tasador)\" en la casa de subastas (o usa Auctionator si lo tienes).",
 }
@@ -75,6 +83,24 @@ local function Comando(msg)
 	elseif cmd == "alerta" and (arg == "si" or arg == "no") then
 		T.db.ajustes.alerta = (arg == "si")
 		T.Decir("Alerta de enemigos: " .. (arg == "si" and "encendida" or "apagada"))
+	elseif cmd == "op" or cmd == "oportunidades" then
+		T.AbrirOportunidades()
+	elseif cmd == "reventa" then
+		T.MostrarReventa("reventa")
+	elseif cmd == "pnj" or cmd == "vendedor" then
+		T.MostrarReventa("vendedor")
+	elseif cmd == "vender" then
+		T.MostrarVender()
+	elseif cmd == "fabricar" then
+		T.MostrarFabricar()
+	elseif cmd == "eventos" then
+		T.MostrarEventos()
+	elseif cmd == "deposito" and tonumber(arg) and tonumber(arg) >= 0 and tonumber(arg) <= 100 then
+		T.db.ajustes.depositoPct = tonumber(arg) / 100
+		T.Decir("Depósito supuesto: " .. tonumber(arg) .. "% de lo que paga el vendedor (si la subasta del juego lo calcula, uso el suyo).")
+	elseif cmd == "duracion" and tonumber(arg) and tonumber(arg) >= 1 and tonumber(arg) <= 72 then
+		T.db.ajustes.horasPublicacion = tonumber(arg)
+		T.Decir("Tus publicaciones duran " .. tonumber(arg) .. " horas.")
 	elseif cmd == "comision" and tonumber(arg) then
 		local p = tonumber(arg)
 		if p >= 0 and p <= 50 then
