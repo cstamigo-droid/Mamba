@@ -12,5 +12,6 @@
 
 Lineas.lua
 Avisos.lua
+Misiones.lua
 Pestanas.lua
 Panel.lua

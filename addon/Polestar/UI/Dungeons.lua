@@ -1819,6 +1819,8 @@ local function paintQuest(b, q, p, top, plevel, key)
 		b.ChainXP:ClearAllPoints()
 		b.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)
 	end
+	-- Mamba (PARCHES.md P13): K100, what is still to do and «Guíame» (Mamba_Panel/Misiones.lua).
+	if UI.MambaMision then pcall(UI.MambaMision, b, q, key, state, target, tlabel, fin) end
 	b:Show()
 end
 

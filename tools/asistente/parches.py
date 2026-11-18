@@ -110,6 +110,10 @@ PARCHES = [
     ('P12-titulo', 'Polestar/UI/Picker.lua',
      '\tW.ShellTabs(win, nil)\n\ts.render()',
      '\tW.ShellTabs(win, nil)\n\t-- Mamba: el título de la sección por defecto (su nombre); antes quedaba el de la sección anterior si la\n\t-- nueva no ponía el suyo ("Mejorar mi equipo" en Mi plan).\n\tW.ShellTitle(win, s.label or s.key, "")\n\ts.render()'),
+    # P13 (K100, Mamba_Panel/Misiones.lua): Calabozos › Misiones con lo que falta y «Guíame».
+    ('P13-misiones', 'Polestar/UI/Dungeons.lua',
+     '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\tb:Show()\nend',
+     '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\t-- Mamba (PARCHES.md P13): K100, what is still to do and «Guíame» (Mamba_Panel/Misiones.lua).\n\tif UI.MambaMision then pcall(UI.MambaMision, b, q, key, state, target, tlabel, fin) end\n\tb:Show()\nend'),
 ]
 
 # Parches al código de forge (la herramienta de Polestar que construye los datos), relativos a la raíz.
