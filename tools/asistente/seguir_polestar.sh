@@ -83,7 +83,8 @@ preparar_copia() {
 	# 13-16 errores por raza). Cada vez se juntan las de la carpeta de trabajo con las de la copia, sin repetir.
 	for f in pack-errors-acumulados.txt nunca-report-acumulados.txt pnj-sin-fuente.txt forever-db-need.txt; do
 		[ -f "$REPO/data/local/$f" ] || continue
-		cat "$REPO/data/local/$f" "$FUSION/data/local/$f" 2>/dev/null | sort -u > "$FUSION/data/local/$f.nuevo" \
+		# (con pipefail, un cat de un archivo que no existe cortaba la preparación: se mira antes)
+		{ cat "$REPO/data/local/$f"; [ ! -f "$FUSION/data/local/$f" ] || cat "$FUSION/data/local/$f"; } | sort -u > "$FUSION/data/local/$f.nuevo" \
 			&& mv "$FUSION/data/local/$f.nuevo" "$FUSION/data/local/$f" || return 1
 	done
 	[ -e "$FUSION/data/local/names-same-as-english.json" ] || [ ! -f "$REPO/data/local/names-same-as-english.json" ] \
