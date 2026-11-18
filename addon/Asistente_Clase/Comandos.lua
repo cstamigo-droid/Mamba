@@ -173,5 +173,10 @@ end
 -- La ventana de Mamba: M.Salida(fn) manda las líneas a fn (nil: al chat otra vez). M.Datos: las tablas.
 function M.Salida(fn) C.salida = fn end
 M.C = C
+-- El nombre de la especialización de una build (b.spec es una clave de ns.BUILDS[clase].specs).
+function C.NombreSpec(clase, spec)
+	local d = ns.BUILDS[clase]
+	return d and d.specs and d.specs[spec] or nil
+end
 ns.ComandosClase = M
 if A and A.Registrar then A.Registrar("clase", M) end
