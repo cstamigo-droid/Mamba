@@ -348,6 +348,7 @@ end
 
 function Rk.Abrir()
 	if not v then crear() end
+	v.ejemplo = nil
 	v:Show()
 	M.DB().rankingAbierto = true
 	Rk.Reloj(M.EnCombate())
@@ -356,6 +357,17 @@ end
 function Rk.Cerrar() if v then v:Hide(); M.DB().rankingAbierto = false; Rk.Reloj(false) end end
 function Rk.Alternar() if v and v:IsShown() then Rk.Cerrar() else Rk.Abrir() end end
 function Rk.Ventana() return v end
+M.Precrear(function() if not v then crear() end end)
+M.AlModoMover(function(activo)
+	if not v then crear() end
+	if activo then
+		if not v:IsShown() then v.ejemplo = true; v:Show(); M.DB().rankingAbierto = false end
+	elseif v.ejemplo then
+		v.ejemplo = nil
+		v:Hide()
+		M.DB().rankingAbierto = false
+	end
+end)
 
 local f = CreateFrame("Frame")
 for _, ev in ipairs({ "DAMAGE_METER_COMBAT_SESSION_UPDATED", "DAMAGE_METER_CURRENT_SESSION_UPDATED", "DAMAGE_METER_RESET",

@@ -365,6 +365,7 @@ end
 
 function Cz.Abrir(sola)
 	if not v then crear() end
+	v.ejemplo = nil
 	v.abiertaSola = sola and true or nil
 	v:Show()
 	Cz.Reloj(true)
@@ -372,6 +373,17 @@ function Cz.Abrir(sola)
 end
 function Cz.Cerrar() if v then v:Hide(); Cz.Reloj(false); Cz.cerradaEn = ahora() end end
 function Cz.Ventana() return v end
+M.Precrear(function() if not v then crear() end end)
+M.AlModoMover(function(activo)
+	if not v then crear() end
+	if activo then
+		if not v:IsShown() then v.ejemplo = true; v.cerradaAntes = Cz.cerradaEn; v:Show() end
+	elseif v.ejemplo then
+		v.ejemplo = nil
+		v:Hide()
+		Cz.cerradaEn = v.cerradaAntes -- salir del modo no cuenta como cerrarla el jugador
+	end
+end)
 
 ---------------------------------------------------------------- eventos
 local enganchado = false

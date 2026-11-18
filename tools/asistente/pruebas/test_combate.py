@@ -128,6 +128,18 @@ def nuevo():
             # control negativo K106: ordena aunque haya secretos (los compara) y dibuja sin freno
             src = src.replace("\tif not secreto then\n\t\tfor _, f in ipairs(filas) do if type(f.total) ~= \"number\" then f.total = 0 end end\n", "\tif true then\n")
             src = src.replace("\tif pendiente then return end\n", "")
+        if ROMPER and n == "Medidor.lua":
+            # control negativo «mover»: el medidor sin su nombre en español
+            src = src.replace('M.Movible(v, "MambaMedidorCombate", "Medidor de combate")', 'M.Movible(v, "MambaMedidorCombate")')
+        if ROMPER and n == "Avisos.lua":
+            # control negativo: al salir del modo mover el aviso de ejemplo queda a la vista
+            src = src.replace("\t\tcartel.ejemplo = nil\n\t\tcartel:Hide()", "\t\tcartel.ejemplo = nil")
+        if ROMPER and n == "Disparo.lua":
+            # control negativo: el ancla del disparo queda a la vista (se come los clics) y no se crea al entrar
+            src = src.replace("if ancla and not alguna and not ancla.mostrada and ancla:IsShown() then ancla:Hide() end", "")
+        if ROMPER and n == "Rotacion.lua":
+            # control negativo del texto cortado: el botón no se ensancha
+            src = src.replace("caja.modo:SetWidth(math.max(150, (ancho or 0) + 12))", "")
         if ROMPER and n == "Cercanos.lua":
             # control negativo K105: anota muertes repetidas y se abre sola aunque esté silenciada
             src = src.replace("if ultima[clave] and t - ultima[clave] < 10 then", "if false then")
@@ -144,6 +156,56 @@ check(len(list(G.ERRORES.values())) == 0, "carga sin errores: %s" % list(G.ERROR
 L.execute('Polestar = { UI = { RegisterSection = function(s) SECCION = s; return true end } }')
 L.execute('Fire("PLAYER_LOGIN")')
 check(G.MambaInterfaz.modulos["combate"] is not None, "Combate en Interfaz")
+# ---------- Mover elementos: cada marco existe desde que se entra, escondido, con su nombre en español
+MOVIBLES = {"MambaMedidorCombate": "Medidor de combate", "MambaRanking": "Ranking del grupo", "MambaSiguiente": "Sugerencia de hechizo",
+            "MambaCercanos": "Enemigos cerca", "MambaLanzamiento": "Barra de lanzamiento", "MambaDisparo": "Disparo automático y golpe",
+            "MambaAviso": "Avisos en pantalla", "MambaAmenaza": "Amenaza del grupo"}
+for nom, tit in MOVIBLES.items():
+    check(G[nom] is not None and C.movibles[nom] == tit, "mover: %s existe al entrar y se llama «%s» (fue %s)" % (nom, tit, C.movibles[nom]))
+for nom in ["MambaRanking", "MambaSiguiente", "MambaCercanos", "MambaLanzamiento", "MambaDisparo", "MambaAviso", "MambaAmenaza"]:
+    check(not G[nom].visible, "mover: %s creado escondido" % nom)
+# sin la ventana de Mamba: se arrastran enteros, y en combate no
+L.execute('MOVIDO = false; MambaAviso.StartMoving = function() MOVIDO = true end; COMBATE = true')
+G.MambaAviso.scripts.OnDragStart(G.MambaAviso)
+check(G.MOVIDO is False, "mover: en combate no se mueve")
+L.execute('COMBATE = false')
+G.MambaAviso.scripts.OnDragStart(G.MambaAviso)
+check(G.MOVIDO is True, "mover: fuera de combate sí")
+# con la ventana de Mamba: MambaAPI.Movible(marco, nombre, nil, { etiqueta, sinAsa }) y AlModoMover
+L.execute('''LLAMADAS = {}; MODO_FN = nil
+MambaAPI = { Movible = function(f, n, asa, o) table.insert(LLAMADAS, { n = n, asa = asa, etiqueta = o and o.etiqueta, sinAsa = o and o.sinAsa, ya = o and o.yaArrastra }) end,
+  AlModoMover = function(fn) MODO_FN = fn end }''')
+C.Movible(L.eval('CreateFrame("Frame")'), "MambaPrueba", "Prueba")
+ll = G.LLAMADAS[1]
+check(ll.n == "MambaPrueba" and ll.etiqueta == "Prueba" and ll.sinAsa is True and ll.asa is None, "mover: MambaAPI.Movible(marco, nombre, nil, { etiqueta, sinAsa = true })")
+C.Piezas.Ventana("MambaPruebaV", "Ventana de prueba", 200, 100)
+ll = G.LLAMADAS[2]
+check(ll.n == "MambaPruebaV" and ll.etiqueta == "Ventana de prueba" and ll.ya is True, "mover: las ventanas con título pasan su etiqueta y se arrastran por el título")
+C.ConectarMover()
+check(G.MODO_FN is not None, "mover: se engancha a MambaAPI.AlModoMover")
+ESCONDIDOS = ["MambaMedidorCombate", "MambaRanking", "MambaSiguiente", "MambaCercanos", "MambaLanzamiento", "MambaDisparo", "MambaAviso", "MambaAmenaza"]
+for nom in ESCONDIDOS:
+    G[nom].Hide(G[nom])
+C.DB().rankingAbierto = False
+C.DB().medidor = False  # apagado y sin objetivo: medidor y sugerencia escondidos de verdad
+L.execute('UE_GUARDA = UnitExists; UnitExists = function(u) return u == "player" end')
+G.MODO_FN(True)
+for nom in ESCONDIDOS:
+    check(G[nom].visible, "mover: en el modo, %s se ve de ejemplo" % nom)
+check("ejemplo" in str(G.MambaAviso.texto.texto) and G.MambaAviso.hasta is None, "mover: el aviso de ejemplo no se apaga solo")
+# los relojes y dibujos de cada módulo no esconden el ejemplo (revisión 3)
+RELOJ0 = G.RELOJ; G.RELOJ = G.RELOJ + 5
+C.Disparo.Tick(); C.Rotacion.Dibujar(); C.Amenaza.Dibujar(); C.Medidor.Dibujar(); C.Avisos.Revisar()
+for nom in ESCONDIDOS:
+    check(G[nom].visible, "mover: %s sigue de ejemplo aunque corran sus relojes" % nom)
+G.RELOJ = RELOJ0
+G.MODO_FN(False)
+for nom in ESCONDIDOS:
+    check(not G[nom].visible, "mover: al salir, %s vuelve a esconderse" % nom)
+L.execute('UnitExists = UE_GUARDA'); C.DB().medidor = True
+check(C.DB().rankingAbierto is False and C.Cercanos.cerradaEn is None, "mover: salir del modo no cuenta como abrir el ranking ni cerrar Enemigos cerca")
+check(C.DB().diag.fallas is None, "mover: sin fallas: %s" % (C.DB().diag.fallas and list(C.DB().diag.fallas.values())[:2]))
+L.execute('MambaAPI = nil')
 if SIN_EVENTOS:
     check(C.DB().diag.eventosNo["PLAYER_SWING"], "anota el evento que no existe y sigue")
 
@@ -226,6 +288,17 @@ L.execute('TALENTOS = { 19, 0, 8 }')
 R.AplicarRol()
 check(G.CURA_MOSTRAR is None, "rol daño: deja la elección del jugador")
 
+# ---------- texto de la sugerencia: completo, no cortado (18-11: «Solo · Equilibrio · automát…»)
+check(R.TextoModo("solo", "Equilibrio", True) == "Solo · Equilibrio (auto)" and R.TextoModo("solo", "Equilibrio", False) == "Solo · Equilibrio (fijo)", "sugerencia: texto corto «Solo · Equilibrio (auto)» (fue %s)" % R.TextoModo("solo", "Equilibrio", True))
+G.EN_COMBATE = True
+L.execute('MambaSiguiente.modo.texto.GetStringWidth = function() return 150 end; MambaSiguiente.modo.texto.GetUnboundedStringWidth = function() return 230 end')
+R.Dibujar()
+check(G.MambaSiguiente.modo.w == 242, "sugerencia: el botón se ensancha a lo que mide el texto (fue %s)" % G.MambaSiguiente.modo.w)
+L.execute('MambaSiguiente.modo.texto.GetUnboundedStringWidth = function() return 60 end')
+R.Dibujar()
+check(G.MambaSiguiente.modo.w == 150, "sugerencia: nunca más angosto que la caja")
+G.EN_COMBATE = False
+
 # ---------- disparo automático
 if not SIN_EVENTOS:
     Dp = C.Disparo
@@ -237,6 +310,11 @@ if not SIN_EVENTOS:
     check("muévete" in txt, "al principio del disparo: puedes moverte")
     fr, col, txt = L.eval('function() local b; for _, x in ipairs(frames) do if x.tipo == "distancia" then b = x end end; return MambaCombate.Disparo.Estado(b, 101.7) end')()
     check("QUIETO" in txt, "último medio segundo: QUIETO")
+if not SIN_EVENTOS:
+    check(G.MambaDisparo.visible, "disparo: con una barra, el ancla se ve")
+    G.RELOJ = 110
+    C.Disparo.Tick()
+    check(not G.MambaDisparo.visible, "disparo: sin barras, el ancla se esconde (no se come los clics)")
 L.execute('Fire("PLAYER_SWING", Secreto(), Secreto())')
 check(len(list(G.ERRORES.values())) == 0, "disparo con valores secretos: sin error")
 G.RELOJ = 100

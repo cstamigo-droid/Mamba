@@ -22,15 +22,19 @@ local function nombreTipo(tipo)
 end
 
 local ancla
+-- El ancla del disparo y el golpe se ve solo mientras hay una barra (escondida no se come los clics).
+function D.CrearAncla()
+	if ancla then return end
+	ancla = CreateFrame("Frame", "MambaDisparo", UIParent)
+	ancla:SetSize(200, 14)
+	ancla:SetPoint("CENTER", UIParent, "CENTER", 0, -230)
+	ancla:Hide()
+	M.Movible(ancla, "MambaDisparo", "Disparo automático y golpe")
+end
 local function barra(tipo)
 	local k = nombreTipo(tipo)
 	if barras[k] then return barras[k] end
-	if not ancla then
-		ancla = CreateFrame("Frame", "MambaDisparo", UIParent)
-		ancla:SetSize(200, 14)
-		ancla:SetPoint("CENTER", UIParent, "CENTER", 0, -230)
-		M.Movible(ancla, "MambaDisparo")
-	end
+	if not ancla then D.CrearAncla() end
 	local b = M.Barra(ancla, 200, 12)
 	local n = 0
 	for _ in pairs(barras) do n = n + 1 end
@@ -62,6 +66,7 @@ function D.Empezar(tipo, dur)
 	if not d or d <= 0 then b:Hide(); return end
 	b.inicio, b.dur = ahora(), d
 	b:Show()
+	ancla:Show()
 end
 
 function D.Alcance(tipo, dentro, revisa)
@@ -73,16 +78,19 @@ end
 
 function D.Tick()
 	local t = ahora()
+	local alguna = false
 	for _, b in pairs(barras) do
 		if b:IsShown() then
 			local fr, col, txt = D.Estado(b, t)
 			if not fr then b:Hide() else
+				alguna = true
 				b:SetValue(fr)
 				b:SetStatusBarColor(col[1], col[2], col[3])
 				b.texto:SetText(txt)
 			end
 		end
 	end
+	if ancla and not alguna and not ancla.mostrada and ancla:IsShown() then ancla:Hide() end
 	D.TickLanzamiento(t)
 end
 
@@ -97,7 +105,7 @@ end
 local function crearLanz()
 	lanz = M.Barra(UIParent, 220, 16, "MambaLanzamiento")
 	lanz:SetPoint("CENTER", UIParent, "CENTER", 0, -260)
-	M.Movible(lanz, "MambaLanzamiento")
+	M.Movible(lanz, "MambaLanzamiento", "Barra de lanzamiento")
 	lanz.lat = lanz:CreateTexture(nil, "OVERLAY")
 	lanz.lat:SetColorTexture(0.9, 0.2, 0.2, 0.5)
 	lanz.lat:SetPoint("TOPRIGHT", lanz, "TOPRIGHT")
@@ -108,6 +116,24 @@ local function crearLanz()
 	gcd:SetStatusBarColor(1, 0.82, 0.2)
 	gcd:Hide()
 end
+
+M.Precrear(function() D.CrearAncla(); if not lanz then crearLanz() end end)
+M.AlModoMover(function(activo)
+	D.CrearAncla()
+	if not lanz then crearLanz() end
+	if not ancla.ejemplo then
+		ancla.ejemplo = M.Piezas.Texto(ancla, "small", "text")
+		ancla.ejemplo:SetAllPoints(ancla)
+	end
+	if activo then
+		if not ancla:IsShown() then ancla.mostrada = true; ancla.ejemplo:SetText("Disparo automático y golpe (ejemplo)"); ancla:Show() end
+		if not lanz:IsShown() then lanz.mostrada = true; lanz.fin = nil; lanz:SetValue(0.6); lanz.texto:SetText("Barra de lanzamiento (ejemplo)"); lanz:Show() end
+	else
+		ancla.ejemplo:SetText("")
+		if ancla.mostrada then ancla.mostrada = nil; ancla:Hide() end
+		if lanz.mostrada then lanz.mostrada = nil; lanz.texto:SetText(""); lanz:Hide() end
+	end
+end)
 
 function D.Lanzando()
 	if not M.DB().lanzamiento then return end
@@ -127,6 +153,7 @@ function D.Lanzando()
 end
 
 function D.TickLanzamiento(t)
+	if lanz and lanz.mostrada then return end -- ejemplo del modo «Mover elementos»
 	if lanz and lanz:IsShown() and lanz.fin then
 		local fr = (t - lanz.ini) / (lanz.fin - lanz.ini)
 		if fr >= 1 then lanz:Hide() else lanz:SetValue(lanz.canal and (1 - fr) or fr) end

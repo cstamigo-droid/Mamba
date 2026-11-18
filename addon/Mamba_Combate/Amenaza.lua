@@ -41,19 +41,37 @@ local ventana, filas = nil, {}
 local mostrarRol = true
 function A.MostrarPorRol(v) mostrarRol = v and true or false; A.Dibujar() end
 
+function A.Crear()
+	if ventana then return end
+	ventana = CreateFrame("Frame", "MambaAmenaza", UIParent)
+	ventana:SetSize(160, 14)
+	ventana:SetPoint("RIGHT", UIParent, "RIGHT", -260, 0)
+	ventana:Hide()
+	M.Movible(ventana, "MambaAmenaza", "Amenaza del grupo")
+	ventana.titulo = M.Piezas.Texto(ventana, "small", "text")
+	ventana.titulo:SetPoint("BOTTOMLEFT", ventana, "TOPLEFT", 0, 1)
+	ventana.titulo:SetText("Amenaza")
+end
+M.Precrear(function() A.Crear() end)
+M.AlModoMover(function(activo)
+	A.Crear()
+	if activo then
+		if not ventana:IsShown() then ventana.ejemplo = true; ventana:Show() end
+	elseif ventana.ejemplo then
+		ventana.ejemplo = nil
+		ventana:Hide()
+		A.Dibujar()
+	end
+end)
+
 function A.Dibujar()
+	if ventana and ventana.ejemplo then return end -- modo «Mover elementos»
 	local d = M.DB()
 	local lista = A.Lista()
 	local ver = d.amenaza and mostrarRol and #lista > 0 and (IsInGroup and IsInGroup() or false)
 	if not ventana then
 		if not ver then return end
-		ventana = CreateFrame("Frame", "MambaAmenaza", UIParent)
-		ventana:SetSize(160, 14)
-		ventana:SetPoint("RIGHT", UIParent, "RIGHT", -260, 0)
-		M.Movible(ventana, "MambaAmenaza")
-		ventana.titulo = M.Piezas.Texto(ventana, "small", "text")
-		ventana.titulo:SetPoint("BOTTOMLEFT", ventana, "TOPLEFT", 0, 1)
-		ventana.titulo:SetText("Amenaza")
+		A.Crear()
 	end
 	if not ver then ventana:Hide(); return end
 	for i = 1, math.max(#lista, #filas) do

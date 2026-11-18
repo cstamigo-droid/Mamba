@@ -271,7 +271,7 @@ local function crearCaja()
 	caja = CreateFrame("Frame", "MambaSiguiente", UIParent)
 	caja:SetSize(150, 66)
 	caja:SetPoint("CENTER", UIParent, "CENTER", 0, -160)
-	M.Movible(caja, "MambaSiguiente")
+	M.Movible(caja, "MambaSiguiente", "Sugerencia de hechizo")
 	caja.modo = CreateFrame("Button", nil, caja)
 	caja.modo:SetSize(150, 14)
 	caja.modo:SetPoint("BOTTOM", caja, "TOP", 0, 2)
@@ -294,6 +294,29 @@ local function crearCaja()
 	end
 end
 
+M.Precrear(function() if not caja then crearCaja(); caja:Hide() end end)
+M.AlModoMover(function(activo)
+	if not caja then crearCaja(); caja:Hide() end
+	if activo then
+		if not caja:IsShown() then
+			caja.ejemplo = true
+			caja.modo.texto:SetText("Sugerencia de hechizo (ejemplo)")
+			for _, f in ipairs(caja.iconos) do f.icono:SetTexture(134400); f.tecla:SetText(""); f.duda:SetText(""); f:Show() end
+			caja:Show()
+		end
+	elseif caja.ejemplo then
+		caja.ejemplo = nil
+		caja:Hide()
+		R.Dibujar()
+	end
+end)
+
+-- Línea de arriba de la caja: modo · especialización, y «(auto)» o «(fijo)». Corta, y el botón se ensancha
+-- a lo que mida el texto (en el juego salía «Solo · Equilibrio · automát…», 18-11).
+function R.TextoModo(modo, spec, auto)
+	return (NOMBRE_MODO[modo] or modo) .. " · " .. (spec or "") .. (auto and " (auto)" or " (fijo)")
+end
+
 -- Pasa al modo siguiente con el botón (auto → solo → varios → … → auto)
 function R.SiguienteModo()
 	local d = M.DB()
@@ -306,6 +329,7 @@ end
 
 local ultimo = {}
 function R.Dibujar()
+	if caja and caja.ejemplo then return end -- modo «Mover elementos»
 	local d = M.DB()
 	for b, g in pairs(brillos) do g:Hide() end
 	if not d.sugerencia then if caja then caja:Hide() end return end
@@ -314,7 +338,11 @@ function R.Dibujar()
 	if not e or (#e.pasos == 0) or not (UnitExists("target") or M.EnCombate()) then caja:Hide(); return end
 	if e.spec.rol == "sanar" and (e.modo == "mazmorra" or e.modo == "jefe") then caja:Hide(); return end
 	local modo, auto = R.Modo()
-	caja.modo.texto:SetText((NOMBRE_MODO[e.modo] or e.modo) .. " · " .. (e.spec.nombre or "") .. (auto and " · automático" or " · fijo"))
+	caja.modo.texto:SetText(R.TextoModo(e.modo, e.spec.nombre, auto))
+	local fs = caja.modo.texto
+	local medir = fs.GetUnboundedStringWidth or fs.GetStringWidth
+	local ancho = medir and M.Num(medir(fs))
+	caja.modo:SetWidth(math.max(150, (ancho or 0) + 12))
 	local lista = {}
 	if e.ahora then
 		for i = e.ahora, #e.pasos do
