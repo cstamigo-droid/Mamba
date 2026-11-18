@@ -1,0 +1,19 @@
+## Interface: 16001
+## Title: Mamba: profesiones y farmeo
+## Notes: El camino más barato de tus profesiones, la lista de compra o farmeo con su total, instructores y recetas, qué fabricar para ganar oro y el mejor lugar para farmear. Se abre en el menú de Polestar › Profesiones.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariables: MambaProfDB
+## OptionalDeps: Polestar, Asistente, SkillUpForever, Tasador, Medidor, Mamba_Mapa
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Nucleo.lua
+Piezas.lua
+Lista.lua
+DatosFarmeo.lua
+Calculo.lua
+Medir.lua
+Seccion.lua
