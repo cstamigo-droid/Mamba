@@ -27,6 +27,16 @@ if ! git merge --no-ff --no-edit -m "Fusionar Polestar $TAG en asistente" "$TAG"
 	for f in $(grep -v '^#' GENERADOS.txt | sed 's/^\[[A-Z]*\] //'); do
 		git diff --name-only --diff-filter=U | grep -qx "$f" && git checkout --theirs -- "$f" && git add "$f"
 	done
+	# Los .toc de Polestar*: Mamba solo les cambia título, categoría y la marca X-Mamba, y eso lo vuelve a poner
+	# parches.py (P4, paso 3). Se toma el de Polestar (trae la versión nueva). 18-11: v0.4.1.1 chocó en los 42 .toc.
+	for f in $(git diff --name-only --diff-filter=U | grep -E '^addon/Polestar[^/]*/Polestar[^/]*\.toc$'); do
+		if git cat-file -e "HEAD:$(dirname "$f")" 2>/dev/null; then
+			git checkout --theirs -- "$f" && git add "$f"
+		else
+			# la carpeta entera ya no está en Mamba (Polestar_Nav_EK/Kalimdor, mapas de Leffe): sigue fuera
+			git rm -q --cached -- "$f" && rm -f "$f" && rmdir "$(dirname "$f")" 2>/dev/null; true
+		fi
+	done
 	if git diff --name-only --diff-filter=U | grep -q .; then
 		echo "Choques que hay que resolver a mano (deberían ser solo archivos de PARCHES.md):"
 		git diff --name-only --diff-filter=U
