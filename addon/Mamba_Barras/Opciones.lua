@@ -332,7 +332,7 @@ ev:SetScript("OnEvent", function()
 	if not M.enVentanaMamba and UI and UI.RegisterSection then
 		local hecho = false
 		M.enMenuPolestar = UI.RegisterSection({
-			key = "MambaBarras", label = "Barras", icon = "layers", order = 60,
+			key = "MambaBarras", label = "Barras", icon = "layers", order = 210,
 			build = function(parent)
 				local w, h = parent:GetWidth(), parent:GetHeight()
 				if not w or w < 200 then w = 620 end
