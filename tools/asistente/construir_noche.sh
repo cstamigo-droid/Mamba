@@ -151,6 +151,7 @@ else
 fi
 
 # 4. Nombres en cada idioma sin QuestieDB ni DingDB (escribe addon/Polestar_<idioma>; se revisa con git diff).
-paso "nombres" "$F" data names --no-questie
+# (Los nombres van en compilar_addon.sh: `data names` necesita la base de misiones de `data questdb`,
+# que se arma ahí; aquí fallaba "the quest database is not built", 18-11 02:59.)
 
-fin "LISTO: datos, grilla, rutas, guías (en $OUT) y nombres sin QuestieDB, DingDB, forever-vo ni Leffe. Falta (mañana, con Claude): compilar las guías al addon, nav pack sin --leffe, manifiesto y control_zip --estricto. Ver $LOG" 0
+fin "LISTO: datos, grilla, rutas y guías (en $OUT) sin QuestieDB, DingDB, forever-vo ni Leffe. Falta (mañana, con Claude): compilar las guías al addon, nav pack sin --leffe, manifiesto y control_zip --estricto. Ver $LOG" 0
