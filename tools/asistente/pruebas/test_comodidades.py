@@ -207,8 +207,10 @@ L.execute('Avisar("RARE_SPOTTED", { kind = "rare", id = 61, name = "Thuros" })')
 mini = G.MambaRaroMiniatura
 check(mini is not None and mini.visible and L.eval('MambaRaroMiniatura.punto[2] == TARJETA'), "miniatura al lado de la tarjeta")
 check(mini.modelo is not None, "con su modelo 3D")
-L.execute('TARJETA:GetScript("OnHide")(TARJETA)')
-check(not mini.visible, "se va con la tarjeta")
+check(L.eval('MambaRaroMiniatura.padre == TARJETA'), "cuelga de la tarjeta: hereda escala, opacidad, entrada y se va con ella")
+check(L.eval('MambaRaroMiniatura.h') == 104, "alto de la tarjeta (104, BAND_H + ROW_H)")
+check(L.eval('MambaRaroMiniatura.psLight') == True, "marco claro de los avisos (psLight)")
+check(L.eval('MambaRaroMiniatura.modelo.criatura') == 61, "dibuja la criatura del aviso")
 L.execute('Avisar("RARE_SPOTTED", { kind = "treasure", id = 9 })')
 check(not mini.visible, "control negativo: un tesoro no tiene cara")
 G.MambaComodidadesDB.raros.miniatura = False

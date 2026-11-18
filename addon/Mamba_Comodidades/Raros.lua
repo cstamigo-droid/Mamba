@@ -226,9 +226,9 @@ end
 -- Los raros de la zona actual, el más cercano primero; nil, motivo cuando no hay datos.
 function R.Lista()
 	local Ra = Rares()
-	if not (Ra and Ra.Codex and Ra.ListOf) then return nil, "Polestar no está cargado." end
+	if not (Ra and Ra.Codex and Ra.ListOf) then return nil, "Falta Polestar." end
 	if not Ra.Codex(not enCombate()) then
-		return nil, enCombate() and "Sin datos aún: sal de combate y vuelve a abrir." or "Sin datos aún: Polestar no tiene su base de raros (Polestar_Codex)."
+		return nil, enCombate() and "Sin datos aún: sal de combate y vuelve a abrir." or "Sin datos aún: falta la base de raros de Polestar."
 	end
 	local zona = R.Zona()
 	if not zona then return nil, "Sin datos aún: no se sabe en qué zona estás." end
@@ -276,7 +276,7 @@ function R.ActualizarMacro(forzar)
 	if not (forzar or R.Opciones().macro) then return false, "apagado" end
 	if enCombate() then pendiente = true; return false, "combate" end
 	local lista, motivo, zona = R.Lista()
-	if not lista then return false, motivo end
+	if not lista then R.ultimo = { cuantos = 0, total = 0, motivo = motivo }; return false, motivo end
 	local nombres = R.NombresMacro(lista)
 	local texto, cuantos = R.Macro(nombres, marca())
 	R.ultimo = { texto = texto, cuantos = cuantos, total = #nombres, zona = zona }
@@ -298,13 +298,13 @@ end
 
 -- Pone el macro en el cursor, para soltarlo en una barra (sin abrir la ventana de macros).
 function R.AlCursor()
-	if enCombate() then return false end
-	R.ActualizarMacro(true)
+	if enCombate() then return false, "ahora no se puede: sal de combate." end
+	local ok, motivo = R.ActualizarMacro(true)
 	if PickupMacro and GetMacroIndexByName and (GetMacroIndexByName(R.MACRO) or 0) > 0 then
 		PickupMacro(R.MACRO)
 		return true
 	end
-	return false
+	return false, (not ok and motivo) or "no se pudo crear el macro."
 end
 
 ---------------------------------------------------------------- la ruta
@@ -388,12 +388,16 @@ function R.Detener()
 end
 
 ---------------------------------------------------------------- la miniatura en el aviso de Polestar
+-- Cuelga de la tarjeta: hereda su escala, su opacidad y su entrada animada, y se va con ella. Mismo alto
+-- que la tarjeta y su mismo marco (psLight: con las apariencias del juego, el marco claro de los avisos).
 local mini
-local function hacerMini()
+local function hacerMini(tarjeta)
 	if mini then return mini end
-	mini = CreateFrame("Frame", "MambaRaroMiniatura", UIParent)
-	mini:SetSize(76, 76)
-	mini:SetFrameStrata("HIGH")
+	mini = CreateFrame("Frame", "MambaRaroMiniatura", tarjeta)
+	local h = tarjeta.GetHeight and tarjeta:GetHeight()
+	if not h or h < 60 then h = 104 end
+	mini:SetSize(h, h)
+	mini.psLight = true
 	local p = PS()
 	if p and p.Theme and p.Theme.Skin then pcall(p.Theme.Skin, mini, "window") end
 	mini.modelo = CreateFrame("PlayerModel", nil, mini)
@@ -429,11 +433,7 @@ function R.Miniatura(alerta)
 	local Ra = Rares()
 	local tarjeta = Ra and Ra.Toast and Ra.Toast.frame
 	if not tarjeta then return false end
-	local m = hacerMini()
-	if not m.enganchado and tarjeta.HookScript then
-		tarjeta:HookScript("OnHide", function() if mini then mini:Hide() end end)
-		m.enganchado = true
-	end
+	local m = hacerMini(tarjeta)
 	m:ClearAllPoints()
 	m:SetPoint("TOPRIGHT", tarjeta, "TOPLEFT", -6, 0)
 	m.npc = alerta.id

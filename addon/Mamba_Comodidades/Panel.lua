@@ -35,7 +35,10 @@ local function ayuda(f, titulo, texto)
 		local A = _G.Asistente
 		if A and A.CuadroAyuda then A.CuadroAyuda(self, titulo, { texto }) end
 	end)
-	f:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+	f:SetScript("OnLeave", function()
+		local A = _G.Asistente
+		if A and A.OcultarAyuda then A.OcultarAyuda() end
+	end)
 end
 
 -- Una página de interruptores (filas de Polestar) dentro de `padre`. Devuelve el alto usado.
@@ -49,8 +52,8 @@ local function interruptores(padre, items, ancho, y)
 		if not C.Disponible(it) then
 			local n = P.Texto(padre, "note", "textMuted")
 			n:SetPoint("TOPLEFT", padre, "TOPLEFT", 12, -y)
-			n:SetText(it.tipo == "brillo" and "ForeverLootSparkles no está activo: enciéndelo en la lista de addons."
-				or "No disponible: hace falta Polestar.")
+			n:SetText(it.tipo == "brillo" and "Falta el brillo de ForeverLootSparkles: actívalo en la lista de complementos."
+				or "No disponible: falta Polestar.")
 			y = y + 18
 		end
 	end
@@ -66,10 +69,12 @@ local function filaRaro(i, ancho)
 		f = P.Fila(raros.hijo, ancho, 24)
 		f.num = P.Texto(f, "number", "textDim")
 		f.num:SetPoint("LEFT", f, "LEFT", 10, 0)
-		f.izq = P.Texto(f, "body", "text")
-		f.izq:SetPoint("LEFT", f, "LEFT", 38, 0)
 		f.der = P.Texto(f, "small", "textDim")
 		f.der:SetPoint("RIGHT", f, "RIGHT", -10, 0)
+		f.izq = P.Texto(f, "body", "text")
+		f.izq:SetPoint("LEFT", f, "LEFT", 38, 0)
+		f.izq:SetPoint("RIGHT", f.der, "LEFT", -8, 0)
+		if f.izq.SetWordWrap then f.izq:SetWordWrap(false) end
 		f:SetScript("OnClick", function(self)
 			if self.punto then
 				R.Llevame(self.punto)
@@ -103,7 +108,7 @@ local function pintarRuta()
 		raros.alt:SetText("")
 	else
 		-- R0: la ganadora con su número y la que sigue
-		raros.resumen:SetText(format("Ruta más corta: %d %s · %s · %s a pie, %s con montura",
+		raros.resumen:SetText(format("Ruta corta: %d %s · %s · %s a pie, %s con montura",
 			#r.orden, #r.orden == 1 and "raro" or "raros", R.MetrosTexto(r.total),
 			R.Minutos(r.total, R.A_PIE), R.Minutos(r.total, R.MONTADO)))
 		local ahorro = (r.ingenuo or 0) - r.total
@@ -111,7 +116,7 @@ local function pintarRuta()
 			R.MetrosTexto(r.ingenuo), R.MetrosTexto(ahorro))
 			or "Ir siempre al más cercano da lo mismo en esta zona.")
 	end
-	raros.empezar:SetShown(not r.activa)
+	raros.empezar:SetShown(not r.activa and #r.orden > 0)
 	raros.siguiente:SetShown(r.activa and true or false)
 	raros.detener:SetShown(r.activa and true or false)
 	local ancho = math.max(300, (raros.sf:GetWidth() or 600) - 14)
@@ -138,8 +143,11 @@ local function pintarMacro()
 		raros.mEstado:SetText(format("El macro %s apunta a %d de los %d raros de %s, el más cercano primero.",
 			R.MACRO, u.cuantos, u.total, R.NombreZona(u.zona)) .. (u.cuantos < u.total and " Los demás no caben: un macro tiene 255 letras." or ""))
 		raros.mTexto:SetText(u.texto)
+	elseif not R.Opciones().macro then
+		raros.mEstado:SetText("El macro automático está apagado. Enciéndelo arriba o aprieta \"Actualizar ahora\".")
+		raros.mTexto:SetText("")
 	else
-		raros.mEstado:SetText("Sin datos aún: entra a una zona con raros, fuera de combate.")
+		raros.mEstado:SetText(u.motivo or "Sin datos aún: entra a una zona con raros, fuera de combate.")
 		raros.mTexto:SetText("")
 	end
 end
@@ -165,7 +173,8 @@ local function dibujarRaros(p, ancho, alto_)
 	raros.detener = P.Boton(raros.ruta, "Detener", function() R.Detener() end)
 	raros.detener:SetPoint("LEFT", raros.siguiente, "RIGHT", 8, 0)
 	local recalcular = P.Boton(raros.ruta, "Recalcular desde aquí", function() R.Calcular(); M.RefrescarPanel() end)
-	recalcular:SetPoint("TOPRIGHT", raros.ruta, "TOPRIGHT", -12, -48)
+	recalcular:SetPoint("TOP", raros.empezar, "TOP", 0, 0)
+	recalcular:SetPoint("RIGHT", raros.ruta, "RIGHT", -12, 0)
 	raros.sf, raros.hijo = lista(raros.ruta)
 	raros.sf:SetPoint("TOPLEFT", raros.empezar, "BOTTOMLEFT", -12, -10)
 	raros.sf:SetPoint("BOTTOMRIGHT", raros.ruta, "BOTTOMRIGHT", -8, 8)
@@ -176,7 +185,7 @@ local function dibujarRaros(p, ancho, alto_)
 	raros.macro:SetSize(ancho - 20, 360)
 	local o = R.Opciones()
 	local auto = P.Interruptor(raros.macro, "Mantener el macro al día solo",
-		"Al cambiar de zona y al ver un raro, Mamba reescribe el macro MambaRaros con los raros de la zona. Como el RS_MACRO de RareScanner.",
+		"Al cambiar de zona y al ver un raro, Mamba reescribe el macro MambaRaros con los raros de la zona.",
 		function() return o.macro end, function(v) o.macro = v and true or false; if v then R.ActualizarMacro() end; M.RefrescarPanel() end)
 	auto:SetPoint("TOPLEFT", raros.macro, "TOPLEFT", 0, 0)
 	local y = P.Acomodar(auto, ancho - 30) + 8
@@ -184,11 +193,16 @@ local function dibujarRaros(p, ancho, alto_)
 	raros.mEstado:SetPoint("TOPLEFT", raros.macro, "TOPLEFT", 12, -y)
 	raros.mEstado:SetWidth(ancho - 50)
 	local poner = P.Boton(raros.macro, "Ponerlo en mi barra", function()
-		if R.AlCursor() then R.Decir("suelta el macro en un botón de tu barra.") else R.Decir("ahora no se puede: sal de combate.") end
+		local ok, motivo = R.AlCursor()
+		R.Decir(ok and "suelta el macro en un botón de tu barra." or motivo)
 	end, true)
 	poner:SetPoint("TOPLEFT", raros.mEstado, "BOTTOMLEFT", 0, -10)
 	ayuda(poner, "Ponerlo en mi barra", "Toma el macro con el ratón: suéltalo en cualquier botón de tus barras.")
-	local ya = P.Boton(raros.macro, "Actualizar ahora", function() R.ActualizarMacro(true); M.RefrescarPanel() end)
+	local ya = P.Boton(raros.macro, "Actualizar ahora", function()
+		local ok, motivo = R.ActualizarMacro(true)
+		if not ok and motivo then R.Decir(motivo) end
+		M.RefrescarPanel()
+	end)
 	ya:SetPoint("LEFT", poner, "RIGHT", 8, 0)
 	raros.mTexto = P.Texto(raros.macro, "small", "textDim")
 	raros.mTexto:SetPoint("TOPLEFT", poner, "BOTTOMLEFT", 0, -12)
@@ -198,7 +212,7 @@ local function dibujarRaros(p, ancho, alto_)
 	raros.opciones:SetPoint("TOPLEFT", raros.titulo, "BOTTOMLEFT", -12, -6)
 	raros.opciones:SetSize(ancho - 20, 300)
 	local items = {
-		{ "miniatura", "La cara del raro en el aviso", "Cuando Polestar avisa de un raro, a la izquierda de su tarjeta sale la figura del raro." },
+		{ "miniatura", "La cara del raro en el aviso", "Cuando Polestar avisa de un raro, su cara sale a la izquierda del aviso." },
 		{ "tesoros", "Sumar los tesoros a la ruta", "La ruta también pasa por los cofres y tesoros de la zona." },
 		{ "grises", "Incluir los que ya no dan experiencia", "Raros de nivel gris para ti: su botín igual puede servir." },
 	}
@@ -245,15 +259,15 @@ local function dibujarComo(p, ancho)
 	como.inter = CreateFrame("Frame", nil, p)
 	como.inter:SetPoint("TOPLEFT", como.sub, "BOTTOMLEFT", -12, -10)
 	como.inter:SetSize(ancho - 20, 420)
-	interruptores(como.inter, C.LISTA, ancho - 30, 0)
+	como.inter:SetHeight(interruptores(como.inter, C.LISTA, ancho - 30, 0))
 	como.son = CreateFrame("Frame", nil, p)
 	como.son:SetPoint("TOPLEFT", como.sub, "BOTTOMLEFT", -12, -10)
 	como.son:SetSize(ancho - 20, 300)
-	interruptores(como.son, C.Sonidos(), ancho - 30, 0)
+	local y = interruptores(como.son, C.Sonidos(), ancho - 30, 0)
 	if not _G.MuteSoundFile then
 		local n = P.Texto(como.son, "note", "warning")
-		n:SetPoint("TOPLEFT", como.son, "TOPLEFT", 12, -150)
-		n:SetText("Este cliente no deja silenciar sonidos: estos interruptores no hacen nada.")
+		n:SetPoint("TOPLEFT", como.son, "TOPLEFT", 12, -(y + 6))
+		n:SetText("Tu juego no permite silenciar sonidos: estos interruptores no hacen nada.")
 	end
 end
 
@@ -282,6 +296,9 @@ end
 function M.Registrar()
 	local I = _G.MambaInterfaz
 	if not I then return false end
+	-- el color del raro actual va dentro del texto: se vuelve a escribir al cambiar de apariencia (E3)
+	local A = _G.Asistente
+	if A and A.AlCambiarApariencia then pcall(A.AlCambiarApariencia, function() pcall(M.RefrescarPanel) end) end
 	I.Agregar({
 		clave = "raros", titulo = "Raros y tesoros", orden = 5,
 		items = function()
