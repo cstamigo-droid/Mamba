@@ -164,9 +164,8 @@ local function tramo(leg)
 	local t = { tipo = leg.kind, texto = leg.label or LL.TIPO[leg.kind] or tostring(leg.kind), seg = leg.seconds or 0, estimado = true,
 		yardas = leg.yards, via = leg.via }
 	if leg.kind == "hearth" then
-		t.estimado = false -- 10 s de lanzamiento + la pantalla de carga: lo da el juego, no es una ruta
+		-- 10 s de lanzamiento + la pantalla de carga: una constante de Polestar (HEARTH_SECONDS), no una medida: va con ≈ (R0)
 		t.espera = (leg.seconds or 0) > 20 and (leg.seconds - 15) or nil
-		if t.espera then t.estimado = true end
 	elseif leg.kind == "fly" and type(leg.stops) == "table" and #leg.stops >= 2 then
 		local a, b = leg.stops[1], leg.stops[#leg.stops]
 		local M = P() and P().Maps
@@ -235,6 +234,7 @@ local function planear(dest, sinPiedra, sinVuelos, presupuesto)
 	if not (N and N.EstimateTravel) then return nil, "sin" end
 	local ok, s, why, legs = pcall(N.EstimateTravel, nil, { map = dest.map, x = dest.x, y = dest.y, f = dest.f }, presupuesto, sinPiedra or nil, sinVuelos or nil)
 	if not ok then return nil, "sin" end
+	if s and type(legs) ~= "table" then return nil, "sinP8" end -- Polestar sin el parche P8 (una actualización lo pisó)
 	if s then return s, legs end
 	if why == "busy" then return nil, "calculando" end
 	return nil, "sin"
@@ -250,7 +250,19 @@ local function soloTotal(dest)
 	return nil, (ok and why == "busy") and "calculando" or "sin"
 end
 
-local cache = {}
+local cache, nCache = {}, 0
+-- La caché se vacía de lo vencido cuando crece (la clave lleva la celda del jugador: crece al moverse).
+local function guardar(k, r)
+	if not cache[k] then nCache = nCache + 1 end
+	cache[k] = { t = ahora(), r = r }
+	if nCache > 150 then
+		local t, n = ahora(), 0
+		for kk, v in pairs(cache) do
+			if t - v.t >= LL.CACHE then cache[kk] = nil else n = n + 1 end
+		end
+		nCache = n
+	end
+end
 local function claveCache(dest)
 	local c, wx, wy = jugadorMundo()
 	return format("%s:%.1f:%.1f:%s|%s:%d:%d", tostring(dest.map), dest.x or 0, dest.y or 0, tostring(dest.f),
@@ -266,21 +278,22 @@ function LL.Rutas(dest, presupuesto, soloRapida)
 	local c = cache[k]
 	if c and ahora() - c.t < LL.CACHE then return c.r end
 	local res = { estado = "ok", rutas = {} }
-	if not LL.ConTramos() then
+	local s1, l1
+	if LL.ConTramos() then s1, l1 = planear(dest, false, false, presupuesto) end
+	if not LL.ConTramos() or l1 == "sinP8" then
 		local s, no = soloTotal(dest)
 		if s then
 			res.rutas[1] = { clave = "rapida", nombre = "La más rápida", tramos = {}, total = s, estimado = true, usa = {}, sinTramos = true }
 		else
 			res.estado = no
 		end
-		if res.estado ~= "calculando" then cache[k] = { t = ahora(), r = res } end
+		if res.estado ~= "calculando" then guardar(k, res) end
 		return res
 	end
-	local s1, l1 = planear(dest, false, false, presupuesto)
 	if not s1 then res.estado = l1 return res end
 	local r1 = ruta(l1, "rapida", "La más rápida")
 	res.rutas[1] = r1
-	if soloRapida then cache[k] = { t = ahora(), r = res } return res end
+	if soloRapida then guardar(k, res) return res end
 	local function otra(sinPiedra, sinVuelos, clave, nombre)
 		local s, l = planear(dest, sinPiedra, sinVuelos, presupuesto)
 		if not s then return l end
@@ -295,12 +308,13 @@ function LL.Rutas(dest, presupuesto, soloRapida)
 	if r1.usa.hearth or r1.usa.teleport then
 		if otra(true, false, "sinPiedra", "Sin piedra de hogar") == "calculando" then pend = true end
 	end
-	local alguna = false
-	for _, x in ipairs(res.rutas) do alguna = alguna or x.usa.fly end
-	if alguna then
-		if otra(true, true, "sinVuelos", "Sin pagar vuelos") == "calculando" then pend = true end
+	-- sin vuelos: con la piedra si la más rápida vuela; si la que vuela es la de sin piedra, sin las dos
+	if r1.usa.fly then
+		if otra(false, true, "sinVuelos", "Sin pagar vuelos") == "calculando" then pend = true end
+	elseif res.rutas[2] and res.rutas[2].usa.fly then
+		if otra(true, true, "sinVuelos", "Sin piedra ni vuelos") == "calculando" then pend = true end
 	end
-	if pend then res.incompleto = true else cache[k] = { t = ahora(), r = res } end
+	if pend then res.incompleto = true else guardar(k, res) end
 	-- notas que explican la alternativa (R0: con su número)
 	for _, x in ipairs(res.rutas) do
 		if x.clave == "sinPiedra" and r1.tramos[1] and r1.tramos[1].espera then
@@ -314,7 +328,7 @@ function LL.Rutas(dest, presupuesto, soloRapida)
 	return res
 end
 
-function LL.OlvidarCache() cache = {} end
+function LL.OlvidarCache() cache, nCache = {}, 0 end
 
 ---------------------------------------------------------------- destinos
 -- destino = { tipo = "servicio"|"ciudad"|"zona"|"mazmorra"|"pnj"|"punto", nombre, sub, clave,
@@ -378,9 +392,22 @@ function LL.Candidatos(cat, det)
 		local mio = bando()
 		if ok and d then
 			if cat == "posada" then
+				-- las posadas no traen bando: el del maestro de vuelo más cercano (a 2000 yd o menos: Villadorada, a Ventormenta); sin uno, se deja
+				local enemigas = mio == 2 and { [1453] = true, [1455] = true, [1457] = true } or mio == 1 and { [1454] = true, [1456] = true, [1458] = true } or {}
+				local function deMiBando(inn)
+					if enemigas[inn.map] then return false end -- una capital del otro bando (Darnassus no tiene vuelo cerca)
+					local mejor, dm = nil, 2000
+					for _, n in ipairs(d.taxi or {}) do
+						if n.c == inn.c and n.wx and inn.wx then
+							local dd = sqrt((n.wx - inn.wx) ^ 2 + (n.wy - inn.wy) ^ 2)
+							if dd < dm then mejor, dm = n, dd end
+						end
+					end
+					return not mejor or mejor.faction == 3 or mejor.faction == mio or mio == 0
+				end
 				for _, inn in ipairs(d.inns or {}) do
 					local nom = inn.names and inn.names[1] or inn.name
-					if inn.map and inn.x then
+					if inn.map and inn.x and deMiBando(inn) then
 						out[#out + 1] = { nombre = "Posada", sub = (N.travel and N.travel.PlaceName and N.travel.PlaceName(inn)) or nom, map = inn.map, x = inn.x, y = inn.y, f = inn.f, etiqueta = "Posada" }
 					end
 				end
@@ -406,8 +433,8 @@ function LL.Candidatos(cat, det)
 	return unicos
 end
 
--- Los candidatos que vale la pena medir: los más cercanos en línea recta de tu continente, el mejor de cada
--- ciudad de otro continente y el que está junto a tu piedra de hogar. Máximo LL.MAX_CANDIDATOS.
+-- Los candidatos que vale la pena medir: los más cercanos en línea recta de tu continente y el primero de cada
+-- ciudad de otro continente. Máximo LL.MAX_CANDIDATOS. (La piedra de hogar entra sola: cada candidato se mide con ella.)
 function LL.Preseleccion(cands)
 	local pc, px, py = jugadorMundo()
 	local mismo, otros, porCiudad = {}, {}, {}
@@ -540,10 +567,12 @@ function LL.Punto(d, presupuesto)
 		return c, no
 	elseif d.tipo == "pnj" then
 		local s = puntoPNJ(d)
-		return s and { map = s.map, x = s.x, y = s.y, f = s.f } or nil, s and nil or "sin"
+		if not s then return nil, "sin" end
+		return { map = s.map, x = s.x, y = s.y, f = s.f }
 	elseif d.tipo == "mazmorra" and not d.map then
 		local e = puntoMazmorra(d)
-		return e, e and nil or "sin"
+		if not e then return nil, "sin" end
+		return e
 	end
 	if d.map and d.x then return d end
 	return nil, "sin"
@@ -596,10 +625,13 @@ function LL.Calce(d, q)
 end
 
 -- Busca destinos por texto: los fijos + los PNJ de Polestar. -> lista ordenada por calce
+local ultimaBusqueda = {}
 function LL.Buscar(texto)
 	local q = LL.Normal(texto)
 	local out = {}
 	if q == "" then return out end
+	-- la ventana se redibuja seguido (cada 0.3 s mientras calcula): la misma búsqueda vale 3 s
+	if ultimaBusqueda.q == q and ahora() - ultimaBusqueda.t < 3 then return ultimaBusqueda.r end
 	for _, d in ipairs(LL.Destinos()) do
 		local c = LL.Calce(d, q)
 		if c > 0 then d.calce = c; out[#out + 1] = d end
@@ -613,6 +645,7 @@ function LL.Buscar(texto)
 		if orden[a.tipo] ~= orden[b.tipo] then return (orden[a.tipo] or 9) < (orden[b.tipo] or 9) end
 		return a.nombre < b.nombre
 	end)
+	ultimaBusqueda = { q = q, t = ahora(), r = out }
 	return out
 end
 
@@ -621,6 +654,7 @@ function LL.Resolver(destino)
 	if type(destino) == "string" then
 		if destino:find("%S") == nil then return nil end
 		cargar("Asistente_Servicios")
+		cargar("Asistente_Equipo") -- las mazmorras ("Zahúrda")
 		return LL.Buscar(destino)[1]
 	end
 	if type(destino) ~= "table" then return nil end
@@ -651,49 +685,103 @@ end
 
 -- La alternativa elegida se cumple: si la ruta viva de Polestar va a usar lo que se pidió evitar (la piedra,
 -- un vuelo), se salta ese tramo con el mismo «Saltar» de Polestar (Nav.travel.SkipLeg), que planea de nuevo.
-local function cumplirAlternativa(legs, ci)
-	if not (viaje and viaje.ruta and legs and ci and legs[ci]) then return false end
-	local k = legs[ci].kind
-	local evita = (viaje.ruta.clave == "sinPiedra" or viaje.ruta.clave == "sinVuelos") and (k == "hearth" or (k == "teleport" and legs[ci].bind))
-		or (viaje.ruta.clave == "sinVuelos" and k == "fly")
-	if not evita then return false end
-	viaje.saltos = (viaje.saltos or 0) + 1
-	if viaje.saltos > 6 then return false end
+-- Un vuelo solo se puede saltar cuando es el tramo en curso: si lo que sigue a la caminata es el vuelo, se saltan
+-- los dos (la caminata hasta el maestro de vuelo, sin sentido ya, y el vuelo) y Polestar planea desde donde estás.
+local function evita(leg)
+	if not (viaje and viaje.ruta and leg) then return false end
+	local k, clave = leg.kind, viaje.ruta.clave
+	if (clave == "sinPiedra" or (clave == "sinVuelos" and viaje.ruta.nombre ~= "Sin pagar vuelos")) and (k == "hearth" or (k == "teleport" and leg.bind)) then return true end
+	return clave == "sinVuelos" and k == "fly"
+end
+local function saltar()
 	local N = Nav()
 	local T = N and N.travel
-	if T and T.SkipLeg then return pcall(T.SkipLeg) end
-	return false
+	if not (T and T.SkipLeg) then return false end
+	local ok, r = pcall(T.SkipLeg)
+	return ok and r and true or false
+end
+local function cumplirAlternativa(legs, ci)
+	if not (legs and ci and legs[ci]) or (viaje and (viaje.saltos or 0) >= 6) then return false end
+	local ahoraEs = evita(legs[ci])
+	local luego = not ahoraEs and legs[ci].kind == "walk" and evita(legs[ci + 1])
+	if not (ahoraEs or luego) then return false end
+	viaje.saltos = (viaje.saltos or 0) + 1
+	if luego and not saltar() then return false end
+	return saltar()
+end
+
+-- ¿Sigue siendo nuestro el objetivo de la flecha? (el mismo que pusimos: otro paso de la guía o otro addon lo cambia)
+local function objetivo()
+	local N = Nav()
+	if not (N and N.GetTarget) then return nil end
+	local ok, t = pcall(N.GetTarget)
+	return ok and t or nil
+end
+
+local function firma(tr)
+	local t = {}
+	for _, x in ipairs(tr or {}) do t[#t + 1] = x.tipo .. ":" .. floor((x.seg or 0) / 5) end
+	return table.concat(t, ",")
 end
 
 local function alSeguir()
 	if not viaje then return end
-	local api = NAPI()
-	local activo, dueno = false, nil
-	if api and api.Active then activo, dueno = api.Active() end
-	if not activo or (dueno ~= LL.DUENO and not viaje.mazmorra) then
-		-- el viaje terminó (llegó, lo soltó o alguien puso otro destino)
-		LL.Terminar(true)
+	local t = objetivo()
+	if viaje.objetivo and t ~= viaje.objetivo then
+		-- el viaje terminó: lo soltó, o la flecha volvió a la guía o a otro destino
+		LL.Terminar(false)
 		return
+	end
+	if not viaje.objetivo then
+		local api = NAPI()
+		local activo = api and api.Active and api.Active()
+		if not activo then LL.Terminar(false) return end
 	end
 	local legs, ci = rutaViva()
 	if cumplirAlternativa(legs, ci) then return end
-	if legs and ci and ci ~= viaje.tramo then
+	local cambio = false
+	if legs and ci and legs[ci] and ci ~= viaje.tramo then
 		-- terminó un tramo: lo que tardó de verdad corrige las próximas estimaciones (R0)
 		if viaje.tramo and viaje.tramoTipo and viaje.tramoDesde then
 			LL.Medir(viaje.tramoTipo, viaje.tramoEst, ahora() - viaje.tramoDesde)
 		end
 		viaje.tramo, viaje.tramoDesde = ci, ahora()
 		viaje.tramoTipo, viaje.tramoEst = legs[ci].kind, legs[ci].seconds
-		viaje.vivo = LL.Tramos({ unpack(legs, ci) })
+		cambio = true
 	end
-	avisar()
+	if legs and ci then
+		-- lo que falta, también cuando Polestar planea de nuevo sin cambiar de tramo
+		local vivo = LL.Tramos({ unpack(legs, ci) })
+		local f = firma(vivo)
+		if f ~= viaje.firma then viaje.vivo, viaje.firma, cambio = vivo, f, true end
+	end
+	if cambio then avisar() end -- solo cuando algo cambió: el panel no se rehace en cada evento de ruta
 end
+
+-- Al llegar (Polestar dispara NAV_ARRIVED una vez por llegada): el último tramo queda medido, la flecha se suelta
+-- (vuelve a la guía) y el viaje termina.
+local escuchando = false
+local function alLlegar(t)
+	if not (viaje and viaje.objetivo and t == viaje.objetivo) then return end
+	if viaje.tramoTipo and viaje.tramoDesde then LL.Medir(viaje.tramoTipo, viaje.tramoEst, ahora() - viaje.tramoDesde) end
+	local api = NAPI()
+	if not viaje.mazmorra and api and api.Cancel then pcall(api.Cancel, LL.DUENO) end
+	LL.Terminar(true)
+end
+local function escucharLlegada()
+	if escuchando then return end
+	local p = P()
+	if p and type(p.On) == "function" then
+		escuchando = pcall(p.On, "NAV_ARRIVED", alLlegar) and true or false
+	end
+end
+LL._alLlegar = alLlegar -- para las pruebas
 
 function LL.Terminar(llego)
 	if not viaje then return end
 	local api = NAPI()
 	if api and api.Unfollow then pcall(api.Unfollow, LL.DUENO) end
-	viaje.fin = ahora()
+	viaje.fin, viaje.llego = ahora(), llego or nil
 	LL.ultimo = viaje
 	viaje = nil
 	avisar()
@@ -740,12 +828,15 @@ function LL.Llevame(destino, opciones)
 		ok = okc and hecho or false
 	end
 	if not ok then return false, "sin_ruta" end
-	if viaje then local api = NAPI(); if api and api.Unfollow then pcall(api.Unfollow, LL.DUENO) end end
-	viaje = { destino = d, punto = punto, rutas = rutas, ruta = elegida, desde = ahora(), mazmorra = d.tipo == "mazmorra" or nil }
+	-- un viaje nuevo reemplaza al anterior; Follow ya lo tenemos (no se pide de nuevo: cada Follow replanea en Polestar)
+	local yaSigue = viaje ~= nil
+	viaje = { destino = d, punto = punto, rutas = rutas, ruta = elegida, desde = ahora(), mazmorra = d.tipo == "mazmorra" or nil,
+		objetivo = objetivo() }
+	escucharLlegada()
 	local api = NAPI()
-	if api and api.Follow then pcall(api.Follow, LL.DUENO, alSeguir) end
+	if not yaSigue and api and api.Follow then pcall(api.Follow, LL.DUENO, alSeguir) end
 	local legs, ci = rutaViva()
-	if legs and ci then
+	if legs and ci and legs[ci] then
 		viaje.tramo, viaje.tramoDesde, viaje.tramoTipo, viaje.tramoEst = ci, ahora(), legs[ci].kind, legs[ci].seconds
 		cumplirAlternativa(legs, ci)
 	end

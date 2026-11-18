@@ -130,7 +130,8 @@ Hub.Seccion({
 		if est.pestana == "recientes" then
 			vis = recientes
 		elseif q ~= "" then
-			vis = l.Buscar(est.busqueda)
+			vis = {}
+			for _, d in ipairs(l.Buscar(est.busqueda)) do vis[#vis + 1] = d end -- copia: la búsqueda queda guardada en el motor
 			for _, d in ipairs(deCiudad(S())) do
 				local c = l.Calce(d, q)
 				if c > 0 then d.calce = c - 5; vis[#vis + 1] = d end
@@ -156,7 +157,9 @@ Hub.Seccion({
 			if r1 then
 				txt = ""
 				if sel.tipo == "servicio" and sel.cat and punto then
-					txt = "El más cercano en tiempo: |cffffffff" .. tostring(punto.nombre) .. "|r" .. (punto.sub and (" · " .. punto.sub) or "") .. "\n"
+					-- mientras falte medir algún candidato no se afirma cuál es el más cercano
+					txt = (no == "calculando" and "Por ahora el más rápido: |cffffffff" or "El más cercano en tiempo: |cffffffff") .. tostring(punto.nombre) .. "|r"
+						.. (punto.sub and (" · " .. punto.sub) or "") .. (no == "calculando" and "  |cff9ba2b9(midiendo los demás…)|r" or "") .. "\n"
 				end
 				txt = txt .. textoTramos(l, r1)
 			elseif res.estado == "calculando" or no == "calculando" then

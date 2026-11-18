@@ -119,7 +119,7 @@ check(len(tramos) >= 2, f"la ruta va TRAMO POR TRAMO ({tipos})")
 check(all(isinstance(t.seg, (int, float)) and t.seg >= 0 for t in tramos), "cada tramo trae su tiempo")
 check(r1 is not None and abs(sum(t.seg for t in tramos) - r1.total) < 0.01, "el total es la suma de los tramos")
 check("hearth" in tipos, f"con la piedra en Cima del Trueno, la más rápida usa la piedra de hogar ({tipos})")
-check(any(t.tipo == "hearth" and not t.estimado for t in tramos), "la piedra (sin espera) no lleva ≈: son 10 s + la carga")
+check(any(t.tipo == "hearth" and t.estimado for t in tramos), "la piedra lleva ≈: sus 15 s son una constante de Polestar, no una medida (R0)")
 check(r1 is not None and r1.estimado, "la ruta completa es estimada (≈) mientras haya un tramo estimado")
 # las alternativas: sin piedra de hogar y sin pagar vuelos
 claves = [r.clave for r in lista(res.rutas)]
@@ -250,6 +250,49 @@ b = lista(LL.Buscar("Karus"))
 check(b and b[0].tipo == "pnj", "un PNJ se busca por su nombre")
 okk, info = LL.Llevame("Karus")
 check(okk and info.punto.map == 1454, "Llevame('Karus') va a su aparición")
+
+# 12) Lo que encontró la revisión fría (18-11)
+# a) al llegar (NAV_ARRIVED) el viaje termina, mide el último tramo y suelta la flecha
+L.execute("""
+OBJ = { label = 'banco' }
+Polestar.Nav.GetTarget = function() return OBJ end
+ACTIVO = false; RUTA = nil; CI = nil; CANCELADO = 0
+local cancel = Polestar.Nav.API.Cancel
+Polestar.Nav.API.Cancel = function(o) CANCELADO = CANCELADO + 1; return cancel(o) end
+""")
+okk, info = LL.Llevame("banco")
+check(okk and LL.Actual() is not None, "viaje en curso")
+LL._alLlegar(G.OBJ)
+check(LL.Actual() is None and G.CANCELADO == 1, "al llegar el viaje termina y la flecha se suelta (vuelve a la guía)")
+check(LL.ultimo and LL.ultimo.llego, "el viaje queda como «llegó»")
+# b) si la flecha pasa a otro objetivo (la guía, otro addon), el viaje termina aunque la flecha siga activa
+okk, info = LL.Llevame("banco")
+L.execute("OBJ = { label = 'paso de la guía' }; ACTIVO = 'Mamba'")
+G.SEGUIDOR()
+check(LL.Actual() is None, "otro objetivo en la flecha: el viaje termina (no muestra tramos ajenos)")
+# c) «sin pagar vuelos»: la caminata hasta el maestro de vuelo y el vuelo se saltan juntos, de entrada
+L.execute("OBJ = { label = 'x' }; SALTOS = 0; RUTA = { { kind = 'walk', seconds = 20 }, { kind = 'fly', seconds = 200 }, { kind = 'walk', seconds = 30 } }; CI = 1")
+okk, info = LL.Llevame(L.table_from({"map": 1456, "x": 0.5, "y": 0.5, "nombre": "X"}), L.table_from({"ruta": "sinVuelos"}))
+if okk and info.ruta.clave == "sinVuelos":
+    check(G.SALTOS == 2, f"sin vuelos: se saltan la caminata al maestro de vuelo y el vuelo ({G.SALTOS})")
+else:
+    check(True, "(la ruta a ese punto no vuela: sin alternativa de vuelos)")
+L.execute("RUTA = nil; CI = nil; OBJ = nil"); G.SEGUIDOR()
+# d) sin el parche P8 (EstimateTravel sin tramos): solo el total, nunca «Ya estás ahí» con 0 s
+L.execute("""
+ORIG_ET = Polestar.Nav.EstimateTravel
+Polestar.Nav.EstimateTravel = function(...) local s = ORIG_ET(...); return s end
+Asistente.Llevame.OlvidarCache()
+""")
+r = LL.Rutas(dest, False)
+check(r.rutas[1] and r.rutas[1].sinTramos and r.rutas[1].total == 420, "Polestar sin P8: el total de Nav.API.Estimate, marcado sin tramos")
+L.execute("Polestar.Nav.EstimateTravel = ORIG_ET; Asistente.Llevame.OlvidarCache()")
+# e) posadas: ninguna de la Alianza para Hope (Bosque de Elwynn, 1429; Dun Morogh, 1426)
+check(not any(c.map in (1429, 1426, 1457, 1438, 1453, 1455) for c in posadas), "la posada más cercana nunca es de la Alianza")
+# f) la búsqueda guardada no se ensucia
+b1 = len(lista(LL.Buscar("banco")))
+b2 = len(lista(LL.Buscar("banco")))
+check(b1 == b2 and b1 > 0, "la misma búsqueda da lo mismo (guardada 3 s)")
 
 # 11) MambaAPI para las demás secciones
 api = G.MambaAPI
