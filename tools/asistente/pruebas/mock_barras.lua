@@ -79,6 +79,9 @@ function Marco:SetVerticalScroll() end
 function Marco:GetVerticalScroll() return 0 end
 function Marco:SetHighlightTexture() end
 function Marco:SetText(t) self.texto = t end
+function Marco:GetText() return self.texto end
+function Marco:SetAutoFocus() end
+function Marco:ClearFocus() end
 function Marco:GetFontString() return nil end
 function Marco:SetMinMaxValues() end
 function Marco:SetValueStep() end
