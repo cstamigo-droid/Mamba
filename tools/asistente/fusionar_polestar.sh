@@ -47,6 +47,7 @@ echo "== 5. Pruebas"
 LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js || alto "falló mamba-reemplazos"
 (cd tools/asistente/pruebas && python test_capa.py ../../../addon && python test_servicios.py ../../../addon ../../.. \
 	&& python test_tasador.py ../../../addon/Tasador && python test_escaneo.py ../../../addon/Tasador \
+	&& python test_comercio.py ../../../addon/Tasador \
 	&& python test_medidor.py ../../../addon/Medidor) || alto "falló una prueba de los módulos de Mamba"
 
 if ! git diff --quiet; then

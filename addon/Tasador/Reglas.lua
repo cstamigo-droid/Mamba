@@ -10,6 +10,17 @@ T.DEFAULTS = {
 	margen = 1.5,         -- la subasta neta tiene que pagar al menos 1,5 veces lo del vendedor
 	minimoCobre = 2000,   -- y al menos 20 de plata más POR MONTÓN (por el tiempo y el depósito)
 	diasViejo = 7,        -- un precio de subasta de más de 7 días se marca como viejo
+	-- Comerciante (Comercio.lua). Lo marcado NO VERIFICADO es un supuesto ajustable, no un dato de Forever.
+	depositoPct = 0.15,   -- depósito = 15 % de lo que paga el vendedor por unidad (MODELO, NO VERIFICADO)
+	depositoMin = 100,    -- mínimo por publicación: 1 plata (Blizzard anunció 1 cobre desde el 17-11: NO VERIFICADO)
+	horasPublicacion = 24, -- duración de la publicación que usas (NO VERIFICADO cuáles ofrece Forever)
+	minVentasDia = 5,     -- reventa: solo si se venden al menos 5 unidades al día
+	minMargen = 0.10,     -- reventa: margen neto mínimo 10 % (para no confundir ruido con ventaja)
+	minGanancia = 10000,  -- reventa: ganancia neta mínima 1 oro por operación
+	minVendedor = 100,    -- reventa al vendedor: ganancia mínima 1 plata
+	probMin = 0.2,        -- reventa: probabilidad mínima de vender en una publicación
+	edadFotoMax = 3600,   -- comprar: el escaneo tiene que ser de hace 60 min o menos
+	edadFotoVenta = 21600, -- vender: el escaneo tiene que ser de hace 6 h o menos
 }
 
 -- Tipos del juego (Enum.ItemClass / bindType). Copiados como números por si el cliente no trae Enum.
