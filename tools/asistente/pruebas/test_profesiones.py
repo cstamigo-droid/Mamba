@@ -193,6 +193,12 @@ if far:
     check(len(G.NAVEGO) == 1 and G.NAVEGO[1][1] == "MambaProfesiones", "Llévame pone la flecha de Polestar")
 check(abs(G.MambaProfesiones.MinutosViaje(1411, 50, 50) - 2) < 0.01, "minutos de viaje del motor de Ir a… (120 s = 2 min)")
 
+# ---------- K61/K62: recomendaciones para Mi plan
+rec = G.MambaProfesiones.Recomendaciones()
+check(len(rec) == 1 and rec[1].puntos == 35 and rec[1].solo and rec[1].estrellas != "", "recomendación con número, solo y estrellas")
+check(rec[1].como is not None and (rec[1].llevame is not None), "trae el cómo y el Llévame")
+check(len(G.MambaProfesiones.Recomendaciones(L.eval("{ minutos = 0 }"))) <= 1, "filtro de minutos")
+
 # ---------- sin SkillUp: mensaje, sin error
 G.SkillUpForever = None
 C.Olvidar()

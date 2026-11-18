@@ -187,6 +187,42 @@ local function filasFarmeo()
 	return out, cab
 end
 
+
+-- K61/K62 para "Mi plan › Ahora" y el panel de la guía: recomendaciones de profesiones con su número, su cómo y
+-- su "Llévame", ordenadas por impacto ÷ costo. filtro = { solo = true, minutos = n }.
+-- -> { { texto, como, impacto (texto), puntos, minutos, oro, solo = true, estrellas, llevame = fn } }
+function M.Recomendaciones(filtro)
+	filtro = filtro or {}
+	local lista = C.Profesiones()
+	if not lista then return {} end
+	local out = {}
+	for _, e in ipairs(lista) do
+		local lc = C.ListaCompra(e.skillLineID)
+		local t = lc and lc.total
+		local puntos = math.max(0, (e.maxRank or 0) - (e.rank or 0))
+		if t and puntos > 0 then
+			local minutos = t.mixtoMin
+			local s = e.steps and e.steps[1]
+			local primero
+			for _, f in ipairs(lc) do if f.falta > 0 and f.farmear and f.elige == "farmear" then primero = f; break end end
+			local costoMin = minutos + t.mixtoOro / math.max(1, lc.valorHora) * 60
+			local razon = puntos / math.max(1, costoMin) * 2
+			local r = { texto = ("Sube %s de %d a %d"):format(e.name, e.rank or 0, e.maxRank or 0),
+				como = s and (s.text .. (s.detail and (" · " .. s.detail) or "")) or "Abre tus recetas",
+				impacto = ("+%d puntos de %s"):format(puntos, e.name), puntos = puntos, minutos = minutos, oro = t.mixtoOro,
+				solo = true, estrellas = M.Lista.Estrellas(razon), razon = razon,
+				llevame = primero and function()
+					M.Medir.Empezar(primero.id, primero.farmear.forma.mapa)
+					M.Llevame(primero.farmear.forma.mapa, primero.farmear.forma.x, primero.farmear.forma.y, primero.nombre)
+				end or (s and s.nav and function() api().Navigate(e.skillLineID, 1) end) or nil,
+				abrir = function() profElegida = e.skillLineID; M.Abrir("compra") end }
+			if (not filtro.minutos or minutos <= filtro.minutos) then out[#out + 1] = r end
+		end
+	end
+	table.sort(out, function(a, b) return a.razon > b.razon end)
+	return out
+end
+
 local FILAS = { tuyas = filasTuyas, compra = filasCompra, instructores = filasInstructores, ganar = filasGanar, farmeo = filasFarmeo }
 
 function M.Refrescar()
