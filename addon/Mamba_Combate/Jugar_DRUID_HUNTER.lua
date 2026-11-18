@@ -118,8 +118,8 @@ M.JUGAR.DRUID = {
 				{ h = 16857, cuando = "Tirar desde lejos: {16857}", c = { { "fueraDeCombate" } } },
 				{ h = 6795, cuando = "Si alguien te quita uno: {6795}", c = {} },
 				{ h = 779, cuando = "Varios: {779} sin parar", c = { { "enemigos>=", 2 }, { "ira>=", 20 } } },
+				{ h = 414644, cuando = "Desde el 42: {414644} suma amenaza con el tiempo", c = { { "ira>=", 20 } } },
 				{ h = 6807, cuando = "Uno: {6807}", c = { { "ira>=", 15 } } },
-				{ h = 414644, cuando = "Desde el 42: {414644} suma amenaza con el tiempo", c = { { "ira>=", 15 } } },
 				{ h = 99, cuando = "{99} si no lo tiene", c = { { "sinDebuff", 99 } } },
 			}, nota = "Marca cuál matar primero y espera al sanador antes del siguiente grupo." },
 			jcj = { pasos = {
@@ -129,8 +129,8 @@ M.JUGAR.DRUID = {
 			}, nota = "En JcJ el oso aguanta y corta; el daño lo pone el gato." },
 			jefe = { pasos = {
 				{ h = 99, cuando = "Siempre {99} puesto", c = { { "sinDebuff", 99 } } },
+				{ h = 414644, cuando = "Desde el 42: {414644}", c = { { "ira>=", 20 } } },
 				{ h = 6807, cuando = "{6807}", c = { { "ira>=", 15 } } },
-				{ h = 414644, cuando = "Desde el 42: {414644}", c = { { "ira>=", 15 } } },
 				{ h = 16857, cuando = "{16857} si no lo tiene", c = { { "sinDebuff", 16857 } } },
 			}, nota = "" },
 			emergencia = { pasos = {
