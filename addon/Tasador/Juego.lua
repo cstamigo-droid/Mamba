@@ -423,7 +423,7 @@ function T.LeerBolsas()
 	local lista, sinCargar = {}, 0
 	local C = C_Container
 	if not (C and C.GetContainerNumSlots and C.GetContainerItemLink) then return lista, 0 end
-	for bolsa = 0, 4 do
+	for bolsa = 0, (NUM_TOTAL_EQUIPPED_BAG_SLOTS or 4) do -- incluye la bolsa de componentes (5) de Forever
 		local n = T.Leer(C.GetContainerNumSlots(bolsa)) or 0
 		for slot = 1, n do
 			local link = T.Leer(C.GetContainerItemLink(bolsa, slot))

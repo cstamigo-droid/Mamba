@@ -83,7 +83,8 @@ local function decision(o) return o.elegido or o.sug end
 local function ubicar(id)
 	local out, C = {}, C_Container
 	if not (C and C.GetContainerNumSlots and C.GetContainerItemID) then return out end
-	for b = 0, 4 do
+	-- 0-4 + la bolsa de componentes (5 en Forever, Enum.BagIndex.ReagentBag)
+	for b = 0, (NUM_TOTAL_EQUIPPED_BAG_SLOTS or 4) do
 		for s = 1, (C.GetContainerNumSlots(b) or 0) do
 			if C.GetContainerItemID(b, s) == id then out[#out + 1] = { b, s } end
 		end
