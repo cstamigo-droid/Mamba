@@ -21,7 +21,7 @@ end
 function A.Ayuda()
 	A.Decir("versión " .. A.version .. ". Módulos:")
 	for _, m in ipairs(MODULOS) do
-		local estado = cargado(m[1]) and A.Color("bueno", "cargado") or A.Color("gris", "se carga cuando haga falta")
+		local estado = cargado(m[1]) and A.ColorOscuro("bueno", "cargado") or A.ColorOscuro("gris", "se carga cuando haga falta")
 		A.Decir("  " .. m[1] .. ": " .. m[3] .. " · " .. estado)
 	end
 	A.Decir("/asis creditos: de dónde viene cada dato.")
@@ -60,21 +60,35 @@ SlashCmdList.ASISSERVICIOS = function(arg)
 	abrirServicios(arg)
 end
 
--- /equipo y /clase (18-11): los módulos Asistente_Equipo y Asistente_Clase siguen instalados desde la
--- versión anterior del Asistente; sin estos comandos quedaban sin forma de abrirse.
-local function abrirModulo(addon, modulo, texto)
-	A.Cargar(addon, function() -- si no está instalado, A.Cargar lo dice
-		local M = A.modulos[modulo]
-		if M and M.Comando then M.Comando(texto or "") end
-	end)
-end
-
+-- /equipo, /clase y /mamba (18-11): abren la ventana de Mamba en su pestaña (Ventana.lua). Lo que se
+-- escribe después del comando elige la sección: "/equipo mazmorras", "/clase builds"...
 SLASH_ASISEQUIPO1 = "/equipo"
 SlashCmdList.ASISEQUIPO = function(arg)
-	abrirModulo("Asistente_Equipo", "equipo", arg)
+	A.AbrirVentana("equipo", arg)
 end
 
 SLASH_ASISCLASE1 = "/clase"
 SlashCmdList.ASISCLASE = function(arg)
-	abrirModulo("Asistente_Clase", "clase", arg)
+	A.AbrirVentana("clase", arg)
 end
+
+SLASH_ASISMAMBA1 = "/mamba"
+SlashCmdList.ASISMAMBA = function(arg)
+	arg = (arg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
+	if arg == "boton" or arg == "botón" then
+		A.AlternarBotonMinimapa()
+	else
+		A.AbrirVentana(arg ~= "" and arg or nil)
+	end
+end
+
+-- Ajustes de los módulos en la ventana de ajustes de Polestar (Ajustes › Mamba), registrados aquí porque
+-- Asistente se carga siempre: los módulos se cargan cuando hacen falta (Servicios, al entrar a una ciudad)
+-- y su página tiene que estar desde el principio (ESTETICA_MAMBA.md, E5).
+A.Defaults("servicios", { abrirAlEntrar = true })
+A.Opciones("Servicios", "Buscador de servicios de la ciudad", {
+	{ kind = "toggle", label = "Abrir la lista al entrar a una ciudad",
+		help = "Al entrar a Orgrimmar, Cima del Trueno o Entrañas se abre esta lista. Lo mismo que /servicios auto si|no.",
+		get = function() return A.Ajuste("servicios", "abrirAlEntrar") and true or false end,
+		set = function(valor) A.FijarAjuste("servicios", "abrirAlEntrar", valor and true or false) end },
+})

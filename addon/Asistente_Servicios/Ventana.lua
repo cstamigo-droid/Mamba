@@ -34,7 +34,7 @@ function S.Elegir(g)
 	if not (g and g.mejor and S.ciudadActual) then return end
 	S.IrA(g.mejor, S.ciudadActual, g.etiqueta)
 	local donde = g.mejor.titulo and (g.mejor.nombre .. " <" .. g.mejor.titulo .. ">") or g.mejor.nombre
-	local aviso = g.conf == "titulo" and (" " .. A.Color("dudoso", "(" .. A.CONFIANZA.titulo .. ")")) or ""
+	local aviso = g.conf == "titulo" and (" " .. A.ColorOscuro("dudoso", "(" .. A.CONFIANZA.titulo .. ")")) or ""
 	A.Decir(g.etiqueta .. ": " .. donde .. ", " .. S.TextoDistancia(g.mejor.dist) .. ". Sigue la flecha." .. aviso)
 end
 
@@ -82,47 +82,46 @@ end
 
 local function crear()
 	if v then return v end
-	v = A.CrearVentana("AsistenteServiciosVentana", "Servicios", 320, 120 + FILAS * ALTO_FILA)
-	v.buscar = A.CrearMarcoBajo("EditBox", nil, v, "InputBoxTemplate")
-	v.buscar:SetSize(220, 20)
-	v.buscar:SetPoint("TOPLEFT", v, "TOPLEFT", 18, -32)
-	v.buscar:SetAutoFocus(false)
-	v.buscar:SetScript("OnTextChanged", function() desplaza = 0; S.Refrescar() end)
-	v.buscar:SetScript("OnEnterPressed", function(self)
-		self:ClearFocus()
-		if #vistos >= 1 then S.Elegir(vistos[1]) end
-	end)
-	v.buscar:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-	local ayuda = v:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	ayuda:SetPoint("LEFT", v.buscar, "RIGHT", 8, 0)
-	ayuda:SetText("buscar")
+	-- Regla de estética (WOW_FOREVER/ESTETICA_MAMBA.md): ventana, letras, buscador y filas de Polestar.
+	local ANCHO = 340
+	v =A.CrearVentana("AsistenteServiciosVentana", "Servicios", ANCHO, 1)
+	local m, arriba = v.margen, v.cuerpo + 10
+	v.buscar = A.Buscador(v, "Buscar: banco, alquimia, reparar…",
+		function() desplaza = 0; S.Refrescar() end,
+		function() if #vistos >= 1 then S.Elegir(vistos[1]) end end)
+	v.buscar:SetPoint("TOPLEFT", v, "TOPLEFT", m, -arriba)
+	v.buscar:SetPoint("TOPRIGHT", v, "TOPRIGHT", -m, -arriba)
+	if not v.polestar then -- la caja del juego no trae texto de ayuda
+		v.buscar:SetPoint("TOPRIGHT", v, "TOPRIGHT", -m - 60, -arriba)
+		local ayuda = A.Texto(v, "note", "textMuted")
+		ayuda:SetPoint("LEFT", v.buscar, "RIGHT", 8, 0)
+		ayuda:SetText("buscar")
+	end
+	local y0 = arriba + (v.buscar:GetHeight() or 20) + 8
 	v.filas = {}
 	for i = 1, FILAS do
-		local b = A.CrearMarcoBajo("Button", nil, v)
-		b:SetSize(288, ALTO_FILA)
-		b:SetPoint("TOPLEFT", v, "TOPLEFT", 14, -58 - (i - 1) * ALTO_FILA)
-		b:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+		local b = A.Fila(v, ANCHO - 2 * m + 8, ALTO_FILA)
+		b:SetPoint("TOPLEFT", v, "TOPLEFT", m - 4, -y0 - (i - 1) * ALTO_FILA)
 		b.icono = b:CreateTexture(nil, "ARTWORK")
 		b.icono:SetSize(18, 18)
 		b.icono:SetPoint("LEFT", 2, 0)
-		b.texto = b:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+		b.texto = A.Texto(b, "body", "text")
 		b.texto:SetPoint("LEFT", b.icono, "RIGHT", 6, 0)
-		b.texto:SetJustifyH("LEFT")
-		b.dist = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+		b.dist = A.Texto(b, "small", "textMuted")
 		b.dist:SetPoint("RIGHT", -4, 0)
+		b.texto:SetPoint("RIGHT", b.dist, "LEFT", -6, 0)
 		b:SetScript("OnClick", function(self) if self.g then S.Elegir(self.g) end end)
 		b:SetScript("OnEnter", function(self)
-			if not (self.g and GameTooltip and GameTooltip.SetOwner) then return end
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:AddLine(self.g.etiqueta)
+			if not self.g then return end
+			local lineas = {}
 			for k, l in ipairs(self.g.lugares) do
 				if k > 6 then break end
-				GameTooltip:AddLine(l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist), 1, 1, 1)
+				lineas[#lineas + 1] = A.ColorOscuro("blanco", l.nombre .. (l.titulo and (" <" .. l.titulo .. ">") or "") .. "  " .. S.TextoDistancia(l.dist))
 			end
-			GameTooltip:AddLine(A.CONFIANZA[self.g.conf] or "", 0.6, 0.6, 0.6)
-			GameTooltip:Show()
+			lineas[#lineas + 1] = A.ColorOscuro("gris", A.CONFIANZA[self.g.conf] or "")
+			A.CuadroAyuda(self, self.g.etiqueta, lineas)
 		end)
-		b:SetScript("OnLeave", function() if GameTooltip and GameTooltip.Hide then GameTooltip:Hide() end end)
+		b:SetScript("OnLeave", function() A.OcultarAyuda() end)
 		v.filas[i] = b
 	end
 	v:EnableMouseWheel(true)
@@ -130,10 +129,11 @@ local function crear()
 		desplaza = math.max(0, math.min(desplaza - delta * 3, #vistos - FILAS))
 		S.Refrescar()
 	end)
-	v.pie = v:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	v.pie:SetPoint("BOTTOMLEFT", v, "BOTTOMLEFT", 16, 12)
-	v.pie:SetWidth(290)
-	v.pie:SetJustifyH("LEFT")
+	v.pie = A.Texto(v, "note", "textMuted")
+	v.pie:SetPoint("BOTTOMLEFT", v, "BOTTOMLEFT", m, 14)
+	v.pie:SetWidth(ANCHO - 2 * m)
+	if v.pie.SetWordWrap then v.pie:SetWordWrap(true) end
+	v:SetHeight(y0 + FILAS * ALTO_FILA + 46)
 	return v
 end
 
@@ -158,10 +158,13 @@ function S.AlEntrar(uiMap)
 	if A.MapaActual() ~= uiMap then return end
 	S.ciudadActual = uiMap
 	if A.EnCombate() or not A.Ajuste("servicios", "abrirAlEntrar") then return end
+	crear()
+	v.abiertaSola = true -- se abrió sola: con mando no le quita el foco al jugador
 	S.Abrir(uiMap)
 end
 
 function S.Comando(arg)
+	if v then v.abiertaSola = false end -- la pidió el jugador
 	arg = S.Normal(arg)
 	if arg == "parar" or arg == "quitar" then
 		S.Detener(false)
@@ -184,4 +187,8 @@ function S.Comando(arg)
 	end
 end
 
-if A then A.Registrar("servicios", S) end
+if A then
+	A.Registrar("servicios", S)
+	-- Los colores de las filas van dentro del texto (A.Color): al cambiar de apariencia se reescriben.
+	A.AlCambiarApariencia(function() if v and v:IsShown() then S.Refrescar() end end)
+end

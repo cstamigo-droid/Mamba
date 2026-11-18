@@ -1,0 +1,68 @@
+Asistente_Equipo: de dónde viene cada dato (generado el 2026-11-18)
+==================================================================
+
+Licencia del addon y de estos datos: GPL-3.0-only.
+Nombres, números e ids del juego: de Blizzard Entertainment, usados como hechos. Este addon no está
+hecho ni respaldado por Blizzard.
+
+1. Polestar 0.4.1 (GPL-3.0-only) — https://github.com/fitzforge/polestar
+   - En el juego, este módulo NO trae pesos ni estadísticas propias: llama a Polestar.Gear (pesos de
+     Polestar con simulaciones de wowsims, rol, "¿lo puede usar?", comparación con lo puesto) y a su
+     ItemDB. Este paquete es un fork de Polestar (ARQUITECTURA §13).
+   - El índice de abajo se armó leyendo Polestar_ItemDB/Items.lua (tablas del cliente Classic Era vía
+     wago.tools) para saber qué ids tienen estadísticas y su nivel de objeto.
+2. ForeverLevelingBiS v0.12.0-beta de Thunder (MIT, Copyright (c) 2026 Thunder), datos del 2026-10-13, leído desde
+   Polestar_ItemDB/Forever.lua: estadísticas de Forever, botín de jefe con % de caída, misiones y
+   profesiones de cada pieza. OJO: son datos de la BETA, anteriores al lanzamiento (4-11-2026).
+3. Tablas del cliente de WoW: Forever 1.60.1.70532 (beta, 22-10-2026) vía https://wago.tools: ItemSet,
+   ItemSparse, Item. Solo ids, nombres de conjuntos y tipos de estadística, como hechos.
+4. Niveles de las mazmorras: Warcraft Tavern, https://www.warcrafttavern.com/forever/guides/dungeons/
+   (leída el 16-11-2026). Solo hechos (nombre y rango de nivel); no se copia texto.
+5. Nombres en español mexicano (esMX), todos del propio juego: la caché WDB del cliente instalado
+   (Mamba data/i18n/names-observed/esMX.json), ForeverTDB (GPL-2.0, creature_template_locale y
+   quest_template_locale, solo nombres como hechos) y las tablas del cliente en esMX vía wago.tools
+   (&locale=esMX): GroupFinderActivity y AreaTable 1.60.1.70959; ItemSparse, ItemSet y SkillLine
+   1.60.1.70532 (+ ItemSparse esMX de Classic Era 1.15.9.70576), y la caché de hotfixes del cliente en esMX
+   (Cache/ADB/esMX/DBCache.bin) para los objetos nuevos de Forever. Lo que no tiene nombre esMX queda en inglés con "*" (NO VERIFICADO).
+
+NO se usa: AtlasLoot (GPL-2.0 solo, choca con GPL-3.0), QuestieDB ni Polestar_Codex (permisos solo
+para Polestar), Wowhead ni otros sitios que prohíben copiar.
+
+Huellas sha256 de lo que se leyó:
+  778bd528263488c131a252da274d01ce294987a0d874078a84a3eafdf6d6d12c  C:/Users/<usuario>/Mamba/data/i18n/names-observed/esMX.json
+  689e7280a8dca043c93fb9e56275a10970ffa6833d205a761e5f133dd1a47676  C:/Users/<usuario>/Mamba/data/local/forever-tdb/world.sqlite
+  0a52250a3123adc99bec4f7350a95b31c34f273909e071f078b16bdcad73409e  D:/rust/polestar-data/sources/cliente-hotfix/ItemSparse.esMX.csv
+  5a919978df4f4a3c457530abbab65fd3ca9202631574d70669145c9c8c31240f  D:/rust/polestar-data/sources/wago/1.15.9.70576/esMX/ItemSparse.csv
+  08dc718da242b61411ffcdd1474ead9bc1c73f5af9c4399bd140466aadc5f4bc  D:/rust/polestar-data/sources/wago/1.60.1.70532/esMX/ItemSet.csv
+  2bd24a3a924449cba940bb8aee8802cf1ec3b6f9c4554fdf5bbbcb94461e5022  D:/rust/polestar-data/sources/wago/1.60.1.70532/esMX/ItemSparse.csv
+  a01f7eca315d567341157086d517889ef9eabf25e2e6744429ef261168421dd2  D:/rust/polestar-data/sources/wago/1.60.1.70532/esMX/SkillLine.csv
+  9aac5960ef4b8f3c01d9f46f399628ce7bb633ff865709d59fb59d9ce4cb43df  D:/rust/polestar-data/sources/wago/1.60.1.70959/AreaTable.csv
+  dd6c88dd4a10461a017085ac88981ce651d27f7c87e78563c20be0f340e704de  D:/rust/polestar-data/sources/wago/1.60.1.70959/GroupFinderActivity.csv
+  56268755cbe1b27283d12034d0dfc4229bdbaed2201fadaef40963651fc766a5  D:/rust/polestar-data/sources/wago/1.60.1.70959/esMX/AreaTable.csv
+  ee361dbe5268c4823cc11146008138372027bacee66bcce446cfa980e9862c60  D:/rust/polestar-data/sources/wago/1.60.1.70959/esMX/GroupFinderActivity.csv
+  961f90227f41e952ccdb0f524d84756956d922110a7185892fc033caaa25e9ea  Item.csv
+  9180aa9bd764bdeb08defd2c66358c23ee71c776c1552bf501c376c63e230979  ItemSet.csv
+  98333a70d1a3f01489a3525cb8e8cdde14be5d1cab84c69bb43ef1ee6d87da8e  ItemSparse.csv
+  dd440d4e7548ddce73de91d39e8e69dc201ff8f604b57f11ce609242e33fa163  Polestar_ItemDB/Forever.lua
+  243fcb5b45960250043137b9a3ffb8e7b445ee985433e08b0539b41f890af6ae  Polestar_ItemDB/Items.lua
+
+---- Aviso MIT de ForeverLevelingBiS ----
+MIT License
+
+Copyright (c) 2026 Thunder
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

@@ -256,7 +256,10 @@ end
 if SlashCmdList then
 	SLASH_ASISTENTE1 = "/asistente"
 	SlashCmdList.ASISTENTE = function(arg)
-		local say = function(t) DEFAULT_CHAT_FRAME:AddMessage("|cff66bbffAsistente:|r " .. t) end
+		local As = _G.Asistente
+		local say = function(t)
+			if As and As.Decir then As.Decir(t) else DEFAULT_CHAT_FRAME:AddMessage("Asistente: " .. t) end
+		end
 		if arg == "fuentes" then
 			for _, l in ipairs(C.Creditos()) do say(l) end
 			return

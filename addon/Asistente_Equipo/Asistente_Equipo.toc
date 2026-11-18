@@ -1,0 +1,20 @@
+## Interface: 16001
+## Title: Asistente: equipo
+## Notes: Extiende el equipo de Mamba: revisa todo lo puesto, te dice qué mazmorra repetir según tu nivel (con % de caída y el tope de 5 por hora) y trae guías al 60 de JcE y JcJ. Solo aconseja: no equipa nada. /equipo
+## Author: Cristian Amigo
+## Version: 0.2.0
+## Group: Asistente
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+## Dependencies: Asistente, Polestar
+## OptionalDeps: Tasador
+## LoadOnDemand: 1
+## X-License: GPL-3.0-only
+## X-Datos: Polestar (GPL-3.0), ForeverLevelingBiS (MIT), tablas del cliente. Ver LICENSE-DATA.txt
+
+Datos_Mazmorras.lua
+Datos_JcJ.lua
+Logica.lua
+Juego.lua
+Comandos.lua
