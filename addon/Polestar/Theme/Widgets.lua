@@ -4312,12 +4312,13 @@ function W.Shell(name, opts)
 	f.Tagline = W.Text(side, "small", "textDim")
 	f.Tagline:SetPoint("TOPLEFT", side, "TOPLEFT", textX, -(WORD_TOP + 30))
 	f.Tagline:SetText(opts.tagline or L["A community project"])
-	-- Mamba: el nombre de la ventana es Mamba; Polestar (de nnachit) queda en la línea de abajo, como crédito.
-	f.Wordmark:SetAlpha(0)
-	f.MambaMarca = W.Text(side, "display", "text")
-	f.MambaMarca:SetPoint("BOTTOMLEFT", f.Tagline, "TOPLEFT", 0, 4)
-	f.MambaMarca:SetText("MAMBA")
-	f.Tagline:SetText("con Polestar, de nnachit")
+	-- Mamba (Cristian, 18-11): arriba sigue POLESTAR; debajo, en vez de "Un proyecto comunitario", "Mamba" más
+	-- chico en el acento de la casa; el crédito a nnachit, en un tercer plano debajo.
+	f.Tagline:SetText("Mamba")
+	W.Color(f.Tagline, "accent")
+	f.MambaCredito = W.Text(side, "caption", "textMuted")
+	f.MambaCredito:SetPoint("TOPLEFT", f.Tagline, "BOTTOMLEFT", 0, -2)
+	f.MambaCredito:SetText((L["A community project"] or "Un proyecto comunitario") .. " · nnachit")
 	if opts.headerSearch then
 		-- The search is in the header (below); the navigation starts under
 		-- the band, a hairline over it.
