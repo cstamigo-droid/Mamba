@@ -68,7 +68,7 @@ function Marco:EnableKeyboard(v) self.teclado = v end
 function Marco:EnableMouseWheel() end
 function Marco:SetMovable() end
 function Marco:SetClampedToScreen() end
-function Marco:SetFrameStrata() end
+function Marco:SetFrameStrata(e) self.estrato = e end
 function Marco:SetFrameLevel() end
 function Marco:GetFrameLevel() return 1 end
 function Marco:SetToplevel() end

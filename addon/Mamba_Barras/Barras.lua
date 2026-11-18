@@ -31,6 +31,11 @@ M.DB, M.PJ = db, pj
 function M.Anotar(clave, valor)
 	db().diag[clave] = valor
 end
+function M.Contar(clave)
+	local d = db().diag
+	d.cuenta = d.cuenta or {}
+	d.cuenta[clave] = (d.cuenta[clave] or 0) + 1
+end
 function M.Falla(donde, err)
 	local d = db().diag
 	d.fallas = d.fallas or {}
@@ -118,11 +123,15 @@ function M.Config(id)
 end
 
 -- Primera vez de este personaje: si hay copia de Bartender, se usa; si no, el lugar por defecto.
+-- Versión 2 (K99, 18-11): si la primera vez no había copia (la instalación todavía no la traía), se copia UNA
+-- vez cuando aparece; lo de antes queda para «Deshacer».
 local function primeraVez()
 	local p = pj()
-	if p.version then return end
-	p.version = 1
+	if p.version and (p.version >= 2 or p.copiadoDe) then return end
+	local antes = p.version and p.barras
+	p.version = 2
 	local perfil, origen = M.CopiaBartender()
+	if antes and perfil then p.anterior = antes end
 	local conv = perfil and M.DeBartender(perfil)
 	if conv then
 		p.barras = conv
@@ -203,7 +212,9 @@ M.ConfigLAB = configLAB
 local function crearBarra(def)
 	local h = CreateFrame("Frame", "MambaBarra" .. def.id, UIParent, "SecureHandlerStateTemplate")
 	h.def = def
-	h:SetFrameStrata("LOW")
+	-- MEDIUM, como Bartender4: en LOW cualquier marco del juego en MEDIUM (la barra principal mal escondida
+	-- de la 1.ª tanda) quedaba encima y se comía los clics y el arrastre (K99).
+	h:SetFrameStrata("MEDIUM")
 	h:SetMovable(true)
 	h:SetClampedToScreen(true)
 	h.botones = {}
@@ -222,6 +233,9 @@ local function crearBarra(def)
 		end
 		h.botones[i] = b
 		M.botones[casilla] = b
+		-- K99: cuántos clics y cuántos hechizos soltados llegan de verdad a los botones (se lee en el diag)
+		b:HookScript("PostClick", function() M.Contar("clics") end)
+		b:HookScript("OnReceiveDrag", function() M.Contar("soltados") end)
 	end
 	if def.pagina then
 		local cond = M.ConductorActual()
@@ -309,6 +323,23 @@ end
 
 function M.DisponerTodo()
 	for id in pairs(M.marcos) do M.Disponer(id) end
+end
+
+-- K99: un tamaño (escala) y una separación para todas las barras de una vez, fuera de combate.
+local function todasLasBarras(campo, v)
+	for _, d in ipairs(M.BARRAS) do M.Config(d.id)[campo] = v end
+	for _, d in ipairs(M.ESPECIALES or {}) do M.Config(d.id)[campo] = v end
+	M.FueraDeCombate("disponer", M.DisponerTodo)
+end
+function M.TamanoTodas(esc)
+	esc = math.max(0.3, math.min(1.5, tonumber(esc) or 1))
+	pj().escalaTodas = esc
+	todasLasBarras("escala", esc)
+end
+function M.SeparacionTodas(sep)
+	sep = math.max(0, math.min(20, math.floor(tonumber(sep) or 2)))
+	pj().separacionTodas = sep
+	todasLasBarras("separacion", sep)
 end
 
 -- Grilla a la vista (modo mover) o solo los botones con algo.

@@ -48,7 +48,7 @@ end
 function M.CrearFormas()
 	local h = CreateFrame("Frame", "MambaBarraFormas", UIParent, "SecureHandlerStateTemplate")
 	h.def = def
-	h:SetFrameStrata("LOW")
+	h:SetFrameStrata("MEDIUM")
 	h:SetMovable(true)
 	h:SetClampedToScreen(true)
 	h.botones = {}
