@@ -178,6 +178,11 @@ def desde_build(guias: Path) -> list[tuple[str, int, str, str]]:
             destinos = [propia]
         elif clave:
             destinos = [x for x in sorted(guias.rglob("*.guide")) if re.search(rf"^\s*\w+ .*\b{clave}\b", x.read_text(encoding="utf-8"), re.M)]
+            # La ruta de un bando solo lee guías de ese bando (y las comunes): no tocar las del otro.
+            bando = next((b for b in ("alliance", "horde") if f"/{b}/" in "/" + rel_flujo), None)
+            otro = {"alliance": "horde", "horde": "alliance"}.get(bando or "")
+            if otro:
+                destinos = [x for x in destinos if f"/{otro}/" not in "/" + x.relative_to(guias).as_posix()]
         else:
             destinos = [propia] if propia.is_file() else []
         if msg.startswith("duplicate `loop`") or msg.startswith("unknown label"):
@@ -274,6 +279,24 @@ def _arreglo_build(g: Path, rel: str, rel_flujo: str, fl: int, msg: str, start: 
                         return False
                 return False
             for i, x in enumerate(lineas):
+                if re.match(rf"^\s*collect {m[1]}\b", x) and rel != rel_flujo and en_when_group(i):
+                    # La ruta sacó el paso `when group Q` a la ruta de todos (v0.4.1, Raptor Mastery en la Horda):
+                    # en su paso de grupo no puede ser optional y fuera de él tiene que serlo. La misión de
+                    # élite sale de esta guía (pasos `when group Q` y sus líneas); la ruta recupera la XP.
+                    qm = re.search(r"\bquest (\d+)", x)
+                    if not qm:
+                        break
+                    q = qm[1]
+                    inicios = [j for j, y in enumerate(lineas) if y.startswith("step ")] + [len(lineas)]
+                    fuera = []
+                    for a, b in zip(inicios, inicios[1:]):
+                        if any(re.match(rf"^\s*when group {q}\s*$", y.split("--")[0]) for y in lineas[a:b]):
+                            fuera.append((a, b))
+                    for a, b in reversed(fuera):
+                        hechos.append((rel, a + 1, f"paso fuera (misión de élite {q} de grupo, que la ruta saca del grupo)", lineas[a].strip()))
+                        del lineas[a:b]
+                    g.write_bytes("\n".join(lineas).encode("utf-8"))
+                    return hechos
                 if re.match(rf"^\s*collect {m[1]}\b", x) and "optional" not in x.split("--")[0] and not en_when_group(i):
                     cr = "\r" if x.endswith("\r") else ""
                     ind = x[: len(x) - len(x.lstrip())]
