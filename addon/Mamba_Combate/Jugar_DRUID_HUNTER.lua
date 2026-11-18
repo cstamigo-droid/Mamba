@@ -34,12 +34,12 @@ M.JUGAR.DRUID = {
 				{ h = 5570, cuando = "Si tienes {5570} y no lo tiene", c = { { "sinDebuff", 5570 } } },
 				{ h = 2912, cuando = "Si tienes Augurio de claridad: {2912} sale gratis", c = { { "buff", 16870 } } },
 				{ h = 5176, cuando = "Relleno: {5176}", c = {} },
-				{ h = 339, cuando = "Si se te acerca: {339} y te alejas", c = {} },
+				{ h = 339, cuando = "Si se te acerca: {339} y te alejas", c = { { "sinDebuff", 339 }, { "vida<", 80 } } },
 			}, nota = "Con poco maná, termina a los enemigos en forma felina en vez de beber entre cada pelea." },
 			varios = { pasos = {
 				{ h = 16914, cuando = "Si hay 3 o más juntos: {16914}", c = { { "enemigos>=", 3 } } },
 				{ h = 8921, cuando = "{8921} a cada uno que no lo tenga", c = { { "sinDebuff", 8921 } } },
-				{ h = 339, cuando = "{339} al que se te acerque", c = {} },
+				{ h = 339, cuando = "{339} al que se te acerque", c = { { "sinDebuff", 339 } } },
 				{ h = 5176, cuando = "Relleno: {5176}", c = {} },
 			}, nota = "Contra varios, controla a uno con {339} o {2637} (bestias y dragones) y mata de a uno." },
 			mazmorra = { pasos = {
@@ -49,12 +49,11 @@ M.JUGAR.DRUID = {
 				{ h = 29166, cuando = "{29166} al sanador (o a ti) con poco maná", c = { { "mana<", 30 } } },
 			}, nota = "No pases al tanque en amenaza: espera 2-3 golpes antes del primer {2912}." },
 			jcj = { pasos = {
-				{ h = 339, cuando = "Controlar: {339} al que viene a pegarte", c = {} },
+				{ h = 339, cuando = "Controlar: {339} al que viene a pegarte", c = { { "sinDebuff", 339 } } },
 				{ h = 8921, cuando = "Al moverte: {8921} no te frena", c = { { "sinDebuff", 8921 } } },
 				{ h = 2912, cuando = "Con el enemigo enraizado: {2912}", c = {} },
 				{ h = 783, cuando = "Escapar: {783} (quita la lentitud)", c = { { "vida<", 40 } } },
-				{ h = 5211, cuando = "Cortar un lanzamiento: {5487} y {5211}", c = {} },
-			}, nota = "Contra pícaros y guerreros, distancia con {339}; contra lanzadores, interrumpe con {5211} desde oso." },
+			}, nota = "Contra pícaros y guerreros, distancia con {339}. Al pasar a oso empiezas sin ira: {5211} no te sirve para cortar desde Equilibrio." },
 			jefe = { pasos = {
 				{ h = 770, cuando = "Si nadie puso {770}", c = { { "sinDebuff", 770 } } },
 				{ h = 2912, cuando = "{2912} sin parar", c = {} },
@@ -80,7 +79,6 @@ M.JUGAR.DRUID = {
 				{ h = 1082, cuando = "Uno por uno: {1082}", c = { { "energia>=", 45 } } },
 			}, nota = "El gato no tiene daño en área: contra varios, oso." },
 			mazmorra = { pasos = {
-				{ h = 5217, cuando = "Al empezar: {5217}", c = { { "energia>=", 30 } } },
 				{ h = 5221, cuando = "Desde atrás: {5221}", c = { { "energia>=", 60 } } },
 				{ h = 1079, cuando = "Con 5 puntos y el jefe con vida: {1079}", c = { { "combo>=", 5 }, { "sinDebuff", 1079 } } },
 				{ h = 22568, cuando = "Con 5 puntos si ya tiene {1079}: {22568}", c = { { "combo>=", 5 } } },
@@ -121,6 +119,7 @@ M.JUGAR.DRUID = {
 				{ h = 6795, cuando = "Si alguien te quita uno: {6795}", c = {} },
 				{ h = 779, cuando = "Varios: {779} sin parar", c = { { "enemigos>=", 2 }, { "ira>=", 20 } } },
 				{ h = 6807, cuando = "Uno: {6807}", c = { { "ira>=", 15 } } },
+				{ h = 414644, cuando = "Desde el 42: {414644} suma amenaza con el tiempo", c = { { "ira>=", 15 } } },
 				{ h = 99, cuando = "{99} si no lo tiene", c = { { "sinDebuff", 99 } } },
 			}, nota = "Marca cuál matar primero y espera al sanador antes del siguiente grupo." },
 			jcj = { pasos = {
@@ -131,6 +130,7 @@ M.JUGAR.DRUID = {
 			jefe = { pasos = {
 				{ h = 99, cuando = "Siempre {99} puesto", c = { { "sinDebuff", 99 } } },
 				{ h = 6807, cuando = "{6807}", c = { { "ira>=", 15 } } },
+				{ h = 414644, cuando = "Desde el 42: {414644}", c = { { "ira>=", 15 } } },
 				{ h = 16857, cuando = "{16857} si no lo tiene", c = { { "sinDebuff", 16857 } } },
 			}, nota = "" },
 			emergencia = { pasos = {
@@ -199,7 +199,7 @@ M.JUGAR.HUNTER = {
 				{ h = 5116, cuando = "Si viene hacia ti: {5116}", c = {} },
 				{ h = 1499, cuando = "Contra cuerpo a cuerpo: {1499} y te alejas", c = {} },
 				{ h = 3044, cuando = "{3044}", c = {} },
-				{ h = 781, cuando = "Pegado a ti: {781}", c = {} },
+				{ h = 2974, cuando = "Pegado a ti: {2974} y aléjate", c = { { "sinDebuff", 2974 } } },
 			}, nota = "Mantén distancia: a menos de 8 metros no puedes disparar." },
 			jefe = { pasos = {
 				{ h = 3045, cuando = "Al principio: {3045}", c = {} },

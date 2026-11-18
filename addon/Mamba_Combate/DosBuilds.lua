@@ -3,8 +3,8 @@
 --      con su build recomendada y su fuente (Asistente_Clase, por MambaAPI.Clase).
 --   2) Mamba DECIDE con números entre: (a) subir con la de daño y activar la doble al 40, juntando de paso el equipo
 --      de la otra; (b) llevar las dos ya, reiniciando talentos cada vez que cambias; (c) terminar una al 60 y
---      después la otra. Se comparan horas hasta el 60 (XP/h MEDIDA por el Medidor; si no hay, "sin datos aún"),
---      oro y desde qué nivel puedes cumplir el segundo rol.
+--      después la otra. Las horas hasta el 60 son las mismas en las tres (subes con la misma build; se muestran con
+--      la XP/h MEDIDA o "sin datos aún"): deciden el oro y desde qué nivel puedes cumplir el segundo rol.
 --   3) Tu equipo por ranura: sirve para las dos, solo para una o para ninguna, y qué cambiar primero.
 -- Lo no verificado (costo de la doble: 50 o según Wowhead; reinicios 1/5/10 o según jugadores) va marcado.
 -- Licencia: GPL-3.0-only.
@@ -23,7 +23,8 @@ B.NIVEL_DOBLE = 40
 
 local ROL_TXT = { danio = "daño", ["daño"] = "daño", sanar = "curar", tanque = "tanque", jcj = "JcJ" }
 -- Segundo rol natural de cada clase (si no lo elegiste en Mi plan)
-B.SEGUNDO = { DRUID = "sanar", PRIEST = "danio", SHAMAN = "sanar", PALADIN = "sanar", WARRIOR = "tanque" }
+B.SEGUNDO = { DRUID = "sanar", PRIEST = "danio", SHAMAN = "sanar", PALADIN = "sanar", WARRIOR = "tanque",
+	HUNTER = "jcj", MAGE = "jcj", ROGUE = "jcj", WARLOCK = "jcj" } -- sin segundo rol de curar: daño en JcJ
 
 function B.XPHasta60(nivel, xpAhora, xpMax)
 	if nivel >= 60 then return 0 end
@@ -56,7 +57,7 @@ function B.Roles()
 	end
 	local rol2 = r.rol2
 	if not rol2 or rol2 == rol1 then rol2 = B.SEGUNDO[clase] end
-	if rol2 == rol1 then rol2 = (rol1 == "danio") and "sanar" or "danio" end
+	if not rol2 or rol2 == rol1 then rol2 = (rol1 == "danio") and "jcj" or "danio" end
 	return rol1, rol2
 end
 
@@ -105,30 +106,42 @@ end
 ---------------------------------------------------------------- equipo por ranura
 B.RANURAS = { { 1, "Cabeza" }, { 2, "Cuello" }, { 3, "Hombros" }, { 15, "Espalda" }, { 5, "Pecho" }, { 9, "Muñecas" },
 	{ 10, "Manos" }, { 6, "Cintura" }, { 7, "Piernas" }, { 8, "Pies" }, { 11, "Anillo" }, { 12, "Anillo" },
-	{ 13, "Abalorio" }, { 14, "Abalorio" }, { 16, "Arma" }, { 17, "Mano izquierda" } }
+	{ 13, "Abalorio" }, { 14, "Abalorio" }, { 16, "Arma" }, { 17, "Mano izquierda" }, { 18, "Distancia o reliquia" } }
 local MAGIA = { ITEM_MOD_INTELLECT_SHORT = true, ITEM_MOD_SPIRIT_SHORT = true, ITEM_MOD_SPELL_POWER_SHORT = true,
 	ITEM_MOD_SPELL_DAMAGE_DONE_SHORT = true, ITEM_MOD_MANA_REGENERATION_SHORT = true, ITEM_MOD_SPELL_HEALING_DONE_SHORT = true }
-local SOLO_CURA = { ITEM_MOD_SPELL_HEALING_DONE_SHORT = true, ITEM_MOD_MANA_REGENERATION_SHORT = true }
+local CURA = { ITEM_MOD_INTELLECT_SHORT = true, ITEM_MOD_SPIRIT_SHORT = true, ITEM_MOD_SPELL_POWER_SHORT = true,
+	ITEM_MOD_MANA_REGENERATION_SHORT = true, ITEM_MOD_SPELL_HEALING_DONE_SHORT = true }
+local LANZA = { ITEM_MOD_INTELLECT_SHORT = true, ITEM_MOD_SPELL_POWER_SHORT = true, ITEM_MOD_SPELL_DAMAGE_DONE_SHORT = true }
 local FISICO = { ITEM_MOD_AGILITY_SHORT = true, ITEM_MOD_STRENGTH_SHORT = true, ITEM_MOD_ATTACK_POWER_SHORT = true }
+local TANQUE = { ITEM_MOD_STAMINA_SHORT = true, ITEM_MOD_DEFENSE_SKILL_RATING_SHORT = true, RESISTANCE0_NAME = true,
+	ITEM_MOD_AGILITY_SHORT = true, ITEM_MOD_STRENGTH_SHORT = true }
+-- Clases que hacen daño con hechizos (el resto, físico); el druida depende de su especialización.
+local LANZADORA = { MAGE = true, WARLOCK = true, PRIEST = true }
 
--- Para qué rol sirve una pieza según sus atributos: "dos" | "daño" | "curar" | "fisico" | "nada"
+-- ¿Qué atributos quiere un rol? (tabla de claves)
+function B.Quiere(rol)
+	if rol == "sanar" then return CURA end
+	if rol == "tanque" then return TANQUE end
+	local clase = M.Clase()
+	local s = M.Rotacion and M.Rotacion.Spec()
+	if LANZADORA[clase] or (s and (s.clave == "equilibrio" or s.clave == "elemental")) then return LANZA end
+	return FISICO
+end
+
+-- Para qué rol sirve una pieza: "dos" | "rol1" | "rol2" | "nada"
 function B.SirvePara(stats, rol1, rol2)
-	local magia, cura, fis = false, true, false
-	local algo = false
+	local q1, q2 = B.Quiere(rol1), B.Quiere(rol2)
+	local s1, s2, algo = false, false, false
 	for k in pairs(stats or {}) do
-		local kk = tostring(k):gsub("_SHORT$", "") .. "_SHORT"
-		if MAGIA[kk] then magia = true; algo = true; if not SOLO_CURA[kk] then cura = false end end
-		if FISICO[kk] then fis = true; algo = true end
+		local kk = tostring(k)
+		if not kk:find("_SHORT$") and kk:find("^ITEM_MOD") then kk = kk .. "_SHORT" end
+		algo = true
+		if q1[kk] then s1 = true end
+		if q2[kk] then s2 = true end
 	end
 	if not algo then return "nada" end
-	local quiereMagia = function(r) return r == "sanar" or (r == "danio" and M.Rotacion and M.Rotacion.Spec() and M.Rotacion.Spec().clave == "equilibrio") end
-	if magia and cura and not fis then return "curar" end
-	if magia and not fis then
-		if quiereMagia(rol1) and quiereMagia(rol2) then return "dos" end
-		return "daño"
-	end
-	if fis and not magia then return "fisico" end
-	return "dos"
+	if s1 and s2 then return "dos" elseif s1 then return "rol1" elseif s2 then return "rol2" end
+	return "nada"
 end
 
 function B.Equipo(rol1, rol2)
@@ -156,7 +169,7 @@ end
 function M.FilasDosBuilds()
 	local nivel = UnitLevel and UnitLevel("player") or 1
 	local rol1, rol2 = B.Roles()
-	local cab = { titulo = ("Dos formas de jugar: %s y %s"):format(ROL_TXT[rol1] or rol1, ROL_TXT[rol2] or rol2),
+	local cab = { titulo = ("Dos formas de jugar: %s y %s"):format(ROL_TXT[rol1] or tostring(rol1), ROL_TXT[rol2] or tostring(rol2)),
 		linea1 = "Desde el nivel 40 tu instructor de clase te deja tener dos juegos de talentos y cambiar entre ellos (costo aproximado 50 o: confírmalo con él).",
 		linea2 = "Tus roles salen de Mi plan (puedes cambiarlos en «Cambiar mis respuestas»)." }
 	local out = {}
@@ -182,7 +195,7 @@ function M.FilasDosBuilds()
 	end
 	local eq = B.Equipo(rol1, rol2)
 	local nada = {}
-	local TXT = { dos = "sirve para las dos", ["daño"] = "solo daño", curar = "solo curar", fisico = "solo felino, oso u otro físico", nada = "sin atributos útiles", vacia = "vacía" }
+	local TXT = { dos = "sirve para las dos", rol1 = "solo para " .. (ROL_TXT[rol1] or rol1), rol2 = "solo para " .. (ROL_TXT[rol2] or rol2), nada = "no sirve para ninguna", vacia = "vacía" }
 	local cuenta = {}
 	for _, x in ipairs(eq) do
 		cuenta[x.sirve] = (cuenta[x.sirve] or 0) + 1
@@ -190,7 +203,7 @@ function M.FilasDosBuilds()
 	end
 	out[#out + 1] = { tipo = "Equipo", titulo = ("%d piezas sirven para las dos formas de jugar"):format(cuenta.dos or 0),
 		detalle = #nada > 0 and ("Para cambiar de rol con lo mínimo, busca primero: " .. table.concat(nada, ", ")) or "Todo lo que llevas sirve para las dos.",
-		conf = "Las piezas con «daño y curación», intelecto o espíritu sirven a Equilibrio y a Restauración a la vez.",
+		conf = "Cuenta los atributos que pide cada forma de jugar (por ejemplo, intelecto sirve a Equilibrio y a Restauración; aguante y armadura, al oso).",
 		acciones = { { "Ver en Equipo", function() if api and api.Abrir then pcall(api.Abrir, "MambaEquipo", "mejorar") end end } } }
 	return out, cab
 end

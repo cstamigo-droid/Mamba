@@ -13,20 +13,31 @@ local function enCombate() return InCombatLockdown and InCombatLockdown() end
 local function secreto(v) return issecretvalue and issecretvalue(v) end
 
 -- Fragmento seguro: al entrar el ratón ata la rueda a este botón; al salir la suelta.
-local ENTRAR = [[ self:SetBindingClick(true, "MOUSEWHEELUP", self, "Button4"); self:SetBindingClick(true, "MOUSEWHEELDOWN", self, "Button5") ]]
+local ENTRAR = [[
+	for _, m in ipairs(newtable("", "SHIFT-", "CTRL-", "ALT-")) do
+		self:SetBindingClick(true, m .. "MOUSEWHEELUP", self, "Button4")
+		self:SetBindingClick(true, m .. "MOUSEWHEELDOWN", self, "Button5")
+	end ]]
 local SALIR = [[ self:ClearBindings() ]]
+local function usaRueda(attrs)
+	for k in pairs(attrs) do if k:match("type[45]$") then return true end end
+	return false
+end
 
 -- El fragmento que la cabecera corre en cada botón nuevo (también en combate): copia los atributos del perfil.
 function M.FragmentoInicial(attrs)
-	local t = { [[ self:SetWidth(self:GetParent():GetAttribute("anchoBoton")); self:SetHeight(self:GetParent():GetAttribute("altoBoton")); self:RegisterForClicks("AnyUp") ]] }
+	local t = { [[ self:SetWidth(self:GetParent():GetAttribute("anchoBoton")); self:SetHeight(self:GetParent():GetAttribute("altoBoton")); self:SetAttribute("useOnKeyDown", false) ]] }
 	local claves = {}
 	for k in pairs(attrs) do claves[#claves + 1] = k end
 	table.sort(claves)
 	for _, k in ipairs(claves) do
 		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format(k, attrs[k])
 	end
-	t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onenter", ENTRAR)
-	t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onleave", SALIR)
+	if usaRueda(attrs) then
+		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onenter", ENTRAR)
+		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onleave", SALIR)
+		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onhide", SALIR)
+	end
 	return table.concat(t, "\n")
 end
 
@@ -85,7 +96,7 @@ function M.Pintar(b)
 		local inR
 		local sp = b:GetAttribute("spell1")
 		if sp and C_Spell and C_Spell.IsSpellInRange then inR = C_Spell.IsSpellInRange(sp, u) end
-		if inR == nil and UnitInRange then inR = UnitInRange(u) end
+		if not secreto(inR) and inR == nil and UnitInRange then inR = UnitInRange(u) end
 		if secreto(inR) and b.SetAlphaFromBoolean then pcall(b.SetAlphaFromBoolean, b, inR, 1, 0.45)
 		elseif not secreto(inR) then b:SetAlpha((inR == false or inR == 0) and 0.45 or 1) end
 	end
@@ -96,7 +107,9 @@ function M.Pintar(b)
 		for i = 1, 20 do
 			local ok, a = pcall(A.GetAuraDataByIndex, u, i, "HELPFUL|PLAYER")
 			if not ok or not a then break end
-			if n < 3 then
+			local dur = a.duration
+			local corto = (not secreto(dur)) and (dur or 0) > 0 and dur <= 60
+			if n < 3 and (corto or secreto(dur)) then
 				n = n + 1
 				local h = b.hots[n]
 				pcall(h.icono.SetTexture, h.icono, a.icon)
@@ -159,7 +172,8 @@ function M.Aplicar()
 	if not cabecera then
 		cabecera = CreateFrame("Frame", "MambaCuraCabecera", ancla, "SecureGroupHeaderTemplate")
 		cabecera:SetPoint("TOPLEFT", ancla, "TOPLEFT", 0, 0)
-		cabecera:SetAttribute("template", "SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate")
+		-- SecureActionButtonTemplate (como HealBot): SecureUnitButtonTemplate consulta antes los atajos de clic de Blizzard
+		cabecera:SetAttribute("template", "SecureActionButtonTemplate,SecureHandlerEnterLeaveTemplate,SecureHandlerShowHideTemplate")
 		cabecera:SetAttribute("showPlayer", true)
 		cabecera:SetAttribute("showParty", true)
 		cabecera:SetAttribute("showRaid", true)
@@ -182,8 +196,17 @@ function M.Aplicar()
 	cabecera:SetAttribute("showSolo", d.solo)
 	cabecera:SetAttribute("initialConfigFunction", M.FragmentoInicial(attrs))
 	ancla:SetScale(d.escala or 1)
-	-- los botones que ya existen reciben el perfil nuevo
+	for i = 1, 40 do
+		local h = cabecera.GetAttribute and cabecera:GetAttribute("child" .. i)
+		if type(h) == "table" then M.NuevoBoton(h) end
+	end
+	-- los botones que ya existen reciben el perfil nuevo y el tamaño
+	local rueda = usaRueda(attrs)
 	for _, b in ipairs(botones) do
+		b:SetSize(d.ancho, d.alto)
+		b:SetAttribute("_onenter", rueda and ENTRAR or nil)
+		b:SetAttribute("_onleave", rueda and SALIR or nil)
+		b:SetAttribute("_onhide", rueda and SALIR or nil)
 		for _, c in ipairs(M.CLICS) do
 			local pre, boton = c[1]:match("^(.-)(%d)$")
 			b:SetAttribute(pre .. "type" .. boton, nil)
@@ -200,9 +223,17 @@ function M.NuevoBoton(b)
 	botones[#botones + 1] = b
 	-- la rueda: el fragmento de entrar/salir va en el botón (SecureHandlerEnterLeaveTemplate)
 	if not enCombate() and b.SetAttribute then
-		b:SetAttribute("_onenter", ENTRAR)
-		b:SetAttribute("_onleave", SALIR)
-		for k, v in pairs(M.Atributos(M.Perfil())) do b:SetAttribute(k, v) end
+		local attrs = M.Atributos(M.Perfil())
+		if b.RegisterForClicks then b:RegisterForClicks("AnyUp") end
+		b:SetAttribute("useOnKeyDown", false)
+		if usaRueda(attrs) then
+			b:SetAttribute("_onenter", ENTRAR)
+			b:SetAttribute("_onleave", SALIR)
+			b:SetAttribute("_onhide", SALIR)
+		end
+		for k, v in pairs(attrs) do b:SetAttribute(k, v) end
+	elseif enCombate() then
+		pendiente = true -- RegisterForClicks y el perfil, al salir de combate
 	end
 	if b.HookScript then b:HookScript("OnAttributeChanged", function(s, n) if n == "unit" then M.Proteger("pintar", M.Pintar, s) end end) end
 	M.Proteger("pintar", M.Pintar, b)
@@ -238,6 +269,7 @@ ev:SetScript("OnEvent", function(_, e, unidad)
 	elseif e == "SPELL_UPDATE_COOLDOWN" then
 		M.Proteger("presteza", M.ActualizarPresteza)
 	else
+		if type(unidad) == "string" and not (unidad == "player" or unidad:find("^party") or unidad:find("^raid")) then return end
 		for _, b in ipairs(botones) do
 			if not unidad or (b.GetAttribute and b:GetAttribute("unit") and UnitIsUnit and UnitIsUnit(b:GetAttribute("unit"), unidad)) then
 				M.Proteger("pintar", M.Pintar, b)

@@ -316,8 +316,13 @@ e2 = B.Estrategias(39, None, 25000)
 check(e2[1].horas is None, "sin XP/h medida: horas = sin datos (no inventa)")
 st = L.eval("{ ITEM_MOD_INTELLECT_SHORT = 5, ITEM_MOD_SPIRIT_SHORT = 3 }")
 check(B.SirvePara(st, "danio", "sanar") == "dos", "intelecto y espíritu: sirve a Equilibrio y a Restauración")
-check(B.SirvePara(L.eval("{ ITEM_MOD_AGILITY_SHORT = 5 }"), "danio", "sanar") == "fisico", "agilidad: solo físico")
-check(B.SirvePara(L.eval("{ ITEM_MOD_SPELL_HEALING_DONE_SHORT = 9 }"), "danio", "sanar") == "curar", "+curación: solo curar")
+check(B.SirvePara(L.eval("{ ITEM_MOD_AGILITY_SHORT = 5 }"), "tanque", "sanar") == "rol1", "agilidad: solo para el oso (tanque)")
+check(B.SirvePara(L.eval("{ ITEM_MOD_SPELL_HEALING_DONE_SHORT = 9 }"), "danio", "sanar") == "rol2", "+curación: solo para curar")
+check(B.SirvePara(L.eval("{ ITEM_MOD_STAMINA_SHORT = 9 }"), "tanque", "danio") == "rol1", "aguante: sirve al tanque")
+L.execute("UnitClass = function() return 'Cazador', 'HUNTER' end")
+r1, r2 = B.Roles()
+check(r2 is not None, "cazador sin segundo rol en Mi plan: igual tiene uno (no se cae el panel)")
+L.execute("UnitClass = function() return 'Druida', 'DRUID' end")
 G.MambaPlanPJ = L.eval('{ respuestas = { rol = "danio", rol2 = "sanar" } }')
 filas, cab = C.FilasDosBuilds()
 check("daño" in cab.titulo and "curar" in cab.titulo and len(filas) >= 6, "panel Dos builds: roles de Mi plan y 3 estrategias")
@@ -331,7 +336,7 @@ if csvp.exists():
     for r in csv.DictReader(open(csvp, encoding="utf-8")):
         NOMBRES_CSV[int(r["ID"])] = r["Name_lang"]
 PERMITIDAS = {"sinDebuff", "sinBuff", "buff", "vidaObj<", "vida<", "mana<", "energia>=", "ira>=", "combo>=", "enemigos>=",
-              "forma", "sinForma", "mascota", "amenaza>=", "fueraDeCombate"}
+              "forma", "sinForma", "mascota", "vida>=", "amenaza>=", "fueraDeCombate"}
 malos, ids, clases = [], set(), 0
 for clase, d in G.MambaCombate.JUGAR.items():
     clases += 1

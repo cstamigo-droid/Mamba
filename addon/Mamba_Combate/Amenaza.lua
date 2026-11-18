@@ -179,7 +179,10 @@ f:SetScript("OnEvent", function(_, e, u)
 	if type(u) == "string" and u:find("^nameplate") then
 		if e:find("SPELLCAST") then M.Proteger("lanzaPlaca", A.LanzaPlaca, u) else M.Proteger("placa", A.PintarPlaca, u) end
 	end
+	local t = GetTime and GetTime() or 0
+	if e:find("THREAT") and t < (A.proxAmenaza or 0) then return end -- como mucho 5 veces por segundo
 	if e:find("THREAT") or e == "PLAYER_TARGET_CHANGED" or e == "GROUP_ROSTER_UPDATE" then
+		A.proxAmenaza = t + 0.2
 		M.Proteger("amenaza", A.Dibujar)
 		local N = C_NamePlate
 		if N and N.GetNamePlates then

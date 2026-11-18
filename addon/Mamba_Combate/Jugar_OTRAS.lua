@@ -145,7 +145,7 @@ M.JUGAR.WARRIOR = {
 				{ h = 72, cuando = "Para cortar un lanzamiento (con escudo): {72}", c = { { "ira>=", 10 } } },
 			}, nota = "En JcJ el tanque aguanta y corta; el daño lo ponen otros." },
 			jefe = { pasos = {
-				{ h = 7386, cuando = "{7386} hasta tener 5 marcas", c = { { "sinDebuff", 7386 }, { "ira>=", 15 } } },
+				{ h = 7386, cuando = "{7386}: repítelo hasta 5 marcas (Mamba solo ve la primera)", c = { { "ira>=", 15 } } },
 				{ h = 6572, cuando = "Después de esquivar, parar o bloquear: {6572}", c = { { "ira>=", 5 } } },
 				{ h = 23922, cuando = "Si lo tienes: {23922}", c = { { "ira>=", 20 } } },
 				{ h = 2565, cuando = "Cuando pega fuerte: {2565}", c = { { "forma", DEFENSIVA }, { "ira>=", 10 } } },
@@ -541,31 +541,31 @@ M.JUGAR.MAGE = {
 			solo = { pasos = {
 				{ h = 6117, cuando = "Antes de pelear: {6117}", c = { { "fueraDeCombate" }, { "sinBuff", 6117 } } },
 				{ h = 1459, cuando = "Antes de pelear: {1459}", c = { { "fueraDeCombate" }, { "sinBuff", 1459 } } },
-				{ h = 12536, cuando = "Si tienes Aclarado mental: {5143} sale gratis", c = { { "buff", 12536 } } },
+				{ h = 5143, cuando = "Si tienes {12536}: {5143} sale gratis", c = { { "buff", 12536 } } },
 				{ h = 122, cuando = "Si te alcanza: {122} y te alejas", c = { { "vida<", 70 } } },
 				{ h = 116, cuando = "Relleno: {116}", c = {} },
 			}, nota = "Cuando al enemigo le quede poca vida, remátalo con la varita para ahorrar maná." },
 			varios = { pasos = {
 				{ h = 1449, cuando = "Con 3 o más cerca: {1449}", c = { { "enemigos>=", 3 } } },
 				{ h = 122, cuando = "Con 2 o más encima: {122}", c = { { "enemigos>=", 2 }, { "vida<", 70 } } },
-				{ h = 5143, cuando = "Si tienes Aclarado mental: {5143} sale gratis", c = { { "buff", 12536 } } },
+				{ h = 5143, cuando = "Si tienes {12536}: {5143} sale gratis", c = { { "buff", 12536 } } },
 				{ h = 116, cuando = "Relleno: {116}", c = {} },
 			}, nota = "{1449} gasta mucho maná: úsala con el grupo cerca y bebe después." },
 			mazmorra = { pasos = {
 				{ h = 1459, cuando = "Antes de empezar, a cada compañero: {1459}", c = { { "fueraDeCombate" } } },
-				{ h = 5143, cuando = "Si tienes Aclarado mental: {5143} sale gratis", c = { { "buff", 12536 } } },
+				{ h = 5143, cuando = "Si tienes {12536}: {5143} sale gratis", c = { { "buff", 12536 } } },
 				{ h = 1449, cuando = "Con 3 o más cerca: {1449}", c = { { "enemigos>=", 3 } } },
 				{ h = 116, cuando = "Daño principal: {116}", c = {} },
 			}, nota = "Duerme a uno con {118} (humanoides y bestias). Para cortar un lanzamiento usa {2139}." },
 			jcj = { pasos = {
 				{ h = 122, cuando = "Si te alcanza: {122} y te alejas", c = { { "vida<", 70 } } },
 				{ h = 2136, cuando = "Para rematar: {2136}", c = { { "vidaObj<", 30 } } },
-				{ h = 5143, cuando = "Si tienes Aclarado mental: {5143} sale gratis", c = { { "buff", 12536 } } },
+				{ h = 5143, cuando = "Si tienes {12536}: {5143} sale gratis", c = { { "buff", 12536 } } },
 				{ h = 116, cuando = "Relleno: {116} lo frena", c = {} },
 			}, nota = "{2139} corta un lanzamiento. {118} deja fuera de pelea a un sanador. {1953} te saca de apuros." },
 			jefe = { pasos = {
 				{ h = 12042, cuando = "Al empezar, si lo tienes: {12042}", c = {} },
-				{ h = 5143, cuando = "Si tienes Aclarado mental: {5143} sale gratis", c = { { "buff", 12536 } } },
+				{ h = 5143, cuando = "Si tienes {12536}: {5143} sale gratis", c = { { "buff", 12536 } } },
 				{ h = 12051, cuando = "Muy poco maná: {12051}", c = { { "mana<", 15 } } },
 				{ h = 116, cuando = "Daño principal: {116}", c = {} },
 			}, nota = "La pelea larga es de maná: {12051} recupera mucho, pero no la uses con enemigos cerca." },
@@ -604,7 +604,6 @@ M.JUGAR.MAGE = {
 			}, nota = "{2139} corta un lanzamiento. {118} deja fuera de pelea a un sanador. {1953} te saca de apuros." },
 			jefe = { pasos = {
 				{ h = 1459, cuando = "Antes de empezar: {1459}", c = { { "fueraDeCombate" }, { "sinBuff", 1459 } } },
-				{ h = 2948, cuando = "Con el talento que mejora {2948}: mantén sus marcas", c = { { "sinDebuff", 22959 } } },
 				{ h = 11129, cuando = "Al empezar, si lo tienes: {11129}", c = {} },
 				{ h = 12051, cuando = "Muy poco maná: {12051}", c = { { "mana<", 15 } } },
 				{ h = 133, cuando = "Daño principal: {133}", c = {} },
@@ -669,7 +668,7 @@ M.JUGAR.WARLOCK = {
 	specs = {
 		{ clave = "afliccion", nombre = "Aflicción", arbol = 1, rol = "daño", casos = {
 			solo = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 1120, cuando = "Si le queda menos del 25 %: {1120} da un fragmento de alma", c = { { "vidaObj<", 25 } } },
 				{ h = 172, cuando = "Si no tiene tu {172}", c = { { "sinDebuff", 172 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
@@ -684,7 +683,7 @@ M.JUGAR.WARLOCK = {
 				{ h = 686, cuando = "Relleno: {686}", c = {} },
 			}, nota = "Que tu esbirro aguante a uno; a otro puedes mandarlo lejos con {5782}." },
 			mazmorra = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
 				{ h = 172, cuando = "Si no tiene tu {172}", c = { { "sinDebuff", 172 } } },
 				{ h = 18265, cuando = "Si lo tienes: {18265}", c = { { "sinDebuff", 18265 } } },
@@ -699,7 +698,7 @@ M.JUGAR.WARLOCK = {
 				{ h = 686, cuando = "Relleno: {686}", c = {} },
 			}, nota = "Contra lanzadores pon {1714}. {5484} aleja a varios de golpe." },
 			jefe = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
 				{ h = 172, cuando = "Si no tiene tu {172}", c = { { "sinDebuff", 172 } } },
 				{ h = 18265, cuando = "Si lo tienes: {18265}", c = { { "sinDebuff", 18265 } } },
@@ -715,7 +714,7 @@ M.JUGAR.WARLOCK = {
 		{ clave = "demonologia", nombre = "Demonología", arbol = 2, rol = "daño", usa = "afliccion" },
 		{ clave = "destruccion", nombre = "Destrucción", arbol = 3, rol = "daño", casos = {
 			solo = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 17877, cuando = "Para rematar, si lo tienes: {17877} (gasta un fragmento)", c = { { "vidaObj<", 20 } } },
 				{ h = 348, cuando = "Si no tiene tu {348}", c = { { "sinDebuff", 348 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
@@ -728,7 +727,7 @@ M.JUGAR.WARLOCK = {
 				{ h = 686, cuando = "Relleno: {686}", c = {} },
 			}, nota = "Que tu esbirro aguante a uno; a otro puedes mandarlo lejos con {5782}." },
 			mazmorra = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 348, cuando = "Si no tiene tu {348}", c = { { "sinDebuff", 348 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
 				{ h = 686, cuando = "Daño principal: {686}", c = {} },
@@ -742,7 +741,7 @@ M.JUGAR.WARLOCK = {
 				{ h = 686, cuando = "Relleno: {686}", c = {} },
 			}, nota = "Contra lanzadores pon {1714}. {5484} aleja a varios de golpe." },
 			jefe = { pasos = {
-				{ h = 1454, cuando = "Poco maná: {1454}", c = { { "mana<", 20 } } },
+				{ h = 1454, cuando = "Poco maná y vida alta: {1454}", c = { { "mana<", 20 }, { "vida>=", 60 } } },
 				{ h = 980, cuando = "Si no tiene tu {980}", c = { { "sinDebuff", 980 } } },
 				{ h = 348, cuando = "Si no tiene tu {348}", c = { { "sinDebuff", 348 } } },
 				{ h = 686, cuando = "Daño principal: {686}", c = {} },

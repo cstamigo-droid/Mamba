@@ -65,6 +65,7 @@ function R.Condicion(c)
 	elseif k == "buff" or k == "forma" then return aura("player", v, "HELPFUL")
 	elseif k == "vidaObj<" then local p = M.Pct(UnitHealth("target"), UnitHealthMax("target")); return p and p < v
 	elseif k == "vida<" then local p = M.Pct(UnitHealth("player"), UnitHealthMax("player")); return p and p < v
+	elseif k == "vida>=" then local p = M.Pct(UnitHealth("player"), UnitHealthMax("player")); return p and p >= v
 	elseif k == "mana<" then local p = M.Pct(UnitPower("player", 0), UnitPowerMax("player", 0)); return p and p < v
 	elseif k == "energia>=" then local p = poder(3); return p and p >= v
 	elseif k == "ira>=" then local p = poder(1); return p and p >= v
@@ -157,6 +158,7 @@ function R.ModoAuto()
 	if tipo == "party" or tipo == "raid" then
 		local nivel = UnitLevel and M.Num(UnitLevel("target"))
 		local clas = UnitClassification and UnitClassification("target")
+		if M.Secreto(clas) then clas = nil end
 		if nivel == -1 or clas == "worldboss" then return "jefe" end
 		return "mazmorra"
 	end
@@ -219,8 +221,11 @@ local function botonesCon(id)
 		if ok and type(l) == "table" then for _, s in ipairs(l) do slots[s] = true end end
 	end
 	local out = {}
+	R.nombres = R.nombres or {}
 	for i = 1, 120 do
-		local b = _G["MambaBoton" .. i]
+		local nb = R.nombres[i]
+		if not nb then nb = "MambaBoton" .. i; R.nombres[i] = nb end
+		local b = _G[nb]
 		if b and b.IsVisible and b:IsVisible() then
 			local a = b._state_action or b.action
 			if a and slots[a] then out[#out + 1] = b end
@@ -234,8 +239,8 @@ local function botonesCon(id)
 end
 R.BotonesCon = botonesCon
 
-function R.Tecla(id)
-	for _, b in ipairs(botonesCon(id)) do
+function R.Tecla(id, lista)
+	for _, b in ipairs(lista or botonesCon(id)) do
 		local hk = b.HotKey and b.HotKey.GetText and b.HotKey:GetText()
 		if hk and hk ~= "" and hk ~= "●" then return hk end
 	end
@@ -307,6 +312,7 @@ function R.Dibujar()
 	local e = R.Evaluar()
 	if not caja then crearCaja() end
 	if not e or (#e.pasos == 0) or not (UnitExists("target") or M.EnCombate()) then caja:Hide(); return end
+	if e.spec.rol == "sanar" and (e.modo == "mazmorra" or e.modo == "jefe") then caja:Hide(); return end
 	local modo, auto = R.Modo()
 	caja.modo.texto:SetText((NOMBRE_MODO[e.modo] or e.modo) .. " · " .. (e.spec.nombre or "") .. (auto and " · automático" or " · fijo"))
 	local lista = {}
@@ -319,8 +325,9 @@ function R.Dibujar()
 	for i, f in ipairs(caja.iconos) do
 		local x = lista[i]
 		if x then
+			x.botones = botonesCon(x.paso.h)
 			f.icono:SetTexture(M.Icono(x.paso.h))
-			f.tecla:SetText(R.Tecla(x.paso.h) or "")
+			f.tecla:SetText(R.Tecla(x.paso.h, x.botones) or "")
 			f.duda:SetText(x.estado == "quizas" and "?" or "")
 			f:Show()
 		else
@@ -330,7 +337,7 @@ function R.Dibujar()
 	caja:Show()
 	ultimo = lista
 	if d.resaltar and lista[1] then
-		for _, b in ipairs(botonesCon(lista[1].paso.h)) do brillo(b):Show() end
+		for _, b in ipairs(lista[1].botones or botonesCon(lista[1].paso.h)) do brillo(b):Show() end
 	end
 end
 function R.Ultimo() return ultimo end

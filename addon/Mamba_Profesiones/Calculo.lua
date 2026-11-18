@@ -201,7 +201,9 @@ function C.Fabricar()
 	local T = _G.Tasador
 	local quien = UnitName and UnitName("player") or "?"
 	local mias = M.DB().recetas[quien] or {}
-	local a = T and T.db and T.db.ajustes or { comision = 0.05, depositoPct = 0.15, horasPublicacion = 12 }
+	-- copia: no se escribe en los ajustes del Tasador
+	local a = {}
+	for k, v in pairs((T and T.db and T.db.ajustes) or { depositoPct = 0.15, horasPublicacion = 12 }) do a[k] = v end
 	a.comision = a.comision or 0.05
 	local out, leidas = {}, 0
 	for prof, recetas in pairs(mias) do

@@ -55,8 +55,10 @@ function Med.Hechizos(sesion, tipo, guid)
 		for _, f in ipairs(s and s.filas or {}) do if f.yo then guid = f.guid end end
 	end
 	if not guid then return nil end
-	local ok, sp = pcall(DM().GetCombatSessionSourceFromType, st, mt, guid, true)
-	if not ok or not sp then return nil end
+	-- firma NO VERIFICADA: se prueba sin y con el 4.º argumento
+	local ok, sp = pcall(DM().GetCombatSessionSourceFromType, st, mt, guid)
+	if not (ok and sp) then ok, sp = pcall(DM().GetCombatSessionSourceFromType, st, mt, guid, true) end
+	if not ok or not sp then M.DB().diag.hechizosNo = true; return nil end
 	local out, total = {}, M.Num(sp.totalAmount)
 	for _, x in ipairs(sp.combatSpells or {}) do
 		local id, amt = M.Num(x.spellID), M.Num(x.totalAmount)

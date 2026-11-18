@@ -14,7 +14,7 @@ Av.CONTROLES = {
 	[408] = "aturdir", [1833] = "aturdir", [853] = "aturdir", [5211] = "aturdir", [20549] = "aturdir", [12809] = "aturdir",
 	[1776] = "incapacitar", [6770] = "incapacitar", [2094] = "cegar", [118] = "polimorfia", [19503] = "desorientar",
 	[5782] = "miedo", [8122] = "miedo", [5246] = "miedo", [5484] = "miedo", [6789] = "miedo", [6358] = "seducir",
-	[122] = "raíces", [339] = "raíces", [1499] = "congelar", [2637] = "dormir",
+	[122] = "raíces", [339] = "raíces", [1499] = "congelar", [2637] = "dormir", [9005] = "aturdir", [19386] = "dormir",
 }
 -- Qué usar para salir, por clase (K40). Ids de rango 1; solo se nombra lo que sabes.
 Av.SALIDAS = {
@@ -23,14 +23,15 @@ Av.SALIDAS = {
 	ROGUE = {},
 	MAGE = { raices = { 1953 }, aturdir = { 1953 } },
 	WARRIOR = { miedo = { 18499 }, raices = {} },
-	PRIEST = { miedo = { 6346 } },
-	SHAMAN = { miedo = { 8143 } },
-	PALADIN = { aturdir = { 642 }, miedo = { 642 }, raices = { 1044 }, lentitud = { 1044 } },
+	PRIEST = {}, -- Resguardo contra el miedo se pone ANTES: no saca del miedo
+	SHAMAN = {}, -- el tótem de tremor también va antes
+	PALADIN = { raices = { 1044 }, lentitud = { 1044 } }, -- Escudo divino no quita aturdir ni miedo
 	WARLOCK = {},
 }
-Av.RAZA = { Scourge = { miedo = 7744, dormir = 7744, seducir = 7744 } } -- Voluntad de los Renegados
-Av.BUFO = { DRUID = 1126, PRIEST = 1243, MAGE = 1459, WARRIOR = 6673, HUNTER = 13165, PALADIN = 19740, WARLOCK = 687, SHAMAN = 324 }
-Av.MANA = { DRUID = 29166, MAGE = 12051 }
+Av.RAZA = { Scourge = { miedo = 7744, dormir = 7744, seducir = 7744 }, -- Voluntad de los Renegados
+	Gnome = { raices = 20589, lentitud = 20589 } } -- Artista del escape
+Av.BUFO = { DRUID = { 1126 }, PRIEST = { 1243 }, MAGE = { 1459 }, WARRIOR = { 6673 }, HUNTER = { 13165 }, PALADIN = { 19740 }, WARLOCK = { 706, 687 }, SHAMAN = { 324 } }
+Av.MANA = { DRUID = 29166, MAGE = 12051, WARLOCK = 1454, SHAMAN = 16190 }
 
 local function clave(tipo)
 	if not tipo or M.Secreto(tipo) then return nil end
@@ -45,6 +46,7 @@ end
 
 -- Qué hechizos tuyos sirven contra ese control (solo los que sabes y están listos).
 function Av.Salidas(tipo)
+	if M.Secreto(tipo) then return {} end
 	local k = clave(tipo) or tipo
 	local out = {}
 	for _, id in ipairs((Av.SALIDAS[M.Clase()] or {})[k] or {}) do
@@ -90,11 +92,25 @@ function Av.Control()
 	mostrar(txt .. (#nombres > 0 and (": usa " .. table.concat(nombres, " o ")) or ""), true, true)
 end
 
-local ultimoLanzado = {}
+local ultimoLanzado, porNombre = {}, nil
+-- Un control por su NOMBRE (cada rango tiene otro id: Polimorfia 118, 12824…)
+function Av.TipoControl(id)
+	if M.Secreto(id) or not id then return nil end
+	if Av.CONTROLES[id] then return Av.CONTROLES[id] end
+	if not porNombre then
+		porNombre = {}
+		for i, tipo in pairs(Av.CONTROLES) do
+			local n = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(i)
+			if n then porNombre[n] = tipo end
+		end
+	end
+	local n = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+	return n and porNombre[n]
+end
 function Av.Lanzado(unidad, id)
-	if M.Secreto(id) or not Av.CONTROLES[id] then return end
+	if not Av.TipoControl(id) then return end
 	local t = GetTime and GetTime() or 0
-	local tipo = Av.CONTROLES[id]
+	local tipo = Av.TipoControl(id)
 	if t - (ultimoLanzado[tipo] or -99) < 3 then return end -- uno cada 3 s por tipo de control
 	ultimoLanzado[tipo] = t
 	if not (UnitCanAttack and UnitCanAttack("player", unidad)) then return end
@@ -131,11 +147,16 @@ end
 
 -- Antes de pelear: ¿te falta tu bufo de clase? (devuelve el id o nil)
 function Av.BufoQueFalta()
-	local id = Av.BUFO[M.Clase()]
-	if not (id and M.Conoce(id)) then return nil end
 	local R = M.Rotacion
-	local a = R and R.Condicion({ "sinBuff", id })
-	if a == true then return id end
+	local falta
+	for _, id in ipairs(Av.BUFO[M.Clase()] or {}) do
+		if M.Conoce(id) then
+			local a = R and R.Condicion({ "sinBuff", id })
+			if a == false then return nil end -- tiene uno de los de su clase
+			if a == true and not falta then falta = id end
+		end
+	end
+	return falta
 end
 
 local f = CreateFrame("Frame")

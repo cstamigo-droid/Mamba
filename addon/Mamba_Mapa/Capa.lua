@@ -213,7 +213,9 @@ function M.AplicarEscala()
 	local W = WorldMapFrame
 	if not (W and W.SetScale) then return end
 	if enCombate() then M.pendiente = true; return end
-	W:SetScale(db().escalaMapa or 1)
+	local e = db().escalaMapa or 1
+	if W.GetScale and math.abs((W:GetScale() or 1) - e) < 0.001 then return end
+	W:SetScale(e)
 end
 
 local function botonesMinimapa()
@@ -235,7 +237,13 @@ function M.AplicarMinimapa()
 		if not M.ganchoMini and Minimap.HookScript then
 			M.ganchoMini = true
 			Minimap:HookScript("OnEnter", function() if db().ocultarBotones then alfa(1) end end)
-			Minimap:HookScript("OnLeave", function() if db().ocultarBotones then alfa(0) end end)
+			Minimap:HookScript("OnLeave", function()
+				-- al pasar a un botón (hijo del minimapa) el ratón sigue encima: no se esconden
+				if db().ocultarBotones and not (Minimap.IsMouseOver and Minimap:IsMouseOver()) then alfa(0) end
+			end)
+			for _, b in ipairs(botonesMinimapa()) do
+				if b.HookScript then b:HookScript("OnLeave", function() if db().ocultarBotones and not Minimap:IsMouseOver() then alfa(0) end end) end
+			end
 		end
 	else
 		alfa(1)
@@ -323,7 +331,7 @@ function M.TickRuta()
 	local w, h = M.Yardas(mapa)
 	w, h = w or 1000, h or 1000
 	local d = math.sqrt(((x * 100 - p.x) * w / 100) ^ 2 + ((y * 100 - p.y) * h / 100) ^ 2)
-	if d < 15 then
+	if d < 15 and #r.orden > 1 then
 		r.i = r.i % #r.orden + 1
 		M.SeguirRuta()
 	end

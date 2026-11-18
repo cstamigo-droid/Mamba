@@ -131,7 +131,9 @@ function D.TickLanzamiento(t)
 		local fr = (t - lanz.ini) / (lanz.fin - lanz.ini)
 		if fr >= 1 then lanz:Hide() else lanz:SetValue(lanz.canal and (1 - fr) or fr) end
 	end
-	if gcd and M.DB().lanzamiento and C_Spell and C_Spell.GetSpellCooldown then
+	D.proxGCD = D.proxGCD or 0
+	if gcd and M.DB().lanzamiento and C_Spell and C_Spell.GetSpellCooldown and t >= D.proxGCD then
+		D.proxGCD = t + 0.05 -- 20 veces por segundo basta
 		local ok, cd = pcall(C_Spell.GetSpellCooldown, 61304)
 		local ini, dur = ok and cd and M.Num(cd.startTime), ok and cd and M.Num(cd.duration)
 		if ini and dur and ini > 0 and dur > 0 and t < ini + dur then
@@ -148,7 +150,9 @@ end
 ---------------------------------------------------------------- números de enfriamiento (opción del juego)
 function D.NumerosCD()
 	if not SetCVar or M.EnCombate() then return end
-	pcall(SetCVar, "countdownForCooldowns", M.DB().numerosCD and "1" or "0")
+	local quiero = M.DB().numerosCD and "1" or "0"
+	if GetCVar and GetCVar("countdownForCooldowns") == quiero then return end
+	pcall(SetCVar, "countdownForCooldowns", quiero)
 end
 
 local f = CreateFrame("Frame")
