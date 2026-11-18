@@ -78,6 +78,16 @@ preparar_copia() {
 	for c in kb nav-layers; do
 		[ -e "$FUSION/data/local/$c" ] || [ ! -d "$REPO/data/local/$c" ] || cp -r "$REPO/data/local/$c" "$FUSION/data/local/" || return 1
 	done
+	# Listas que las construcciones ACUMULAN en data/local (no están en git): sin ellas arreglar_guias.py y
+	# guias_sin_fuente.py no conocen lo ya resuelto y forge build falla en las guías (18-11, ensayo v0.4.1.1:
+	# 13-16 errores por raza). Cada vez se juntan las de la carpeta de trabajo con las de la copia, sin repetir.
+	for f in pack-errors-acumulados.txt nunca-report-acumulados.txt pnj-sin-fuente.txt forever-db-need.txt; do
+		[ -f "$REPO/data/local/$f" ] || continue
+		cat "$REPO/data/local/$f" "$FUSION/data/local/$f" 2>/dev/null | sort -u > "$FUSION/data/local/$f.nuevo" \
+			&& mv "$FUSION/data/local/$f.nuevo" "$FUSION/data/local/$f" || return 1
+	done
+	[ -e "$FUSION/data/local/names-same-as-english.json" ] || [ ! -f "$REPO/data/local/names-same-as-english.json" ] \
+		|| cp "$REPO/data/local/names-same-as-english.json" "$FUSION/data/local/" || return 1
 	# data/forever también es PROPIA (18-11): forge data build la reescribe y con una unión pisaba los datos de la
 	# carpeta de trabajo C:\Users\<usuario>\Mamba con los de la versión nueva. Se copia una vez, como caché.
 	[ -e "$FUSION/data/forever" ] || cp -r /d/rust/polestar-data/forever "$FUSION/data/forever" || return 1
