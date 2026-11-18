@@ -46,6 +46,7 @@ end
 
 local AYUDA = {
 	"/tasador  → qué hacer con cada cosa de tus bolsas y cuánto vale",
+	"/tasador escanear  → escanea la subasta (con la casa de subastas abierta; igual que el botón)",
 	"/tasador baratos  → materiales que hoy están más baratos que de costumbre",
 	"/tasador hierbas  → hierbas que más pagan hoy (para farmear)",
 	"/tasador rol sanacion | equilibrio | feral | auto  → para comparar equipo",
@@ -71,6 +72,10 @@ local function Comando(msg)
 	T.db.ajustes = T.db.ajustes or {}
 	if cmd == "" then
 		T.Bolsas()
+	elseif cmd == "escanear" or cmd == "scan" then
+		T.Escanear() -- lo mismo que el botón, por si el botón no aparece
+	elseif cmd == "diag" then
+		T.Diagnostico(true)
 	elseif cmd == "baratos" then
 		T.MostrarBaratos()
 	elseif cmd == "hierbas" then

@@ -360,6 +360,29 @@ local function ponerBoton()
 	boton:SetScript("OnClick", function() T.Escanear() end)
 end
 
+-- Qué subasta tiene el juego y si el botón quedó a la vista. Se guarda en TasadorDB.diag para leerlo
+-- fuera del juego (SavedVariables) y, con /tasador diag, se muestra en el chat.
+function T.Diagnostico(decir)
+	local function si(x) return x and "si" or "no" end
+	local d = {
+		cuando = date and date("%Y-%m-%d %H:%M:%S") or "?",
+		AuctionHouseFrame = si(AuctionHouseFrame), AuctionFrame = si(AuctionFrame),
+		visibleAH = si(AuctionHouseFrame and AuctionHouseFrame.IsShown and AuctionHouseFrame:IsShown()),
+		visibleAF = si(AuctionFrame and AuctionFrame.IsShown and AuctionFrame:IsShown()),
+		api = moderna() and "moderna" or (antigua() and "antigua" or "ninguna"),
+		boton = boton and (boton:IsShown() and "visible" or "oculto") or "no existe",
+	}
+	if boton and boton.GetParent and boton:GetParent() and boton:GetParent().GetName then
+		d.padre = boton:GetParent():GetName() or "?"
+	end
+	if T.db then T.db.diag = d end
+	if decir then
+		T.Decir("Diagnóstico: subasta moderna " .. d.AuctionHouseFrame .. " (abierta " .. d.visibleAH .. "), antigua " .. d.AuctionFrame
+			.. " (abierta " .. d.visibleAF .. "), lectura " .. d.api .. ", botón " .. d.boton .. (d.padre and (" en " .. d.padre) or ""))
+	end
+	return d
+end
+
 local f = CreateFrame("Frame")
 f:RegisterEvent("AUCTION_HOUSE_SHOW")
 f:RegisterEvent("AUCTION_HOUSE_CLOSED")
@@ -367,7 +390,10 @@ f:RegisterEvent("REPLICATE_ITEM_LIST_UPDATE")
 pcall(f.RegisterEvent, f, "AUCTION_ITEM_LIST_UPDATE") -- solo existe en la subasta antigua; en Forever da error y cortaba el archivo
 f:SetScript("OnEvent", function(_, evento)
 	if evento == "AUCTION_HOUSE_SHOW" then
-		ponerBoton()
+		pcall(ponerBoton)
+		pcall(T.Diagnostico, false)
+		-- la ventana puede terminar de armarse después del evento: se vuelve a intentar al rato
+		if C_Timer and C_Timer.After then C_Timer.After(1, function() pcall(ponerBoton); pcall(T.Diagnostico, false) end) end
 	elseif evento == "AUCTION_HOUSE_CLOSED" then
 		if estado.activo then T.Decir("Cerraste la subasta antes de terminar: el escaneo quedó a medias, no se guardó.") end
 		estado.activo = false
