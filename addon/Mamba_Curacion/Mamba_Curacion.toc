@@ -1,0 +1,17 @@
+## Interface: 16001
+## Title: Mamba: curación con clic
+## Notes: Marcos de grupo y banda con clic para curar (clic, rueda, Mayús/Ctrl/Alt), alcance, tus efectos de curación con su cuenta regresiva, lo que puedes limpiar y un perfil por especialización. Se ajusta en el menú de Polestar › Interfaz › Curación.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariablesPerCharacter: MambaCuraDB
+## OptionalDeps: Polestar, Asistente
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Interfaz.lua
+Nucleo.lua
+Piezas.lua
+Marcos.lua
+Seccion.lua

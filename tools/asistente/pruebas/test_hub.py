@@ -69,9 +69,10 @@ G.LOADED["Polestar"] = True
 GUIAS = []
 PS.Dungeons = L.table_from({"Load": L.eval("function() return true end"), "GuideTo": lambda clave: GUIAS.append(clave) or True})
 NAV = []
-PS.Nav = L.table_from({"API": L.table_from({
+PS.Nav = L.table_from({"API": L.table_from({"version": 1, 
     "Estimate": L.eval("function(...) ESTIMADO = (ESTIMADO or 0) + 1; return 420 end"),
-    "Navigate": lambda *a: NAV.append(a) or True, "Cancel": lambda *a: True})})
+    "Navigate": L.eval("function(...) return NAVEGAR(...) end"), "Cancel": lambda *a: True})})
+G.NAVEGAR = lambda *a: NAV.append(a) or True  # Navigate es una función de Lua, como en el juego (MambaAPI la exige)
 
 # Las piezas REALES de interfaz de Polestar, si cargan con los marcos simulados.
 W_REAL = False
@@ -258,7 +259,29 @@ check(any("Ruta a" in x for x in v), "Ir a… muestra la ruta")
 R["MambaGrupoCiudad"].search("subasta")
 v = textos()
 check(any("subastas" in x.lower() for x in v), "buscar «subasta» encuentra la casa de subastas")
-check(any("unos 7 min" in x for x in v), f"el tiempo sale de Nav.API.Estimate (420 s) ({[x for x in v if 'min' in x][:1]})")
+check(any("≈ 7:00" in x for x in v), f"sin el parche P8 el tiempo total sale de Nav.API.Estimate (420 s = ≈ 7:00, R0) ({[x for x in v if 'otal' in x][:1]})")
+# con el parche P8, los tramos: piedra, vuelo y a pie, cada uno con su tiempo, y las otras formas de llegar
+L.execute("""
+Asistente.Llevame.OlvidarCache()
+Polestar.Nav.EstimateTravel = function(from, to, budgeted, noHearth, noFlights)
+  local legs
+  if noFlights then legs = { { kind = "walk", seconds = 900, label = "Camina", yards = 6000 } }
+  elseif noHearth then legs = { { kind = "walk", seconds = 20, label = "Camina hasta el maestro de vuelo", yards = 130 }, { kind = "fly", seconds = 258, label = "Vuela a Cima del Trueno" }, { kind = "walk", seconds = 40, label = "Camina", yards = 280 } }
+  else legs = { { kind = "hearth", seconds = 15, label = "Piedra de hogar a Cima del Trueno" }, { kind = "walk", seconds = 45, yards = 382 } } end
+  local t = 0; for _, l in ipairs(legs) do t = t + l.seconds end
+  return t, nil, legs
+end
+""")
+R["MambaGrupoCiudad"].search("banco")
+v = textos()
+tx = " | ".join(v)
+check("1. Piedra de hogar a Cima del Trueno" in tx and "15 s" in tx, "Ir a…: tramo 1, la piedra con su tiempo")
+check("Caminar 382 yd" in tx and "≈ 45 s" in tx, "Ir a…: tramo 2, a pie con sus yardas y su tiempo (≈)")
+check("Total ≈ 1:00" in tx, "Ir a…: el total, estimado (R0)")
+check("El más cercano en tiempo" in tx, "Ir a…: el banco elegido es el más cercano EN TIEMPO")
+check("Otras formas de llegar" in tx and "Sin piedra de hogar" in tx and "Sin pagar vuelos" in tx, "Ir a…: las alternativas sin piedra y sin vuelos")
+check("≈ 5:18" in tx, "la alternativa sin piedra da su total (20 + 258 + 40 s)")
+L.execute("Polestar.Nav.EstimateTravel = nil; Asistente.Llevame.OlvidarCache()")
 R["MambaGrupoCiudad"].search("zzzz qqq")
 check(any("Sin resultados" in x for x in textos()), "Ir a…: estado «Sin resultados»")
 R["MambaGrupoCiudad"].search("")

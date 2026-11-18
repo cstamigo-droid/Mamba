@@ -1,11 +1,11 @@
 ## Interface: 16001
 ## Title: Mamba: bolsas
-## Notes: Todas tus bolsas en una ventana, y lo que lleva cada uno de tus personajes (bolsas y banco): búscalo en Interfaz › Bolsas o en el cuadro de cada objeto.
+## Notes: Todas tus bolsas y el banco en una ventana de Mamba: barra de bolsas, una por una o todas juntas, espacio libre, filtros, buscador, ordenar, lo nuevo, mejoras y marcas, y lo que lleva cada uno de tus personajes.
 ## Author: Cristian Amigo
-## Version: 0.1.0
+## Version: 0.2.0
 ## X-License: GPL-3.0-only
 ## SavedVariables: MambaBolsasDB
-## OptionalDeps: Polestar, Asistente
+## OptionalDeps: Polestar, Asistente, Tasador
 ## Category: Mamba
 ## Category-esMX: Mamba
 ## Category-esES: Mamba
@@ -13,4 +13,8 @@
 Piezas.lua
 Interfaz.lua
 Bolsas.lua
+Filtros.lua
+Ordenar.lua
+Ventana.lua
+Reemplazo.lua
 Opciones.lua
