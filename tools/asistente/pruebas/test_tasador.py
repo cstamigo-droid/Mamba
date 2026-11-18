@@ -252,6 +252,24 @@ w = lines_of(L.eval('warnings'))
 check(len(w) == 4 and "??" in w[-1], f"12 nivel secreto -> ?? {w[-1:]}")
 check(T.Leer(L.eval('SECRET')) is None and T.Leer(5) == 5, "12 T.Leer")
 
+# --- Alerta: API para «Enemigos cerca» de Mamba_Combate (K105) ---
+check(L.eval('MambaAPI == nil or MambaAPI.AlVerEnemigo == nil'), "K105 sin Asistente (sin MambaAPI) no crea la API")
+L.execute('MambaAPI = {}; Fire("PLAYER_LOGIN")')
+check(L.eval('type(MambaAPI.AlVerEnemigo) == "function" and type(MambaAPI.SilenciarCercanos) == "function"'), "K105 cuelga la API en MambaAPI al entrar")
+L.execute('''VISTAS = {}
+MambaAPI.AlVerEnemigo(function() error("oyente roto") end)
+MambaAPI.AlVerEnemigo(function(i) table.insert(VISTAS, i) end)
+UNITS["nameplate9"] = {name="Vero", lvl=33, fac="Alliance", cl="Mago", tok="MAGE"}; NOW=200; Fire("NAME_PLATE_UNIT_ADDED","nameplate9")''')
+v = L.eval('VISTAS[1]')
+check(v is not None and v.nombre == "Vero" and v.nivel == 33 and v.claseToken == "MAGE" and v.gremio is None, "K105 AlVerEnemigo con nombre, nivel y clase; gremio nil sin romper")
+check(len(L.eval('warnings')) == 5, "K105 un oyente roto no corta la alerta")
+L.execute('NOW=210; Fire("NAME_PLATE_UNIT_ADDED","nameplate9")')
+check(len(L.eval('VISTAS')) == 2 and len(L.eval('warnings')) == 5, "K105 el oyente ve cada vista; el aviso respeta los 60 s")
+L.execute('MambaAPI.SilenciarCercanos(true); UNITS["nameplate10"] = {name="Sil", lvl=33, fac="Alliance"}; NOW=300; S0 = sounds; Fire("NAME_PLATE_UNIT_ADDED","nameplate10")')
+check(L.eval('MambaAPI.CercanosSilenciados()') is True and len(L.eval('warnings')) == 5 and L.eval('sounds == S0') and len(L.eval('VISTAS')) == 3, "K105 silenciada: sin cartel ni sonido, el oyente sigue")
+L.execute('MambaAPI.SilenciarCercanos(false); UNITS["nameplate11"] = {name="Vuelve", lvl=33, fac="Alliance"}; NOW=320; Fire("NAME_PLATE_UNIT_ADDED","nameplate11")')
+check(L.eval('MambaAPI.CercanosSilenciados()') is False and len(L.eval('warnings')) == 6, "K105 sin silencio vuelve a avisar")
+
 # --- Mercado: baratos y hierbas con día real, cantidad y tandas (11) ---
 L.execute('''
 ITEMS[200]={name="Hierba",q=1,sell=10,cls=7,sub=9}
