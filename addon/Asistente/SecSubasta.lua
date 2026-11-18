@@ -387,6 +387,7 @@ ev:SetScript("OnEvent", function(_, e, boton)
 		if P and P.Get and P.Get("qol.sellJunk") and not (IsShiftKeyDown and IsShiftKeyDown()) then
 			-- nunca lo VITAL para tu plan (MambaPlan.MaterialDelPlan), aunque lo hayas marcado como basura
 			local MP = _G.MambaPlan
+			local cola = {}
 			for id, que in pairs(db()) do
 				local vital = false
 				if type(MP) == "table" and MP.MaterialDelPlan then
@@ -398,8 +399,20 @@ ev:SetScript("OnEvent", function(_, e, boton)
 					local ok2, t = pcall(MPr.Vital, id)
 					vital = ok2 and type(t) == "string" and t ~= ""
 				end
-				if que == "basura" and not vital then venderAlVendedor(id) end
+				if que == "basura" and not vital then cola[#cola + 1] = id end
 			end
+			-- de a 6 por tanda (como Polestar con los grises), solo lo que el vendedor compra y sin los grises
+			local info = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+			local function tanda(desde)
+				if not abierto.vendedor then return end
+				for n = desde, math.min(#cola, desde + 5) do
+					local id = cola[n]
+					local ok, _, _, q, _, _, _, _, _, _, _, precio = pcall(info, id)
+					if ok and (precio or 0) > 0 and (q or 1) > 0 then venderAlVendedor(id) end
+				end
+				if desde + 6 <= #cola then C_Timer.After(0.3, function() tanda(desde + 6) end) end
+			end
+			if #cola > 0 then C_Timer.After(0.5, function() tanda(1) end) end
 		end
 	elseif e == "MERCHANT_CLOSED" then abierto.vendedor = false
 	elseif e == "BAG_UPDATE_DELAYED" then bolsasCache = nil end

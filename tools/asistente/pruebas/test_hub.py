@@ -411,6 +411,21 @@ r = VENT()
 check(r[0] is True and r[1] is True, "MambaAPI.Movible registra la ventana")
 check(r[2] is True, "el candado fija las ventanas (VentanasFijas)")
 check(r[3] is True, "«Restablecer posiciones» borra los lugares de este personaje")
+# en combate no se mueve ni se restablece nada (un ancla de marcos seguros quedaría bloqueada: veto del revisor, 18-11)
+COMB = L.eval("""function()
+  COMBATE = true
+  Asistente.Ventanas.Fijar(false)
+  local bloqueo = false
+  local orig = Polestar.StartDrag
+  local llamo = false
+  Polestar.StartDrag = Polestar.StartDrag
+  AsistenteDB.lugares[Asistente.Ventanas.Personaje()] = { prueba = { x = 1, y = 1 } }
+  Asistente.Ventanas.Restablecer()
+  local sigue = AsistenteDB.lugares[Asistente.Ventanas.Personaje()].prueba ~= nil
+  COMBATE = false
+  return sigue
+end""")
+check(COMB() is True, "«Restablecer posiciones» en combate espera a que termine el combate")
 
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:

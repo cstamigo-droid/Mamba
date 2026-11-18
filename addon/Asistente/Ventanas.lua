@@ -30,6 +30,9 @@ local function db()
 end
 
 function V.Fijas() return AsistenteDB and AsistenteDB.ventanasFijas == true or false end
+-- En combate no se mueve nada: un marco que ancla marcos seguros (Curación) queda protegido y SetPoint se bloquea.
+local function enCombate() return InCombatLockdown and InCombatLockdown() or false end
+local function noSeMueve() return V.Fijas() or enCombate() end
 function V.Fijar(si) A.PrepararDB(); AsistenteDB.ventanasFijas = si and true or false end
 
 local function guardar(nombre, f)
@@ -65,11 +68,11 @@ function V.Movible(marco, nombre, asa, opciones)
 		asa = asa or marco
 		local P = _G.Polestar
 		if P and P.DragWindow then
-			P.DragWindow(asa, marco, { locked = V.Fijas, onStop = function(f) guardar(nombre, f) end })
+			P.DragWindow(asa, marco, { locked = noSeMueve, onStop = function(f) guardar(nombre, f) end })
 		else
 			asa:EnableMouse(true)
 			asa:RegisterForDrag("LeftButton")
-			asa:SetScript("OnDragStart", function() if not V.Fijas() then marco:StartMoving() end end)
+			asa:SetScript("OnDragStart", function() if not noSeMueve() then marco:StartMoving() end end)
 			asa:SetScript("OnDragStop", function() marco:StopMovingOrSizing(); guardar(nombre, marco) end)
 		end
 	end
@@ -81,6 +84,13 @@ end
 
 -- Vuelve a poner cada ventana en su lugar de siempre y borra lo guardado de este personaje.
 function V.Restablecer()
+	if enCombate() then
+		-- se hace solo al salir del combate
+		local f = CreateFrame("Frame")
+		f:RegisterEvent("PLAYER_REGEN_ENABLED")
+		f:SetScript("OnEvent", function(self) self:UnregisterAllEvents(); V.Restablecer() end)
+		return
+	end
 	A.PrepararDB()
 	if AsistenteDB.lugares then AsistenteDB.lugares[pj()] = {} end
 	if AsistenteDB.ventanas then AsistenteDB.ventanas = {} end -- los lugares viejos de A.CrearVentana
@@ -102,7 +112,7 @@ local function candadoPolestar()
 	local orig = P.StartDrag
 	P.StartDrag = function(handle, frame, opts)
 		for _, r in pairs(V.marcos) do
-			if r.marco == frame and V.Fijas() then return end
+			if r.marco == frame and noSeMueve() then return end
 		end
 		return orig(handle, frame, opts)
 	end

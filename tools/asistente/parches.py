@@ -94,6 +94,9 @@ PARCHES = [
     ('P11-otra-pestana', 'Polestar/UI/Picker.lua',
      '\tif not (E and id) then return end\n\tif inNewTab and E.OpenTab then\n',
      '\tif not (E and id) then return end\n\t-- Mamba (PARCHES.md P11): another kind of guide (cooking, a dungeon...) never replaces the leveling guide: it opens\n\t-- in a new tab.\n\tif not inNewTab and E.OpenTab and E.GetGuide then\n\t\tlocal cur, new = E.GetGuide(), ns.Guides and ns.Guides.Get and ns.Guides.Get(id)\n\t\tif cur and new and (cur.category or "Leveling") == "Leveling" and (new.category or "Leveling") ~= "Leveling" then inNewTab = true end\n\tend\n\tif inNewTab and E.OpenTab then\n'),
+    ('P12-pie', 'Polestar/Theme/Widgets.lua',
+     '\t\tplace(bottom[k], i, y, true)\n\t\ty = y + RAIL_ROW\n',
+     '\t\tplace(bottom[k], i, y, true)\n\t\tlocal pb = f.railButtons[i] -- Mamba (P12-riel): el pie siempre a tamaño completo, con su nombre\n\t\tpb:SetHeight(RAIL_ROW); pb.Label:SetShown(true); pb.Icon:ClearAllPoints(); pb.Icon:SetPoint("TOP", pb, "TOP", 0, -10)\n\t\ty = y + RAIL_ROW\n'),
     # P12: la ventana de Mamba (riel que se achica, encabezado Mamba, cuadro del objeto con lista, título por sección).
     ('P12-cuadro', 'Polestar/Theme/Widgets.lua',
      '\tif extra then extra(tip) end\n\ttip:Show()',
