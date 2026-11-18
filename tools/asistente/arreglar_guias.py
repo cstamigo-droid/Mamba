@@ -202,7 +202,7 @@ def desde_build(guias: Path) -> list[tuple[str, int, str, str]]:
                 destinos = [x for x in destinos if f"/{otro}/" not in "/" + x.relative_to(guias).as_posix()]
         else:
             destinos = [propia] if propia.is_file() else []
-        if msg.startswith("duplicate `loop`") or msg.startswith("unknown label"):
+        if msg.startswith("duplicate `loop`") or msg.startswith("unknown label") or msg.startswith("flies to "):
             destinos = [propia] if propia.is_file() else []
         for g in destinos:
             hechos += _arreglo_build(g, g.relative_to(guias).as_posix(), rel_flujo, fl, msg, start)
@@ -243,6 +243,28 @@ def _arreglo_build(g: Path, rel: str, rel_flujo: str, fl: int, msg: str, start: 
                 q = qm[1] or qm[2]
                 quitar = [i for i, x in enumerate(lineas) if re.match(rf"^\s*(accept|turnin|complete|skip) {q}\b", x) or re.search(rf"\bquest {q}(\.\d+)?\b", x.split("--")[0])]
                 que = f"línea fuera (la misión {q} tiene un título comodín del juego, \"<UNUSED>\")"
+        # Un vuelo a X seguido de otro a Y sin nada entre medio (18-11: la entrega que había en Tarren Mill
+        # salió por la cascada): el arreglo del mensaje, volar directo a Y; el paso del segundo vuelo sale.
+        m = re.match(r"^flies to (.+?) and on to (.+?) \(line \d+\) with nothing to do in between", msg)
+        if m:
+            x, y = m[1].strip('"'), m[2].strip('"')
+            i = next((k for k, s in enumerate(lineas) if re.match(rf'^\s*fly "{re.escape(x)}"\s*$', s.split("--")[0].rstrip("\r"))), None)
+            if i is not None:
+                ini = next((k for k in range(i + 1, len(lineas)) if lineas[k].startswith("step ")), None)
+                fin = next((k for k in range(ini + 1, len(lineas)) if lineas[k].startswith("step ") or lineas[k].startswith("# ")), len(lineas)) if ini is not None else None
+                cuerpo = lineas[ini + 1 : fin] if ini is not None else []
+                fy = next((k for k, s in enumerate(cuerpo) if re.match(rf'^\s*fly "{re.escape(y)}"', s)), None)
+                if fy is not None and all(not s.strip() or re.match(r"^\s*(zone|goto|fly)\b", s) for s in cuerpo):
+                    zy = next((s for s in cuerpo[fy + 1 :] if re.match(r"^\s*zone\b", s)), None)
+                    hechos.append((rel, i + 1, f"vuelo directo a {y} (el paso intermedio por {x} no tenía nada que hacer)", lineas[i].strip()))
+                    lineas[i] = cuerpo[fy]
+                    if zy and i + 1 < len(lineas) and re.match(r"^\s*zone\b", lineas[i + 1]):
+                        lineas[i + 1] = zy
+                    del lineas[ini:fin]
+                    t = next((k for k in range(i, -1, -1) if lineas[k].startswith("step ")), None)
+                    if t is not None:
+                        lineas[t] = lineas[t].replace(x, y)
+                    g.write_bytes("\n".join(lineas).encode("utf-8"))
         if quitar:
             for i in reversed(quitar):
                 hechos.append((rel, i + 1, que, lineas[i].strip()))
