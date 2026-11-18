@@ -207,15 +207,18 @@ def _arreglo_build(g: Path, rel: str, rel_flujo: str, fl: int, msg: str, start: 
         if n:
             v, q = n[1], n[2]
             # Una entrega que la ruta pone antes de aceptar: la misión entera sale de esa guía.
-            pat = rf"^\s*(turnin|accept|complete) {q}\b" if v == "turnin" else rf"^\s*{v} .*\bquest {q}(\.\d+)?\b"
-            quitar = [i for i, x in enumerate(lineas) if re.match(pat, x)]
-            que = f"línea fuera ({v} de la misión {q}, que la ruta pone antes de aceptarla)"
+            # La misión entera sale de esa guía: si solo sale el `kill`/`collect`, la ruta vuelve a generar
+            # el objetivo antes de aceptarla (17-11: 98512 en Zephras Isle, tres veces).
+            quitar = [i for i, x in enumerate(lineas) if re.match(rf"^\s*(turnin|accept|complete|skip) {q}\b", x) or re.search(rf"\bquest {q}(\.\d+)?\b", x.split("--")[0])]
+            que = f"línea fuera ({v} de la misión {q}, que la ruta pone antes de aceptarla: sale la misión entera)"
         m = re.match(r'^unknown label "(.+?)"', msg)
         if m:
             quitar = [i for i, x in enumerate(lineas) if re.match(rf"^\s*\w+ until {re.escape(m[1])}\s*$", x.split("--")[0])]
             que = f"línea fuera (la etiqueta {m[1]} quedó en un paso que la ruta no usa)"
         # Una misión con título comodín ("<UNUSED>"): v0.4.1 no deja mostrarlo; la misión sale de la guía.
-        if re.match(r"^`\w+` shows the game's placeholder name", msg):
+        # Desde el 17-11 21:57 lo hace guias_sin_fuente.py desde los datos (título comodín): los errores
+        # acumulados traen números de línea de flujos viejos y aquí podían apuntar a otra misión.
+        if False and re.match(r"^`\w+` shows the game's placeholder name", msg):
             flujo = FLOW / start / rel_flujo
             fll = flujo.read_text(encoding="utf-8", errors="replace").split("\n") if flujo.is_file() else []
             qm = re.search(r"^\s*(?:accept|turnin|complete|skip) (\d+)\b|\bquest (\d+)", fll[fl - 1]) if 0 < fl <= len(fll) else None

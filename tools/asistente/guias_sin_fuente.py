@@ -172,8 +172,19 @@ def main() -> int:
             for o in q.get("objectives") or []:
                 if o.get("type") in ("kill", "talk") and o.get("id") is not None and int(o["id"]) in marcados and str(int(o["id"])) not in npcs:
                     faltan.add(int(qid))
+    # Una misión cuyo título en los datos es un comodín del juego ("<UNUSED>", "REUSE", test…: el criterio de
+    # forge_guide::placeholder::unused_quest) tampoco se guía: v0.4.1 no deja mostrar ese título (17-11:
+    # Teldrassil, 490). No se inventa otro título.
+    def comodin(t: str) -> bool:
+        t = (t or "").strip()
+        b = t.lower()
+        return t.startswith("<") or b in ("reuse", "reuse me") or b.startswith("hunter test quest") or b == "test kill quest" or "ultimate test quest" in b
+    comodines = {int(k) for k, q in datos.items() if comodin(q.get("title"))}
     for g in dest.rglob("*.guide"):
         for l in g.read_text(encoding="utf-8").splitlines():
+            for q in [int(x) for x in re.findall(r"\b(\d{2,6})\b", l.split("--")[0])]:
+                if q in comodines and (QUEST_LINEA.match(l) or re.search(rf"\bquest {q}\b", l)):
+                    faltan.add(q)
             m = QUEST_LINEA.match(l)
             if m and m.group(2) not in datos:
                 faltan.add(int(m.group(2)))
