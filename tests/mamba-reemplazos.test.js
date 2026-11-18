@@ -199,7 +199,10 @@ test('Aviso de modificación (GPL-3.0 §5a): cada .toc de Polestar dice "· Mamb
 		const toc = path.join(ADDON, dir, `${dir}.toc`);
 		if (!fs.existsSync(toc)) continue;
 		const t = fs.readFileSync(toc, 'utf8');
-		assert.match(t, /^## Title: .* · Mamba\r?$/m, `${dir}: título`);
+		// Polestar lleva el título principal "Mamba (guías · Polestar)" (f9d036dcd, TITULO_PRINCIPAL de parches.py);
+		// las demás carpetas, "… · Mamba".
+		const titulo = dir === 'Polestar' ? /^## Title: Mamba \(guías · Polestar\)\r?$/m : /^## Title: .* · Mamba\r?$/m;
+		assert.match(t, titulo, `${dir}: título`);
 		assert.match(t, /^## X-Mamba: fork de Polestar, modificado \d{4}-\d{2}-\d{2} /m, `${dir}: aviso`);
 	}
 });
