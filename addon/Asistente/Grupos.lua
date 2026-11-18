@@ -84,3 +84,20 @@ function API.OroPorHora()
 	if ok2 and r2 and r2[1] then out.mejor = { zona = r2[1].zona, act = r2[1].act, cobreHora = r2[1].totalHora } end
 	return out
 end
+
+-- El menú del objeto (Mamba sugiere / tú eliges: Subastar, Al vendedor, Guardar, Basura), para reusarlo desde
+-- otras bolsas (Mamba_Bolsas): API.MenuObjeto(ancla, itemID). nil si el objeto no está en las bolsas.
+function API.MenuObjeto(ancla, id)
+	if not (A.MenuObjeto and id) then return nil end
+	if not cargar("Tasador") then return nil end
+	return A.MenuObjeto(ancla, id)
+end
+
+-- Qué sugiere Mamba para lo que hay en las bolsas: lista de { id, link, cantidad, calidad, vendedor (cobre),
+-- sug = "subastar"|"vendedor"|"guardar"|"basura", motivo, elegido (lo que eligió el jugador o nil), precio }.
+function API.Bolsas()
+	if not (A.BolsasMamba and cargar("Tasador")) then return nil end
+	local ok, l = pcall(A.BolsasMamba)
+	return ok and l or nil
+end
+
