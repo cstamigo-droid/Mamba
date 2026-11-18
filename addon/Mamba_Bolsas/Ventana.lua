@@ -148,7 +148,6 @@ local function pintar(b, d, f)
 		if r and d.calidad >= 2 then
 			if W and W.Uncolor then W.Uncolor(t) end -- el color de la calidad no sigue a la apariencia
 			t:SetVertexColor(r, g, bl, 0.95); t:Show()
-		elseif d and d.id then color(t, "divider", 0.6); t:Show()
 		else t:Hide() end
 	end
 	local marcas = M.Op("marcas") and d and d.id
@@ -183,6 +182,19 @@ local function marcoBolsa(f, bolsa)
 	return m
 end
 
+-- Partes de la plantilla del juego que su propio código prende y apaga; sin sus scripts quedan prendidas (el brillo
+-- azul de tienda en todas las casillas, el "?" de misión, el oscurecido): Mamba dibuja las suyas y estas van ocultas.
+local PARTES_DEL_JUEGO = { "BattlepayItemTexture", "NewItemTexture", "IconQuestTexture", "JunkIcon", "UpgradeIcon",
+	"IconOverlay", "IconOverlay2", "ItemContextOverlay", "searchOverlay", "ExtendedSlot", "ExtendedOverlay", "ExtendedOverlay2" }
+local function apagarPartes(b)
+	for _, k in ipairs(PARTES_DEL_JUEGO) do
+		local r = b[k]
+		if type(r) == "table" and r.Hide then r:Hide() end
+	end
+	if b.IconBorder then b.IconBorder:SetAlpha(0) end
+end
+M.ApagarPartes = apagarPartes
+
 local function crearVivo(m, casilla)
 	num = num + 1
 	local nombre = "MambaBolsasCasilla" .. num
@@ -199,9 +211,10 @@ local function crearVivo(m, casilla)
 				pcall(C_NewItems.RemoveNewItem, bolsa, self:GetID())
 				if self.mamba then self.mamba.nuevo:Hide() end
 			end
+			apagarPartes(self) -- el código del juego al pasar el ratón puede volver a prenderlas
 		end)
 	end
-	if b.IconBorder then b.IconBorder:SetAlpha(0) end
+	apagarPartes(b)
 	b.vivo = true
 	return b
 end
@@ -249,7 +262,7 @@ local function actualizarVivo(b, d, f)
 		local ok, s, dur, en = pcall(C_Container.GetContainerItemCooldown, d.bolsa, d.casilla)
 		if ok then pcall(CooldownFrame_Set, b.Cooldown, s, dur, en) end
 	end
-	if b.IconBorder then b.IconBorder:SetAlpha(0) end
+	apagarPartes(b)
 	pintar(b, d, f)
 end
 
@@ -561,6 +574,7 @@ function M.Dibujar(f)
 	f:SetAlpha(math.max(0.3, M.Op("fondo") or 1))
 	M.Titulo(f)
 	M.PintarPestanas(f)
+	M.PintarFiltroPuesto(f)
 	if f.botonFila then
 		local _, _, W = PS()
 		if W and W.SetIconState then W.SetIconState(f.botonFila, M.Op("verBolsas")) else f.botonFila.psActive = M.Op("verBolsas") end
@@ -609,6 +623,14 @@ local ICONOS_FILTRO = {
 	nuevo = { "Interface\\Icons\\INV_Misc_Gift_01" },
 }
 
+-- Con un filtro puesto, el pie lo dice (si no, las casillas apagadas parecen una falla)
+function M.PintarFiltroPuesto(f)
+	if not f.filtroTexto then return end
+	local nombre
+	for _, fl in ipairs(M.FILTROS) do if fl[1] == f.filtro and fl[1] ~= "todo" then nombre = fl[2] end end
+	f.filtroTexto:SetText(nombre and ("Filtro: " .. nombre .. " · clic en su pestaña para quitarlo") or "")
+end
+
 function M.PintarPestanas(f)
 	for _, c in ipairs(f.pestanas or {}) do
 		local activo = (f.filtro or "todo") == c.clave
@@ -641,9 +663,13 @@ local function pestanas(f)
 		if ic[2] and c.icono.SetAtlas then puesto = pcall(c.icono.SetAtlas, c.icono, ic[2]) end
 		if not puesto then c.icono:SetTexture(ic[1] or ic[3]) end
 		c:SetPoint("TOPRIGHT", f, "TOPLEFT", 1, -(PRIMERA_PESTANA + y))
-		c:SetScript("OnClick", function(self)
+		if c.RegisterForClicks then c:RegisterForClicks("LeftButtonUp") end
+		c:SetScript("OnClick", function(self, boton)
+			if boton and boton ~= "LeftButton" then return end
 			f.filtro = (f.filtro == self.clave) and "todo" or self.clave
+			M.Anotar("filtro", self.clave)
 			M.PintarPestanas(f)
+			M.PintarFiltroPuesto(f)
 			M.DibujarCasillas(f)
 		end)
 		c:SetScript("OnEnter", function(self)
@@ -804,8 +830,10 @@ function M.CrearVentanaBolsas(tipo)
 	f.buscador:SetPoint("TOPLEFT", f, "TOPLEFT", RETRATO - 4, -(f.cuerpo - 2))
 	f.buscador:SetPoint("TOPRIGHT", f, "TOPRIGHT", -f.margen, -(f.cuerpo - 2))
 	f.buscador:SetHeight(BUSCADOR)
+	f.filtroTexto = P.Texto(f, "note", "accent")
+	f.filtroTexto:SetPoint("BOTTOM", f, "BOTTOM", 0, 9)
 	f.aviso = P.Texto(f, "note", "warning")
-	f.aviso:SetPoint("BOTTOM", f, "BOTTOM", 0, 9)
+	f.aviso:SetPoint("BOTTOM", f.filtroTexto, "TOP", 0, 2)
 	pestanas(f)
 	f.filaBolsas = CreateFrame("Frame", nil, f)
 	f.filaBolsas:SetSize(1, FILA_BOLSAS)

@@ -51,6 +51,16 @@ function Marco:GetTop() return 500 end
 function Marco:SetFrameStrata(s) self.estrato = s end
 function Marco:GetFrameStrata() return self.estrato or "MEDIUM" end
 function Marco:Raise() end
+-- texturas con estado (se ven o no), para revisar bordes y partes de la plantilla
+function Marco:CreateTexture()
+	local t = { visible = true }
+	t.Show = function(x) x.visible = true end
+	t.Hide = function(x) x.visible = false end
+	t.SetShown = function(x, v) x.visible = v and true or false end
+	t.IsShown = function(x) return x.visible end
+	t.SetVertexColor = function(x, r, g, b, a) x.color = { r, g, b, a } end
+	return setmetatable(t, { __index = function() return function() end end })
+end
 local CF = CreateFrame
 CREADOS_EN_COMBATE = 0
 PLANTILLAS = {}
@@ -61,7 +71,11 @@ function CreateFrame(tipo, nombre, padre, plantilla)
 	end
 	local f = CF(tipo, nombre, padre, plantilla)
 	f.visible = (plantilla ~= nil and plantilla:find("Item") ~= nil) or tipo ~= "Frame" or nombre ~= nil or true
-	if plantilla == "ContainerFrameItemButtonTemplate" then f.icon = f:CreateTexture(); f.Cooldown = f:CreateTexture(); f.IconBorder = f:CreateTexture() end
+	if plantilla == "ContainerFrameItemButtonTemplate" then
+		f.icon = f:CreateTexture(); f.Cooldown = f:CreateTexture(); f.IconBorder = f:CreateTexture()
+		-- en el juego vienen PRENDIDAS si nadie las apaga (brillo azul de tienda, "?" de misión)
+		f.BattlepayItemTexture = f:CreateTexture(); f.IconQuestTexture = f:CreateTexture(); f.NewItemTexture = f:CreateTexture()
+	end
 	return f
 end
 TIMERS = {}
@@ -157,6 +171,10 @@ def nuevo(antes=""):
             src = src.replace("-- sin escribir campos propios en el botón del juego", "b.hasItem = d.id and true or nil --")
         if ROMPER and n == "Ventana.lua":
             src = src.replace("if InCombatLockdown and InCombatLockdown() and M.EsVivo(f) and f.lista then", "if false then")
+        if ROMPER and n == "Ventana.lua":
+            src = src.replace("if type(r) == \"table\" and r.Hide then r:Hide() end", "")
+        if ROMPER and n == "Reemplazo.lua":
+            src = src.replace("if k then SetOverrideBindingClick(tecla, true, k, \"MambaBolsasTecla\") end", "")
         if ROMPER and n == "Banco.lua":
             src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
@@ -428,6 +446,35 @@ check(G.MOVIDAS == 0 and M.ventanas.inventario.pendiente, "en combate no se muev
 L.execute('Fire("PLAYER_REGEN_ENABLED"); Correr()')
 check(not M.ventanas.inventario.pendiente, "al salir de combate se rehace")
 
+# (coordinadora, 18-11) las partes de la plantilla que quedaban prendidas, el borde y la tecla B
+L.execute('OpenAllBags(); Correr()')
+prendidas = L.eval("""function(f) local n = 0
+  for _, m in pairs(f.marcos) do for _, b in ipairs(m.botones) do
+    if b.BattlepayItemTexture.visible or b.IconQuestTexture.visible or b.NewItemTexture.visible then n = n + 1 end end end
+  return n end""")(fi)
+check(prendidas == 0, "sin brillo azul de tienda ni '?' de la plantilla (%s casillas con alguna prendida)" % prendidas)
+bordes = L.eval("""function(f, bolsa, casilla) for i, d in ipairs(f.lista) do if d.bolsa == bolsa and d.casilla == casilla then
+  local n = 0; for _, t in ipairs(f.mostrados[i].mamba.borde) do if t.visible then n = n + 1 end end; return n end end end""")
+check(bordes(fi, 0, 1) == 0 and bordes(fi, 0, 6) == 0, "sin borde en lo común y lo vacío")
+check(bordes(fi, 0, 5) == 4, "borde de color en lo de calidad (espada verde)")
+L.execute('ClearOverrideBindings(); BINDINGS.OPENALLBAGS = { "B" }; Fire("UPDATE_BINDINGS")')
+check(G.OVERRIDES["B"] == "MambaBolsasTecla", "la B va al botón de Mamba (%s)" % G.OVERRIDES["B"])
+L.execute('MambaBolsas.ventanas.inventario:Hide(); MambaBolsasTecla.scripts.OnClick(MambaBolsasTecla)')
+check(fi.visible, "B abre")
+L.execute('MambaBolsasTecla.scripts.OnClick(MambaBolsasTecla)')
+check(not fi.visible, "B otra vez CIERRA")
+L.execute('MambaBolsasTecla.scripts.OnClick(MambaBolsasTecla)')
+pest = [c for c in fi.pestanas.values() if c.clave == "nuevo"][0]
+L.eval('function(c) c.scripts.OnEnter(c) end')(pest)
+check(fi.filtro == "todo", "pasar el ratón por una pestaña NO pone el filtro")
+L.eval('function(c) c.scripts.OnClick(c, "RightButton") end')(pest)
+check(fi.filtro == "todo", "el clic derecho tampoco")
+L.eval('function(c) c.scripts.OnClick(c, "LeftButton") end')(pest)
+check(fi.filtro == "nuevo" and "Nuevo" in (fi.filtroTexto.texto or ""), "clic izquierdo: filtro puesto y el pie lo dice (%s)" % fi.filtroTexto.texto)
+L.eval('function(c) c.scripts.OnClick(c, "LeftButton") end')(pest)
+check(fi.filtro == "todo" and (fi.filtroTexto.texto or "") == "", "otro clic lo quita")
+check(len(list(G.MambaBolsasDB.diag.values())) > 0, "queda diagnóstico de la tecla y los filtros")
+
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.
 L.execute('OpenAllBags(); Correr()')
@@ -435,7 +482,8 @@ camino = L.eval("""function(f)
   local malos = {}
   local permitidos = { mamba = true, vivo = true, icon = true, Cooldown = true, IconBorder = true,
     ev = true, scripts = true, attr = true, nombre = true, padre = true, tipo = true, plantilla = true, visible = true,
-    punto = true, escala = true, alfa = true, id = true, w = true, h = true, tex = true, n = true }
+    punto = true, escala = true, alfa = true, id = true, w = true, h = true, tex = true, n = true,
+    BattlepayItemTexture = true, IconQuestTexture = true, NewItemTexture = true }
   for _, m in pairs(f.marcos) do for _, b in ipairs(m.botones) do
     for _, k in ipairs({ "OnClick", "PreClick", "PostClick", "OnMouseDown", "OnMouseUp", "OnDragStart", "OnReceiveDrag" }) do
       if b.scripts[k] then malos[#malos + 1] = k end

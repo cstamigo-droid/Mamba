@@ -38,6 +38,15 @@ local function db()
 	return d
 end
 M.DB = db
+
+-- Diagnóstico para la próxima sesión (MambaBolsasDB.diag): las últimas 30 cosas que pasaron, sin chat.
+function M.Anotar(que, dato)
+	local d = db()
+	d.diag = d.diag or {}
+	local l = d.diag
+	l[#l + 1] = (date and date("%H:%M:%S") or "") .. " " .. tostring(que) .. " " .. tostring(dato or "")
+	while #l > 30 do table.remove(l, 1) end
+end
 function M.Op(k)
 	local d = MambaBolsasDB
 	local o = d and d.opciones

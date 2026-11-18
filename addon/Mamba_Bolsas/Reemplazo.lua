@@ -107,6 +107,7 @@ function M.AplicarReemplazo()
 		for _, f in pairs(M.ventanas) do f:Hide() end
 		pcall(M.AplicarUnir)
 	end
+	if M.AplicarTeclas then pcall(M.AplicarTeclas) end
 end
 
 local enganchado = false
@@ -119,8 +120,9 @@ local function enganchar()
 			-- el juego también abre y cierra bolsas por dentro (modo edición, "...Manager"): eso no es del jugador
 			if debugstack then
 				local ok, pila = pcall(debugstack, 3)
-				if ok and type(pila) == "string" and pila:find("Manager") then return end
+				if ok and type(pila) == "string" and pila:find("Manager") then M.Anotar(nombre, "ignorado (Manager)"); return end
 			end
+			M.Anotar(nombre, que)
 			pedir(que)
 		end)
 	end
@@ -159,6 +161,37 @@ table.insert(M.alCambiar, function(motivo)
 	end
 end)
 
+---------------------------------------------------------------- la tecla de las bolsas (B y la de la mochila)
+-- En el juego la B abría pero no cerraba (prueba de la coordinadora, 18-11): lo que el juego hace por dentro al
+-- alternar no se puede ver desde aquí. Las teclas que el jugador tiene para "Abrir todas las bolsas" y "Abrir la
+-- mochila" pasan, con un atajo de prioridad (override, del dueño Mamba_Bolsas, que no toca sus teclas guardadas),
+-- a un botón que solo alterna la ventana de Mamba. Se ponen fuera de combate; en combate siguen andando.
+local tecla = CreateFrame("Button", "MambaBolsasTecla", UIParent)
+tecla:SetScript("OnClick", function()
+	M.Anotar("tecla", M.ventanas.inventario and M.ventanas.inventario:IsShown() and "cerrar" or "abrir")
+	M.AbrirInventario(nil)
+end)
+function M.AplicarTeclas()
+	if InCombatLockdown and InCombatLockdown() then M.teclasPendientes = true; return end
+	M.teclasPendientes = false
+	if not (ClearOverrideBindings and SetOverrideBindingClick and GetBindingKey) then return end
+	ClearOverrideBindings(tecla)
+	if not M.Activa() then return end
+	for _, comando in ipairs({ "OPENALLBAGS", "TOGGLEBACKPACK" }) do
+		for _, k in ipairs({ GetBindingKey(comando) }) do
+			if k then SetOverrideBindingClick(tecla, true, k, "MambaBolsasTecla") end
+		end
+	end
+end
+do
+	local ev = CreateFrame("Frame")
+	for _, e in ipairs({ "UPDATE_BINDINGS", "PLAYER_REGEN_ENABLED" }) do pcall(ev.RegisterEvent, ev, e) end
+	ev:SetScript("OnEvent", function(_, e)
+		if e == "PLAYER_REGEN_ENABLED" and not M.teclasPendientes then return end
+		if M.Activa then pcall(M.AplicarTeclas) end
+	end)
+end
+
 ---------------------------------------------------------------- Bagnon encendido: preguntar una vez
 local function preguntar(otro)
 	local d = M.DB()
@@ -192,6 +225,7 @@ function M.Iniciar()
 	M.Ventana("banco")
 	enganchar()
 	M.AplicarReemplazo()
+	pcall(M.AplicarTeclas)
 	local otro = otroCargado()
 	if otro and M.Op("propia") then preguntar(otro) end
 	local api = _G.MambaAPI
