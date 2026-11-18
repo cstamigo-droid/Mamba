@@ -104,6 +104,11 @@ if [ $ENLACES = 1 ]; then
 		done
 		paso "capa hubs" "$F" nav layers hubs --dir 'D:\rust\forge-out\grid' --root "$RAIZ"
 	fi
+	# forge busca las capas en dos lugares: prepare usa <grilla>/../nav-layers y, si no existe,
+	# data/local/nav-layers; legs (walker.rs hubs_file) solo <grilla>/../nav-layers. Sin esa carpeta,
+	# legs carga sin hubs, la clave del grafo cambia y falla "no walk graph … for continent 1" (17-11, 23:30).
+	# Copia idéntica junto a la salida: las dos etapas leen lo mismo.
+	paso "capas junto a la salida" bash -c 'rm -rf /d/rust/forge-out/nav-layers && cp -r "$1/data/local/nav-layers" /d/rust/forge-out/nav-layers' _ "$RAIZ"
 	# Una sola máscara de caminos en grid/walk (walks exige una; si no, "expected one road mask tag", 17-11):
 	# se apartan las que no registró la prepare vigente y se quitan de la caché de la grilla (si no, forge
 	# rehace la grilla, prepare crea otra máscara y vuelve a fallar).
