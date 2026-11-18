@@ -20,10 +20,31 @@ local function hex(c) return string.format("|cff%02x%02x%02x", math.floor(c[1] *
 
 -- Los objetivos que eligió el jugador en el asistente de «Mi plan» (MambaPlanPJ.respuestas).
 local NOMBRE_ROL = { balance = "Equilibrio", feral = "Feral", feraltank = "Feral (tanque)", restoration = "Restauración" }
+-- MambaPlanPJ.respuestas guarda el ROL ("sanar" | "tanque" | "danio") y el ÁRBOL (1..3, orden del juego);
+-- aquí se traducen a la clave de pesos de Polestar (Gear.CLASSES[clase].specs: "(healer)" / "(tank)" en su etiqueta).
+local function claveDe(rol, arbol)
+	local g = G()
+	local p = g and g.GetPlayer and g.GetPlayer()
+	local c = p and p.class and g.CLASSES and g.CLASSES[p.class]
+	if not (c and rol) then return nil end
+	local mejor, dist
+	for i, s in ipairs(c.specs or {}) do
+		local et = tostring(s.label or ""):lower()
+		local tipo = et:find("healer") and "sanar" or (et:find("tank") and "tanque" or "danio")
+		if tipo == rol then
+			local d = arbol and math.abs(i - arbol) or (s.key == c.default and -1 or i)
+			if not dist or d < dist then mejor, dist = s.key, d end
+		end
+	end
+	if not mejor and rol == "tanque" then return claveDe("danio", arbol) end -- druida: el tanque es Feral
+	return mejor
+end
+T.ClaveDeRol = claveDe
+
 local function objetivos()
 	local r = type(_G.MambaPlanPJ) == "table" and _G.MambaPlanPJ.respuestas or nil
 	local est = r and r.estilos or {}
-	return { rol2 = r and r.rol2, jcj = est.jcj, jce = est.jce, rol = r and r.rol }
+	return { rol = r and claveDe(r.rol, r.arbol), rol2 = r and r.rol2 and claveDe(r.rol2, nil), jcj = est.jcj, jce = est.jce }
 end
 
 -- Veredicto contra lo puesto con los pesos de OTRO rol: «+8 %» / «-3 %» / nil

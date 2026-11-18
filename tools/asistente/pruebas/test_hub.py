@@ -354,6 +354,13 @@ if G.TIP_HOOK is not None:
 else:
     check(False, "el Tasador instaló su gancho del cuadro (TIP_HOOK)")
 
+# 10b2) rol + árbol de Mi plan -> clave de pesos de Polestar (druida)
+CL = L.eval("function(r, a) return Tasador.ClaveDeRol(r, a) end")
+check(str(CL("danio", 1)) == "balance", f"danio + árbol 1 = balance ({CL('danio', 1)})")
+check(str(CL("danio", 2)) == "feral", "danio + árbol 2 = feral")
+check(str(CL("sanar", None)) == "restoration", "sanar = restoration")
+check(str(CL("tanque", None)) == "feral", "tanque (druida) = feral")
+
 # 10c) ventanas movibles: lugar por personaje, candado y «Restablecer posiciones»
 VENT = L.eval("""function()
   local V = Asistente.Ventanas
