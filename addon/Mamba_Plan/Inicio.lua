@@ -420,6 +420,13 @@ function M.AbrirInicio()
 	for k, x in pairs(pj.respuestas or {}) do borrador[k] = x end
 	if not borrador.estilos then borrador.estilos = { [borrador.estilo or "jce"] = 1 } end
 	if not borrador.modoRol and borrador.rol then borrador.modoRol = borrador.rol2 and "mixto" or "uno" end
+	-- sin respuesta todavía: de entrada, "como juego ahora" (nunca obliga a elegir algo que no lo representa)
+	if not borrador.rol then
+		local ahora = M.ComoJuegaAhora(M.Estado())
+		if ahora then
+			borrador.rol, borrador.rol2, borrador.modoRol, borrador.spec = ahora.rol, ahora.rol2, "ahora", ahora.nombre
+		end
+	end
 	pagina = 1
 	v:Show()
 	dibujar()
