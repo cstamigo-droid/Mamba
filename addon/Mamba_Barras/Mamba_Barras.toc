@@ -1,0 +1,26 @@
+## Interface: 16001
+## Title: Mamba: barras
+## Notes: Barras de acción de Mamba: se mueven, se escalan y cambian solas con la forma o la actitud. Se configuran en la ventana de Mamba (pestaña Barras).
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only (libs/: BSD y dominio público, ver LICENCIAS.txt)
+## SavedVariables: MambaBarrasDB
+## SavedVariablesPerCharacter: MambaBarrasPJ
+## OptionalDeps: Asistente, Polestar
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibButtonGlow-1.0\LibButtonGlow-1.0.lua
+libs\LibActionButton-1.0\LibActionButton-1.0.lua
+Datos.lua
+DeBartender.lua
+Barras.lua
+Formas.lua
+Mascota.lua
+Piezas.lua
+Teclas.lua
+Mover.lua
+Opciones.lua

@@ -1,0 +1,11 @@
+Mamba_Barras: GPL-3.0-only (Cristian Amigo). El código de Mamba_Barras está escrito de cero; de Bartender4
+(All Rights Reserved) solo se tomó la idea, nunca código.
+
+Librerías incluidas sin cambios, en libs/:
+- LibActionButton-1.0 (Hendrik "nevcairiel" Leppkes): licencia BSD de 3 cláusulas, texto completo en la
+  cabecera de libs/LibActionButton-1.0/LibActionButton-1.0.lua.
+- LibButtonGlow-1.0 (Hendrik "nevcairiel" Leppkes): licencia BSD de 3 cláusulas, en la cabecera del archivo.
+- CallbackHandler-1.0 (equipo de Ace3): licencia BSD de Ace3.
+- LibStub: dominio público ("LibStub is hereby placed in the Public Domain").
+Las tres licencias BSD son compatibles con la GPL-3.0. Se tomaron de la copia de Bartender4 4.19.0
+instalada (que las trae como librerías aparte), versión LibActionButton-1.0 MINOR 170.
