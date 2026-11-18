@@ -56,9 +56,11 @@ end
 '''
 
 
-def nuevo(con_auctionator=False):
+def nuevo(con_auctionator=False, cliente_antiguo=False):
     L = LuaRuntime(unpack_returned_tuples=True)
     L.execute((AQUI / "mock_wow.lua").read_text(encoding="utf-8"))
+    if cliente_antiguo:  # en un cliente con la subasta antigua esos eventos sí existen
+        L.execute("EVENTOS_DESCONOCIDOS = {}")
     L.execute(EXTRA)
     if not con_auctionator:
         L.execute("Auctionator = nil")
@@ -160,7 +162,7 @@ check(G.TasadorDB.precios is None or G.TasadorDB.precios["2447"] is None, "cerra
 check(any("a medias" in c for c in chat(L)), "y lo avisa")
 
 # ---------- 4. Subasta antigua
-L, T = nuevo()
+L, T = nuevo(cliente_antiguo=True)
 G = L.globals()
 G.UsarAntigua(False)
 check(not T.Escanear() and G.PEDIDOS == 0 and any("15 minutos" in c for c in chat(L)), "antigua: respeta la espera de 15 minutos del juego")

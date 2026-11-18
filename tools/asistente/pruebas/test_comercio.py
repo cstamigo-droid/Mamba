@@ -94,9 +94,11 @@ end
 '''
 
 
-def nuevo(asistente=False):
+def nuevo(asistente=False, cliente_antiguo=False):
     L = LuaRuntime(unpack_returned_tuples=True)
     L.execute((AQUI / "mock_wow.lua").read_text(encoding="utf-8"))
+    if cliente_antiguo:  # en un cliente con la subasta antigua esos eventos sí existen
+        L.execute("EVENTOS_DESCONOCIDOS = {}")
     L.execute(EXTRA)
     L.execute("Auctionator = nil")
     if asistente:
@@ -540,7 +542,7 @@ info = T.InfoDe("|Hitem:2447::::::::|h[x]|h", False)
 check(info.disponible == 1 and info.subasta == 1000, "el cuadro del objeto sabe cuántas había a la venta (escaneo propio)")
 
 # subasta ANTIGUA con las trampas puestas
-L, T = nuevo()
+L, T = nuevo(cliente_antiguo=True)
 G = L.globals()
 L.execute(r'''
 C_AuctionHouse = nil

@@ -109,7 +109,7 @@ local avisado = {}
 local f = CreateFrame("Frame")
 f:RegisterEvent("TRADE_SKILL_SHOW")
 f:RegisterEvent("TRADE_SKILL_LIST_UPDATE")
-f:RegisterEvent("TRADE_SKILL_UPDATE")
+pcall(f.RegisterEvent, f, "TRADE_SKILL_UPDATE") -- evento antiguo; en Forever da error y cortaba el archivo
 f:RegisterEvent("MERCHANT_SHOW")
 f:SetScript("OnEvent", function(_, evento)
 	if not T.db then return end

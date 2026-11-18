@@ -364,7 +364,7 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("AUCTION_HOUSE_SHOW")
 f:RegisterEvent("AUCTION_HOUSE_CLOSED")
 f:RegisterEvent("REPLICATE_ITEM_LIST_UPDATE")
-f:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+pcall(f.RegisterEvent, f, "AUCTION_ITEM_LIST_UPDATE") -- solo existe en la subasta antigua; en Forever da error y cortaba el archivo
 f:SetScript("OnEvent", function(_, evento)
 	if evento == "AUCTION_HOUSE_SHOW" then
 		ponerBoton()

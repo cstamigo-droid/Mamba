@@ -1,12 +1,21 @@
 -- Simulación mínima del cliente de WoW: Forever para probar el Tasador fuera del juego.
 handlers = {}
+EVENTOS_DESCONOCIDOS = { AUCTION_ITEM_LIST_UPDATE = true, TRADE_SKILL_UPDATE = true }
 chat = {}
 warnings = {}
 sounds = 0
 DEFAULT_CHAT_FRAME = { AddMessage = function(self, m) table.insert(chat, m) end }
 function CreateFrame()
 	local f = { ev = {} }
-	function f:RegisterEvent(e) self.ev[e] = true end
+	-- Eventos que el cliente de Forever NO conoce (medido en el juego el 18-11, Mamba_Errores):
+	-- registrarlos da error y corta el resto del archivo, igual que en el juego.
+	-- Una prueba de cliente antiguo puede vaciar EVENTOS_DESCONOCIDOS antes de cargar el addon.
+	function f:RegisterEvent(e)
+		if EVENTOS_DESCONOCIDOS and EVENTOS_DESCONOCIDOS[e] then
+			error('Frame:RegisterEvent(): Attempt to register unknown event "' .. e .. '"')
+		end
+		self.ev[e] = true
+	end
 	function f:UnregisterEvent(e) end
 	function f:SetScript(_, fn) table.insert(handlers, { f = self, fn = fn }) end
 	return f
