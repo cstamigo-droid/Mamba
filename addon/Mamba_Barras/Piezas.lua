@@ -35,8 +35,8 @@ function P.Ventana(nombre, titulo, ancho, alto)
 	f:RegisterForDrag("LeftButton")
 	f:SetScript("OnDragStart", f.StartMoving)
 	f:SetScript("OnDragStop", f.StopMovingOrSizing)
-	f.titulo = f.TitleText
-	if f.titulo then f.titulo:SetText(titulo) end
+	f.titulo = f.TitleText or f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	f.titulo:SetText(titulo)
 	f.cuerpo, f.margen = 26, 16
 	f:Hide()
 	return f

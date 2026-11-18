@@ -1,0 +1,23 @@
+## Interface: 16001
+## Title: Mamba: mi plan
+## Notes: El centro de Mamba: pregunta qué quieres que sea tu personaje y arma UN plan con lo que tienes hoy (talentos, equipo, mazmorras, profesiones, farmeo, bolsas, dinero y macros). Se abre en el menú de Polestar › Mi plan.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariablesPerCharacter: MambaPlanPJ
+## OptionalDeps: Polestar, Asistente, Asistente_Clase, Asistente_Equipo, Tasador, Medidor
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Nucleo.lua
+DatosPlan.lua
+DatosProfesiones.lua
+DatosMacros.lua
+Piezas.lua
+Estado.lua
+Fuentes.lua
+Plan.lua
+Macros.lua
+Inicio.lua
+Seccion.lua
