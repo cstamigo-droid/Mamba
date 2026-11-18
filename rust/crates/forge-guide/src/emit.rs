@@ -1238,9 +1238,11 @@ fn locale_compare(a: &str, b: &str) -> Ordering {
 const LEGS_NOTICE: [&str; 6] = [
 	"Baked walking legs",
 	"------------------",
+	// Mamba: las piernas se hornean en la grilla propia (forge nav grid, del cliente instalado), nunca en
+	// los mapas de Leffe (control_zip rechaza el zip si un generado los nombra). 18-11.
 	"The walks into the guides' steps (Legs.lua in the race parts) were routed on",
-	"Leffe's navigation maps, used with Leffe's permission given to Polestar's author.",
-	"Credit: Leffe's navigation maps.",
+	"Mamba's own walking grid, built by forge nav grid from the installed game client's map files.",
+	"No Leffe navigation maps were used.",
 	"",
 ];
 
