@@ -261,5 +261,15 @@ K.execute((AQUI / "mock_barras.lua").read_text(encoding="utf-8"))
 K.execute((D / "Teclas_cortas.lua").read_text(encoding="utf-8"))
 kb = K.eval('LibStub("LibKeyBound-1.0")')
 check(kb.ToShortKey(kb, "CTRL-1") == "c1" and kb.ToShortKey(kb, "SHIFT-MOUSEWHEELUP") == "sRuA" and kb.ToShortKey(kb, "Q") == "Q", "teclas cortas")
+# ---------- 13. K55: ventanas movibles y "Restablecer posiciones" ----------
+L, M = nuevo('MambaAPI = { Movible = function(f, n, asa, op) MOVIBLES = MOVIBLES or {}; MOVIBLES[n] = op and op.yaArrastra; return true end, '
+             'AlRestablecer = function(fn) RESTABLECER = fn end }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+M.AbrirOpciones()
+check(G.MOVIBLES is not None and G.MOVIBLES["MambaBarrasVentana"] is True, "la ventana de barras pasa por MambaAPI.Movible")
+c1 = M.Config(1); c1.punto, c1.x, c1.y = "CENTER", 5, 5
+G.RESTABLECER()
+check(M.Config(1).punto == "BOTTOM" and abs(M.Config(1).x + 302.58) < 0.01, "Restablecer: la barra vuelve al lugar de Bartender")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)

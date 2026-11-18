@@ -142,6 +142,19 @@ function M.CopiarBartender()
 	M.FueraDeCombate("disponer", M.DisponerTodo)
 	return true
 end
+-- "Restablecer posiciones" de Ajustes › Mamba › Ventanas (MambaAPI.AlRestablecer): cada barra vuelve al
+-- lugar copiado de Bartender, o al de siempre si no hay copia. Solo el lugar: tamaño, botones y filas quedan.
+function M.RestablecerLugares()
+	local perfil = M.CopiaBartender()
+	local conv = perfil and M.DeBartender(perfil) or {}
+	for id in pairs(M.marcos) do
+		local c = M.Config(id)
+		local base = conv[id] or M.ConfigPorDefecto(id)
+		c.punto, c.x, c.y = base.punto, base.x, base.y
+	end
+	M.FueraDeCombate("disponer", M.DisponerTodo)
+end
+
 function M.Deshacer()
 	local p = pj()
 	if not p.anterior then return false end
@@ -431,6 +444,8 @@ function M.Construir()
 	M.Anotar("barrasCreadas", n)
 	if n > 0 then M.Proteger("esconder", M.EsconderJuego) end
 	if M.AplicarTeclas then M.Proteger("teclas", M.AplicarTeclas) end
+	local api = _G.MambaAPI
+	if api and api.AlRestablecer then pcall(api.AlRestablecer, M.RestablecerLugares) end
 	M.listo = true
 end
 
