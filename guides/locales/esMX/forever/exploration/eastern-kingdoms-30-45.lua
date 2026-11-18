@@ -40,7 +40,7 @@ return {
 
 	-- Step 5: Badlands (1/2)
 	["14 areas to discover here, levels 36-45."] = "14 áreas por descubrir aquí, niveles 36-45.",
-	-- {area:880} Thandol Span · {zone:1437} Wetlands · {object:1668} Dun Algaz (no name in this language: may be words) · {zone:1432} Loch Modan · {zone:1418} Badlands
+	-- {area:880} Thandol Span · {zone:1437} Wetlands · {object:1668} Dun Algaz · {zone:1432} Loch Modan · {zone:1418} Badlands
 	["Cross the {area:880} south into the {zone:1437}, go through the {object:1668} pass into {zone:1432} and take the road south out of {zone:1432} into the {zone:1418}."] = "Cruza {area:880} hacia el sur hasta {zone:1437}, atraviesa el paso de {object:1668} hasta {zone:1432} y toma el camino hacia el sur que sale de {zone:1432} hasta {zone:1418}.",
 	-- {area:144} Thelsamar · {zone:1432} Loch Modan
 	["Faster: fly to {area:144} in {zone:1432}."] = "Más rápido: vuela a {area:144}, en {zone:1432}.",
@@ -54,8 +54,9 @@ return {
 	["14 areas to discover here, levels 36-44. Flight paths: {area:16724} in the south-east (Alliance), {area:16743} in the middle (Horde)."] = "14 áreas por descubrir aquí, niveles 36-44. Puntos de vuelo: {area:16724} en el sureste (Alianza), {area:16743} en el centro (Horda).",
 	-- {zone:1418} Badlands · {area:345} Agmond's End · {zone:2548} Riverglades · {area:16685} Twilight's Shroud · {area:2417} Blackrock Pass · {area:977} Steamwheedle Port · {zone:1446} Tanaris · {area:16727} Powderfuse Port · {area:17780} Krol'dok Stronghold
 	["From the south of the {zone:1418}, past {area:345}, a way leads down into the {zone:2548} by {area:16685}. (The {zone:2548} also open off northern Redridge through {area:2417}, and a ship runs from {area:977} in {zone:1446} to {area:16727}, the neutral goblin port on its coast.) {area:17780} is an ogre clan's outdoor dungeon."] = "Desde el sur de {zone:1418}, pasando {area:345}, un camino baja a {zone:2548} junto a {area:16685}. ({zone:2548} también se abre desde el norte de Crestagrana por {area:2417}, y un barco va de {area:977} en {zone:1446} a {area:16727}, el puerto goblin neutral de su costa.) {area:17780} es una mazmorra al aire libre de un clan de ogros.",
-	-- {area:16724} Farholde Keep · {npc:257087} Gretchen Mayberry
-	["Flight path here: {area:16724} ({npc:257087})."] = "Ruta de vuelo aquí: {area:16724} ({npc:257087}).",
+	-- {area:16724} Farholde Keep
+	-- was: ["Flight path here: {area:16724} ({npc:257087})."] = "Ruta de vuelo aquí: {area:16724} ({npc:257087})."
+	["Flight path here: {area:16724} (Gretchen Mayberry)."] = "",
 	-- {area:16743} Rog'mar
 	["Flight path here: {area:16743} (Grakna)."] = "Ruta de vuelo aquí: {area:16743} (Grakna).",
 
@@ -77,7 +78,7 @@ return {
 	["Or take the zeppelin from {zone:1454} or the {zone:1458} to {area:117}."] = "O toma el zepelín de {zone:1454} o {zone:1458} hasta {area:117}.",
 	-- {area:35} Booty Bay
 	["Flight path here: {area:35} (Gyll)."] = "Ruta de vuelo aquí: {area:35} (Gyll).",
-	-- {area:35} Booty Bay · {object:3202} Grom'gol (no name in this language: may be words)
+	-- {area:35} Booty Bay · {object:3202} Grom'gol
 	["Flight paths here: {area:35} (Gringer), {object:3202} (Thysta)."] = "Rutas de vuelo aquí: {area:35} (Gringer), {object:3202} (Thysta).",
 	["free-for-all PvP inside the arena ring"] = "JcJ libre para todos dentro del círculo de la arena",
 
@@ -89,6 +90,7 @@ return {
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["14 areas to discover here, levels 36-44."] = "14 áreas por descubrir aquí, niveles 36-44.",
+	-- ["Flight path here: {area:16724} ({npc:257087})."] = "Ruta de vuelo aquí: {area:16724} ({npc:257087}).",
 	-- ["Fly to {area:42} (or {zone:1453}) and take the road south out of {zone:1431} into northern {zone:1434}."] = "Vuela a {area:42} (o a {zone:1453}) y toma el camino hacia el sur que sale de {zone:1431} hasta el norte de {zone:1434}.",
 	-- ["Go back north into {zone:1431} and follow its road east through {zone:1430} (level 50+ creatures off the road) into the {zone:1435}."] = "Regresa al norte a {zone:1431} y sigue su camino hacia el este por {zone:1430} (criaturas de nivel 50+ fuera del camino) hasta {zone:1435}.",
 	-- ["Picks up in {zone:1424}, where the 1-30 guide leaves the Horde and passes the Alliance. 15 areas to discover here, levels 27-39."] = "Comienza en {zone:1424}, donde la guía 1-30 deja a la Horda y pasa a la Alianza. 15 áreas por descubrir aquí, niveles 27-39.",

@@ -8,20 +8,21 @@
 return {
 	-- Guide
 	-- {area:444} Tower of Althalaxx
-	["Starts now at 22 at the {area:444}; its mobs are 28-30, so go nearer 30 or with a friend. Alliance only for now."] = "",
+	["Starts now at 22 at the {area:444}; its mobs are 28-30, so go nearer 30 or with a friend. Alliance only for now."] = "Empieza ahora, a nivel 22, en {area:444}; sus enemigos son de nivel 28-30, así que ve cerca del nivel 30 o con un amigo. Por ahora solo para la Alianza.",
 
 	-- Step 1: The Strange Orb
-	-- {object:409289} Strange Orb (no name in this language: may be words)
-	["The {object:409289}"] = "{object:409289}",
-	-- {area:444} Tower of Althalaxx · {zone:1439} Darkshore · {spell:686} Shadow Bolt · {object:409289} Strange Orb (no name in this language: may be words) · {item:209748} Althalaxx Orb · {object:409311} Spear of Mannoroth (no name in this language: may be words)
+	-- was: ["The {object:409289}"] = "{object:409289}"
+	["The Strange Orb"] = "The Strange Orb",
+	-- {area:444} Tower of Althalaxx · {zone:1439} Darkshore · {spell:686} Shadow Bolt · {object:409311} Spear of Mannoroth
 	-- plural, as words: Dark Strand Fanatics = {npc:2336} Dark Strand Fanatic · Dark Strand Voidcallers = {npc:2337} Dark Strand Voidcaller
-	["Climb to the top of the {area:444} in northern {zone:1439}. The Dark Strand Fanatics around it are easy (level 16-17), but four Dark Strand Voidcallers (level 28-29) stand in the tower on the way to the orb: each calls a voidwalker and casts {spell:686} from range. At 22-25 bring a friend or two, pull them one at a time and step behind a wall so they have to come to you. Loot the {object:409289} at the top: it gives you the {item:209748}; right-click it to start the quest. Keep the orb in your bags until the {object:409311}: three later quests need it."] = "",
-	-- {object:409289} Strange Orb (no name in this language: may be words) · {area:444} Tower of Althalaxx · {item:209748} Althalaxx Orb
-	["{object:409289} atop the {area:444}: right-click the {item:209748} it gives"] = "{object:409289} en lo alto de la {area:444}: haz clic derecho en el {item:209748} que da",
+	["Climb to the top of the {area:444} in northern {zone:1439}. The Dark Strand Fanatics around it are easy (level 16-17), but four Dark Strand Voidcallers (level 28-29) stand in the tower on the way to the orb: each calls a voidwalker and casts {spell:686} from range. At 22-25 bring a friend or two, pull them one at a time and step behind a wall so they have to come to you. Loot the Strange Orb at the top: it gives you the Althalaxx Orb; right-click it to start the quest. Keep the orb in your bags until the {object:409311}: three later quests need it."] = "Sube hasta lo alto de {area:444}, en el norte de {zone:1439}. Los Dark Strand Fanatics de alrededor son fáciles (nivel 16-17), pero cuatro Dark Strand Voidcallers (nivel 28-29) están en la torre en el camino al orbe: cada uno llama a un abisario y lanza {spell:686} a distancia. A nivel 22-25 lleva uno o dos amigos, atráelos de uno en uno y escóndete detrás de una pared para que tengan que venir hacia ti. Saquea el Strange Orb de arriba: te da el Althalaxx Orb; haz clic derecho en él para empezar la misión. Guarda el orbe en tus bolsas hasta {object:409311}: tres misiones posteriores lo necesitan.",
+	-- {area:444} Tower of Althalaxx
+	-- was: ["{object:409289} atop the {area:444}: right-click the {item:209748} it gives"] = "{object:409289} en lo alto de la {area:444}: haz clic derecho en el {item:209748} que da"
+	["Strange Orb atop the {area:444}: right-click the Althalaxx Orb it gives"] = "Strange Orb en lo alto de {area:444}: haz clic derecho en el Althalaxx Orb que da",
 
 	-- Step 2: Delgren the Purifier
 	-- {npc:3663} Delgren the Purifier · {area:413} Maestra's Post · {zone:1440} Ashenvale · {zone:1439} Darkshore · {zone:1453} Stormwind
-	["{npc:3663} stands at {area:413} in western {zone:1440}, south of the {zone:1439} road. He sends you to {zone:1453} with the orb."] = "",
+	["{npc:3663} stands at {area:413} in western {zone:1440}, south of the {zone:1439} road. He sends you to {zone:1453} with the orb."] = "{npc:3663} está en {area:413}, en el oeste de {zone:1440}, al sur del camino de {zone:1439}. Te manda a {zone:1453} con el orbe.",
 
 	-- Step 3: Katherine the Pure
 	-- {npc:5492} Katherine the Pure
@@ -29,12 +30,12 @@ return {
 
 	-- Step 4: Ursula Deline
 	-- {npc:5495} Ursula Deline · {object:2101} Mage Quarter · {object:2164} Slaughtered Lamb · {item:209778} Summoner's Salt
-	["{npc:5495}, the warlock trainer, is in the {object:2101}'s warlock sanctum, down in the {object:2164}'s cellar. She wants 14 {item:209778} to read the orb."] = "",
+	["{npc:5495}, the warlock trainer, is in the {object:2101}'s warlock sanctum, down in the {object:2164}'s cellar. She wants 14 {item:209778} to read the orb."] = "{npc:5495}, la instructora de brujos, está en el santuario de los brujos de {object:2101}, abajo en el sótano de {object:2164}. Quiere 14 {item:209778} para leer el orbe.",
 
 	-- Step 5: Summoner's Salt
 	-- {item:209778} Summoner's Salt · {area:69} Lakeshire · {npc:334} Gath'Ilzogg
 	-- plural, as words: Blackrock Summoners = {npc:4463} Blackrock Summoner · Blackrock Shadowcasters = {npc:436} Blackrock Shadowcaster
-	["The Blackrock Summoners, Champions and Trackers (level 22-25, not elite) camp in the north-west of Redridge and drop the {item:209778}; you need 14. Two elite Blackrock Shadowcasters (22-23) stand at the cave mouth at the camp's east end: pull around them. The Blackrock camps east of {area:69} drop the salt too, but their Shadowcasters, Sentries and Hunters are elite (level 21-24), and so is {npc:334} (26): stay in the north-west."] = "",
+	["The Blackrock Summoners, Champions and Trackers (level 22-25, not elite) camp in the north-west of Redridge and drop the {item:209778}; you need 14. Two elite Blackrock Shadowcasters (22-23) stand at the cave mouth at the camp's east end: pull around them. The Blackrock camps east of {area:69} drop the salt too, but their Shadowcasters, Sentries and Hunters are elite (level 21-24), and so is {npc:334} (26): stay in the north-west."] = "Los invocadores, campeones y rastreadores Roca Negra (nivel 22-25, no élite) acampan en el noroeste de Montañas Crestagrana y sueltan {item:209778}; necesitas 14. Dos lanzasombras Roca Negra élite (22-23) están en la entrada de la cueva del extremo este del campamento: rodéalos al atraer. Los campamentos Roca Negra al este de {area:69} también sueltan la sal, pero sus lanzasombras, centinelas y cazadores son élite (nivel 21-24), igual que {npc:334} (26): quédate en el noroeste.",
 
 	-- Step 6: Back to Ursula Deline
 	-- {npc:5495} Ursula Deline
@@ -44,14 +45,14 @@ return {
 	["Motes of Mannoroth"] = "Motas de Mannoroth",
 	-- {area:435} Demon Fall Canyon · {zone:1440} Ashenvale · {area:431} Splintertree Post · {spell:686} Shadow Bolt · {spell:348} Immolate
 	-- plural, as words: Mannoroc Lashers = {npc:11697} Mannoroc Lasher · Searing Infernals = {npc:6073} Searing Infernal · Legion Hounds = {npc:6071} Legion Hound
-	["{area:435} is in south-east {zone:1440}, east of {area:431} (a Horde camp: go round it). The Mannoroc Lashers, Searing Infernals, Felguards and Legion Hounds (level 29-30, not elite) drop the Motes of Mannoroth; you need 12. Below about 27 they are hard alone: come with a second player or later. Felguards knock you down, Lashers cast {spell:686} and {spell:348}, Infernals keep a fire shield up. They respawn in five minutes."] = "",
+	["{area:435} is in south-east {zone:1440}, east of {area:431} (a Horde camp: go round it). The Mannoroc Lashers, Searing Infernals, Felguards and Legion Hounds (level 29-30, not elite) drop the Motes of Mannoroth; you need 12. Below about 27 they are hard alone: come with a second player or later. Felguards knock you down, Lashers cast {spell:686} and {spell:348}, Infernals keep a fire shield up. They respawn in five minutes."] = "{area:435} está en el sureste de {zone:1440}, al este de {area:431} (un campamento de la Horda: rodéalo). Los azotadores de Mannoroc, infernales abrasadores, guardias viles y canes de la Legión (nivel 29-30, no élite) sueltan las Motas de Mannoroth; necesitas 12. Por debajo de nivel 27, más o menos, son difíciles solo: ve con otro jugador o más adelante. Los guardias viles te derriban, los azotadores lanzan {spell:686} y {spell:348}, y los infernales mantienen un escudo de fuego. Reaparecen en cinco minutos.",
 
 	-- Step 8: The Spear of Mannoroth
-	-- {object:409311} Spear of Mannoroth (no name in this language: may be words)
+	-- {object:409311} Spear of Mannoroth
 	["The {object:409311}"] = "La {object:409311}",
-	-- {object:409311} Spear of Mannoroth (no name in this language: may be words) · {area:435} Demon Fall Canyon · {item:209748} Althalaxx Orb · {object:409315} Shattered Orb (no name in this language: may be words)
-	["The {object:409311} stands at the east end of {area:435}. Hand in the motes at the spear with the {item:209748} in your bags: the orb shatters, and the {object:409315} beside it starts the last quest."] = "",
-	-- {object:409315} Shattered Orb (no name in this language: may be words)
+	-- {object:409311} Spear of Mannoroth · {area:435} Demon Fall Canyon · {object:409315} Shattered Orb
+	["The {object:409311} stands at the east end of {area:435}. Hand in the motes at the spear with the Althalaxx Orb in your bags: the orb shatters, and the {object:409315} beside it starts the last quest."] = "{object:409311} está en el extremo este de {area:435}. Entrega las motas en la lanza con el Althalaxx Orb en tus bolsas: el orbe se rompe, y {object:409315}, a su lado, inicia la última misión.",
+	-- {object:409315} Shattered Orb
 	["from the {object:409315}"] = "del {object:409315}",
 
 	-- Step 9: Return to Delgren
@@ -64,7 +65,9 @@ return {
 	-- ["Blackrock Summoners, Champions and Trackers camp in the north-west of Redridge; they drop the {item:209778}."] = "Los invocadores, campeones y rastreadores Roca Negra acampan en el noroeste de las Montañas Crestagrana; sueltan la {item:209778}.",
 	-- ["Climb to the top of the {area:444} in northern {zone:1439}. Loot the Strange Orb up there: it gives you the Althalaxx Orb, which starts the quest."] = "Sube a lo alto de la {area:444}, en el norte de {zone:1439}. Despoja el orbe extraño de arriba: te da el orbe de Althalaxx, que inicia la misión.",
 	-- ["Katherine sends you to the warlocks in the {object:2101}; {npc:5495} speaks for them."] = "Katherine te envía a los brujos de {object:2101}; {npc:5495} habla por ellos.",
+	-- ["The {object:409289}"] = "{object:409289}",
 	-- ["The {object:409311} stands at the east end of {area:435}. Shatter the orb on it; the {object:409315} appears beside it."] = "{object:409311} está en el extremo este de {area:435}. Rompe el orbe que hay en ella; {object:409315} aparece a su lado.",
 	-- ["The {object:409311} stands at the east end of {area:435}. {spell:11170} the orb on it; the {object:409315} appears beside it."] = "{object:409311} está en el extremo este de {area:435}. Lanza {spell:11170} sobre el orbe que hay en ella; {object:409315} aparece a su lado.",
 	-- ["{area:435} is in south-east {zone:1440}. The Mannoroc Lashers, Searing Infernals, Felguards and Legion Hounds in it drop the Motes of Mannoroth."] = "{area:435} está en el sureste de {zone:1440}. Los Mannoroc Latiguez, infernales abrasadores, guardias malditos y canes de la Legión de allí sueltan las motas de Mannoroth.",
+	-- ["{object:409289} atop the {area:444}: right-click the {item:209748} it gives"] = "{object:409289} en lo alto de la {area:444}: haz clic derecho en el {item:209748} que da",
 }

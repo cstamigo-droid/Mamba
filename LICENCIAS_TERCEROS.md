@@ -51,6 +51,7 @@ Es del autor de WhatsTraining (fusionpit): sus commits están en https://github.
 - Base de datos del servidor de Forever: https://github.com/advocaite/TrinityCore/tree/forever (fork de TrinityCore), **GPL-2.0**. Release `forever-tdb-2026-10-14`, asset `TDB_full_forever_2026_10_14.7z`, SHA-256 `373cdca7…4f41` (igual al `digest` del release), commit `f2b20d1863`.
 - Autorizada por Cristian el 17-11-2026. Se usa **como hechos** (costos y niveles de entrenador, recompensas), igual que Polestar: forge la lee desde `data/local/forever-tdb/world.sqlite` (ignorado por git) y lo que llega al addon son valores derivados, que se acreditan en los `LICENSE-DATA.txt` / `NOTICE` de los datos.
 - El SQLite se arma con `tools/asistente/tdb_a_sqlite.py`; el procedimiento está en la cabecera del script.
+- **Nombres por idioma (18-11-2026):** sin DingDB (QuestieDB), esMX se quedaba sin nombres de misiones, PNJ ni objetos (pfQuest no trae esMX). `tools/asistente/nombres_wdb.py` escribe `data/i18n/names-observed/esMX.json` con, primero, la caché WDB del cliente instalado (`client-wdb`) y, para lo que esa caché no tiene, las tablas `*_template_locale` de ForeverTDB (`forever-tdb`, solo nombres, solo ids que nombran los datos). forge acepta `forever-tdb` como fuente aparte (`names_sources.rs`, `OBSERVED_SOURCES`) y el `LICENSE-DATA.txt` de `Polestar_esMX` la acredita por separado.
 
 ## forever-db (misiones propias de Forever en los datos; parche P7)
 
@@ -58,6 +59,22 @@ Es del autor de WhatsTraining (fusionpit): sus commits están en https://github.
 - Sin QuestieDB, `forge data build` toma de forever-db las misiones que pfQuest no tiene y sus PNJ, objetos y objetos de inventario (`POLESTAR_FOREVER_DB_QUESTS=1`, `rust/crates/forge-data/src/mamba_foreverdb.rs`). Cada valor de forever-db está respaldado por al menos una fuente independiente (su `NOTICE.md`). Las filas llevan `source: "forever-db"`.
 - Las misiones que ni forever-db tiene (147 en la construcción del 17-11, junto con las de título comodín del juego, p. ej. `<UNUSED>`, que forge no deja mostrar: 490, 73, 1441, 1461, 5516, 5520) **salen de las guías** (`tools/asistente/guias_sin_fuente.py`, informe en `D:\rust\guias-mamba_SIN_FUENTE.md`): NO VERIFICADO, no se inventan títulos ni objetivos.
 - Las líneas de guía que forge rechaza porque estos datos difieren de QuestieDB se corrigen con el arreglo que da el propio mensaje de forge (`tools/asistente/arreglar_guias.py`, informe en `D:\rust\guias-mamba_ARREGLOS.md`). Los nombres de hechizo que agrega salen de `SpellName.csv` y el bando de los PNJ nuevos de `FactionTemplate.csv`: tablas del cliente del juego bajadas de wago.tools (fuente ya autorizada, hechos del juego).
+
+## webxp (XP por misión, desde dos sitios web de Forever; provisional)
+
+- Caché `data/sources/webxp/quest-xp.json` (17-11-2026), con la XP de cada misión leída de wowforevertalents.com y foreverchanges.pro (`rust/crates/forge-data/src/sources.rs`, `web_xp`). `forge data build` la usa para las misiones cuya fuente no trae XP (filas `source: "webdb:xp"`, ~3441 en la construcción del 18-11).
+- Autorizada por Cristian el 18-11-2026 ("Autorizar e instalar") **solo como hecho numérico** (cuánta XP da una misión): no se copian textos, nombres ni páginas. Sin licencia publicada por esos sitios: NO VERIFICADO; por eso es provisional.
+- Pendiente con dueño: reemplazarla por la XP calculada con ForeverTDB + la tabla `QuestXP` del cliente, y construir con `--no-web-xp`.
+
+## QuestieDB como consulta de hechos (autorizado por Cristian el 18-11-2026: "Aceptar todo")
+
+- 21 guías escritas a mano por Polestar (GPL-3.0) dicen en sus comentarios que tomaron de QuestieDB títulos, niveles, objetivos o lugares: 5 de druida (aquatic-form, bear-form, bloodpetal-poison, cat-form, cure-poison), 9 de otras clases, 3 de monturas, 4 varias y `reputation/centaur-clans`. Además 8 filas: `forever-db/corrections` (misiones 79980, 91899, 91900; PNJ 270513; objeto 5359) y 3 de `data/codex/journal-quests.json`.
+- Se aceptan como hechos del juego, con el mismo criterio que forever-db. La construcción de datos sigue con `--no-questie`: no se lee QuestieDB. El aviso va en el `LICENSE-DATA.txt` de las guías y de la base de misiones (`tools/asistente/avisos_mamba.py`).
+- Pendiente con dueño: reemplazar esos hechos por ForeverTDB y las grabaciones.
+
+## ForeverLevelingBiS, wowsims y Freedoom (aceptadas por Cristian el 18-11-2026)
+
+- ForeverLevelingBiS v0.12.0-beta de Thunder (MIT): `Polestar_ItemDB/Forever.lua`, `Polestar/Gear/SpecData.lua`. wowsims (MIT, https://github.com/wowsims): bandas de pesos de `SpecData.lua`. Freedoom (licencia tipo BSD): Polestar_Arcade, abajo.
 
 ## Polestar_Arcade (va tal cual, de Polestar)
 

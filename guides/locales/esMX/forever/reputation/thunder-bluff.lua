@@ -79,6 +79,7 @@ return {
 	-- Step 13: The mine, the centaurs and the plains
 	["The mine, the centaurs and the plains"] = "La mina, los centauros y las llanuras",
 	-- {quest:765} Supervisor Fizsprocket · {item:281031} Mulgore Expansion Plans · {quest:98424} Fizsprocket's Notes · {zone:1412} Mulgore
+	-- plural, as words: Swoops = {npc:2970} Swoop
 	["Back to the mine for the workers, supervisors and {quest:765} in the back: his {item:281031} start {quest:98424}, and its other pages lie inside the mine. The Galak centaurs and Herak camp east of the village. Swoops fly all over {zone:1412}; the Windfury harpies roost south-east of the village; the Palemane gnolls camp west of it."] = "De vuelta a la mina por los obreros, los supervisores y {quest:765}, al fondo: sus {item:281031} inician {quest:98424}, y sus otras páginas están dentro de la mina. Los centauros Galak y Herak acampan al este de la aldea. Los vencejos vuelan por todo {zone:1412}; las arpías Furia del Viento anidan al sureste de la aldea; los gnolls Crin Pálida acampan al oeste.",
 	-- {item:281031} Mulgore Expansion Plans · {quest:765} Supervisor Fizsprocket
 	["{item:281031}, from {quest:765}"] = "{item:281031}, de {quest:765}",
@@ -113,10 +114,8 @@ return {
 
 	-- Step 19: Gloomrise
 	-- {area:17044} Gloomrise · {faction:81} Thunder Bluff · {item:273015} Toxin Extractor · {npc:264082} Broodmother Valraxx · {item:273658} Bloody Parchment · {quest:96294} A Darker Truth
-	-- plural, as words: Gnawed Corpses = {npc:264096} Gnawed Corpse
 	["{area:17044} is the tauren burial ground north of {faction:81}. Use the {item:273015} on the Gnawed Corpses. {npc:264082} waits at the heart of it; her body carries a {item:273658}: read it to start {quest:96294}."] = "{area:17044} es el cementerio tauren al norte de {faction:81}. Usa el {item:273015} en los cadáveres roídos. {npc:264082} espera en su centro; su cuerpo lleva un {item:273658}: léelo para iniciar {quest:96294}.",
 	-- {item:273181} Crystalline Silk
-	-- plural, as words: Gloomrise Spinners = {npc:264081} Gloomrise Spinner
 	["{item:273181}, from Gloomrise Spinners"] = "{item:273181}, de las Tejedoras del Alto Penumbroso ({npc:264081})",
 
 	-- Step 20: The Skywatcher camp: hand in

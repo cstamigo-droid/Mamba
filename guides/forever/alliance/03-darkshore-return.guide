@@ -2,9 +2,28 @@
 guide forever/alliance/03-darkshore-return
 title Darkshore
 faction Alliance
-levels 21-23
+levels 21-22
 zone Darkshore
 next forever/alliance/06-ashenvale
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+# Left out: The Absent Minded Prospector (729), Return to Onu (950), The Absent Minded Prospector (731), Mathystra Relics (951).
+
+step Fly to Stormwind
+  only Dwarf,Gnome,Human,NightElf
+  zone Redridge Mountains
+  goto 30.4,59.0 "Lakeshire flight master"
+  fly "Stormwind"
+
+step Boat to Auberdine
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
+
+step To Auberdine
+  zone Darkshore
+  goto 37.0,44.1 "Auberdine"
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
@@ -18,24 +37,19 @@ next forever/alliance/06-ashenvale
 # Glaive, Remtravel's dig, Murkdeep's beach -> the Grove -> Auberdine ->
 # the naga and the Ruins of Mathystra -> back south (Auberdine, the Grove) -> Volcor -> Auberdine
 # (Druids: Cat Form), then Kerlonian's escort south through Darkshore (06-ashenvale).
-#
-# Blackfathom Deeps (`when dungeon "Blackfathom Deeps"`, dungeons in the route): for a character who chose
-# it, Gershala Nightwhisper's Researching the Corruption (1275) is taken on the Auberdine stop after the
-# Grove, at about 22; the run is on the Zoram Strand in forever/alliance/06-ashenvale. The Corruption
-# Abroad (3765, Argos Nightwhisper in Stormwind) only leads to her: players take her quest without it.
 
 # ---------------------------------------------------------------- Auberdine
 
 step Auberdine
   zone Darkshore
   tip From the dock (or the inn, if you used your Hearthstone), up to the north end of the village first (Thundris Windweaver, Alanndarian Nightsong by the moonwell, Archaeologist Hollee), then down the main street: the WANTED poster outside the inn, Terenthis at its east end, where the road leaves south. Sentinel Selarin (Trek to Ashenvale) is beside Terenthis only for a few minutes at a time: she comes shortly after someone hands in Volcor's escort and leaves again about 5 minutes later. If she isn't there, don't wait: the guide offers her quest again when you hand in Volcor's escort to Terenthis yourself. Changing layer can also find her.
-  turnin 97926 optional                       -- Thundris Windweaver, north end of the village: Baros Alexston's reply
+  turnin 97926 optional only Dwarf,Gnome,Human,NightElf -- Thundris Windweaver, north end of the village: Baros Alexston's reply
   accept 6123 only NightElf,Skyborne,Druid             -- Alanndarian Nightsong
-  accept 729                                  -- Archaeologist Hollee
   vendor nearest optional
   accept 4740                                 -- The WANTED poster
-  accept 986                                  -- Terenthis
+  accept 986 only Dwarf,Gnome,Human,NightElf -- Terenthis
   accept 990 optional                         -- Sentinel Selarin, beside Terenthis if she is there: for Raene Wolfrunner in Astranaar, in the next guide
+  accept 990 optional only Druid -- Sentinel Selarin, once she comes: Trek to Ashenvale, for Raene Wolfrunner in Astranaar on your next Ashenvale visit
 
 step Lunar Fungus and Earthroot
   only NightElf,Skyborne,Druid
@@ -44,109 +58,169 @@ step Lunar Fungus and Earthroot
   collect 15851 x12 quest 6123.2 only NightElf,Skyborne -- Lunar Fungus
 
 step Onu
+  only NightElf
   when onquest 952
   turnin 952 only NightElf
 
+step Into Stormwind City
+  only Dwarf,Gnome,Human
+  zone Stormwind City
+  goto 21.8,56.9 "Into Stormwind City" live
+
+step Boat to Auberdine
+  only Dwarf,Gnome,Human
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
+
 step Onu
+  zone Darkshore
   tip Onu is the ancient at the Grove; Arbal and Kerlonian Evershade sleep beside him.
-  turnin 948                                  -- Onu
+  turnin 948 only Dwarf,Gnome,Human,NightElf -- Onu
+
+step Boat to Stormwind Harbor
+  only Skyborne,Druid
+  zone Darkshore
+  goto 30.5,40.9 "Boat to Stormwind Harbor"
+
+step Into Stormwind City
+  only Skyborne
+  zone Stormwind City
+  goto 21.8,56.9 "Into Stormwind City" live
+
+step Boat to Auberdine
+  only Skyborne
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
+
+step Onu
+  zone Darkshore
   accept 944
 
 # ---------------------------------------------------------------- Fourth loop: the south
 
 step The Grove of the Ancients
   tip Grizzled Thistle Bears roam the hills around the Grove; Buzzbox 525 stands west of it among them.
-  collect 5414 quest 1003 @41.1,81.3 map 1439 -- Grizzled Scalps
-  turnin 1003                                 -- Buzzbox 525
+  collect 5414 quest 1003 @51.5,38.3 map 1439 only Dwarf,Gnome,Human,NightElf -- Grizzled Scalps; below ground
+  turnin 1003 only Dwarf,Gnome,Human,NightElf -- Buzzbox 525
 
 step The Master's Glaive
   tip Moonstalker Sires prowl the woods around the glaive. The Twilight Tome sits at the bottom of the crater; Therylune stands on its north side. For Onu's quest, use the Phial of Scrying at the bottom of the crater: it makes the Scrying Bowl, and you hand the quest in to the bowl.
-  collect 5386 quest 986                      -- Fine Moonstalker Pelts
-  accept 945                                  -- Therylune
-  complete 945                                -- Escort her out of the glaive; Therysil takes the turn-in in Ashenvale
-  accept 968 optional                         -- Only if a Disciple or Thug dropped Book: The Powers Below: right-click it
+  collect 5386 quest 986 only Dwarf,Gnome,Human,NightElf -- Fine Moonstalker Pelts
+  accept 968 optional only Dwarf,Gnome,Human,NightElf -- Only if a Disciple or Thug dropped Book: The Powers Below: right-click it
   complete 944
   turnin 944                                  -- The Scrying Bowl
   accept 949
   turnin 949                                  -- The Twilight Tome
-  accept 950
-  accept 98042                                -- The Twilight Tome, once it has The Twilight Camp
-  collect 279279 quest 98042                  -- Peerless Eye: Twilight Disciples and Thugs
+  accept 98042 only Dwarf,Gnome,Human,NightElf -- The Twilight Tome, once it has The Twilight Camp
+  collect 279279 quest 98042 only Dwarf,Gnome,Human,NightElf -- Peerless Eye: Twilight Disciples and Thugs
+  accept 945 only Dwarf,Gnome,Human,NightElf -- Therylune
 
-step Prospector Remtravel
-  tip Remtravel's Excavation lies on the coast south of Murkdeep's beach. Protect the prospector while he searches for the fossil.
-  tip Careful: Ambushers appear as he passes certain spots: a scout comes out from under the board ramp, and more scouts come out when he checks the tent.
-  turnin 729                                  -- Prospector Remtravel
-  accept 731
-  complete 731
+step The Master's Glaive
+  when onquest 945
+  complete 945 only Dwarf,Gnome,Human,NightElf -- Escort her out of the glaive; Therysil takes the turn-in in Ashenvale
 
 step Murkdeep's beach
   tip Murkdeep camps on the beach west of the glaive: kill the murlocs at the camp fire; he comes in the third wave with his hound. Four beached remains lie on the beaches west and south-west of Remtravel's Excavation: take them on the way north to his camp.
-  accept 4733                                 -- Beached Sea Creature
-  accept 4732                                 -- Beached Sea Turtle
-  accept 4731                                 -- Beached Sea Turtle
-  accept 4730                                 -- Beached Sea Creature
+  accept 4733 only Dwarf,Gnome,Human,NightElf -- Beached Sea Creature
+  accept 4732 only Dwarf,Gnome,Human,NightElf -- Beached Sea Turtle
+  accept 4731 only Dwarf,Gnome,Human,NightElf -- Beached Sea Turtle
+  accept 4730 only Dwarf,Gnome,Human,NightElf -- Beached Sea Creature
   kill 10323 quest 4740                       -- Murkdeep
 
-step The Grove of the Ancients
-  turnin 950                                  -- Onu
-  accept 951
+step To Auberdine
+  zone Darkshore
+  goto 32.4,43.9 "To Auberdine"
+
+step Into Ashenvale
+  zone Ashenvale
+  goto 29.2,15.0 "Into Ashenvale"
+
+step Into Stonetalon Mountains
+  zone Stonetalon Mountains
+  goto 78.2,42.9 "Into Stonetalon Mountains"
+
+step Stonetalon Peak flight master
+  zone Stonetalon Mountains
+  goto 36.5,7.2 "Stonetalon Peak flight master"
+  getfp "Stonetalon Peak"
+
+step Into Ashenvale
+  zone Ashenvale
+  goto 42.3,71.0 "Into Ashenvale"
+
+step Into Felwood
+  zone Felwood
+  goto 54.9,92.7 "Into Felwood"
+
+step To Grove of the Ancients
+  zone Felwood
+  goto 27.2,55.8 "To Grove of the Ancients"
 
 step The Grove of the Ancients
   zone Darkshore
-  accept 98013                                -- Arbal
+  accept 98013 only Dwarf,Gnome,Human,NightElf -- Arbal
+
+step To Auberdine
+  only Dwarf,Gnome,Human,Skyborne
+  zone Darkshore
+  goto 37.0,44.1 "Auberdine"
+
+step Darkshore
+  only Dwarf,Gnome,Human,Skyborne
+  zone Darkshore
+  goto 36.0,70.9 "Darkshore"
 
 step The shore west of the Grove
   only Dwarf,Gnome,Human,Skyborne
   tip On the way north to Auberdine, the last Beached Sea Creature lies on the shore west of the Grove.
-  accept 4728                                 -- Beached Sea Creature
+  accept 4728 only Dwarf,Gnome,Human,Skyborne -- Beached Sea Creature
+
+step Into Ashenvale
+  only NightElf
+  zone Ashenvale
+  goto 55.9,31.7 "Into Ashenvale"
+
+step Into Darkshore
+  only NightElf
+  zone Darkshore
+  goto 43.7,94.7 "Into Darkshore"
+
+step To Auberdine
+  only NightElf
+  zone Darkshore
+  goto 36.6,45.6 "To Auberdine"
 
 step Auberdine
   zone Darkshore
   tip Follow the road north.
-  turnin 4731                                 -- Gwennyth Bly'Leggonde
-  turnin 4733
-  turnin 4732
-  turnin 4730
+  turnin 4731 only Dwarf,Gnome,Human,NightElf -- Gwennyth Bly'Leggonde
+  vendor nearest optional
+  turnin 4733 only Dwarf,Gnome,Human,NightElf
+  turnin 4732 only Dwarf,Gnome,Human,NightElf
+  turnin 4730 only Dwarf,Gnome,Human,NightElf
   turnin 4728 only Dwarf,Gnome,Human,Skyborne
-  accept 87760                                -- Holy Diver: Gwennyth offers it once all nine beached remains are handed in
+  accept 87760 only Dwarf,Gnome,Human,NightElf -- Holy Diver: Gwennyth offers it once all nine beached remains are handed in
   turnin 4740                                 -- Sentinel Glynda Nal'Shea
-  accept 98461 optional                   -- Archaeologist Hollee
-  turnin 731                                  -- Archaeologist Hollee
   turnin 6123 only NightElf,Skyborne,Druid             -- Alanndarian Nightsong
   accept 6124 only NightElf,Skyborne,Druid             -- She gives you the Curative Animal Salve
-  turnin 98042                                -- Thundris Windweaver
-  turnin 986                                  -- Terenthis
-  accept 993
-  vendor nearest optional
-
-step Gershala Nightwhisper
-  when dungeon "Blackfathom Deeps"
-  zone Darkshore
-  tip For your Blackfathom Deeps run, on the Zoram Strand in the next guide: Gershala Nightwhisper stands a short walk west of Terenthis.
-  accept 1275                         -- Gershala Nightwhisper
+  turnin 98042 only Dwarf,Gnome,Human,NightElf -- Thundris Windweaver
+  turnin 986 only Dwarf,Gnome,Human,NightElf -- Terenthis
+  accept 993 only Dwarf,Gnome,Human,NightElf
+  accept 98461 optional only Dwarf,Gnome,Human,NightElf -- Archaeologist Hollee
 
 # ---------------------------------------------------------------- The north coast
 
 step On the way
-  along until q98013
-  kill 2181 quest 98013
-  kill 2182 quest 98013
-
-step The naga
-  label q98013
-  tip Follow the coast north-east to the Ruins of Mathystra. Mathystra Relics lie among the ruins; Stormscale Myrmidons, Sorceresses and Warriors hold them, and Stormscale Beastmistresses walk the shore. Careful: Baron Marinous, an elite naga (21), walks the ruins among them: pull the naga away from him, or fight him at full health.
-  collect 5273 quest 951                      -- Mathystra Relics
-  kill 2181 quest 98013
-  kill 2182 quest 98013
+  kill 2181 quest 98013 only Dwarf,Gnome,Human,NightElf
+  kill 2182 quest 98013 only Dwarf,Gnome,Human,NightElf
 
 step The Ruins of Mathystra
   tip Gelkak Gyromast hides on the little island off the ruins. The key pieces drop from Giant Foreststriders (top), Greymist murlocs (middle) and Raging Reef Crawlers (bottom).
-  accept 2098                                 -- Gelkak Gyromast
-  collect 7498 quest 2098 @58.4,14.2 map 1439
-  collect 7500 quest 2098 @56.9,13.1 map 1439
-  collect 7499 quest 2098 @55.5,12.6 map 1439 -- Underwater
-  turnin 2098
+  accept 2098 only Dwarf,Gnome,Human,NightElf -- Gelkak Gyromast
+  collect 7498 quest 2098 @58.4,14.2 map 1439 only Dwarf,Gnome,Human,NightElf
+  collect 7500 quest 2098 @56.9,13.1 map 1439 only Dwarf,Gnome,Human,NightElf
+  collect 7499 quest 2098 @55.5,12.6 map 1439 only Dwarf,Gnome,Human,NightElf -- Underwater
+  turnin 2098 only Dwarf,Gnome,Human,NightElf
 
 step Strange Lockbox
   only NightElf,Skyborne,Druid
@@ -155,55 +229,110 @@ step Strange Lockbox
 
 step Mist's Edge: kill these as you meet them
   zone Darkshore
-  kill 2181 quest 98013
-  kill 2182 quest 98013
-  kill 2183 quest 98013
-  collect 280686 quest 87760                  -- Rod of Deep Dominion: Stormscale Beastmistress
+  kill 2183 quest 98013 only Dwarf,Gnome,Human,NightElf
+  collect 280686 quest 87760 only Dwarf,Gnome,Human,NightElf -- Rod of Deep Dominion: Stormscale Beastmistress
+
+step To Auberdine
+  zone Darkshore
+  goto 36.4,45.6 "To Auberdine"
+
+step Into Ashenvale
+  zone Ashenvale
+  goto 42.3,71.0 "Into Ashenvale"
+
+step Into Felwood
+  zone Felwood
+  goto 54.9,92.7 "Into Felwood"
+
+step To Grove of the Ancients
+  zone Felwood
+  goto 27.2,55.8 "To Grove of the Ancients"
 
 step Back south
-  turnin 87760                                -- Gwennyth Bly'Leggonde
-  turnin 951                                  -- Onu, at the Grove
-  turnin 98013                                -- Arbal
+  zone Darkshore
+  turnin 87760 only Dwarf,Gnome,Human,NightElf -- Gwennyth Bly'Leggonde
+
+step Into Ashenvale
+  zone Ashenvale
+  goto 29.2,15.0 "Into Ashenvale"
+
+step Into Felwood
+  zone Felwood
+  goto 54.9,92.7 "Into Felwood"
+
+step Into Felwood
+  zone Felwood
+  goto 27.2,55.8 "Into Felwood" live
+
+step Back south
+  zone Darkshore
+  turnin 98013 only Dwarf,Gnome,Human,NightElf -- Arbal
+
+step Into Ashenvale
+  zone Ashenvale
+  goto 55.9,31.7 "Into Ashenvale"
+
+step Into Stonetalon Mountains
+  zone Stonetalon Mountains
+  goto 78.2,42.9 "Into Stonetalon Mountains"
+
+step To Stonetalon Peak
+  zone Stonetalon Mountains
+  goto 36.5,7.2 "To Stonetalon Peak"
+
+step Fly to Auberdine
+  zone Stonetalon Mountains
+  goto 36.5,7.2 "Stonetalon Peak flight master"
+  fly "Auberdine"
+  zone Darkshore
+
+step To Blackwood Den
+  zone Darkshore
+  goto 45.0,85.3 "To Blackwood Den"
 
 step Volcor
   tip Volcor hides in the hills east of the Master's Glaive. Help him back to the road; he fights on his way out. Terenthis takes the escort in Auberdine on the next visit there.
-  turnin 993                                  -- Volcor, inside Blackwood Den
-  accept 994
-  complete 994 @41.7,81.5                     -- His walk ends at the road, where Grimclaw waits
-  kill 12298 quest 6124.1 "Cure Sickly Deer" only NightElf,Skyborne,Druid -- Sickly Deer: use the Curative Animal Salve on them; they roam all of Darkshore
+  turnin 993 only Dwarf,Gnome,Human,NightElf -- Volcor, inside Blackwood Den
+  accept 994 only Dwarf,Gnome,Human,NightElf
+  complete 994 @41.7,81.5 only Dwarf,Gnome,Human,NightElf -- His walk ends at the road, where Grimclaw waits
+  kill 12298 quest 6124.1 "Use the Curative Animal Salve on Sickly Deer" only NightElf,Skyborne,Druid -- Sickly Deer: use the Curative Animal Salve on them; they roam all of Darkshore
 
-step Auberdine
+step To Auberdine
   only Druid
-  tip No Trek to Ashenvale yet? Give it a minute after the hand-in: Sentinel Selarin comes to Terenthis's side shortly after Volcor's escort is handed in. Changing layer can also find her.
-  turnin 994                                  -- Terenthis
-  accept 990 optional                         -- Sentinel Selarin, once she comes: Trek to Ashenvale, for Raene Wolfrunner in Astranaar on your next Ashenvale visit
+  zone Darkshore
+  goto 39.4,43.5 "To Auberdine"
 
 step Auberdine flight master
-  only Druid
+  only Skyborne,Druid
   zone Darkshore
   goto 36.4,45.6 "Auberdine flight master"
 
 # ---------------------------------------------------------------- Druids: Cat Form
 
 step The Great Cat Spirit
-  only Druid
+  only Skyborne,Druid
   zone Darnassus
-  tip Night Elves fly from Auberdine to Rut'theran Village; Skyborne take the boat from the Auberdine dock and learn the Rut'theran flight path there. Take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.
+  tip Night Elves fly from Auberdine to Rut'theran Village; Skyborne take the boat from the Auberdine dock and learn the Rut'theran flight path there.
   fly "Rut'theran Village" only NightElf
   getfp "Rut'theran Village" only Skyborne
-  level 20 only Druid
+
+step Into Darnassus
+  only Skyborne,Druid
+  zone Darnassus
+  goto 35.4,8.4 "Into Darnassus" live
+
+step The Great Cat Spirit
+  only NightElf,Skyborne,Druid
+  zone Darnassus
+  tip Take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.
+  accept 98393 only NightElf,Skyborne -- Mathrengyl Bearwalker
 
 # Mathrengyl stands upstairs in the druids' building; the walking maps have no way up inside it, so
 # this goto is its door on the south side (players' recordings walk in there), not his spot (#1338).
 step Darnassus
   only NightElf,Skyborne,Druid
   zone Darnassus
-  goto 35.8,11.6 "Mathrengyl Bearwalker"
-
-step The Great Cat Spirit
-  only Druid
-  zone Darnassus
-  accept 98393 only NightElf,Skyborne -- Mathrengyl Bearwalker
+  goto 35.8,11.6 "Darnassus"
 
 step Moonglade
   only NightElf,Skyborne,Druid
@@ -221,16 +350,21 @@ step Dendrite Starblaze
   accept 98341 only Skyborne
 
 step Dendrite Starblaze
-  only Druid
+  only Skyborne,Druid
   zone Moonglade
-  tip Dendrite Starblaze stands upstairs in his building in Nighthaven: go up inside, the arrow cannot tell the floors apart.
   when onquest 94914
   turnin 94914 only Skyborne                  -- Dendrite Starblaze: the welcome from Sheldras
 
-step Sindrayl
-  only Druid
+step Trial of the Sea Lion
+  only NightElf,Skyborne,Druid
   zone Moonglade
-  getfp "Moonglade"
+  when onquest 272
+  when has 15882
+  when has 15883
+  tip Cast Teleport: Moonglade. With both half pendants in your bags, stand by the Shrine of Remulos on the north-west shore of the lake and use a half to join them, then go to Dendrite Starblaze in Nighthaven. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
+  collect 15885 quest 272.1 only NightElf -- Pendant of the Sea Lion: join the halves at the Shrine of Remulos
+  turnin 272 only NightElf -- Dendrite Starblaze
+  accept 5061 only NightElf,Skyborne -- Dendrite Starblaze: Aquatic Form, for Mathrengyl Bearwalker
 
 step The relics of the Barrow Dens
   zone Moonglade
@@ -251,24 +385,12 @@ step The relics of the Barrow Dens
   turnin 98404 only Skyborne                  -- Avatar of Saeyleenan
   accept 98738 only Skyborne
 
-step Trial of the Sea Lion
-  only NightElf,Skyborne,Druid
-  zone Moonglade
-  when onquest 272
-  when has 15882
-  when has 15883
-  tip Both half pendants in your bags (the Westfall half from your last Westfall visit, the Darkshore half from the north coast): stand by the Shrine of Remulos on the north-west shore of the lake and use a half to join them, then take the pendant to Dendrite Starblaze with the Cat Form hand-in. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
-  collect 15885 quest 272.1                   -- Pendant of the Sea Lion: join the halves at the Shrine of Remulos
-  turnin 272                                  -- Dendrite Starblaze
-  accept 5061                                 -- Dendrite Starblaze: Aquatic Form, for Mathrengyl Bearwalker
-
 step Back to Dendrite
   zone Moonglade
   only Druid
   tip Back to Dendrite Starblaze in Nighthaven, then Silva Fil'naveth there flies Druids straight to Rut'theran Village. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
   turnin 98731 only NightElf                  -- Dendrite Starblaze
   turnin 98738 only Skyborne
-  level 20 only Druid
   accept 98397 only NightElf,Skyborne
   fly "Rut'theran Village"
 
@@ -276,13 +398,13 @@ step Back to Dendrite
 step Darnassus
   only NightElf,Skyborne,Druid
   zone Darnassus
-  goto 35.8,11.6 "Mathrengyl Bearwalker"
+  goto 35.8,11.6 "Darnassus"
 
 step Mathrengyl Bearwalker: Aquatic Form
   only NightElf,Skyborne,Druid
   zone Darnassus
   when onquest 5061
-  turnin 5061                                 -- Mathrengyl Bearwalker: Aquatic Form
+  turnin 5061 only NightElf,Skyborne -- Mathrengyl Bearwalker: Aquatic Form
 
 step To Darnassus
   only Druid

@@ -68,7 +68,7 @@ return {
 	["Cast {spell:18960}: {npc:11802} stands upstairs in the building beside you. He hands you the {item:15842}. {npc:11798} flies druids to {area:1638}; fly on to the Crossroads from there."] = "Lanza {spell:18960}: {npc:11802} está en el piso de arriba del edificio a tu lado. Te da {item:15842}. {npc:11798} lleva a los druidas a {area:1638}; desde ahí sigue volando al Cruce.",
 
 	-- Step 16: Dreadmist Peak
-	-- {area:384} Dreadmist Peak · {object:19464} Dreadmist Peak Pool (no name in this language: may be words) · {item:15842} Empty Dreadmist Peak Sampler
+	-- {area:384} Dreadmist Peak · {object:19464} Dreadmist Peak Pool · {item:15842} Empty Dreadmist Peak Sampler
 	-- plural, as words: Burning Blade Toxicologists = {npc:12319} Burning Blade Toxicologist
 	["From the Crossroads head north to {area:384} and climb to the bubbling {object:19464} on its summit. Burning Blade cultists camp around it: pull them one or two at a time. Stand in the water and use the {item:15842}: three Burning Blade Toxicologists (level 13-14, curses and warlock spells) appear and attack. You need not kill them: once the sampler is full, run."] = "Desde el Cruce ve al norte hasta {area:384} y sube hasta {object:19464}, que burbujea en la cima. Sectarios del Filo Ardiente acampan alrededor: atráelos de a uno o dos. Párate en el agua y usa {item:15842}: aparecen tres toxicólogos del Filo Ardiente (nivel 13-14, maldiciones y hechizos de brujo) y atacan. No hace falta matarlos: cuando el muestreador esté lleno, corre.",
 	-- {item:15842} Empty Dreadmist Peak Sampler

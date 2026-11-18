@@ -64,7 +64,7 @@ return {
 
 	-- Step 8: Irontree Woods
 	-- {area:1767} Irontree Woods
-	-- plural, as words: Irontree Stompers = {npc:7139} Irontree Stomper · Felpaw Ravagers = {npc:8961} Felpaw Ravager · Ancient Irontree Walkers = {npc:235912} Ancient Irontree Walker
+	-- plural, as words: Irontree Stompers = {npc:7139} Irontree Stomper · Felpaw Ravagers = {npc:8961} Felpaw Ravager
 	["Follow the road north to {area:1767}. The Irontree Stompers carry the heart; finish the claws on the Angerclaw Grizzlies and Felpaw Ravagers of the north.\nCareful: Ancient Irontree Walkers, level 59 elites, stand among the treants in the middle of {area:1767}: take the Stompers on the north side (about 48,21)."] = "Sigue el camino al norte hasta {area:1767}. Los vapuleadores Troncoferro llevan el corazón; termina las garras con los pardos Zarpira y los devastadores Zarpayel del norte.\nCuidado: los Caminantes ancestrales Troncoferro, élites de nivel 59, están entre los ents en el centro de {area:1767}: enfréntate a los vapuleadores del lado norte (alrededor de 48,21).",
 	-- plural, as words: Irontree Stompers = {npc:7139} Irontree Stomper
 	["Irontree Stompers"] = "Vapuleadores Troncoferro",
@@ -292,7 +292,7 @@ return {
 	["Pick up the supplies around the wagon and take {npc:10301}'s amulet back from the owlbeasts nearby."] = "Recoge los suministros alrededor de la carreta y recupera el amuleto de {npc:10301} de las lechubestias cercanas.",
 
 	-- Step 54: Ranshalla
-	-- {npc:10300} Ranshalla · {area:2250} Owl Wing Thicket · {area:2255} Everlook · {object:177404} Altar of Elune (no name in this language: may be words)
+	-- {npc:10300} Ranshalla · {area:2250} Owl Wing Thicket · {area:2255} Everlook · {object:177404} Altar of Elune
 	["{npc:10300} waits at {area:2250}, south of {area:2255}.\nProtect {npc:10300} while she lights the torches on the way to the {object:177404}."] = "{npc:10300} espera en {area:2250}, al sur de {area:2255}.\nProtege a {npc:10300} mientras enciende las antorchas de camino a {object:177404}.",
 
 	-- Step 55: Darkwhisper Gorge
@@ -309,7 +309,6 @@ return {
 
 	-- Step 59: Toxic Horrors
 	-- {quest:5086} Toxic Horrors
-	-- plural, as words: Ancient Irontree Walkers = {npc:235912} Ancient Irontree Walker
 	["Careful: Ancient Irontree Walkers, level 59 elites, stand among the {quest:5086}: work the Horrors at the camp's north-east tip (about 50.6,22.4), one at a time, and look for a walker before each pull."] = "Cuidado: los Caminantes ancestrales Troncoferro, élites de nivel 59, están entre {quest:5086}: encárgate de los Horrores en la punta noreste del campamento (alrededor de 50.6,22.4), de uno en uno, y busca un caminante antes de cada atracción.",
 
 	-- Step 60: Kernda

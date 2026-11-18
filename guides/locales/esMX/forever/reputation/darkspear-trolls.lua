@@ -16,7 +16,7 @@ return {
 	-- Step 1: Vehena: how it works
 	-- {npc:14727} Vehena
 	["{npc:14727}: how it works"] = "{npc:14727}: cómo funciona",
-	-- {npc:14727} Vehena · {zone:1454} Orgrimmar · {object:172961} Valley of Spirits · {quest:7837} Additional Runecloth · {item:14047} Runecloth · {faction:530} Darkspear Trolls · {zone:1456} Thunder Bluff · {zone:1458} Undercity · {zone:1411} Durotar · {area:414} Zoram Strand · {zone:1440} Ashenvale · {object:3202} Grom'gol (no name in this language: may be words)
+	-- {npc:14727} Vehena · {zone:1454} Orgrimmar · {object:172961} Valley of Spirits · {quest:7837} Additional Runecloth · {item:14047} Runecloth · {faction:530} Darkspear Trolls · {zone:1456} Thunder Bluff · {zone:1458} Undercity · {zone:1411} Durotar · {area:414} Zoram Strand · {zone:1440} Ashenvale · {object:3202} Grom'gol
 	["Darkspear reputation comes from quests and cloth. {npc:14727}, the Darkspear cloth quartermaster, stands in {zone:1454}'s {object:172961}. She takes four one-time donations of 60 cloth (150 each) and then {quest:7837}, 20 {item:14047} for 50, as often as you like. Every point you earn with the {faction:530} also gives a quarter as much to {zone:1454}, {zone:1456} and the {zone:1458}. While you level, do the Darkspear quests within 5 levels of them: {zone:1411} at 5 to 12, {area:414} in {zone:1440} at 19 to 27, {object:3202} in Stranglethorn at 34 to 46. The Legacy perk Diplomat adds up to 10%. Rewards: at Honored the Darkspear merchants sell to you for 10% less (the Classic rule), the raptor vendor included; at Exalted other races can buy the raptors: 20 gold for a level 40 raptor, 200 gold for a swift raptor at level 60, once you have mount training. The {faction:530} have no tabard or other reward."] = "La reputación con Lanza Negra viene de misiones y paño. {npc:14727}, la intendente de paño de Lanza Negra, está en {object:172961}, en {zone:1454}. Acepta cuatro donaciones únicas de 60 de paño (150 cada una) y luego {quest:7837}, 20 {item:14047} por 50, cuantas veces quieras. Cada punto que ganas con {faction:530} también da un cuarto a {zone:1454}, {zone:1456} y {zone:1458}. Mientras subes de nivel, haz las misiones de Lanza Negra cuando estén a menos de 5 niveles de ti: {zone:1411} de 5 a 12, {area:414} en {zone:1440} de 19 a 27, {object:3202} en Tuercespina de 34 a 46. La ventaja Diplomático del Legado suma hasta un 10%. Recompensas: en Honorable, los mercaderes de Lanza Negra te venden un 10% más barato (la regla de Classic), incluido el vendedor de raptores; en Exaltado otras razas pueden comprar los raptores: 20 de oro por un raptor de nivel 40, 200 de oro por un raptor veloz a nivel 60, una vez que tengas el entrenamiento de equitación. {faction:530} no tienen tabardo ni otra recompensa.",
 	["her donations are handed in from her window and never enter the log"] = "sus donaciones se entregan desde su ventana y nunca entran en el registro",
 
@@ -27,6 +27,8 @@ return {
 	["Forever pays these old quests in full at any level. The {area:363} is the best of them: about 1,400 {zone:1454} and 1,400 Darkspear reputation in 25 minutes. {npc:3143} waits in the Den, the big hut; {npc:10176} stands outside it."] = "Forever paga estas misiones viejas completas a cualquier nivel. {area:363} es el mejor de ellos: unos 1.400 de reputación con {zone:1454} y 1.400 con Lanza Negra en 25 minutos. {npc:3143} espera en La Guarida, la choza grande; {npc:10176} está afuera.",
 	-- {npc:3144} Eitrigg · {zone:1454} Orgrimmar · {quest:787} The New Horde
 	["{npc:3144}, in {zone:1454}: {quest:787}, +50"] = "{npc:3144}, en {zone:1454}: {quest:787}, +50",
+	-- {npc:10176} Kaltunk
+	["{npc:10176}: Your Place in the World, +50"] = "{npc:10176}: Your Place in the World, +50",
 	-- {npc:5765} Ruzan · {quest:792} Vile Familiars
 	["{npc:5765}: {quest:792}, warlocks only"] = "{npc:5765}: {quest:792}, solo brujos",
 
@@ -85,6 +87,7 @@ return {
 	["The coast and the road"] = "La costa y el camino",
 	-- {quest:97223} Bloodtalon Matriarch
 	["Makrura and surf crawlers walk the beaches east and south of Sen'jin. The {quest:97223} is east of the village."] = "Los makrura y los reptadores de la marea recorren las playas al este y al sur de Sen'jin. {quest:97223} está al este de la aldea.",
+	["Bloodtalon Matriarch Eggs"] = "Bloodtalon Matriarch Eggs",
 
 	-- Step 12: Sen'jin Village: hand in
 	-- {area:367} Sen'jin Village

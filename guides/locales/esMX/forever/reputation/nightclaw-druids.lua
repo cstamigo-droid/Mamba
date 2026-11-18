@@ -7,7 +7,6 @@
 -- The comments are rewritten by sync.
 return {
 	-- Guide
-	-- plural, as words: Nightclaw Druids = {npc:254152} Nightclaw Druid
 	["Nightclaw Druids Reputation"] = "Reputación con los druidas de la Garra Nocturna",
 	-- {zone:2521} Zephras Isle
 	["{zone:2521}'s hidden druids: five cultist ears pay 1000 reputation, best done before you outlevel the isle."] = "Los druidas ocultos de {zone:2521}: cinco orejas de sectario pagan 1000 de reputación, mejor antes de superar el nivel de la isla.",
@@ -42,7 +41,7 @@ return {
 
 	-- Step 6: Shadowgale Forest
 	-- {npc:257944} Elegael Thornpaw · {item:265105} Lady's Tear Moss
-	-- plural, as words: Al'Aketh Footsoldiers = {npc:252665} Al'Aketh Footsoldier · Bloody Heirlooms = {item:265141} Bloody Heirloom · Shadowgale Shrieklings = {npc:256092} Shadowgale Shriekling
+	-- plural, as words: Bloody Heirlooms = {item:265141} Bloody Heirloom
 	["The Al'Aketh Footsoldiers and Stormchasers camp just north of {npc:257944} and drop the Bloody Heirlooms (and ears, about one kill in four). The Shadowgale Shrieklings flying west of her drop the feathers; the {item:265105} grows on the trees along the stream west of her."] = "Los soldados de infantería y cazatormentas Al'Aketh acampan justo al norte de {npc:257944} y sueltan las reliquias ensangrentadas (y orejas, más o menos una de cada cuatro muertes). Los chillones de Vendaval Sombrío que vuelan al oeste de ella sueltan las plumas; el {item:265105} crece en los árboles a lo largo del arroyo al oeste de ella.",
 	-- {npc:254151} Vayn Moongaze
 	["ears for {npc:254151}: keep every one"] = "orejas para {npc:254151}: guárdalas todas",
@@ -53,12 +52,13 @@ return {
 	["500 reputation"] = "500 de reputación",
 
 	-- Step 8: The Nightfang Den and Commander Haalien
-	-- {npc:253622} Commander Haalien
-	["The Nightfang Den and {npc:253622}"] = "La Guarida Colmillo Nocturno y {npc:253622}",
-	-- {npc:257944} Elegael Thornpaw · {npc:258134} Naaleos Leafwhisper · {npc:258130} Jorel Windsinger · {npc:253622} Commander Haalien · {quest:94490} Ripped Missive
-	["The Nightfang Den is the cave north across the clearing from {npc:257944}. Heal the seven injured druids inside ({npc:258134} among them) and find {npc:258130}. {npc:253622} stands east of the den: he drops his head and a {quest:94490}; right-click the missive to start its quest."] = "La Guarida Colmillo Nocturno es la cueva al norte, al otro lado del claro desde {npc:257944}. Sana a los siete druidas heridos de adentro ({npc:258134} entre ellos) y encuentra a {npc:258130}. {npc:253622} está al este de la guarida: suelta su cabeza y una {quest:94490}; haz clic derecho en la misiva para empezar su misión.",
-	-- {npc:253622} Commander Haalien
-	["from {npc:253622}"] = "de {npc:253622}",
+	-- was: ["The Nightfang Den and {npc:253622}"] = "La Guarida Colmillo Nocturno y {npc:253622}"
+	["The Nightfang Den and Commander Haalien"] = "Nightfang Den y Commander Haalien",
+	-- {npc:257944} Elegael Thornpaw · {npc:258134} Naaleos Leafwhisper · {npc:258130} Jorel Windsinger · {quest:94490} Ripped Missive
+	-- was: ["The Nightfang Den is the cave north across the clearing from {npc:257944}. Heal the seven injured druids inside ({npc:258134} among them) and find {npc:258130}. {npc:253622} stands east of the den: he drops his head and a {quest:94490}; right-click the missive to start its quest."] = "La Guarida Colmillo Nocturno es la cueva al norte, al otro lado del claro desde {npc:257944}. Sana a los siete druidas heridos de adentro ({npc:258134} entre ellos) y encuentra a {npc:258130}. {npc:253622} está al este de la guarida: suelta su cabeza y una {quest:94490}; haz clic derecho en la misiva para empezar su misión."
+	["The Nightfang Den is the cave north across the clearing from {npc:257944}. Heal the seven injured druids inside ({npc:258134} among them) and find {npc:258130}. Commander Haalien stands east of the den: he drops his head and a {quest:94490}; right-click the missive to start its quest."] = "Nightfang Den es la cueva al norte, al otro lado del claro desde {npc:257944}. Cura a los siete druidas heridos de adentro ({npc:258134} entre ellos) y encuentra a {npc:258130}. Commander Haalien está al este de la guarida: suelta su cabeza y {quest:94490}; haz clic derecho en la misiva para empezar su misión.",
+	-- was: ["from {npc:253622}"] = "de {npc:253622}"
+	["from Commander Haalien"] = "de Commander Haalien",
 
 	-- Step 9: Elegael Thornpaw, the den's fate
 	-- {npc:257944} Elegael Thornpaw
@@ -108,4 +108,9 @@ return {
 	["The {item:280363}"] = "El {item:280363}",
 	-- {item:280363} Nightclaw Mantle
 	["Exalted opens the {item:280363}, green cloth shoulders for level 15, for 8s 16c."] = "Exaltado abre el {item:280363}, unas hombreras verdes de tela para nivel 15, por 8s 16c.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["The Nightfang Den and {npc:253622}"] = "La Guarida Colmillo Nocturno y {npc:253622}",
+	-- ["The Nightfang Den is the cave north across the clearing from {npc:257944}. Heal the seven injured druids inside ({npc:258134} among them) and find {npc:258130}. {npc:253622} stands east of the den: he drops his head and a {quest:94490}; right-click the missive to start its quest."] = "La Guarida Colmillo Nocturno es la cueva al norte, al otro lado del claro desde {npc:257944}. Sana a los siete druidas heridos de adentro ({npc:258134} entre ellos) y encuentra a {npc:258130}. {npc:253622} está al este de la guarida: suelta su cabeza y una {quest:94490}; haz clic derecho en la misiva para empezar su misión.",
+	-- ["from {npc:253622}"] = "de {npc:253622}",
 }

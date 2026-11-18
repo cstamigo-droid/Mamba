@@ -35,7 +35,7 @@ return {
 	-- Step 5: Muren Stormpike in Ironforge
 	-- {quest:1679} Muren Stormpike · {zone:1455} Ironforge
 	["{quest:1679} in {zone:1455}"] = "{quest:1679} en {zone:1455}",
-	-- {quest:1679} Muren Stormpike · {object:32390} Hall of Arms (no name in this language: may be words) · {object:32359} Military Ward (no name in this language: may be words)
+	-- {quest:1679} Muren Stormpike · {object:32390} Hall of Arms · {object:32359} Military Ward
 	["{quest:1679} stands in the {object:32390} in the {object:32359}."] = "{quest:1679} está en {object:32390}, en {object:32359}.",
 
 	-- Step 6: Vejrek
@@ -43,7 +43,7 @@ return {
 	["{quest:1678} (level 11, a lone troll) waits at his hut on a hill south of {area:135}, near the mountains at the top of a short ramp, with no other trolls around; the hut at the front of {area:135} is the wrong one. He fights in {spell:71} and sunders your armor; {spell:6343} slows him. His head always drops; he returns about 8 minutes after dying."] = "{quest:1678} (nivel 11, un trol solitario) espera en su choza en una colina al sur de {area:135}, cerca de las montañas, al final de una rampa corta, sin otros trols alrededor; la choza del frente de {area:135} no es. Pelea en {spell:71} y te hiende la armadura; {spell:6343} lo ralentiza. Su cabeza siempre cae; vuelve unos 8 minutos después de morir.",
 
 	-- Step 7: Tormus Deepforge
-	-- {npc:6114} Muren Stormpike · {spell:71} Defensive Stance · {quest:1680} Tormus Deepforge · {object:32372} Great Forge (no name in this language: may be words) · {zone:1455} Ironforge
+	-- {npc:6114} Muren Stormpike · {spell:71} Defensive Stance · {quest:1680} Tormus Deepforge · {object:32372} Great Forge · {zone:1455} Ironforge
 	["Back to {npc:6114} for {spell:71}, then to {quest:1680} at the {object:32372} in the middle of {zone:1455}."] = "De vuelta con {npc:6114} para {spell:71}, y luego con {quest:1680} en {object:32372}, en el centro de {zone:1455}.",
 
 	-- Step 8: Ironband's Compound

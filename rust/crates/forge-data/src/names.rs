@@ -545,6 +545,11 @@ pub fn license_text(locale: &str, built: &Built, s: &Sources) -> Result<String, 
 		out.push("The server's own names, read from the client's cache and from the names it".into());
 		out.push("gave units in play, collected by players and reviewed in the repository".into());
 		out.push(format!("({}).", seen.refs.iter().map(|r| format!("#{r}")).collect::<Vec<_>>().join(", ")));
+		if seen.from_tdb > 0 {
+			out.push(format!("Mamba: {} of these names are not from the client's cache but from the Forever", seen.from_tdb));
+			out.push("server's own database, ForeverTDB (https://github.com/advocaite/TrinityCore/tree/forever,".into());
+			out.push("its *_template_locale tables; GPL-2.0), used as facts: names only.".into());
+		}
 		out.push(format!("Names taken: {}.", counts(1)));
 		out.push(String::new());
 	}

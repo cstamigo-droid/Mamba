@@ -76,7 +76,7 @@ return {
 
 	-- Step 12: Kernda: the Deadwood totem
 	-- {npc:11558} Kernda
-	["{npc:11558}: the Deadwood totem"] = "",
+	["{npc:11558}: the Deadwood totem"] = "{npc:11558}: el tótem Deadwood",
 
 	-- Step 13: Winterfall Ritual Totem
 	-- {quest:8471} Winterfall Ritual Totem · {npc:11558} Kernda
@@ -85,7 +85,7 @@ return {
 
 	-- Step 14: Kernda: the Winterfall totem
 	-- {npc:11558} Kernda
-	["{npc:11558}: the Winterfall totem"] = "",
+	["{npc:11558}: the Winterfall totem"] = "{npc:11558}: el tótem de Winterfall",
 
 	-- Step 15: Neutral to Friendly
 	["Neutral to Friendly"] = "De Neutral a Amistoso",
@@ -107,8 +107,9 @@ return {
 
 	-- Step 19: Friendly to Honored
 	["Friendly to Honored"] = "De Amistoso a Honorable",
-	-- {npc:11557} Meilosh · {item:19445} Formula: Enchant Weapon - Agility · {item:19202} Pattern: Heavy Timbermaw Belt · {item:19044} Might of the Timbermaw · {skill:165} Leatherworking · {item:19047} Wisdom of the Timbermaw · {skill:197} Tailoring
-	["Friendly to Honored is 6,000: 1,200 kills. Keep all feathers and beads. Honored opens at {npc:11557}: {item:19445} (3 gold), and for 2 gold 20 silver each {item:19202} and {item:19044} ({skill:165}) and {item:19047} ({skill:197})."] = "De Amistoso a Honorable son 6.000: 1.200 muertes. Guarda todas las plumas y cuentas. Honorable abre con {npc:11557}: {item:19445} (3 de oro), y por 2 de oro 20 de plata cada uno {item:19202} y {item:19044} ({skill:165}) y {item:19047} ({skill:197}).",
+	-- {npc:11557} Meilosh · {item:19445} Formula: Enchant Weapon - Agility · {item:19043} Heavy Timbermaw Belt · {item:19044} Might of the Timbermaw · {skill:165} Leatherworking · {item:19047} Wisdom of the Timbermaw · {skill:197} Tailoring
+	-- was: ["Friendly to Honored is 6,000: 1,200 kills. Keep all feathers and beads. Honored opens at {npc:11557}: {item:19445} (3 gold), and for 2 gold 20 silver each {item:19202} and {item:19044} ({skill:165}) and {item:19047} ({skill:197})."] = "De Amistoso a Honorable son 6.000: 1.200 muertes. Guarda todas las plumas y cuentas. Honorable abre con {npc:11557}: {item:19445} (3 de oro), y por 2 de oro 20 de plata cada uno {item:19202} y {item:19044} ({skill:165}) y {item:19047} ({skill:197})."
+	["Friendly to Honored is 6,000: 1,200 kills. Keep all feathers and beads. Honored opens at {npc:11557}: {item:19445} (3 gold), and for 2 gold 20 silver each Pattern: {item:19043} and {item:19044} ({skill:165}) and {item:19047} ({skill:197})."] = "De Amistoso a Honorable son 6,000: 1,200 muertes. Guarda todas las plumas y cuentas. Honorable abre con {npc:11557}: {item:19445} (3 de oro), y por 2 de oro 20 de plata cada uno, el patrón: {item:19043} y {item:19044} ({skill:165}) y {item:19047} ({skill:197}).",
 
 	-- Step 20: Honored to Revered
 	["Honored to Revered"] = "De Honorable a Reverenciado",
@@ -122,8 +123,9 @@ return {
 
 	-- Step 21: Revered to Exalted
 	["Revered to Exalted"] = "De Reverenciado a Exaltado",
-	-- {npc:15395} Nafien · {npc:11554} Grazle · {npc:11556} Salfa · {npc:14342} Ragepaw · {npc:10199} Grizzle Snowpaw · {npc:10738} High Chief Winterfall · {npc:11557} Meilosh · {item:19204} Pattern: Heavy Timbermaw Boots · {item:19049} Timbermaw Brawlers · {skill:165} Leatherworking · {item:19050} Mantle of the Timbermaw · {skill:197} Tailoring
-	["Kills stopped at the end of Honored. Revered to Exalted is 21,000: 420 turn-ins, 2,100 feathers and beads. Hand in the feathers to {npc:15395} at the tunnel or {npc:11554} in the south, the beads to {npc:11556}, five at a time. The named furbolgs (Ror, Bloodmaw, {npc:14342}, {npc:10199}, {npc:10738}) still count. Revered opens at {npc:11557}, for 4 gold each: {item:19204} and {item:19049} ({skill:165}) and {item:19050} ({skill:197})."] = "Las muertes dejaron de contar al final de Honorable. De Reverenciado a Exaltado son 21.000: 420 entregas, 2.100 plumas y cuentas. Entrega las plumas a {npc:15395} en el túnel o a {npc:11554} en el sur, y las cuentas a {npc:11556}, de cinco en cinco. Los fúrbolgs con nombre (Ror, Fauces Sangrientas, {npc:14342}, {npc:10199}, {npc:10738}) siguen contando. Reverenciado abre con {npc:11557}, por 4 de oro cada uno: {item:19204} y {item:19049} ({skill:165}) y {item:19050} ({skill:197}).",
+	-- {npc:15395} Nafien · {npc:11554} Grazle · {npc:11556} Salfa · {npc:14342} Ragepaw · {npc:10199} Grizzle Snowpaw · {npc:10738} High Chief Winterfall · {npc:11557} Meilosh · {item:19048} Heavy Timbermaw Boots · {item:19049} Timbermaw Brawlers · {skill:165} Leatherworking · {item:19050} Mantle of the Timbermaw · {skill:197} Tailoring
+	-- was: ["Kills stopped at the end of Honored. Revered to Exalted is 21,000: 420 turn-ins, 2,100 feathers and beads. Hand in the feathers to {npc:15395} at the tunnel or {npc:11554} in the south, the beads to {npc:11556}, five at a time. The named furbolgs (Ror, Bloodmaw, {npc:14342}, {npc:10199}, {npc:10738}) still count. Revered opens at {npc:11557}, for 4 gold each: {item:19204} and {item:19049} ({skill:165}) and {item:19050} ({skill:197})."] = "Las muertes dejaron de contar al final de Honorable. De Reverenciado a Exaltado son 21.000: 420 entregas, 2.100 plumas y cuentas. Entrega las plumas a {npc:15395} en el túnel o a {npc:11554} en el sur, y las cuentas a {npc:11556}, de cinco en cinco. Los fúrbolgs con nombre (Ror, Fauces Sangrientas, {npc:14342}, {npc:10199}, {npc:10738}) siguen contando. Reverenciado abre con {npc:11557}, por 4 de oro cada uno: {item:19204} y {item:19049} ({skill:165}) y {item:19050} ({skill:197})."
+	["Kills stopped at the end of Honored. Revered to Exalted is 21,000: 420 turn-ins, 2,100 feathers and beads. Hand in the feathers to {npc:15395} at the tunnel or {npc:11554} in the south, the beads to {npc:11556}, five at a time. The named furbolgs (Ror, Bloodmaw, {npc:14342}, {npc:10199}, {npc:10738}) still count. Revered opens at {npc:11557}, for 4 gold each: Pattern: {item:19048} and {item:19049} ({skill:165}) and {item:19050} ({skill:197})."] = "Las muertes terminaron al final de Honrado. De Reverenciado a Exaltado son 21,000: 420 entregas, 2,100 plumas y cuentas. Entrega las plumas a {npc:15395} en el túnel o a {npc:11554} en el sur, y las cuentas a {npc:11556}, de cinco en cinco. Los furbolgs con nombre (Ror, Bloodmaw, {npc:14342}, {npc:10199}, {npc:10738}) siguen contando. Reverenciado abre con {npc:11557}, a 4 de oro cada uno: Patrón: {item:19048} y {item:19049} ({skill:165}) y {item:19050} ({skill:197}).",
 	-- {quest:8467} Feathers for Nafien
 	["{quest:8467}: 5 feathers, 50 reputation"] = "{quest:8467}: 5 plumas, 50 de reputación",
 	-- {quest:8466} Feathers for Grazle
@@ -147,8 +149,10 @@ return {
 	-- ["Feathers and beads to Friendly"] = "Plumas y cuentas hasta Amistoso",
 	-- ["Feathers for {npc:11554} and Feathers for {npc:15395} (Deadwood Headdress Feathers) and Beads for {npc:11556} ({item:21383}) repeat as often as you like; every Deadwood or Winterfall kill counts as well. {area:2244} is the densest bead spot."] = "Plumas para {npc:11554}, Plumas para {npc:15395} (Plumas de penacho de Muertobosque) y Cuentas para {npc:11556} ({item:21383}) se repiten cuantas veces quieras; cada muerte de Muertobosque o Nevada también cuenta. {area:2244} es el mejor lugar para cuentas.",
 	-- ["Feathers to Honored"] = "Plumas hasta Honorable",
+	-- ["Friendly to Honored is 6,000: 1,200 kills. Keep all feathers and beads. Honored opens at {npc:11557}: {item:19445} (3 gold), and for 2 gold 20 silver each {item:19202} and {item:19044} ({skill:165}) and {item:19047} ({skill:197})."] = "De Amistoso a Honorable son 6.000: 1.200 muertes. Guarda todas las plumas y cuentas. Honorable abre con {npc:11557}: {item:19445} (3 de oro), y por 2 de oro 20 de plata cada uno {item:19202} y {item:19044} ({skill:165}) y {item:19047} ({skill:197}).",
 	-- ["Go through {faction:576} to its {zone:1452} exit; {npc:11556} stands just outside. The quests and kills so far usually reach Unfriendly, and then the Timbermaw let you pass. If they still show red, kill more Deadwood by the tunnel first."] = "Atraviesa {faction:576} hasta su salida a {zone:1452}; {npc:11556} está justo afuera. Las misiones y muertes hasta ahora suelen llegar a Adverso, y entonces los Fauces de Madera te dejan pasar. Si siguen en rojo, mata primero más Muertobosque junto al túnel.",
 	-- ["Keep turning in feathers and beads until Exalted."] = "Sigue entregando plumas y cuentas hasta Exaltado.",
+	-- ["Kills stopped at the end of Honored. Revered to Exalted is 21,000: 420 turn-ins, 2,100 feathers and beads. Hand in the feathers to {npc:15395} at the tunnel or {npc:11554} in the south, the beads to {npc:11556}, five at a time. The named furbolgs (Ror, Bloodmaw, {npc:14342}, {npc:10199}, {npc:10738}) still count. Revered opens at {npc:11557}, for 4 gold each: {item:19204} and {item:19049} ({skill:165}) and {item:19050} ({skill:197})."] = "Las muertes dejaron de contar al final de Honorable. De Reverenciado a Exaltado son 21.000: 420 entregas, 2.100 plumas y cuentas. Entrega las plumas a {npc:15395} en el túnel o a {npc:11554} en el sur, y las cuentas a {npc:11556}, de cinco en cinco. Los fúrbolgs con nombre (Ror, Fauces Sangrientas, {npc:14342}, {npc:10199}, {npc:10738}) siguen contando. Reverenciado abre con {npc:11557}, por 4 de oro cada uno: {item:19204} y {item:19049} ({skill:165}) y {item:19050} ({skill:197}).",
 	-- ["The northern Deadwood (level 53-55) hold the camps just south of the tunnel. Keep their feathers too."] = "Los Muertobosque del norte (nivel 53-55) ocupan los campamentos justo al sur del túnel. Guarda también sus plumas.",
 	-- ["The northern Deadwood camps by the tunnel are the densest feather spot (35% drop chance there). Hand feathers to {npc:15395} at the tunnel, or to {npc:11554} in the south."] = "Los campamentos Muertobosque del norte junto al túnel son el mejor lugar para plumas (35% de probabilidad allí). Entrega las plumas a {npc:15395} en el túnel, o a {npc:11554} en el sur.",
 	-- ["{area:2244} sits on the eastern side of {zone:1452}. Keep every {item:21383} you loot: {npc:11556} takes them."] = "{area:2244} está en el lado este de {zone:1452}. Guarda cada {item:21383} que obtengas: {npc:11556} los acepta.",

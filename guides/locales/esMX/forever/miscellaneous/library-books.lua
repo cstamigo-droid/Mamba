@@ -7,7 +7,6 @@
 -- The comments are rewritten by sync.
 return {
 	-- Guide
-	-- plural, as words: Library Books = {object:386691} Library Book
 	["Library Books"] = "Libros de biblioteca",
 	["Lost books and scrolls all over the world: each pays experience at the library, and 10, 20 and 25 of them earn a necklace, a ring and an off-hand."] = "Libros y pergaminos perdidos por todo el mundo: cada uno da experiencia en la biblioteca, y 10, 20 y 25 de ellos dan un collar, un anillo y un objeto de mano izquierda.",
 
@@ -49,8 +48,9 @@ return {
 	["On a barrel in a tent at {area:2537}, in the far south-east of the zone."] = "Sobre un barril en una tienda de {area:2537}, en el extremo sureste de la zona.",
 
 	-- Step 11: The Barrens
-	-- {area:382} Sludge Fen · {object:407566} Goblin Tome (no name in this language: may be words) · {area:392} Ratchet
-	["Two books: the manual in the control room at the top of the oil rig at the {area:382}, and the {object:407566} beside Gazlowe in {area:392}."] = "Dos libros: el manual en la sala de control, en lo alto de la plataforma petrolera de {area:382}, y el {object:407566} junto a Gazlowe en {area:392}.",
+	-- {area:382} Sludge Fen · {area:392} Ratchet
+	-- was: ["Two books: the manual in the control room at the top of the oil rig at the {area:382}, and the {object:407566} beside Gazlowe in {area:392}."] = "Dos libros: el manual en la sala de control, en lo alto de la plataforma petrolera de {area:382}, y el {object:407566} junto a Gazlowe en {area:392}."
+	["Two books: the manual in the control room at the top of the oil rig at the {area:382}, and the Goblin Tome beside Gazlowe in {area:392}."] = "Dos libros: el manual en la sala de control, en lo alto de la plataforma petrolera de {area:382}, y el Goblin Tome junto a Gazlowe en {area:392}.",
 
 	-- Step 12: The Wailing Caverns' cave
 	-- {area:718} Wailing Caverns
@@ -61,8 +61,9 @@ return {
 	["Cave mouth at {area:387}"] = "Boca de la cueva en {area:387}",
 
 	-- Step 13: Orgrimmar
-	-- {object:405149} Mural of Ta'zo (no name in this language: may be words) · {object:172961} Valley of Spirits
-	["The {object:405149} is the stone tablet leaning against the wall in the {object:172961}, on the way to the mage trainers. Use it to take the book."] = "El {object:405149} es la tabla de piedra apoyada contra la pared en {object:172961}, de camino a los instructores de magos. Úsala para tomar el libro.",
+	-- {object:172961} Valley of Spirits
+	-- was: ["The {object:405149} is the stone tablet leaning against the wall in the {object:172961}, on the way to the mage trainers. Use it to take the book."] = "El {object:405149} es la tabla de piedra apoyada contra la pared en {object:172961}, de camino a los instructores de magos. Úsala para tomar el libro."
+	["The Mural of Ta'zo is the stone tablet leaning against the wall in the {object:172961}, on the way to the mage trainers. Use it to take the book."] = "El Mural of Ta'zo es la tablilla de piedra apoyada contra la pared en {object:172961}, camino a los instructores de magos. Úsala para tomar el libro.",
 
 	-- Step 14: The library: first books
 	["The library: first books"] = "La biblioteca: primeros libros",
@@ -142,10 +143,12 @@ return {
 	["The library: third books (Horde)"] = "La biblioteca: terceros libros (Horda)",
 
 	-- Step 36: The second Greater Friend of the Library
-	-- {quest:79536} Greater Friend of the Library
-	["The second {quest:79536}"] = "La segunda {quest:79536}",
-	-- {npc:211033} Garion Wendell · {quest:79536} Greater Friend of the Library · {item:277254} Truthseeker's Bow · {item:277258} Crest of Elucidation · {item:277260} Researcher's Night Light
-	["From level 35, with 25 different books handed in, {npc:211033} offers the second {quest:79536}: {item:277254}, {item:277258} or {item:277260} (level 40 to equip)."] = "Desde el nivel 35, con 25 libros distintos entregados, {npc:211033} ofrece la segunda {quest:79536}: {item:277254}, {item:277258} o {item:277260} (nivel 40 para equipar).",
+	-- {quest:82208} Greater Friend of the Library
+	-- was: ["The second {quest:79536}"] = "La segunda {quest:79536}"
+	["The second {quest:82208}"] = "La segunda {quest:82208}",
+	-- {npc:211033} Garion Wendell · {quest:82208} Greater Friend of the Library · {item:277254} Truthseeker's Bow · {item:277258} Crest of Elucidation · {item:277260} Researcher's Night Light
+	-- was: ["From level 35, with 25 different books handed in, {npc:211033} offers the second {quest:79536}: {item:277254}, {item:277258} or {item:277260} (level 40 to equip)."] = "Desde el nivel 35, con 25 libros distintos entregados, {npc:211033} ofrece la segunda {quest:79536}: {item:277254}, {item:277258} o {item:277260} (nivel 40 para equipar)."
+	["From level 35, with 25 different books handed in, {npc:211033} offers the second {quest:82208}: {item:277254}, {item:277258} or {item:277260} (level 40 to equip)."] = "Desde el nivel 35, con 25 libros distintos entregados, {npc:211033} ofrece la segunda {quest:82208}: {item:277254}, {item:277258} o {item:277260} (nivel 40 para equipar).",
 
 	-- Step 37: Level 60 books: Western Plaguelands
 	-- {zone:1422} Western Plaguelands
@@ -188,4 +191,10 @@ return {
 	["The level 60 books: {npc:7825}"] = "Los libros de nivel 60: {npc:7825}",
 	-- {npc:7825} Oran Snakewrithe · {npc:211022} Owen Thadd · {object:36082} Magic Quarter
 	["{npc:7825}, beside {npc:211022} in the {object:36082}, takes the level 60 books: each book's quest is offered while the book is in your bags. Take and hand them in one at a time (Polestar cannot track these quests for the Horde yet)."] = "{npc:7825}, junto a {npc:211022} en {object:36082}, acepta los libros de nivel 60: ofrece la misión de cada libro mientras el libro está en tus bolsas. Tómalas y entrégalas de una en una (Polestar todavía no puede seguir estas misiones para la Horda).",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["From level 35, with 25 different books handed in, {npc:211033} offers the second {quest:79536}: {item:277254}, {item:277258} or {item:277260} (level 40 to equip)."] = "Desde el nivel 35, con 25 libros distintos entregados, {npc:211033} ofrece la segunda {quest:79536}: {item:277254}, {item:277258} o {item:277260} (nivel 40 para equipar).",
+	-- ["The second {quest:79536}"] = "La segunda {quest:79536}",
+	-- ["The {object:405149} is the stone tablet leaning against the wall in the {object:172961}, on the way to the mage trainers. Use it to take the book."] = "El {object:405149} es la tabla de piedra apoyada contra la pared en {object:172961}, de camino a los instructores de magos. Úsala para tomar el libro.",
+	-- ["Two books: the manual in the control room at the top of the oil rig at the {area:382}, and the {object:407566} beside Gazlowe in {area:392}."] = "Dos libros: el manual en la sala de control, en lo alto de la plataforma petrolera de {area:382}, y el {object:407566} junto a Gazlowe en {area:392}.",
 }

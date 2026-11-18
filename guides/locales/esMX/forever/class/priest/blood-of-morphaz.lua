@@ -12,7 +12,7 @@ return {
 	["17,060 experience and 1 gold 55 silver"] = "17.060 de experiencia y 1 de oro 55 de plata",
 
 	-- Step 1: Cenarion Aid: High Priest Rohan
-	-- {zone:1455} Ironforge · {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries (no name in this language: may be words) · {object:32362} Mystic Ward (no name in this language: may be words) · {quest:8254} Cenarion Aid · {item:7972} Ichor of Undeath
+	-- {zone:1455} Ironforge · {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries · {object:32362} Mystic Ward · {quest:8254} Cenarion Aid · {item:7972} Ichor of Undeath
 	["At 50 in {zone:1455}, {npc:11406} in the {object:32386} ({object:32362}) offers {quest:8254}. Before you leave a city, buy an {item:7972} at the Auction House (a few silver): the third quest asks for one and it drops rarely."] = "A nivel 50 en {zone:1455}, {npc:11406} en {object:32386} ({object:32362}) ofrece {quest:8254}. Antes de salir de una ciudad, compra un {item:7972} en la casa de subastas (unas pocas monedas de plata): la tercera misión pide uno y cae rara vez.",
 
 	-- Step 2: Cenarion Aid: Brother Joshua

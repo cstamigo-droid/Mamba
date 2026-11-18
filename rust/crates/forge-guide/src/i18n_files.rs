@@ -217,7 +217,9 @@ fn lua_to_json(expr: &str) -> Result<V, String> {
 
 /// The longest one read of translation files may run, and the most memory it may hold.
 #[cfg(feature = "native")]
-const LUA_TIME: std::time::Duration = std::time::Duration::from_secs(10);
+// Mamba (18-11): 10 s cortaba la lectura de nuestras propias traducciones (varios MB por idioma) cuando
+// la máquina estaba cargada (justo después del horneado con 8 hilos). 60 s, aún bajo los 120 s del JS.
+const LUA_TIME: std::time::Duration = std::time::Duration::from_secs(60);
 #[cfg(feature = "native")]
 const LUA_MEMORY: usize = 256 << 20;
 

@@ -14,7 +14,7 @@ return {
 	["At 50 {npc:928}, the paladin trainer in the Cathedral of Light, sends you to {area:3197} in the {zone:1422}. {npc:5149} in {zone:1455} gives the same quest."] = "A nivel 50, {npc:928}, el instructor de paladines en la Catedral de la Luz, te manda a {area:3197} en {zone:1422}. {npc:5149} en {zone:1455} da la misma misión.",
 
 	-- Step 2: Brandur Ironhammer
-	-- {npc:5149} Brandur Ironhammer · {object:32362} Mystic Ward (no name in this language: may be words) · {area:3197} Chillwind Camp · {zone:1422} Western Plaguelands · {npc:928} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
+	-- {npc:5149} Brandur Ironhammer · {object:32362} Mystic Ward · {area:3197} Chillwind Camp · {zone:1422} Western Plaguelands · {npc:928} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
 	["At 50 {npc:5149}, the paladin trainer in the {object:32362}, sends you to {area:3197} in the {zone:1422}. {npc:928} in {zone:1453} gives the same quest."] = "A nivel 50, {npc:5149}, el instructor de paladines en {object:32362}, te manda a {area:3197} en {zone:1422}. {npc:928} en {zone:1453} da la misma misión.",
 
 	-- Step 3: Chillwind Camp

@@ -122,7 +122,7 @@ function render(ctx) {
 		}
 	});
 	const L = [
-		header('lua', 'profession gathering spots', 'data/forever (the herb, ore and fishing pool spawns in objects.json: pfQuest and Questie Forever) and the node skills of tools/lib/professions/gathering/tables.js'),
+		header('lua', 'profession gathering spots', 'data/forever (the herb, ore and fishing pool spawns in objects.json: pfQuest, with forever-db and ForeverTDB additions, Mamba) and the node skills of tools/lib/professions/gathering/tables.js'),
 		`-- Where each gathering node can spawn, for While you're here's gathering spots (Core/Gather.lua): a kind's points`,
 		`-- on a map within ${SPOT_YARDS} yards of each other are one spot.`,
 		'',

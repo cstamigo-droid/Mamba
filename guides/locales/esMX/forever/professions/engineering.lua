@@ -352,8 +352,9 @@ return {
 	["{item:16042} teaches {item:15994} ({skill:202} 260) for 1g 20s. Sold by Alliance: {npc:5175} ({zone:1455}), limited stock; Horde: {npc:3413} ({zone:1454}), limited stock. Its sellers keep one or two in stock that come back some time after a sale; the Auction House often has it too."] = "{item:16042} enseña {item:15994} ({skill:202} 260) por 1g 20s. Lo venden: Alianza: {npc:5175} ({zone:1455}), existencias limitadas; Horda: {npc:3413} ({zone:1454}), existencias limitadas. Sus vendedores tienen una o dos en existencia, que se reponen un tiempo después de cada venta; la casa de subastas también suele tenerla.",
 
 	-- Step 66: Schematic: Thorium Tube
-	-- {item:16047} Schematic: Thorium Tube · {item:16000} Thorium Tube · {skill:202} Engineering · {npc:260565} Kor'gar · {zone:2548} Riverglades · {npc:11185} Xizzer Fizzbolt · {zone:1452} Winterspring
-	["{item:16047} teaches {item:16000} ({skill:202} 275) for 1g 60s. Sold by {npc:260565} ({zone:2548}) and {npc:11185} ({zone:1452}), limited stock."] = "{item:16047} enseña {item:16000} ({skill:202} 275) por 1g 60s. Lo venden {npc:260565} ({zone:2548}) y {npc:11185} ({zone:1452}), con existencias limitadas.",
+	-- {item:16047} Schematic: Thorium Tube · {item:16000} Thorium Tube · {skill:202} Engineering · {zone:2548} Riverglades · {npc:11185} Xizzer Fizzbolt · {zone:1452} Winterspring
+	-- was: ["{item:16047} teaches {item:16000} ({skill:202} 275) for 1g 60s. Sold by {npc:260565} ({zone:2548}) and {npc:11185} ({zone:1452}), limited stock."] = "{item:16047} enseña {item:16000} ({skill:202} 275) por 1g 60s. Lo venden {npc:260565} ({zone:2548}) y {npc:11185} ({zone:1452}), con existencias limitadas."
+	["{item:16047} teaches {item:16000} ({skill:202} 275) for 1g 60s. Sold by Kor'gar ({zone:2548}) and {npc:11185} ({zone:1452}), limited stock."] = "{item:16047} enseña {item:16000} ({skill:202} 275) por 1 de oro 60 de plata. Lo venden Kor'gar ({zone:2548}) y {npc:11185} ({zone:1452}), existencias limitadas.",
 
 	-- Step 67: Engineering 225-300: Auction House
 	-- {skill:202} Engineering
@@ -460,6 +461,7 @@ return {
 	-- ["{item:14047} (Alliance)"] = "{item:14047} (Alianza)",
 	-- ["{item:14047} (Horde)"] = "{item:14047} (Horda)",
 	-- ["{item:15994} to 288"] = "{item:15994} hasta 288",
+	-- ["{item:16047} teaches {item:16000} ({skill:202} 275) for 1g 60s. Sold by {npc:260565} ({zone:2548}) and {npc:11185} ({zone:1452}), limited stock."] = "{item:16047} enseña {item:16000} ({skill:202} 275) por 1g 60s. Lo venden {npc:260565} ({zone:2548}) y {npc:11185} ({zone:1452}), con existencias limitadas.",
 	-- ["{item:2592} (Alliance)"] = "{item:2592} (Alianza)",
 	-- ["{item:2592} (Horde)"] = "{item:2592} (Horda)",
 	-- ["{item:2835} (Alliance)"] = "{item:2835} (Alianza)",

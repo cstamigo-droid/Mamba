@@ -62,6 +62,8 @@ def _cabecera(datos: bytes) -> str:
 
 
 FOREVER_DB = re.compile(r"\bforever-db\b", re.I)
+NEGACION = re.compile(r"--no-questie|\bno (?:names from )?(?:DingDB|Leffe|QuestieDB)\b|without `?--leffe|"
+                      r"rows citing QuestieDB left out", re.I)
 
 
 def _secciones_fuente(texto: str):
@@ -75,6 +77,13 @@ def _secciones_fuente(texto: str):
     hechos de QuestieDB "with the Questie maintainers' agreement" (THIRD_PARTY.md): esos sí se rechazan.
     """
     for parrafo in re.split(r"\n\s*\n", texto.replace("\r\n", "\n")):
+        # Segunda excepción (18-11): las oraciones que dicen que esa fuente NO se usó ("Built with
+        # --no-questie: no names from DingDB…", "No Leffe navigation maps were used") no son un origen.
+        oraciones = re.split(r"(?<=[.!?])\s+", " ".join(parrafo.split()))
+        parrafo = " ".join(o for o in oraciones if not NEGACION.search(o))
+        # Tercera (18-11): la sección que escribe avisos_mamba.py con lo que Cristian autorizó.
+        if parrafo.startswith("Mamba: sources authorized by Cristian"):
+            continue
         if AJENAS.search(parrafo) and not FOREVER_DB.search(parrafo):
             primera = next((l.strip() for l in parrafo.splitlines() if l.strip()), "")
             yield primera + " … " + AJENAS.search(parrafo).group(0)

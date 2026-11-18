@@ -18,7 +18,7 @@ return {
 	["Take the zeppelin to {zone:1454} (or use {spell:3567}, which lands you on the upper floor of {object:173161}). {npc:5885} stands with the mage trainers on the lower floor of {object:173161} in the {object:172961}. She hands you {item:7269}."] = "Toma el zepelín a {zone:1454} (o usa {spell:3567}, que te deja en el piso de arriba de {object:173161}). {npc:5885} está con los instructores de magos en la planta baja de {object:173161}, en {object:172961}. Te da {item:7269}.",
 
 	-- Step 3: The Xavian Waterfall
-	-- {object:174797} Xavian Waterfall (no name in this language: may be words)
+	-- {object:174797} Xavian Waterfall
 	["The {object:174797}"] = "{object:174797}",
 	-- {area:431} Splintertree Post · {area:429} Xavian
 	["Fly to {area:431} and swim north up the river past the big lake to its far northern end, where the zone text reads {area:429}; satyrs hold the ruins around it and a few river beasts are in the way. Swim right in under the highest waterfall until you touch the rock wall, then use the flask (you can stay in the water). The waterfalls on the western Falfarren fork do not work."] = "Vuela a {area:431} y nada al norte río arriba pasando el lago grande hasta su extremo norte, donde el texto de zona dice {area:429}; los sátiros ocupan las ruinas alrededor y hay algunas bestias de río en el camino. Nada justo debajo de la cascada más alta hasta tocar la pared de roca y luego usa el frasco (puedes quedarte en el agua). Las cascadas de la bifurcación oeste de Falfarren no sirven.",

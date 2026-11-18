@@ -417,8 +417,9 @@ return {
 
 	-- Step 104: Northern Pylon
 	["Northern Pylon"] = "Pilón norte",
-	-- {npc:9166} Pterrordax · {npc:9997} Spraggle Frock
-	["The pylon stands on the slope east of the refuge. {npc:9166} circle the slopes around it: they count for {npc:9997}."] = "El pilón está en la ladera al este del refugio. Los {npc:9166} rondan las laderas a su alrededor: cuentan para {npc:9997}.",
+	-- {npc:9997} Spraggle Frock
+	-- was: ["The pylon stands on the slope east of the refuge. {npc:9166} circle the slopes around it: they count for {npc:9997}."] = "El pilón está en la ladera al este del refugio. Los {npc:9166} rondan las laderas a su alrededor: cuentan para {npc:9997}."
+	["The pylon stands on the slope east of the refuge. Pterrordax circle the slopes around it: they count for {npc:9997}."] = "",
 
 	-- Step 105: A-Me 01
 	-- {area:1943} Ironstone Plateau
@@ -458,58 +459,52 @@ return {
 	["{quest:4291}, if you still carry it from the first visit"] = "{quest:4291}, si aún la llevas de la primera visita",
 	-- {area:1943} Ironstone Plateau
 	["The pelts come from the gorillas on {area:1943}"] = "Las pieles salen de los gorilas de {area:1943}",
-	-- {quest:87494} Microcrystal Contamination
-	["{quest:87494}, if a ravasaur dropped the scale since the first visit"] = "{quest:87494}, si un ravasaurio soltó la escama desde la primera visita",
 
-	-- Step 111: Damaged Blue Crystal
-	-- {item:280417} Damaged Blue Crystal · {npc:9619} Torwa Pathfinder
-	["The {item:280417} is a short ride west of {npc:9619}'s camp."] = "El {item:280417} está a poca distancia al oeste del campamento de {npc:9619}.",
-
-	-- Step 114: Ironstone Plateau: kill these as you meet them
+	-- Step 112: Ironstone Plateau: kill these as you meet them
 	-- {area:1943} Ironstone Plateau · {area:541} Marshal's Refuge · {npc:9619} Torwa Pathfinder · {npc:9622} U'cha
 	-- plural, as words: Un'Goro Gorillas = {npc:6514} Un'Goro Gorilla
 	["The gorillas live on {area:1943}, east of {area:541}. Keep their pelts for {npc:9619}. Stay out of the deepest cave: {npc:9622} is level 55.\nCareful: Un'Goro Gorillas (level 50-51) call for help from allies within 20 yd once they drop to 25% health. There is a cave full of apes in the area, and fighting there brings many adds."] = "Los gorilas viven en {area:1943}, al este de {area:541}. Guarda sus pieles para {npc:9619}. No entres en la cueva más profunda: {npc:9622} es de nivel 55.\nCuidado: Los gorilas de Un'Goro (nivel 50-51) piden ayuda a los aliados a menos de 20 m cuando bajan al 25% de salud. En la zona hay una cueva llena de simios, y pelear ahí trae muchos enemigos de más.",
 
-	-- Step 116: U'cha
+	-- Step 114: U'cha
 	-- {npc:9622} U'cha
 	["Ride north along the east side to the gorilla plateau. {npc:9622}, a level 55 gorilla, sits in its deepest cave: clear the gorillas at the cave mouth first."] = "Cabalga al norte por el lado este hasta la meseta de los gorilas. {npc:9622}, un gorila de nivel 55, está en su cueva más profunda: limpia antes los gorilas de la boca de la cueva.",
 
-	-- Step 117: Lar'korwi
+	-- Step 115: Lar'korwi
 	-- {npc:9684} Lar'korwi · {npc:9619} Torwa Pathfinder · {item:11568} Torwa's Pouch
 	["{npc:9684}'s lair lies in the jungle north of {npc:9619}, below the eastern cliffs: use {item:11568} there. {npc:9684} is level 56: start at full health."] = "La guarida de {npc:9684} está en la jungla al norte de {npc:9619}, bajo los acantilados del este: usa {item:11568} allí. {npc:9684} es de nivel 56: empieza con la salud completa.",
 
-	-- Step 118: Eastern Pylon and the crate
+	-- Step 116: Eastern Pylon and the crate
 	["Eastern Pylon and the crate"] = "Pilón del este y el cajón",
 	-- {npc:9684} Lar'korwi · {item:11113} Crate of Foodstuffs
 	["The pylon stands on the eastern cliffs above {npc:9684}'s lair; the expedition's {item:11113} sits at the abandoned camp in the eastern jungle."] = "El pilón está en los acantilados del este, sobre la guarida de {npc:9684}; el {item:11113} de la expedición está en el campamento abandonado de la jungla del este.",
 
-	-- Step 119: Torwa Pathfinder
+	-- Step 117: Torwa Pathfinder
 	-- {npc:9619} Torwa Pathfinder
 	["Cross the south of the crater to {npc:9619} by the ramp."] = "Cruza el sur del cráter hasta {npc:9619}, junto a la rampa.",
 
-	-- Step 120: The Marshlands: kill these as you meet them
+	-- Step 118: The Marshlands: kill these as you meet them
 	-- {area:1942} The Marshlands
 	["{area:1942}: kill these as you meet them"] = "{area:1942}: mata a estos según te los encuentres",
 
-	-- Step 121: The Gorishi hive
+	-- Step 119: The Gorishi hive
 	["The Gorishi hive"] = "La colmena Gorishi",
 	["West along the south of the crater: the Gorishi hive fills it. Use the Scraping Vial on a hatchery, a chamber with hanging larvae."] = "Al oeste por el sur del cráter: la colmena Gorishi lo llena. Usa el Vial raspador en una sala de cría, una cámara con larvas colgando.",
 
-	-- Step 122: Bones and equipment
+	-- Step 120: Bones and equipment
 	["Bones and equipment"] = "Huesos y equipo",
 	-- {item:11112} Research Equipment
 	-- plural, as words: Dinosaur Bones = {item:11114} Dinosaur Bone
 	["West across the south of the crater: Dinosaur Bones lie on the ground in the south-west, among the stegodons: those are elite, pick the bones up around them and take the rest from the Diemetradons. The expedition's {item:11112} lies in the south-west jungle."] = "Al oeste por el sur del cráter: hay Huesos de dinosaurio en el suelo al suroeste, entre los estegodones: son élite, recoge los huesos a su alrededor y consigue el resto de los Diemetradones. El {item:11112} de la expedición está en la jungla del suroeste.",
 
-	-- Step 123: Western Pylon
+	-- Step 121: Western Pylon
 	["Western Pylon"] = "Pilón del Oeste",
 	["The pylon stands on the western cliffs."] = "El pilón está en los acantilados del oeste.",
 
-	-- Step 124: Ringo
+	-- Step 122: Ringo
 	-- {npc:9999} Ringo · {area:537} Fire Plume Ridge
 	["{npc:9999} sits on the south-east slope of {area:537}, in the middle of the crater."] = "{npc:9999} está sentado en la ladera sureste de {area:537}, en medio del cráter.",
 
-	-- Step 125: Escort Ringo
+	-- Step 123: Escort Ringo
 	-- {npc:9999} Ringo
 	["Escort {npc:9999}"] = "Escolta a {npc:9999}",
 	-- {npc:9999} Ringo · {area:541} Marshal's Refuge · {item:11804} Spraggle's Canteen
@@ -546,7 +541,9 @@ return {
 	-- ["The fields"] = "Los campos",
 	-- ["The next guide starts here in {area:392} and flies on to {area:976}."] = "La siguiente guía empieza aquí en {area:392} y sigue en vuelo hasta {area:976}.",
 	-- ["The pelts come after loop 2, on the gorilla plateau"] = "Las pieles vienen después del circuito 2, en la meseta de los gorilas",
+	-- ["The pylon stands on the slope east of the refuge. {npc:9166} circle the slopes around it: they count for {npc:9997}."] = "El pilón está en la ladera al este del refugio. Los {npc:9166} rondan las laderas a su alrededor: cuentan para {npc:9997}.",
 	-- ["The shrunken giants roam the {area:1119}; the sea elementals wade along the coast to the west."] = "Los gigantes encogidos rondan {area:1119}; los elementales de mar recorren la costa al oeste.",
+	-- ["The {item:280417} is a short ride west of {npc:9619}'s camp."] = "El {item:280417} está a poca distancia al oeste del campamento de {npc:9619}.",
 	-- ["Umber in {area:493}: keep it"] = "Umber en {area:493}: guárdala",
 	-- ["Umber in {zone:1450}: keep it"] = "Umber en {zone:1450}: guárdala",
 	-- ["Use the {item:12627} by the grain silos to draw out Temporal Parasites. {quest:5154} is one of the musty tomes in the town hall. Every skeleton in town drops {quest:5537}."] = "Usa el {item:12627} junto a los silos de grano para hacer salir Parásitos temporales. {quest:5154} es uno de los tomos mohosos del ayuntamiento. Todos los esqueletos del pueblo sueltan {quest:5537}.",
@@ -584,4 +581,5 @@ return {
 	-- ["{object:175924}, in the farmhouse"] = "{object:175924}, en la granja",
 	-- ["{quest:6762} in {area:493}: keep it"] = "{quest:6762} en {area:493}: guárdala",
 	-- ["{quest:6762} in {zone:1450}: keep it"] = "{quest:6762} en {zone:1450}: guárdala",
+	-- ["{quest:87494}, if a ravasaur dropped the scale since the first visit"] = "{quest:87494}, si un ravasaurio soltó la escama desde la primera visita",
 }

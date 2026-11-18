@@ -121,11 +121,9 @@ step Fresh Threshadon Carcass
   tip Any ravasaur may drop a Crystal Infused Scale: right-click it, Torwa takes it.
   collect 11504 quest 4290            -- Piece of Threshadon Carcass
   collect 280459 x1 optional          -- Crystal Infused Scale
-  accept 87494 optional
 
 step Torwa Pathfinder
   turnin 4290
-  turnin 87494 optional               -- Microcrystal Contamination, if a ravasaur dropped the scale
   accept 4291
   accept 4289                         -- The gorillas on Ironstone Plateau carry the pelts: keep it for the second Un'Goro visit, around 56
 

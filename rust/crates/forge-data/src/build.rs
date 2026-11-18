@@ -952,9 +952,9 @@ pub fn run(o: &Options, log: &dyn Fn(&str)) -> Result<Output, String> {
 	}
 	if let Some(w) = webxp.as_ref().filter(|w| !w.xp.is_empty()) {
 		sources.push(obj_of(vec![
-			("name", s("Quest XP for quests QuestieDB lacks: two Forever web quest databases (one from the beta client's quest cache)")),
+			("name", s("Quest XP for quests the other sources lack: two Forever web quest databases (one from the beta client's quest cache)")),
 			("revision", s(&format!("{} quests; cache {}", w.xp.len(), relative(&o.root, &w.file)))),
-			("license", s("Public web pages; facts (XP numbers) only, used locally with permission")),
+			("license", s("Public web pages; facts (XP numbers) only, used locally with permission (Mamba: authorized by Cristian 18-11-2026, provisional)")),
 			("copyright", V::Null),
 		]));
 	}

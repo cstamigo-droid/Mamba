@@ -19,7 +19,7 @@ return {
 
 	-- Step 2: The summons (Dwarf)
 	["The summons (Dwarf)"] = "La convocatoria (enanos)",
-	-- {npc:5149} Brandur Ironhammer · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {npc:6179} Tiza Battleforge · {npc:1232} Azar Stronghammer · {area:131} Kharanos · {npc:928} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
+	-- {npc:5149} Brandur Ironhammer · {zone:1455} Ironforge · {object:32362} Mystic Ward · {npc:6179} Tiza Battleforge · {npc:1232} Azar Stronghammer · {area:131} Kharanos · {npc:928} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
 	["At 12 {npc:5149}, the paladin trainer in {zone:1455}'s {object:32362}, sends you upstairs to {npc:6179}. The errand is optional, a little XP: {npc:1232} in {area:131} and {npc:928} in {zone:1453} give the same one (taking one closes the others), and {npc:6179} starts the chain without it."] = "A nivel 12, {npc:5149}, el instructor de paladines en {object:32362} de {zone:1455}, te manda arriba con {npc:6179}. El encargo es opcional, algo de experiencia: {npc:1232} en {area:131} y {npc:928} en {zone:1453} dan el mismo (tomar uno cierra los otros), y {npc:6179} empieza la cadena sin él.",
 
 	-- Step 3: Duthorian Rall
@@ -27,10 +27,12 @@ return {
 	["{npc:6171}, Cathedral of Light"] = "{npc:6171}, Catedral de la Luz",
 
 	-- Step 5: The Tome of Divinity
-	-- {npc:6171} Duthorian Rall · {quest:2998} Tome of Divinity · {item:2589} Linen Cloth
-	["{npc:6171} stands inside the Cathedral of Light. He hands you the {quest:2998}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6171} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6171} está dentro de la Catedral de la Luz. Te da {quest:2998}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6171} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso.",
-	-- {quest:2998} Tome of Divinity
-	["Right-click the {quest:2998}"] = "Haz clic derecho en {quest:2998}",
+	-- {npc:6171} Duthorian Rall · {item:6775} Tome of Divinity · {item:2589} Linen Cloth
+	-- was: ["{npc:6171} stands inside the Cathedral of Light. He hands you the {quest:2998}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6171} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6171} está dentro de la Catedral de la Luz. Te da {quest:2998}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6171} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso."
+	["{npc:6171} stands inside the Cathedral of Light. He hands you the {item:6775}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6171} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6171} está dentro de la Cathedral of Light. Te da {item:6775}: haz clic derecho en él en tus bolsas para iniciar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pide una copia nueva a {npc:6171}. Lleva 10 {item:2589} para el siguiente paso si los tienes.",
+	-- {item:6775} Tome of Divinity
+	-- was: ["Right-click the {quest:2998}"] = "Haz clic derecho en {quest:2998}"
+	["Right-click the {item:6775}"] = "Haz clic derecho en {item:6775}",
 
 	-- Step 6: Stephanie Turner
 	-- {npc:6174} Stephanie Turner · {object:2096} Trade District · {item:2589} Linen Cloth · {zone:1436} Westfall
@@ -66,14 +68,16 @@ return {
 	["Back to the Cathedral of Light: {npc:6173} takes the script, {npc:6171} teaches you {spell:7328}."] = "De vuelta a la Catedral de la Luz: {npc:6173} recibe el escrito y {npc:6171} te enseña {spell:7328}.",
 
 	-- Step 11: Tiza Battleforge
-	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries (no name in this language: may be words)
+	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries
 	["{npc:6179}, upstairs in the {object:32386}"] = "{npc:6179}, en el piso de arriba de {object:32386}",
 
 	-- Step 14: The Tome of Divinity
-	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries (no name in this language: may be words) · {object:32362} Mystic Ward (no name in this language: may be words) · {quest:2997} Tome of Divinity · {item:2589} Linen Cloth
-	["{npc:6179} stands upstairs in the {object:32386}, in the {object:32362}: take the ramp at the back of the hall. She hands you the {quest:2997}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6179} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6179} está en el piso de arriba de {object:32386}, en {object:32362}: toma la rampa al fondo de la sala. Te da {quest:2997}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6179} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso.",
-	-- {quest:2997} Tome of Divinity
-	["Right-click the {quest:2997}"] = "Haz clic derecho en {quest:2997}",
+	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries · {object:32362} Mystic Ward · {item:6916} Tome of Divinity · {item:2589} Linen Cloth
+	-- was: ["{npc:6179} stands upstairs in the {object:32386}, in the {object:32362}: take the ramp at the back of the hall. She hands you the {quest:2997}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6179} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6179} está en el piso de arriba de {object:32386}, en {object:32362}: toma la rampa al fondo de la sala. Te da {quest:2997}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6179} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso."
+	["{npc:6179} stands upstairs in the {object:32386}, in the {object:32362}: take the ramp at the back of the hall. She hands you the {item:6916}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6179} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6179} está arriba en {object:32386}, en {object:32362}: toma la rampa al fondo del salón. Te da {item:6916}: haz clic derecho en él en tus bolsas para iniciar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pide una copia nueva a {npc:6179}. Lleva 10 {item:2589} para el siguiente paso si los tienes.",
+	-- {item:6916} Tome of Divinity
+	-- was: ["Right-click the {quest:2998}"] = "Haz clic derecho en {quest:2998}"
+	["Right-click the {item:6916}"] = "Haz clic derecho en {item:6916}",
 
 	-- Step 15: John Turner
 	-- {npc:6175} John Turner · {item:2589} Linen Cloth · {zone:1432} Loch Modan
@@ -81,11 +85,11 @@ return {
 	["{npc:6175} walks the outer ring of the Commons, past the front gate, the bank and the Auction House. He wants 10 {item:2589}: humanoids drop it (in {zone:1432} the Dark Iron Ambushers, Tunnel Rat kobolds and Stonesplinter troggs about two kills in five), or buy it at the Auction House on his ring."] = "{npc:6175} recorre el anillo exterior de la Explanada, pasando la puerta principal, el banco y la casa de subastas. Quiere 10 {item:2589}: los humanoides la sueltan (en {zone:1432}, los emboscadores Hierro Negro, los kóbolds Rata del Túnel y los troggs Rompecantos más o menos dos de cada cinco veces), o cómprala en la casa de subastas de su anillo.",
 
 	-- Step 16: The Symbol of Life
-	-- {object:32386} Hall of Mysteries (no name in this language: may be words) · {npc:6179} Tiza Battleforge · {item:6866} Symbol of Life · {npc:6178} Muiredon Battleforge · {npc:6177} Narm Faulk
+	-- {object:32386} Hall of Mysteries · {npc:6179} Tiza Battleforge · {item:6866} Symbol of Life · {npc:6178} Muiredon Battleforge · {npc:6177} Narm Faulk
 	["Back upstairs in the {object:32386}. {npc:6179} gives you the {item:6866}; her husband {npc:6178} rests on the same floor. Keep the symbol: you need it on {npc:6177}. If you lose it, {npc:6179} gives you another (The {item:6866})."] = "De vuelta arriba en {object:32386}. {npc:6179} te da {item:6866}; su esposo {npc:6178} descansa en el mismo piso. Guarda el símbolo: lo necesitas sobre {npc:6177}. Si lo pierdes, {npc:6179} te da otro ({item:6866}).",
 
 	-- Step 17: Narm Faulk
-	-- {npc:6177} Narm Faulk · {zone:1426} Dun Morogh · {zone:1432} Loch Modan · {area:131} Kharanos · {area:212} Helm's Bed Lake · {object:147516} Dark Iron (no name in this language: may be words) · {item:6866} Symbol of Life
+	-- {npc:6177} Narm Faulk · {zone:1426} Dun Morogh · {zone:1432} Loch Modan · {area:131} Kharanos · {area:212} Helm's Bed Lake · {object:147516} Dark Iron · {item:6866} Symbol of Life
 	["{npc:6177} lies dead in {zone:1426}, not {zone:1432}: east past {area:131}, north-east of Ironband's compound, on the smallest of three little hills between {area:212} and the {object:147516} camp. Target his body and use the {item:6866} to raise him, then speak to him. If another paladin just raised him, his body is back within about three minutes."] = "{npc:6177} yace muerto en {zone:1426}, no en {zone:1432}: al este pasando {area:131}, al noreste del recinto de Ironband, en la más pequeña de tres colinitas entre {area:212} y el campamento de {object:147516}. Selecciona su cuerpo y usa {item:6866} para revivirlo, luego háblale. Si otro paladín acaba de revivirlo, su cuerpo vuelve en unos tres minutos.",
 	-- {item:6866} Symbol of Life · {npc:6177} Narm Faulk
 	["{item:6866} on {npc:6177}'s body"] = "{item:6866} sobre el cuerpo de {npc:6177}",
@@ -99,9 +103,13 @@ return {
 	["{item:6847}: Dark Iron Spies"] = "{item:6847}: Espías Hierro Negro",
 
 	-- Step 19: Redemption
-	-- {object:32386} Hall of Mysteries (no name in this language: may be words) · {npc:6178} Muiredon Battleforge · {npc:6179} Tiza Battleforge · {spell:7328} Redemption
+	-- {object:32386} Hall of Mysteries · {npc:6178} Muiredon Battleforge · {npc:6179} Tiza Battleforge · {spell:7328} Redemption
 	["Back up to the {object:32386}: {npc:6178} takes the script, {npc:6179} teaches you {spell:7328}."] = "De vuelta arriba en {object:32386}: {npc:6178} recibe el escrito y {npc:6179} te enseña {spell:7328}.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Right-click the {quest:2997}"] = "Haz clic derecho en {quest:2997}",
+	-- ["Right-click the {quest:2998}"] = "Haz clic derecho en {quest:2998}",
 	-- ["{item:2589} x10"] = "{item:2589} x10",
+	-- ["{npc:6171} stands inside the Cathedral of Light. He hands you the {quest:2998}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6171} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6171} está dentro de la Catedral de la Luz. Te da {quest:2998}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6171} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso.",
+	-- ["{npc:6179} stands upstairs in the {object:32386}, in the {object:32362}: take the ramp at the back of the hall. She hands you the {quest:2997}: right-click it in your bags to start the next quest. If the book says the quest is already done, destroy it and ask {npc:6179} for a new copy. Bring 10 {item:2589} for the next step if you have it."] = "{npc:6179} está en el piso de arriba de {object:32386}, en {object:32362}: toma la rampa al fondo de la sala. Te da {quest:2997}: haz clic derecho en él en tus bolsas para empezar la siguiente misión. Si el libro dice que la misión ya está hecha, destrúyelo y pídele a {npc:6179} una copia nueva. Si tienes, lleva 10 {item:2589} para el siguiente paso.",
 }

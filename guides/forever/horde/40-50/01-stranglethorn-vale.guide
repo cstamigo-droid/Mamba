@@ -9,39 +9,27 @@ next forever/horde/40-50/01b-riverglades
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
+# Added here: The Coastal Menace (104), Hilary's Necklace (3741), Noboru the Cudgel (1392).
+# Left out: Report to Helgrum (1420), Big Game Hunter (208).
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
 # Added here: Panther Mastery (193), Raptor Mastery (197), Nothing But The Truth (1372), The Gurubashi Legends of Old (95748),
-# Locating the Lost City (95770, Kin'weelay's next legend: the cavern entrance under the Vile Reef, west of Grom'gol, on
-# the way to the jungle stalkers; handed in with the trophy skulls). Its follow-up, The Drowned City (95775), is a dungeon.
-# Excelsior (628, Drizzlik: the Elder Saltwater Crocolisk on the coast between Zul'Kunda and Grom'gol, optional).
-# Left out: The Bloodsail Buccaneers (608), taken in forever/horde/40-50/06-azshara at 50.
-# Level tidy (0.4.0): the level 43-46 errands are still taken here, where the route passes their givers, and done on
-# 40-50/02's Grom'gol stop at about 45, after the Riverglades, where their mobs fit (here they ran 2-4 over the player,
-# #2353, #2102): Mok'thardin's Enchantment and Akiris (573, 617), Stranglethorn Fever (348), Voodoo Dues (609), Zanzil's
-# Secret (621, Zanzil's camps 43-44) and the Wild Shore (604, 576, 587). Speaking with Gan'zulah (586) is taken at the
-# Bubbling Cauldron on 02's Grom'gol landing, right before its Skullsplitters, instead of carried from here; Skullsplitter
-# Tusks (209), taken on this guide's Booty Bay stops, is handed in on that stop's Booty Bay call, where Krazek's
-# Tran'rek (2864) is taken, so this guide makes no Booty Bay flight of its own for them.
-# Riding at 40: the Grom'gol stop after Zul'Kunda (about 41) offers each race's riding trainer by zeppelin, before the
-# Riverglades, a zone you cross on foot otherwise.
 
 step Fly to the Undercity
   only Warrior,Paladin,Rogue,Priest,Mage,Warlock
   zone Badlands
   tip Your level 40 training is in the Undercity: fly there from Kargath, train, and take the zeppelin from the towers outside the city to Grom'gol.
-  goto 4.1,44.9 "Kargath flight master"
+  zone Undercity
+  zone Badlands
   fly "Undercity"
-  zone Undercity
-
-step Undercity trainers
-  only Warrior,Paladin,Rogue,Priest,Mage,Warlock
-  zone Undercity
-  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock
 
 step Riding at 40
   only Undead,Warrior,Paladin,Rogue,Priest,Mage
   zone Tirisfal Glades
   when level>=40
-  tip Riding needs level 40 and costs 100 gold; learning it gives you a mount. Each race learns it from its own race's trainer: yours is Velma Warnam in Brill, a short ride north of the zeppelin towers, with Zachariah Post's skeletal horses (20 gold each) beside her. Ride back to the towers for the Grom'gol zeppelin.
+  tip Riding needs level 40 and costs 100 gold; learning it gives you a mount. Each race learns it from its own race's trainer: yours is Velma Warnam in Brill, a short ride north of the zeppelin towers, with Zachariah Post's skeletal horses (20 gold each) beside her.
   train 4773 optional                   -- Velma Warnam, riding trainer
   note "Skeletal horses: Zachariah Post, beside Velma Warnam in Brill."
 
@@ -51,52 +39,51 @@ step Zeppelin to Grom'gol
   goto 61.8,59.2 "Zeppelin to Grom'gol"
 
 step Fly to Grom'gol
-  only Hunter,Shaman,Druid
-  zone Badlands
-  goto 4.1,44.9 "Kargath flight master"
+  only Orc,Tauren,Troll,Hunter
+  zone Undercity
   fly "Grom'gol"
-  zone Stranglethorn Vale
+
+step Fly to Grom'gol
+  only Orc,Tauren,Troll,Shaman
+  zone Undercity
+  fly "Grom'gol"
+
+step Fly to Grom'gol
+  only Tauren,Druid
+  zone Undercity
+  fly "Grom'gol"
 
 step Grom'gol Base Camp
-  turnin 1240                           -- Kin'weelay
-  accept 95748 npc 2519                 -- Kin'weelay: the legend lies in Zul'Kunda, where this guide goes for Gan'zulah
-
-step Jungle Stalkers
-  tip The Jungle Stalkers (40-41) hunt the coast south of Grom'gol. They are well above you: pull one at a time and rest between fights.
-  tip Careful: Tethis, a level 43 elite raptor, roams among the stalkers: leave him for Raptor Mastery's group step.
-  collect 3863 quest 572
-
-step Far Seer Mok'thardin
-  turnin 572
-  accept 571
+  zone Stranglethorn Vale
+  turnin 1240 only Orc,Tauren,Troll,Undead -- Kin'weelay
 
 step Fly to Booty Bay
   zone Stranglethorn Vale
-  goto 32.5,29.3 "Grom'gol flight master"
+  goto 32.5,29.3 "Grom'gol flight master" only Orc,Tauren,Troll,Undead
+  goto 32.5,29.3 "Grom'gol flight master" only Skyborne,Warrior,Paladin,Rogue,Priest,Mage,Warlock
+
+step Fly to Booty Bay
+  zone Stranglethorn Vale
+  goto 32.5,29.3 "Grom'gol flight master" only Orc,Tauren,Troll,Undead
+  goto 32.5,29.3 "Grom'gol flight master" only Skyborne,Warrior,Paladin,Rogue,Priest,Mage,Warlock
   fly "Booty Bay"
 
 step Booty Bay
   zone Stranglethorn Vale
-  turnin 577                          -- Drizzlik: the Snapjaw skins gathered earlier; inside
-  accept 628                          -- Drizzlik: the Elder Saltwater Crocolisk suns on the coast between Zul'Kunda and Grom'gol, later on this loop
   tip Gringer, the flight master, waits on Booty Bay's upper deck. The quest givers stand on the boardwalks around the harbour and in the inn.
-  turnin 213                          -- Kebok
-  turnin 1180                         -- Wharfmaster Lozgil, on the docks: Gazlowe's letter, if you carry it
-  accept 1181
-  accept 97332                          -- Wharfmaster Lozgil: Twice Misplaced Trust, after Zimmix's rescue; the package goes to Wharfmaster Whizzbuzz at Powderfuse Port, in the Riverglades guide
-  accept 606                            -- "Sea Wolf" MacKinley, on the top floor
-  turnin 1181                         -- Baron Revilgaz, on the balcony beside MacKinley
-  turnin 669
-  accept 621                          -- Inside
-  accept 600                            -- Crank Fizzlebub
-  accept 617                            -- Privateer Bloads
+  turnin 577 only Orc,Tauren,Troll,Undead -- Drizzlik: the Snapjaw skins gathered earlier; inside
   vendor nearest
-  accept 595                            -- First Mate Crazz
+  accept 595 only Orc,Tauren,Troll,Undead -- First Mate Crazz
+  accept 606 only Orc,Tauren,Troll,Undead -- "Sea Wolf" MacKinley, on the top floor
+  accept 600 only Orc,Tauren,Troll,Undead -- Crank Fizzlebub, inside
+  turnin 1180 only Orc,Tauren,Troll,Undead -- Wharfmaster Lozgil, on the docks: Gazlowe's letter, if you carry it
+  accept 1181 only Orc,Tauren,Troll,Undead
+  turnin 1181 only Orc,Tauren,Troll,Undead -- Baron Revilgaz, on the balcony beside MacKinley
+  turnin 669 only Orc,Tauren,Troll,Undead
 
-step Kebok
-  when turnedin 189
-  tip Kebok, upstairs, has his next errand now: the Skullsplitter tusks come from the trolls of Zul'Mamwe, later on this loop.
-  accept 209                            -- Kebok, upstairs
+step Booty Bay
+  when group 628
+  accept 628 only Orc,Tauren,Troll,Undead -- Drizzlik: the Elder Saltwater Crocolisk suns on the coast between Zul'Kunda and Grom'gol, later on this loop
 
 # ---------------------------------------------------------------- Booty Bay
 
@@ -187,98 +174,51 @@ step Kebok
 
 step Bloodsail Correspondence
   tip Leave town by the tunnel; the note lies in the pirates' cove just north of Booty Bay.
-  turnin 595
-  accept 597
+  turnin 595 only Orc,Tauren,Troll,Undead
+  accept 597 only Orc,Tauren,Troll,Undead
 
 step Booty Bay
-  turnin 597                            -- First Mate Crazz
-  accept 599
-  turnin 599                            -- Fleet Master Seahorn
+  turnin 597 only Orc,Tauren,Troll,Undead -- First Mate Crazz
+  accept 599 only Orc,Tauren,Troll,Undead
+  turnin 599 only Orc,Tauren,Troll,Undead -- Fleet Master Seahorn
 
 # ---------------------------------------------------------------- North through the jungle
 
-step Mistvale gorillas
-  tip The gorillas roam the valley around Unbagwa. The elders drop the giblets; any of them can drop a fang: keep ten for Unbagwa, whose Mokk (44) waits for your Stranglethorn stop at about 45.
-  tip Careful: the Elder Mistvale Gorillas (40-41) stand close together in the valley: pull one at a time.
-  collect 2799 x10
-  collect 3862 quest 571 @33.0,66.1 map 1434
+step Witch Doctor Unbagwa
+  tip Take the road north out of Booty Bay; Unbagwa sits on a hill in Mistvale Valley, east of the road.
+  accept 349                          -- Inside Spirit Den
 
 step Mistvale gorillas
-  collect 3919 quest 606.1
+  collect 3919 quest 606.1 only Orc,Tauren,Troll,Undead
 
 step Venture Co. mine
   tip Further north, the goblins of the Venture Co. dig at the mine east of the road; miners, foremen, surveyors and tinkerers all drop the crystals.
   tip Careful: Stealthed Shadowmaw Panthers and Stranglethorn Tigresses roam the area around the camp.
-  collect 3917 quest 600.1
-
-step Grom'gol Base Camp
-  turnin 571                          -- Far Seer Mok'thardin
-  accept 573                            -- Far Seer Mok'thardin
+  collect 3917 quest 600.1 only Orc,Tauren,Troll,Undead
 
 step Nesingwary's camp
-  turnin 195                          -- Hemet Nesingwary
   tip Head north up the road; the hunters camp on the hill above the river.
-  accept 196                            -- Hemet Nesingwary
-  turnin 192                          -- Sir S. J. Erlgadin
+  turnin 195 only Orc,Tauren,Troll,Undead -- Hemet Nesingwary
+  accept 196 only Orc,Tauren,Troll,Undead -- Hemet Nesingwary
+  turnin 192 only Orc,Tauren,Troll,Undead -- Sir S. J. Erlgadin
 
 step Sin'Dall
   when onquest 188
   tip Sin'Dall, the tiger Ajeck sent you after on your last visit, prowls the hilltop just south-west of the camp.
-  collect 3879 quest 188 @31.8,16.4
+  collect 3879 quest 188 @31.8,16.4 only Orc,Tauren,Troll,Undead
 
 step Nesingwary's camp
   when onquest 188
-  turnin 188                          -- Ajeck Rouack
+  turnin 188 only Orc,Tauren,Troll,Undead -- Ajeck Rouack
 
 step Nesingwary's camp
   when group 193
   accept 193
 
-step Nesingwary's camp
-  when !turnedin 583
-  tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
-  accept 583                          -- Barnil Stonepot
-  turnin 583                          -- Hemet Nesingwary
-
 step The Green Hills of Stranglethorn
   when turnedin 583
   tip Barnil Stonepot collects the pages of The Green Hills of Stranglethorn: the trolls of the vale drop them now and then. Take his quest; each chapter he takes once you have all its pages.
   accept 338 optional                 -- Barnil Stonepot
-
-step Chapter I
-  when onquest 338
-  when has 2725
-  when has 2728
-  when has 2730
-  when has 2732
-  accept 339                           -- Barnil Stonepot: every page of chapter I is in your bags
-  turnin 339
-
-step Chapter II
-  when onquest 338
-  when has 2734
-  when has 2735
-  when has 2738
-  when has 2740
-  accept 340                           -- Barnil Stonepot: every page of chapter II is in your bags
-  turnin 340
-
-step Chapter III
-  when onquest 338
-  when has 2742
-  when has 2744
-  when has 2745
-  when has 2748
-  accept 341                           -- Barnil Stonepot: every page of chapter III is in your bags
-  turnin 341
-
-step Chapter IV
-  when onquest 338
-  when has 2749
-  when has 2750
-  when has 2751
-  accept 342                           -- Barnil Stonepot: every page of chapter IV is in your bags
-  turnin 342
 
 step The Green Hills of Stranglethorn
   when onquest 338
@@ -288,21 +228,144 @@ step The Green Hills of Stranglethorn
   when has 2759
   turnin 338                          -- Barnil Stonepot: the four chapters
 
+step Chapter IV
+  zone Stranglethorn Vale
+  when onquest 338
+  when has 2749
+  when has 2750
+  when has 2751
+  accept 342 optional                  -- Barnil Stonepot: every page of chapter IV is in your bags
+  turnin 342
+
+step Chapter III
+  zone Stranglethorn Vale
+  when onquest 338
+  when has 2742
+  when has 2744
+  when has 2745
+  when has 2748
+  accept 341 optional                  -- Barnil Stonepot: every page of chapter III is in your bags
+  turnin 341
+
+step Chapter II
+  zone Stranglethorn Vale
+  when onquest 338
+  when has 2734
+  when has 2735
+  when has 2738
+  when has 2740
+  accept 340 optional                  -- Barnil Stonepot: every page of chapter II is in your bags
+  turnin 340
+
+step Chapter I
+  zone Stranglethorn Vale
+  when onquest 338
+  when has 2725
+  when has 2728
+  when has 2730
+  when has 2732
+  accept 339 optional                  -- Barnil Stonepot: every page of chapter I is in your bags
+  turnin 339
 step Zul'Kunda
+  zone Stranglethorn Vale
   tip West of the expedition, the Bloodscalp chiefs Gan'zulah and Nezzliok stand together in the ruins of Zul'Kunda. Clear their guards first, then pull them.
-  collect 3904 quest 584.1
-  collect 2007 quest 95748.1 @23.0,12.0 map 1434 -- from the Fall of Gurubashi, in the ruins
-  collect 3905 quest 584.2
   tip On the coast between Zul'Kunda and Grom'gol an Elder Saltwater Crocolisk (level 38 elite) shares the spawns of the ordinary crocolisks: kill it if it is up and take its skin for Drizzlik.
-  collect 4105 quest 628.1 optional @29.3,22.3 map 1434 -- Elder Saltwater Crocolisk
+  collect 3904 quest 584.1 only Orc,Tauren,Troll,Undead
+  collect 3905 quest 584.2 only Orc,Tauren,Troll,Undead
 
 step Grom'gol
-  turnin 584                            -- the Bubbling Cauldron, beside Nimboya
-  turnin 95748 npc 2519                 -- Kin'weelay
-  accept 585
-  accept 2932                           -- Nimboya: for the Hinterlands, around level 48
-  accept 598                            -- Kin'weelay: the trophy skulls stand in the Skullsplitter ruins, later on this loop
-  accept 95770 npc 2519                 -- Kin'weelay: the cavern entrance under the Vile Reef, west of the camp
+  turnin 584 only Orc,Tauren,Troll,Undead -- the Bubbling Cauldron, beside Nimboya
+  accept 585 only Orc,Tauren,Troll,Undead
+  accept 2932 only Orc,Tauren,Troll,Undead -- Nimboya: for the Hinterlands, around level 48
+  accept 598 only Orc,Tauren,Troll,Undead -- Kin'weelay: the trophy skulls stand in the Skullsplitter ruins, later on this loop
+
+step Fly to Booty Bay
+  zone Stranglethorn Vale
+  goto 32.5,29.3 "Grom'gol flight master"
+  fly "Booty Bay"
+
+step Booty Bay
+  zone Tirisfal Glades
+  tip Head south to Booty Bay.
+  turnin 600 only Orc,Tauren,Troll,Undead -- Inside
+
+step Kebok
+  zone Stranglethorn Vale
+  when turnedin 189
+  tip Kebok, upstairs, has his next errand now: the Skullsplitter tusks come from the trolls of Zul'Mamwe, later on this loop.
+  accept 209 only Orc,Tauren,Troll,Undead -- Kebok, upstairs
+
+step Riding at 40
+  only Undead,!Warlock
+  zone Tirisfal Glades
+  when level>=40
+  when !skill Riding 1
+  tip Riding needs level 40 and costs 100 gold; learning it gives you a mount, and the Riverglades after Stranglethorn are a long walk without one. Take the zeppelin from Grom'gol's tower to the Undercity's towers: Velma Warnam teaches the Forsaken in Brill, a short ride north, with Zachariah Post's skeletal horses (20 gold each). Then the zeppelin back to Grom'gol. Short of gold? Skip this step: the Swamp of Sorrows guide passes the Undercity again at about 47.
+  train 4773                            -- Velma Warnam, riding trainer
+
+step Your mount at 40
+  zone Tirisfal Glades
+  only Warlock
+  when level>=40
+  tip Warlocks don't buy riding: your mount is the Felsteed, from your class quest. Zevrost in Orgrimmar's Cleft of Shadow starts it and Strahad Farsan in Ratchet teaches it, both on the Feralas guide's Orgrimmar stop at about 45.
+  note "Felsteed: Zevrost in Orgrimmar, then Strahad Farsan in Ratchet, on the Feralas guide's Orgrimmar stop."
+
+step Back to Westfall Lighthouse
+  only Warlock
+  zone Westfall
+  goto 30.0,86.0 "To Westfall Lighthouse"
+
+step Into Westfall
+  zone Westfall
+  goto 73.0,77.1 "Into Westfall"
+
+step To Captain Grayson
+  zone Westfall
+  goto 30.0,86.0 "To Captain Grayson"
+
+step Captain Grayson
+  accept 104 only Orc,Tauren,Troll,Undead
+  accept 103 only Orc,Tauren,Troll,Undead
+
+step The Coastal Menace
+  collect 3636 quest 104.1 @33.7,83.9 map 1436 live only Orc,Tauren,Troll,Undead
+
+step Captain Grayson
+  turnin 104 only Orc,Tauren,Troll,Undead
+
+step To Tarren Mill
+  zone Hillsbrad Foothills
+  goto 62.8,19.0 "Tarren Mill" only Skyborne
+
+step Fly to Undercity
+  zone Hillsbrad Foothills
+  goto 60.2,18.8 "Tarren Mill flight master" only Skyborne
+  fly "Undercity" only Skyborne
+  zone Undercity
+
+step Zeppelin to Grom'gol
+  zone Tirisfal Glades
+  goto 61.8,59.2 "Zeppelin to Grom'gol" only Skyborne
+
+step The Savage Coast
+  when group 628
+  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Elder Saltwater Crocolisk is a level 38 elite: most classes solo it at level 40, but you may need help. Skip it if you are alone: the route has you grind the XP back.
+  zone Stranglethorn Vale
+  collect 4105 quest 628.1 @29.3,22.3 map 1434 only Orc,Tauren,Troll,Undead -- Elder Saltwater Crocolisk
+
+step Into Stranglethorn Vale
+  only Orc,Tauren,Troll,Undead
+  zone Stranglethorn Vale
+  goto 28.1,0.8 "Into Stranglethorn Vale"
+
+step To Grom'gol
+  only Orc,Tauren,Troll,Undead
+  zone Stranglethorn Vale
+  goto 32.2,27.6 "To Grom'gol"
+
+step Grom'gol
+  zone Tirisfal Glades
+  accept 586 only Orc,Tauren,Troll,Undead
 
 step Riding at 40
   only Orc,!Warlock
@@ -336,104 +399,63 @@ step Riding at 40
   tip Riding needs level 40 and costs 100 gold; learning it gives you a Galestrider, and the Riverglades after Stranglethorn are a long walk without one. Take the zeppelin from Grom'gol's tower to Orgrimmar and fly to Thunder Bluff: the skyboat to Zephras Isle leaves the cliffs south of Skywatcher Plateau, north of Thunder Bluff, about every five minutes, and Genn Fairweather teaches Skyborne at the Fairweather Stables in Valanaar. Then back to Orgrimmar for the Grom'gol zeppelin. Short of gold? Skip this step: the Feralas guide passes Orgrimmar again at about 45.
   train 265756                          -- Genn Fairweather, riding trainer, at the Fairweather Stables in Valanaar
 
-step Riding at 40
-  only Undead,!Warlock
-  zone Tirisfal Glades
-  when level>=40
-  when !skill Riding 1
-  tip Riding needs level 40 and costs 100 gold; learning it gives you a mount, and the Riverglades after Stranglethorn are a long walk without one. Take the zeppelin from Grom'gol's tower to the Undercity's towers: Velma Warnam teaches the Forsaken in Brill, a short ride north, with Zachariah Post's skeletal horses (20 gold each). Then the zeppelin back to Grom'gol. Short of gold? Skip this step: the Swamp of Sorrows guide passes the Undercity again at about 47.
-  train 4773                            -- Velma Warnam, riding trainer
-
-step Your mount at 40
-  only Warlock
-  when level>=40
-  tip Warlocks don't buy riding: your mount is the Felsteed, from your class quest. Zevrost in Orgrimmar's Cleft of Shadow starts it and Strahad Farsan in Ratchet teaches it, both on the Feralas guide's Orgrimmar stop at about 45.
-  note "Felsteed: Zevrost in Orgrimmar, then Strahad Farsan in Ratchet, on the Feralas guide's Orgrimmar stop."
-
-step The Vile Reef
-  zone Stranglethorn Vale
-  when onquest 95770
-  when !complete 95770
-  tip Locating the Lost City: west of Grom'gol, swim out over the Vile Reef and dive to the cavern entrance in the reef; the quest completes as you find it. Leave the cavern for now: the jungle stalkers are south along the coast.
-  complete 95770 @21.8,27.6 map 1434   -- the Drowned City's entrance, underwater
-
-# ---------------------------------------------------------------- South to Booty Bay
-
 step Jungle stalkers
-  zone Stranglethorn Vale
+  zone Tirisfal Glades
   tip The stalker raptors hunt the jungle south of Grom'gol, out towards the west coast.
   tip Careful: the Jungle Stalkers (40-41) are thick here: pull one at a time and rest between fights.
-  kill 687 quest 196.1
+  kill 687 quest 196.1 only Orc,Tauren,Troll,Undead
   note The naga explorers on the coast south of here (43-44) are for Bloads and Mok'thardin: keep both quests for your Stranglethorn stop at about 45.
 
 step Booty Bay
-  tip Head south to Booty Bay. Shaky Phillipe waits on the docks.
-  turnin 606                            -- "Shaky" Phillipe
-  accept 607
-  accept 580                            -- Whiskey Slim, in the inn: his bottles wash up on the Hinterlands coast, around level 48
-  accept 348                            -- Fin Fizracket: Stranglethorn Fever (offered from 40), Unbagwa's part on the Feralas guide's Grom'gol stop
-  turnin 600                          -- Inside
-  accept 209                            -- Kebok, upstairs: the tusks come from the Skullsplitters, later on this loop
-  turnin 607                            -- "Sea Wolf" MacKinley, on the top floor
-  accept 2872                           -- MacKinley, on the top floor: for Stoley in Tanaris
-  accept 609                            -- MacKinley: keep it, the ghost pirates (43-44) wait for your Stranglethorn stop at about 45
-  turnin 628 optional                   -- Drizzlik, inside: the Elder Crocolisk Skin
-  accept 576                            -- Dizzy One-Eye: keep it for the Wild Shore at about 45
-  accept 604                            -- Fleet Master Seahorn: keep it for the Wild Shore at about 45
-  accept 587                            -- Deeg, on the top floor: keep it for the Wild Shore at about 45
+  tip Shaky Phillipe waits on the docks.
+  turnin 606 only Orc,Tauren,Troll,Undead -- "Shaky" Phillipe
+  accept 607 only Orc,Tauren,Troll,Undead
+  accept 576 only Orc,Tauren,Troll,Undead -- Dizzy One-Eye: keep it for the Wild Shore at about 45
+  turnin 607 only Orc,Tauren,Troll,Undead -- "Sea Wolf" MacKinley, on the top floor
+  accept 2872 only Orc,Tauren,Troll,Undead -- MacKinley, on the top floor: for Stoley in Tanaris
+  accept 604 only Orc,Tauren,Troll,Undead -- Fleet Master Seahorn: keep it for the Wild Shore at about 45
+  accept 580 only Orc,Tauren,Troll,Undead -- Whiskey Slim, in the inn: his bottles wash up on the Hinterlands coast, around level 48
+  accept 587 only Orc,Tauren,Troll,Undead -- Deeg, on the top floor: keep it for the Wild Shore at about 45
   vendor nearest
 
+step Booty Bay
+  when group 628
+  turnin 628 only Orc,Tauren,Troll,Undead -- Drizzlik, inside: the Elder Crocolisk Skin
+
+step Level 40.09
+  zone Stranglethorn Vale
+  when !group 628
+  when level<40.09
+  tip If you skipped Excelsior, grind here to level 40.09 to stay on the route's plan.
+  goto 27.2,83.0 map 1434 "Bloodsail Swashbuckler"
+  level 40.09 grind 1563                -- grind on Bloodsail Swashbuckler
+
 step The Bloodsail ships
+  zone Tirisfal Glades
   when group 624
   tip The scroll, Cortello's Riddle, lies on the decks of the three ships off the Wild Shore, crewed by pirates of 42-45 who come in pairs, with captains of 45-48: take it with a group. Its chain runs on through the Swamp of Sorrows, Dustwallow Marsh and the Hinterlands.
-  collect 4056 "Cortello's Riddle"
+  collect 4056 "Cortello's Riddle"    -- Inside
   accept 624                            -- for a later stop in the Swamp of Sorrows
 
-step Fly to Grom'gol
-  zone Stranglethorn Vale
-  tip Fly back to Grom'gol: Zul'Mamwe's Skullsplitters are just east of it.
-  goto 26.8,77.0 "Booty Bay flight master"
-  fly "Grom'gol"
-
 step Zul'Mamwe
-  zone Stranglethorn Vale
-  tip From Grom'gol head east to the Skullsplitter ruins east of the Venture Co. mine; pull the headhunters and berserkers one at a time. One pile of trophy skulls stands on the ruins' north side. Every Skullsplitter can drop a tusk or a necklace: the necklaces are the slow part, so keep killing in the warriors' camp north of the ruins until you have them all. Careful: Ana'thek the Cruel (45) walks the south-western ruins with two guards; Speaking with Gan'zulah's last piece, his Broken Armor, waits for your Stranglethorn stop at about 45.
-  goto 45.06,34.07 "Skullsplitter warriors"
-  collect 1524 quest 209.1 @45.4,36.2 map 1434 era
-  collect 3908 quest 585.3
+  tip Head north to the Skullsplitter ruins east of the Venture Co. mine; pull the headhunters and berserkers one at a time. One pile of trophy skulls stands on the ruins' north side. Every Skullsplitter can drop a tusk or a necklace: the necklaces are the slow part, so keep killing in the warriors' camp north of the ruins until you have them all. Careful: Ana'thek the Cruel (45) walks the south-western ruins with two guards; Speaking with Gan'zulah's last piece, his Broken Armor, waits for your Stranglethorn stop at about 45.
+  collect 1524 quest 209.1 @45.4,36.2 map 1434 era only Orc,Tauren,Troll,Undead
+  collect 3908 quest 585.3 only Orc,Tauren,Troll,Undead
 
 step Balia'mah Ruins: kill these as you meet them
   zone Stranglethorn Vale
   tip The next trophy skulls stand in the small ruins just north of the warriors' camp.
   tip The last skulls are in the ruins a short walk west, on the way back to Grom'gol.
-  collect 3916 quest 598.1
-  collect 3906 quest 585.1
-  collect 3907 quest 585.2
+  collect 3916 quest 598.1 only Orc,Tauren,Troll,Undead
+  collect 3906 quest 585.1 only Orc,Tauren,Troll,Undead
+  collect 3907 quest 585.2 only Orc,Tauren,Troll,Undead
 
 step Grom'gol Base Camp
   tip Head west to Grom'gol.
-  turnin 598                            -- Kin'weelay
-  turnin 95770 npc 2519                 -- Kin'weelay
-  turnin 585
+  turnin 598 only Orc,Tauren,Troll,Undead -- Kin'weelay
+  turnin 585 only Orc,Tauren,Troll,Undead
   accept 95141                          -- Commander Aggro'gosh: for Krom'rosh in Rog'mar, the Riverglades' Horde fort, in the next guide
-  note Keep Mok'thardin's Enchantment, Zanzil's Secret and Kebok's tusks: the Skullsplitter chief, Zanzil's camps, the naga coast and Booty Bay come on your Stranglethorn stop at about 45, after the Riverglades.
-
-step Stranglethorn Vale
-  zone Stranglethorn Vale
-  goto 35.7,10.8 "Nesingwary's Expedition"
-
-step Nesingwary's Expedition
-  tip Head north up the road to the hunters' camp.
-  turnin 196                            -- Hemet Nesingwary
-
-step Nesingwary's Expedition
-  when group 197
-  accept 197
-
-step Raptor Mastery
-  when group 197
-  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Tethis is a level 43 elite: most classes solo it at level 45, but you may need help. Skip it if you are alone.
-  collect 3877 quest 197.1 @31.5,41.2 map 1434
+  note Keep Speaking with Gan'zulah, Mok'thardin's Enchantment, Zanzil's Secret and Kebok's tusks: the Skullsplitter chief, Zanzil's camps, the naga coast and Booty Bay come on your Stranglethorn stop at about 45.
 
 step Panther Mastery
   when group 193
@@ -444,77 +466,109 @@ step Sir S. J. Erlgadin
   when group 193
   turnin 193
 
-step Hemet Nesingwary
-  when group 197
-  turnin 197
-
-step Hemet Nesingwary
-  when group 208
-  accept 208
-
-step Big Game Hunter
-  when group 208
-  tip These are elite mobs: grouping up is encouraged, look for people to do it with. King Bangalash is a level 43 elite: most classes solo it at level 45, but you may need help. Skip it if you are alone.
-  tip Careful: Tigers and stealthed shadowmaw panthers roam close to him. Clear them before you pull him. When he is pulled, King Bangalash calls for help from creatures within 20 yd.
-  collect 3880 quest 208.1 @38.2,35.6 map 1434
-
-step Hemet Nesingwary
-  when group 208
-  turnin 208
-
-step Duskwood
+step To Deathstalker Zraedus
   zone Duskwood
-  goto 87.8,35.6 "Deathstalker Zraedus"
+  goto 87.8,35.6 "To Deathstalker Zraedus"
 
 step Deathstalker Zraedus
-  accept 1372
-  turnin 1372
+  accept 1372 only Orc,Tauren,Troll,Undead
+  turnin 1372 only Orc,Tauren,Troll,Undead
 
 step Swamp of Sorrows
   zone Swamp of Sorrows
-  goto 26.0,31.4 "Magtoor"
+  goto 26.0,31.4 "Swamp of Sorrows"
 
 # ---------------------------------------------------------------- Swamp of Sorrows
 
 step Into the Swamp of Sorrows
   zone Swamp of Sorrows
   tip Follow the road east from Duskwood through Deadwind Pass into the swamp. Magtoor waits at the Harborage, the draenei camp just off the road where it comes in from Deadwind Pass.
-  accept 1389                           -- Magtoor
+  accept 1389 only Orc,Tauren,Troll,Undead -- Magtoor
+
+step Rog'mar flight master
+  zone Riverglades
+  tip Riverglades is reached on foot through Redridge Pass, south of the Bristle Hills.
+  getfp "Rog'mar"
+
+step To Powderfuse Port
+  zone Riverglades
+  goto 80.4,54.4 "To Powderfuse Port" live
+
+step Into Redridge Mountains
+  zone Redridge Mountains
+  tip Leave Riverglades on foot through Redridge Pass, south of the Bristle Hills, or west of the hills through Blackrock Pass.
+  goto 46.7,14.8 "Into Redridge Mountains"
+
+step Into Burning Steppes
+  zone Burning Steppes
+  goto 78.8,82.5 "Into Burning Steppes"
+
+step Flame Crest flight master
+  zone Burning Steppes
+  goto 65.6,24.2 "Flame Crest flight master"
+  getfp "Flame Crest"
+
+step To Lake Everstill
+  zone Redridge Mountains
+  goto 29.3,53.6 "To Lake Everstill"
+
+step Shawn
+  accept 3741 only Orc,Tauren,Troll,Undead
+
+step Into Duskwood
+  zone Duskwood
+  goto 93.7,11.4 "Into Duskwood"
+
+step Into Deadwind Pass
+  zone Deadwind Pass
+  goto 33.1,36.0 "Into Deadwind Pass"
+
+step Into Swamp of Sorrows
+  zone Swamp of Sorrows
+  goto 5.8,60.8 "Into Swamp of Sorrows"
+
+step To Stonard
+  zone Swamp of Sorrows
+  goto 44.7,57.2 "To Stonard"
 
 step Stonard
   zone Swamp of Sorrows
   tip Head east to Stonard, in the reeds south of the road.
-  accept 698                            -- Dar, inside
-  accept 1430                           -- Dar, inside
+  accept 698 only Orc,Tauren,Troll,Undead -- Dar, inside
+  accept 1430 only Orc,Tauren,Troll,Undead -- Dar, inside
   getfp "Stonard" npc 6026              -- Breyk
-  turnin 1420                           -- Helgrum the Swift, upstairs
-  accept 1424                           -- Fel'zerul, on the top floor
+  accept 1424 only Orc,Tauren,Troll,Undead -- Fel'zerul, on the top floor
 
 step Sawtooth crocolisks
   tip The crocolisks wallow in the pools around Galen's camp and south towards Stonard; about one in four drops a flank.
-  collect 6169 quest 698.1
+  collect 6169 quest 698.1 only Orc,Tauren,Troll,Undead
 
 step Noboru the Cudgel
   zone Swamp of Sorrows
   tip Noboru wanders the clearing south-west of the Fallow Sanctuary; his cudgel starts a quest.
   kill 5477 @54.9,34.1
-  collect 6196 "Noboru's Cudgel"
-  accept 1392
 
 step Draenethyst crystals
-  tip Head north-east to the Fallow Sanctuary. The crystals stand along the way up to Galen Goodward's cage.
-  collect 6071 x6 quest 1389.1          -- Draenethyst Crystals
+  tip Ride north-east to the Fallow Sanctuary. The crystals stand along the way up to Galen Goodward's cage.
+  collect 6071 x6 quest 1389.1 only Orc,Tauren,Troll,Undead -- Draenethyst Crystals
 
 step Galen's Escape
   tip Galen Goodward is held in the Fallow Sanctuary in the swamp's north-east. Free him and follow him out, fighting off the swamp creatures that chase him.
-  accept 1393
-  complete 1393
+  accept 1393 only Orc,Tauren,Troll,Undead
+  complete 1393 only Orc,Tauren,Troll,Undead
 
 step Galen's Strongbox
   tip His strongbox waits at his old camp north of Stonard, on the way back west.
-  turnin 1393
+  turnin 1393 only Orc,Tauren,Troll,Undead
+
+step Noboru's Cudgel
+  collect 6196 x1 optional @55.7,34.4 map 1435
+  accept 1392 optional only Orc,Tauren,Troll,Undead
+
+step Magtoor
+  when onquest 1392
+  turnin 1392 only Orc,Tauren,Troll,Undead
 
 step The Harborage
-  tip Head west along the road to the draenei camp at the Harborage, near the way in from Deadwind Pass. Lack of Surplus goes to Tok'Kar at Misty Reed Post on the next swamp visit: keep the flanks.
-  turnin 1392                           -- Magtoor
-  turnin 1389
+  tip Ride west along the road to the draenei camp at the Harborage, near the way in from Deadwind Pass. Lack of Surplus goes to Tok'Kar at Misty Reed Post on the next swamp visit: keep the flanks.
+  turnin 1389 only Orc,Tauren,Troll,Undead

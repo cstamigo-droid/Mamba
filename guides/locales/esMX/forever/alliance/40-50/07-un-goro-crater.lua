@@ -76,8 +76,6 @@ return {
 	["The dead Threshadon lies by the water north of {npc:9619}.\nCareful: Venomhide Ravasaurs (50-51) hunt along the water there: pull them one at a time before you loot the carcass.\nAny ravasaur may drop a {item:280459}: right-click it, {npc:9619} takes it."] = "El threshadon muerto yace junto al agua al norte de {npc:9619}.\nCuidado: los ravasaurios Pellejo Venenoso (50-51) cazan junto al agua allí: atráelos de uno en uno antes de saquear el cadáver.\nCualquier ravasaurio puede soltar una {item:280459}: haz clic derecho en ella, {npc:9619} la recibe.",
 
 	-- Step 17: Torwa Pathfinder
-	-- {quest:87494} Microcrystal Contamination
-	["{quest:87494}, if a ravasaur dropped the scale"] = "{quest:87494}, si un ravasaurio soltó la escama",
 	-- {area:1943} Ironstone Plateau
 	["The gorillas on {area:1943} carry the pelts: keep it for the second Un'Goro visit, around 56"] = "Los gorilas de {area:1943} llevan las pieles: guárdala para la segunda visita a Un'Goro, alrededor del nivel 56",
 
@@ -95,8 +93,9 @@ return {
 	["Back east to {npc:9619} with the glands."] = "De vuelta al este con {npc:9619} con las glándulas.",
 
 	-- Step 20: Marshal's Refuge
-	-- {npc:271301} Power Crystal · {object:157936} Un'Goro Dirt Pile
-	["Ride north-west to the refuge.\nGive the elite devilsaurs and stegodons a wide berth. Pick up every {npc:271301} and {object:157936} you pass from here on."] = "Cabalga al noroeste hasta el refugio.\nMantente bien lejos de los demosaurios y estegodones élite. Recoge cada {npc:271301} y {object:157936} que encuentres de aquí en adelante.",
+	-- {object:157936} Un'Goro Dirt Pile
+	-- was: ["Ride north-west to the refuge.\nGive the elite devilsaurs and stegodons a wide berth. Pick up every {npc:271301} and {object:157936} you pass from here on."] = "Cabalga al noroeste hasta el refugio.\nMantente bien lejos de los demosaurios y estegodones élite. Recoge cada {npc:271301} y {object:157936} que encuentres de aquí en adelante."
+	["Ride north-west to the refuge.\nGive the elite devilsaurs and stegodons a wide berth. Pick up every Power Crystal and {object:157936} you pass from here on."] = "",
 	-- {npc:9998} Shizzle
 	["{npc:9998}: his scales come from the young beasts of the eastern jungle"] = "{npc:9998}: sus escamas salen de las bestias jóvenes de la jungla del este",
 	-- {npc:8737} Linken
@@ -112,7 +111,7 @@ return {
 	-- {area:537} Fire Plume Ridge
 	["{area:537} and the eastern jungle"] = "{area:537} y la jungla del este",
 	-- {quest:3764} Un'Goro Soil · {area:537} Fire Plume Ridge · {npc:9998} Shizzle · {npc:9165} Fledgling Pterrordax
-	-- plural, as words: Bloodpetal Lashers = {npc:6509} Bloodpetal Lasher · Living Blazes = {npc:6521} Living Blaze · Bloodpetal Flayers = {npc:6510} Bloodpetal Flayer · Young Diemetradons = {npc:9162} Young Diemetradon
+	-- plural, as words: Bloodpetal Lashers = {npc:6509} Bloodpetal Lasher · Living Blazes = {npc:6521} Living Blaze · Bloodpetal Flayers = {npc:6510} Bloodpetal Flayer · Young Diemetradons = {npc:9162} Young Diemetradon · Diemetradons = {npc:9163} Diemetradon
 	["Ride east into the eastern jungle: Bloodpetal Lashers and Threshers (48-50) drop the petals and {quest:3764}. Crystal clusters stand all over the crater, many around the foot of {area:537}: take a few extra of each colour.\nCareful: the Living Blazes (54-55) walk the top of {area:537}, and the Bloodpetal Flayers and Trappers (51-53) hold the jungle's south: take your crystals from the ridge's foot and your petals in the north.\n{npc:9998}'s scales: the {npc:9165} (48-50) glide over the north-east of the jungle and the Young Diemetradons (49-50) graze beside them. There are only ten of those: the Diemetradons (51) on the jungle's western edge, a short way west of the Threshers, drop the scales too. They are a level over you: take them one at a time."] = "Cabalga al este hacia la jungla del este: los Azotadores y Trilladores Sangrepétalo (48-50) sueltan los pétalos y {quest:3764}. Hay grupos de cristales por todo el cráter, muchos al pie de {area:537}: toma algunos de más de cada color.\nCuidado: las Llamaradas vivientes (54-55) recorren la cima de {area:537}, y los Despellejadores y Tramperos Sangrepétalo (51-53) ocupan el sur de la jungla: toma tus cristales al pie de la cresta y tus pétalos en el norte.\nEscamas para {npc:9998}: los {npc:9165} (48-50) planean sobre el noreste de la jungla y los Diemetradones jóvenes (49-50) pastan a su lado. Solo hay diez de ellos: los Diemetradones (51) del borde oeste de la jungla, un poco al oeste de los Trilladores, también sueltan las escamas. Te superan por un nivel: enfréntalos de uno en uno.",
 	-- {item:11316} Bloodpetal
 	["{item:11316}, from the Lashers and Threshers"] = "{item:11316}, de los Azotadores y Trilladores",
@@ -186,6 +185,7 @@ return {
 	-- ["Ride north along the east side to the gorilla plateau. {npc:9622}, a level 55 gorilla, sits in its deepest cave: clear the gorillas at the cave mouth first."] = "Cabalga al norte por el lado este hasta la meseta de los gorilas. {npc:9622}, un gorila de nivel 55, está en su cueva más profunda: limpia antes los gorilas de la boca de la cueva.",
 	-- ["Ride north along the western jungle back to the refuge."] = "Cabalga al norte por la jungla del oeste de vuelta al refugio.",
 	-- ["Ride north to {area:1943}, where the robot stands among the gorillas. Stay out of the deep cave there."] = "Cabalga al norte hasta {area:1943}, donde el robot está entre los gorilas. No entres en la cueva profunda de allí.",
+	-- ["Ride north-west to the refuge.\nGive the elite devilsaurs and stegodons a wide berth. Pick up every {npc:271301} and {object:157936} you pass from here on."] = "Cabalga al noroeste hasta el refugio.\nMantente bien lejos de los demosaurios y estegodones élite. Recoge cada {npc:271301} y {object:157936} que encuentres de aquí en adelante.",
 	-- ["Ride south along the eastern cliffs to {npc:9619} at the foot of the ramp."] = "Cabalga al sur por los acantilados del este hasta {npc:9619}, al pie de la rampa.",
 	-- ["Ride south down the east side. Young Diemetradons graze the eastern jungle and {npc:9165} fly near the eastern cliffs; both drop {npc:9998}'s scales."] = "Cabalga al sur por el lado este. Los diemetradones jóvenes pastan en la jungla del este y los {npc:9165} vuelan cerca de los acantilados del este; ambos sueltan las escamas para {npc:9998}.",
 	-- ["Ride south down the east side. Young Diemetradons graze the eastern jungle and {npc:9165} fly near the eastern cliffs; both drop {npc:9998}'s scales. The crate sits at the abandoned camp in the eastern jungle."] = "Cabalga al sur por el lado este. Los diemetradones jóvenes pastan en la jungla del este y {npc:9165} vuela cerca de los acantilados del este; ambos sueltan las escamas de {npc:9998}. La caja está en el campamento abandonado de la jungla del este.",
@@ -235,4 +235,5 @@ return {
 	-- ["{npc:9998}, at the refuge entrance"] = "{npc:9998}, en la entrada del refugio",
 	-- ["{npc:9998}, at the refuge's entrance"] = "{npc:9998}, en la entrada del refugio",
 	-- ["{npc:9999} sits on the south-east slope of {area:537}, in the middle of the crater."] = "{npc:9999} está sentado en la ladera sureste de {area:537}, en medio del cráter.",
+	-- ["{quest:87494}, if a ravasaur dropped the scale"] = "{quest:87494}, si un ravasaurio soltó la escama",
 }

@@ -12,10 +12,12 @@ return {
 	["Shen'dralar reputation"] = "Reputación con Shen'dralar",
 
 	-- Step 1: Nostro's Compendium of Dragon Slaying
+	-- was: ["from {item:18401}"] = "de {item:18401}"
+	["Nostro's Compendium of Dragon Slaying"] = "Nostro's Compendium of Dragon Slaying",
 	-- {area:2577} Dire Maul · {npc:11496} Immol'thar · {npc:11501} King Gordok · {zone:1444} Feralas
 	["The book is a rare random drop from the bosses of all three {area:2577} wings (Alzzin, Hydrospawn and the rest of the East, Tendris, Illyanna, Kalendris, {npc:11496} and the West, {npc:11501} and the North's guards) and very rarely from the tribute chest; it can be traded, so the auction house may have one. {area:2577} is a five-player dungeon in the ruins of central {zone:1444}: needs a group of five. Right-click the book to start the quest; it stays in your bags."] = "El libro es un botín raro al azar de los jefes de las tres alas de {area:2577} (Alzzin, Hidroengendro y el resto del Este; Tendris, Illyanna, Kalendris, {npc:11496} y el Oeste; {npc:11501} y los guardias del Norte) y muy rara vez del cofre del tributo; se puede comerciar, así que puede haber uno en la casa de subastas. {area:2577} es una mazmorra de cinco jugadores en las ruinas del centro de {zone:1444}: necesita un grupo de cinco. Haz clic derecho en el libro para empezar la misión; se queda en tus bolsas.",
-	-- {item:18401} Nostro's Compendium of Dragon Slaying
-	["from {item:18401}"] = "de {item:18401}",
+	-- was: ["from {item:18401}"] = "de {item:18401}"
+	["from Nostro's Compendium of Dragon Slaying"] = "de Nostro's Compendium of Dragon Slaying",
 
 	-- Step 2: Lorekeeper Lydros
 	-- {npc:14368} Lorekeeper Lydros · {item:18249} Crescent Key · {item:18513} A Dull and Flat Elven Blade · {item:18489} Unfired Ancient Blade
@@ -45,4 +47,7 @@ return {
 	-- Step 5: The Forging of Quel'Serrar
 	-- {npc:14368} Lorekeeper Lydros · {item:18249} Crescent Key
 	["Back to {npc:14368} in the Athenaeum of Dire Maul West: through the West door with the {item:18249} again, and a group to reach the library."] = "De vuelta con {npc:14368} en el Athenaeum de La Masacre Oeste: otra vez por la puerta del Oeste con {item:18249}, y con un grupo para llegar a la biblioteca.",
+
+	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["from {item:18401}"] = "de {item:18401}",
 }

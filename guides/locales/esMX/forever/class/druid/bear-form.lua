@@ -68,16 +68,19 @@ return {
 	-- Step 20: Skyboat from Dalaran
 	-- {area:279} Dalaran
 	["Skyboat from {area:279}"] = "Barco celeste desde {area:279}",
-	-- {spell:5487} Bear Form · {zone:2521} Zephras Isle · {area:279} Dalaran
-	["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the north side of {area:279}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde el lado norte de {area:279}.",
-	-- {zone:2521} Zephras Isle
-	["Skyboat to {zone:2521}"] = "Barco celeste a {zone:2521}",
+	-- {spell:5487} Bear Form · {zone:2665} Zephras Isle · {area:279} Dalaran
+	-- was: ["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the north side of {area:279}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde el lado norte de {area:279}."
+	["{spell:5487} is taught on {zone:2665}. Skip this if you are still on the isle; otherwise take the skyboat from the north side of {area:279}."] = "{spell:5487} se enseña en {zone:2665}. Omite esto si sigues en la isla; si no, toma el barco volador desde el lado norte de {area:279}.",
+	-- {zone:2665} Zephras Isle
+	-- was: ["Skyboat to {zone:2521}"] = "Barco celeste a {zone:2521}"
+	["Skyboat to {zone:2665}"] = "Barco celeste a {zone:2665}",
 
 	-- Step 21: Skyboat from Thunder Bluff
 	-- {zone:1456} Thunder Bluff
 	["Skyboat from {zone:1456}"] = "Barco celeste desde {zone:1456}",
-	-- {spell:5487} Bear Form · {zone:2521} Zephras Isle · {area:17045} Skywatcher Plateau · {zone:1456} Thunder Bluff
-	["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the cliffs south of {area:17045}, north of {zone:1456}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde los acantilados al sur de {area:17045}, al norte de {zone:1456}.",
+	-- {spell:5487} Bear Form · {zone:2665} Zephras Isle · {area:17045} Skywatcher Plateau · {zone:1456} Thunder Bluff
+	-- was: ["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the cliffs south of {area:17045}, north of {zone:1456}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde los acantilados al sur de {area:17045}, al norte de {zone:1456}."
+	["{spell:5487} is taught on {zone:2665}. Skip this if you are still on the isle; otherwise take the skyboat from the cliffs south of {area:17045}, north of {zone:1456}."] = "{spell:5487} se enseña en {zone:2665}. Omite esto si sigues en la isla; si no, toma el barco celeste desde los acantilados al sur de {area:17045}, al norte de {zone:1456}.",
 
 	-- Step 22: Lotheluum Starbreeze
 	-- {npc:252359} Lotheluum Starbreeze · {area:16638} Valanaar
@@ -94,16 +97,18 @@ return {
 	["Back to {npc:255853} by the falls."] = "Regresa con {npc:255853} junto a la cascada.",
 
 	-- Step 25: Child of Nature
-	-- {npc:259118} Muln Earthfury · {zone:2521} Zephras Isle · {zone:1412} Mulgore · {zone:1456} Thunder Bluff
-	["{npc:259118} waits where the airship from {zone:2521} lands, in northern {zone:1412} beside {zone:1456}."] = "{npc:259118} espera donde aterriza la aeronave de {zone:2521}, al norte de {zone:1412}, junto a {zone:1456}.",
+	-- {npc:259118} Muln Earthfury · {zone:2665} Zephras Isle · {zone:1412} Mulgore · {zone:1456} Thunder Bluff
+	-- was: ["{npc:259118} waits where the airship from {zone:2521} lands, in northern {zone:1412} beside {zone:1456}."] = "{npc:259118} espera donde aterriza la aeronave de {zone:2521}, al norte de {zone:1412}, junto a {zone:1456}."
+	["{npc:259118} waits where the airship from {zone:2665} lands, in northern {zone:1412} beside {zone:1456}."] = "{npc:259118} espera donde aterriza el dirigible de {zone:2665}, en el norte de {zone:1412}, junto a {zone:1456}.",
 
 	-- Step 26: Turak Runetotem
 	-- {npc:3033} Turak Runetotem · {area:1639} Elder Rise · {spell:18960} Teleport: Moonglade
 	["{npc:3033} trains druids in the druids' hut on {area:1639}, over the rope bridges east of the lifts. He teaches you {spell:18960} with the next quest (it stays in your spellbook, Balance tab)."] = "{npc:3033} entrena a los druidas en la choza de los druidas en {area:1639}, cruzando los puentes de cuerda al este de los elevadores. Te enseña {spell:18960} con la siguiente misión (queda en tu libro de hechizos, pestaña Equilibrio).",
 
 	-- Step 27: Child of Nature
-	-- {npc:270459} Alfina Nightgaze · {npc:259084} Denaaris Stargale · {area:279} Dalaran · {zone:2521} Zephras Isle · {npc:2543} Archmage Ansirem Runeweaver
-	["{npc:270459} stands beside {npc:259084} and the Skyborne Portal, west of {area:279}, where the skycutter from {zone:2521} lands. {npc:2543} offers the same quest."] = "{npc:270459} está junto a {npc:259084} y el portal Cielonato, al oeste de {area:279}, donde aterriza el aerocorte de {zone:2521}. {npc:2543} ofrece la misma misión.",
+	-- {npc:270459} Alfina Nightgaze · {npc:259084} Denaaris Stargale · {area:279} Dalaran · {zone:2665} Zephras Isle · {npc:2543} Archmage Ansirem Runeweaver
+	-- was: ["{npc:270459} stands beside {npc:259084} and the Skyborne Portal, west of {area:279}, where the skycutter from {zone:2521} lands. {npc:2543} offers the same quest."] = "{npc:270459} está junto a {npc:259084} y el portal Cielonato, al oeste de {area:279}, donde aterriza el aerocorte de {zone:2521}. {npc:2543} ofrece la misma misión."
+	["{npc:270459} stands beside {npc:259084} and the Skyborne Portal, west of {area:279}, where the skycutter from {zone:2665} lands. {npc:2543} offers the same quest."] = "{npc:270459} está junto a {npc:259084} y el portal Cielonato, al oeste de {area:279}, donde aterriza el aerocorte de {zone:2665}. {npc:2543} ofrece la misma misión.",
 
 	-- Step 28: Sheldras Moontree
 	-- {zone:1453} Stormwind · {npc:5504} Sheldras Moontree · {spell:18960} Teleport: Moonglade
@@ -120,10 +125,15 @@ return {
 	-- ["Cast {spell:18960}: it lands you beside the building where {npc:11802} stands upstairs, in {area:2361}. Learn the {area:493} flight path while you are here (Faustron for the Horde, south-west of the lake; {npc:10897} for the Alliance, south of it)."] = "Lanza {spell:18960}: te deja junto al edificio donde {npc:11802} está en el piso de arriba, en {area:2361}. Aprende la ruta de vuelo de {area:493} mientras estás aquí (Faustron para la Horda, al suroeste del lago; {npc:10897} para la Alianza, al sur).",
 	-- ["Cast {spell:18960}: it lands you beside the building where {npc:11802} stands upstairs. The {quest:5930} sits in the woods to the north-west. Speak to it and go through all of its words (what it represents, the strength of the body, the strength of the heart, then ask for its blessing): the talk is the objective, there is no fight. It blends into the ground, has no quest mark and gives off a faint blue-grey glow by a group of three trees: from {area:2361} go west along the foot of the northern mountains, through the gap between the trees and the hills. If {npc:11802} is missing when you return, step outside and cast {spell:18960} again. Learn the {quest:5922} flight path (Faustron, south-west of the lake); {npc:11798} in {area:2361} flies druids to {area:1638}."] = "Lanza {spell:18960}: te deja junto al edificio donde {npc:11802} está en el piso de arriba. {quest:5930} está en el bosque del noroeste. Háblale y recorre todas sus palabras (lo que representa, la fuerza del cuerpo, la fuerza del corazón, y luego pide su bendición): la charla es el objetivo, no hay pelea. Se confunde con el suelo, no tiene marca de misión y da un leve brillo gris azulado junto a un grupo de tres árboles: desde {area:2361} ve al oeste por el pie de las montañas del norte, por el hueco entre los árboles y las colinas. Si {npc:11802} no está cuando vuelves, sal afuera y vuelve a lanzar {spell:18960}. Aprende la ruta de vuelo de {quest:5922} (Faustron, al suroeste del lago); {npc:11798}, en {area:2361}, lleva a los druidas a {area:1638}.",
 	-- ["Fly from {area:702} to {area:442}. The {object:177525} stands in the hills just east of the village: use the {item:15208} there, defeat Lunaclaw and speak to the {npc:12144}."] = "Vuela de {area:702} a {area:442}. {object:177525} está en las colinas justo al este del pueblo: usa ahí el {item:15208}, derrota a Garraluna y habla con {npc:12144}.",
+	-- ["Skyboat to {zone:2521}"] = "Barco celeste a {zone:2521}",
 	-- ["The Skyborne Portal takes you to {zone:1453}. {npc:5504} is the city's druid trainer."] = "El portal Cielonato te lleva a {zone:1453}. {npc:5504} es el instructor de druidas de la ciudad.",
 	-- ["The {object:177525} stands in the pass from {zone:1412} into the {zone:1413}. Use the {item:15710} there, defeat Lunaclaw and speak to the {npc:12144}."] = "{object:177525} está en el paso de {zone:1412} a {zone:1413}. Usa ahí el {item:15710}, derrota a Garraluna y habla con {npc:12144}.",
 	-- ["{npc:255853} waits by the falls north-east of {area:16638}. {npc:258443} prowls the {area:16623}, west of {area:16638}."] = "{npc:255853} espera junto a la cascada al noreste de {area:16638}. {npc:258443} merodea por {area:16623}, al oeste de {area:16638}.",
+	-- ["{npc:259118} waits where the airship from {zone:2521} lands, in northern {zone:1412} beside {zone:1456}."] = "{npc:259118} espera donde aterriza la aeronave de {zone:2521}, al norte de {zone:1412}, junto a {zone:1456}.",
+	-- ["{npc:270459} stands beside {npc:259084} and the Skyborne Portal, west of {area:279}, where the skycutter from {zone:2521} lands. {npc:2543} offers the same quest."] = "{npc:270459} está junto a {npc:259084} y el portal Cielonato, al oeste de {area:279}, donde aterriza el aerocorte de {zone:2521}. {npc:2543} ofrece la misma misión.",
 	-- ["{npc:3033} stands on {area:1639}."] = "{npc:3033} está en {area:1639}.",
 	-- ["{npc:3033} trains druids on {area:1639}."] = "{npc:3033} entrena druidas en {area:1639}.",
 	-- ["{npc:4217} stands in the {area:1658}."] = "{npc:4217} está en {area:1658}.",
+	-- ["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the cliffs south of {area:17045}, north of {zone:1456}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde los acantilados al sur de {area:17045}, al norte de {zone:1456}.",
+	-- ["{spell:5487} is taught on {zone:2521}. Skip this if you are still on the isle; otherwise take the skyboat from the north side of {area:279}."] = "{spell:5487} se enseña en {zone:2521}. Omite esto si sigues en la isla; si no, toma el barco celeste desde el lado norte de {area:279}.",
 }

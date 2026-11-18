@@ -37,7 +37,7 @@ return {
 	["{npc:5489}: take {quest:5628}"] = "{npc:5489}: toma {quest:5628}",
 
 	-- Step 5: Starshards: Braenna Flintcrag
-	-- {zone:1455} Ironforge · {npc:5142} Braenna Flintcrag · {object:32386} Hall of Mysteries (no name in this language: may be words) · {object:32362} Mystic Ward (no name in this language: may be words) · {quest:5628} Returning Home · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
+	-- {zone:1455} Ironforge · {npc:5142} Braenna Flintcrag · {object:32386} Hall of Mysteries · {object:32362} Mystic Ward · {quest:5628} Returning Home · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
 	["At 10 in {zone:1455}, {npc:5142} in the {object:32386} ({object:32362}) hands you {quest:5628}, a letter for {npc:11401} in {zone:1457}."] = "A nivel 10 en {zone:1455}, {npc:5142} en {object:32386} ({object:32362}) te da {quest:5628}, una carta para {npc:11401} en {zone:1457}.",
 	-- {npc:5142} Braenna Flintcrag · {quest:5628} Returning Home
 	["{npc:5142}: take {quest:5628}"] = "{npc:5142}: toma {quest:5628}",
@@ -89,7 +89,7 @@ return {
 	["{npc:376}: take her {spell:2651} letter"] = "{npc:376}: toma su carta de {spell:2651}",
 
 	-- Step 14: Elune's Grace: High Priest Rohan
-	-- {zone:1455} Ironforge · {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries (no name in this language: may be words) · {object:32362} Mystic Ward (no name in this language: may be words) · {spell:2651} Elune's Grace · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
+	-- {zone:1455} Ironforge · {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries · {object:32362} Mystic Ward · {spell:2651} Elune's Grace · {npc:11401} Priestess Alathea · {zone:1457} Darnassus
 	["At 20 in {zone:1455}, {npc:11406} in the {object:32386} ({object:32362}) hands you an {spell:2651} letter for {npc:11401} in {zone:1457}."] = "A nivel 20 en {zone:1455}, {npc:11406} en {object:32386} ({object:32362}) te da una carta de {spell:2651} para {npc:11401} en {zone:1457}.",
 	-- {npc:11406} High Priest Rohan · {spell:2651} Elune's Grace
 	["{npc:11406}: take his {spell:2651} letter"] = "{npc:11406}: toma su carta de {spell:2651}",

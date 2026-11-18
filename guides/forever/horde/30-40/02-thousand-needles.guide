@@ -9,6 +9,196 @@ next forever/horde/30-40/03-stranglethorn-vale
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
+# Added here: Zamek's Distraction (1191), Hate the Hatefury (97265).
+# Left out: Khan Dez'hepah (1365).
+
+step Fly to Tarren Mill
+  zone Undercity
+  fly "Tarren Mill"
+
+step Zeppelin to Orgrimmar
+  only Orc
+  zone Stranglethorn Vale
+  goto 31.4,29.9 "Zeppelin to Orgrimmar" only Warrior,Paladin,Priest,Druid
+
+step Into Tirisfal Glades
+  only Orc,Skyborne,Tauren,Troll,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Orc,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Orc,Skyborne,Troll,Undead,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Orc,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Orc,Skyborne,Tauren,Troll,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Orc,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Orc,Troll,Undead,Mage
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Orc,Mage
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Orc,Troll,Undead,Warlock
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Orc,Warlock
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Skyborne
+  zone Stranglethorn Vale
+  goto 31.4,29.9 "Zeppelin to Orgrimmar" only Warrior,Paladin,Priest,Mage,Warlock
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Skyborne,Tauren,Druid
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Druid
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Tauren
+  zone Stranglethorn Vale
+  goto 31.4,29.9 "Zeppelin to Orgrimmar" only Warrior,Paladin,Rogue,Priest,Mage,Warlock
+
+step Zeppelin to Orgrimmar
+  only Tauren,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Tauren,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Tauren,Druid
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Troll
+  zone Stranglethorn Vale
+  goto 31.4,29.9 "Zeppelin to Orgrimmar" only Warrior,Paladin,Druid
+
+step Zeppelin to Orgrimmar
+  only Troll,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Troll,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Troll,Undead,Priest
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Troll,Priest
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Troll,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Troll,Mage
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Troll,Warlock
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Undead
+  zone Stranglethorn Vale
+  goto 31.4,29.9 "Zeppelin to Orgrimmar" only Warrior,Hunter,Shaman,Druid
+
+step Into Tirisfal Glades
+  only Undead,Paladin
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Undead,Paladin
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Undead,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Undead,Priest
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Undead,Mage
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Zeppelin to Orgrimmar
+  only Undead,Warlock
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
 # Added here: The Swarm Grows (1147), Parts of the Swarm (1148), Hardened Shells (1105), Load
 # Lightening (1176), A Bump in the Road (1175), Family Tree (5361), Alliance Relations (1436),
 # Martek the Exiled (1106), Hate the Hatefury (97265), Rocket Car Parts (1110), Salt Flat Venom
@@ -72,23 +262,13 @@ next forever/horde/30-40/03-stranglethorn-vale
 
 # ---------------------------------------------------------------- Orgrimmar
 
-step Zeppelin to Orgrimmar
-  zone Tirisfal Glades
-  goto 60.7,58.8 "Zeppelin to Orgrimmar"
-
 step Alliance Relations
   when level>=30
   zone Orgrimmar
   tip The zeppelin lands at the tower outside Orgrimmar's main gate. Craven Drok walks the Drag: if he isn't at the arrow, look along its streets to the south-west. Keldran stands in the Valley of Spirits on the west side of the city.
-  accept 1431                         -- Craven Drok: offered from level 30
-  turnin 1431                         -- Keldran
-  accept 1432                         -- for Takata Steelblade in Desolace, later in this guide
-
-step Orgrimmar trainers
-  only Hunter,Shaman
-  zone Orgrimmar
-  tip Train while you are in the city.
-  train class
+  accept 1431 only Orc,Tauren,Troll,Undead -- Craven Drok: offered from level 30
+  turnin 1431 only Orc,Tauren,Troll,Undead -- Keldran
+  accept 1432 only Orc,Tauren,Troll,Undead -- for Takata Steelblade in Desolace, later in this guide
 
 step Searn Firewarder
   only Shaman
@@ -96,45 +276,39 @@ step Searn Firewarder
   tip Searn Firewarder stands in the Valley of Wisdom.
   accept 1531                         -- Searn Firewarder: for Prate Cloudseer by Freewind Post, later in this guide
 
-step Fly to the Crossroads
-  when !turnedin 1145
-  when !onquest 1145
-  zone Orgrimmar
-  tip Korran's The Swarm Grows needed level 29 on the last guide's Crossroads stop: take it now, on a short flight to the Crossroads and back.
-  goto 45.3,63.7 "Orgrimmar flight master"
-  fly "Crossroads"
-  zone The Barrens
-
-step Korran
-  when !turnedin 1145
-  zone The Barrens
-  tip Korran stands beside the Crossroads flight master.
-  accept 1145                         -- Korran: for Belgrom Rockmaul in Orgrimmar
-
-step Back to Orgrimmar
-  when onquest 1145
-  zone The Barrens
-  goto 51.5,30.4 "Crossroads flight master"
-  fly "Orgrimmar"
-  zone Orgrimmar
-
-step Belgrom Rockmaul
-  when onquest 1145
-  zone Orgrimmar
-  tip Belgrom Rockmaul stands in the Valley of Honor.
-  turnin 1145                         -- Belgrom Rockmaul
-  accept 1146                         -- for Moktar Krin in the Shimmering Flats, later in this guide
-
-step Orgrimmar flight master
+step Fly to Brackenwall Village
   zone Orgrimmar
   goto 45.3,63.7 "Orgrimmar flight master"
+  fly "Brackenwall Village"
+  zone Dustwallow Marsh
 
-step Thunder Bluff
-  only Druid
-  zone Thunder Bluff
-  tip Fly from Orgrimmar to Thunder Bluff and train with Turak Runetotem on Elder Rise; fly on to Freewind Post from there.
-  fly "Thunder Bluff"
-  train class
+step To Southern Barrens
+  zone Dustwallow Marsh
+  goto 25.9,44.3 "To Southern Barrens"
+
+step Wrongly Blamed, Justly Corrected
+  when group 97250
+  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Outraged Pillager is a level 23 elite: most classes solo it at level 25, but you may need help. Skip it if you are alone: the route has you grind the XP back.
+  kill 268622 quest 97250.1 @26.0,44.2 map 1445 live only Orc,Tauren,Troll,Undead
+  kill 268623 quest 97250.2 @25.8,45.0 map 1445 live only Orc,Tauren,Troll,Undead
+
+step To The Screeching Canyon: kill these as you meet them
+  zone Thousand Needles
+  goto 26.6,54.0 "To The Screeching Canyon: kill these as you meet them"
+
+step The Screeching Canyon: kill these as you meet them
+  zone Thousand Needles
+  tip West of Freewind Post, below Darkcloud Pinnacle, the harpies of Roguefeather Den (28-30). The Screeching Harpies, Roguefeathers and Windcallers there are Jandia's; her Stolen Freewind Supplies lie on the ground along the foot of the cliff and in the cave up on top. Grenka Bloodscreech (31) walks among them: thin out the harpies around her before you pull her, for Dorn's claw.
+  kill 4100 quest 98070.1 only Orc,Tauren,Troll,Undead
+  collect 279383 x8 quest 98069 @27.0,51.9 map 1441 only Orc,Tauren,Troll,Undead -- Stolen Freewind Supplies, on the ground around the den
+  collect 5843 quest 1150             -- Grenka's Claw, from Grenka Bloodscreech
+  kill 4101 quest 98070.2 only Orc,Tauren,Troll,Undead -- Screeching Roguefeather, by this stop
+  kill 4104 quest 98070.3 only Orc,Tauren,Troll,Undead -- Screeching Windcaller, 70 yd south
+
+step Freewind Post flight master
+  only Shaman
+  zone Thousand Needles
+  goto 45.0,49.1 "Freewind Post flight master"
 
 step Islen Waterseer
   only Shaman
@@ -143,25 +317,38 @@ step Islen Waterseer
   fly "Ratchet"
   turnin 96                           -- Islen Waterseer: Healing Stream Totem and your Water Totem
 
+step Fly to the Crossroads
+  when !turnedin 1145
+  when !onquest 1145
+  zone Orgrimmar
+  tip Korran's The Swarm Grows needed level 29 on the last guide's Crossroads stop: take it now, on a short flight to the Crossroads and back.
+  zone The Barrens
+  zone Orgrimmar
+  goto 45.3,63.7 "Orgrimmar flight master" only Orc,Tauren,Troll,Undead
+  goto 45.3,63.7 "Orgrimmar flight master" only Skyborne,!Shaman
+
+step Back to Orgrimmar
+  when onquest 1145
+  zone The Barrens
+  zone Orgrimmar
+  zone The Barrens
+  goto 51.5,30.4 "Crossroads flight master"
+
 step Fly to Freewind Post
   only Druid
   zone Thunder Bluff
-  goto 46.7,49.9 "Thunder Bluff flight master"
-  fly "Freewind Post"
   zone Thousand Needles
+  zone Thunder Bluff
+  goto 46.7,49.9 "Thunder Bluff flight master" only Orc,Skyborne,Troll,Undead
+  fly "Freewind Post" only Orc,Skyborne,Troll,Undead
 
 step Fly to Freewind Post
   only Shaman
   zone The Barrens
+  zone Thousand Needles
+  zone The Barrens
   goto 63.1,37.1 "Ratchet flight master"
   fly "Freewind Post"
-  zone Thousand Needles
-
-step Fly to Freewind Post
-  only Warrior,Hunter,Rogue,Priest,Paladin,Mage,Warlock
-  zone Orgrimmar
-  fly "Freewind Post"
-  zone Thousand Needles
 
 # ---------------------------------------------------------------- Freewind Post
 
@@ -178,40 +365,52 @@ step Dorn Plainstalker
   tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
   tip Dorn Plainstalker waits on the mesa just north-east of Freewind Post, across the rope bridges.
   tip For the Test of Faith, walk off the end of the planks beside him: you land safely.
-  accept 1149                         -- Dorn Plainstalker
-  complete 1149
+  accept 1149                         -- Dorn Plainstalker, below ground
+  complete 1149 @26.43,32.93 map 1441 era
   turnin 1149                         -- Dorn Plainstalker
 
 step Dorn Plainstalker
   zone Thousand Needles
   tip Dorn Plainstalker waits on the mesa just north-east of Freewind Post, across the rope bridges.
-  accept 1150                         -- Dorn Plainstalker: Grenka Bloodscreech, in the harpy den west of the post
+  accept 1150                         -- Dorn Plainstalker: Grenka Bloodscreech, in the harpy den west of the post; below ground
 
 step Jandia
   zone Thousand Needles
   tip Jandia, the trade supplies vendor, stands inside Freewind Post's inn.
-  accept 98070                        -- Jandia: the Screeching harpies of Roguefeather Den
-  accept 98069                        -- Jandia: her stolen supplies lie in the same harpy den
+  accept 98069 only Orc,Tauren,Troll,Undead -- Jandia: her stolen supplies lie in the same harpy den; inside
+
+step Back to Freewind Post
+  only Shaman
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master" only Undead
+
+step Freewind Post
+  only Skyborne,Shaman
+  zone Thousand Needles
+  goto 45.0,49.1 "Freewind Post"
+
+step Back to Freewind Post
+  only Shaman
+  zone The Barrens
+  fly "Freewind Post" only Orc,Tauren,Troll,Undead
+  zone Thousand Needles
+  goto 26.6,54.0 "To The Shaper's Terrace"
 
 step The Screeching Canyon: kill these as you meet them
   zone Thousand Needles
-  tip West of Freewind Post, below Darkcloud Pinnacle, the harpies of Roguefeather Den (28-30). The Screeching Harpies, Roguefeathers and Windcallers there are Jandia's; her Stolen Freewind Supplies lie on the ground along the foot of the cliff and in the cave up on top. Grenka Bloodscreech (31) walks among them: thin out the harpies around her before you pull her, for Dorn's claw.
-  kill 4101 quest 98070.2
-  kill 4104 quest 98070.3
-  kill 4100 quest 98070.1
-  collect 279383 x8 quest 98069 @27.0,51.9 map 1441 -- Stolen Freewind Supplies, on the ground around the den
-  collect 5843 quest 1150             -- Grenka's Claw, from Grenka Bloodscreech
+  kill 4101 quest 98070.2 only Orc,Tauren,Troll,Undead
+  kill 4104 quest 98070.3 only Orc,Tauren,Troll,Undead -- Below ground
 
 step Jandia
   zone Thousand Needles
   tip Back east to Freewind Post.
-  turnin 98070                        -- Jandia, inside the inn
-  turnin 98069                        -- Jandia, inside the inn
+  turnin 98070 only Orc,Tauren,Troll,Undead -- Jandia, inside the inn
+  turnin 98069 only Orc,Tauren,Troll,Undead -- Jandia, inside the inn
 
 step Dorn Plainstalker
   zone Thousand Needles
   tip Back across to Dorn's mesa north-east of the post, then take the lift down to the canyon floor. Dorn's next test, Rok'Alim the Pounder, is an elite: leave it.
-  turnin 1150                         -- Dorn Plainstalker
+  turnin 1150                         -- Dorn Plainstalker, below ground
 
 # ---------------------------------------------------------------- The Shimmering Flats
 
@@ -220,45 +419,57 @@ step Stormheart
   zone Thousand Needles
   tip These are elite mobs: grouping up is encouraged, look for people to do it with. Stormheart is a level 30 elite: most classes solo it at level 32, but you may need help. Skip it if you are alone: the route has you grind the XP back.
   tip Stormheart walks the canyon road east of Freewind Post's lift, on the way to the salt flats: kill him for his heart.
-  collect 279186 quest 97985          -- Stormheart's Still-beating Heart, from Stormheart
+  collect 279186 quest 97985 only Orc,Tauren,Troll,Undead -- Stormheart's Still-beating Heart, from Stormheart
 
 step Moktar Krin
   when onquest 1146
   zone Thousand Needles
   tip Take the lift down and follow the canyon east. Moktar Krin camps on the north-western edge of the salt flats.
-  turnin 1146                         -- Moktar Krin
-  accept 1147
+  turnin 1146 only Orc,Tauren,Troll,Undead -- Moktar Krin
+  accept 1147 only Orc,Tauren,Troll,Undead
 
 step Mirage Raceway
   zone Thousand Needles
   tip The goblins and gnomes of the Mirage Raceway are neutral and give quests to both factions.
-  accept 1110                         -- Kravel Koalbeard
-  accept 5762                         -- Kravel's crate for Hemet Nesingwary in Stranglethorn, later on the route
-  accept 1104                         -- Fizzle Brassbolts
-  accept 1105                         -- Wizzle Brassbolts
-  accept 1176                         -- Pozzik
-  accept 1175                         -- Trackmaster Zherin
+  accept 1110 only Orc,Tauren,Troll,Undead -- Kravel Koalbeard
+  accept 5762 only Orc,Tauren,Troll,Undead -- Kravel's crate for Hemet Nesingwary in Stranglethorn, later on the route
+  accept 1104 only Orc,Tauren,Troll,Undead -- Fizzle Brassbolts
+  accept 1105 only Orc,Tauren,Troll,Undead -- Wizzle Brassbolts
+  accept 1176 only Orc,Tauren,Troll,Undead -- Pozzik
+  accept 1191 only Orc,Tauren,Troll,Undead
+  turnin 1191 only Orc,Tauren,Troll,Undead
+  accept 1175 only Orc,Tauren,Troll,Undead -- Trackmaster Zherin
 
-step Shimmering Flats: kill these as you meet them
+step Saltstone Crystalhide on the way
+  along until q1175
+  kill 4151 quest 1175.2 only Orc,Tauren,Troll,Undead
+
+step The Shimmering Flats: kill these as you meet them
   zone Thousand Needles
   tip North-east of the raceway onto the flats. The Saltstone Basilisks (30-31) sun themselves north-west of it, and the Sparkleshell Tortoises (30-31) wander among them on the western flats; the Salt Flats Scavengers and Vultures circle the eastern flats. Every vulture drops a bone, about one tortoise in three a shell.
   tip Careful: Scavengers and Vultures use Execute when your health is low. The Sparkleshell Snappers (34-35) crowd round a half-buried ship in the north-east and are over you here: the Tortoises of the western flats drop the shells just as often, so stay with them. Take the venom from the Reavers (31-32) of the north half and leave the Scorpid Terrors (33-34) further south.
-  kill 4147 quest 1175.1 @75.7,57.3 map 1441
-  collect 5795 quest 1105 @74.7,56.4 map 1441 -- Hardened Tortoise Shell, from the Sparkleshell Tortoises of the western flats
-  collect 5848 quest 1176 @87.9,65.4 map 1441 -- Hollow Vulture Bone
-  collect 5798 quest 1110 @74.7,56.4 map 1441 -- Rocket Car Rubble, all over the northern flats: pick it on the western flats, away from the Snappers
-  collect 5794 quest 1104 @74.7,56.4 map 1441 -- Salt Flat Venom, from the Scorpid Reavers of the north half
+  collect 5848 quest 1176 @87.9,65.4 map 1441 only Orc,Tauren,Troll,Undead -- Hollow Vulture Bone
+  collect 5795 quest 1105 @74.7,56.4 map 1441 only Orc,Tauren,Troll,Undead -- Hardened Tortoise Shell, from the Sparkleshell Tortoises of the western flats
+  collect 5798 quest 1110 @74.7,56.4 map 1441 only Orc,Tauren,Troll,Undead -- Rocket Car Rubble, all over the northern flats: pick it on the western flats, away from the Snappers
+  kill 4147 quest 1175.1 @75.7,57.3 map 1441 only Orc,Tauren,Troll,Undead
 
 step Mirage Raceway
   zone Thousand Needles
   tip South-west back to the raceway.
-  turnin 1110                         -- Kravel Koalbeard
-  accept 1111                         -- Kravel Koalbeard: his parts order goes to Wharfmaster Dizzywig in Ratchet, later on the route
-  turnin 1104                         -- Fizzle Brassbolts
-  turnin 1105                         -- Wizzle Brassbolts
-  accept 1106                         -- Fizzle Brassbolts: his letter goes to Martek in the Badlands, at 39
-  turnin 1176                         -- Pozzik
-  accept 1178                         -- Pozzik: for Gazlowe in Ratchet, later on the route
+  turnin 1110 only Orc,Tauren,Troll,Undead -- Kravel Koalbeard
+  turnin 1105 only Orc,Tauren,Troll,Undead -- Wizzle Brassbolts
+  turnin 1176 only Orc,Tauren,Troll,Undead -- Pozzik
+
+step Shimmering Flats: kill these as you meet them
+  zone Thousand Needles
+  collect 5794 quest 1104 @74.7,56.4 map 1441 only Orc,Tauren,Troll,Undead -- Salt Flat Venom, from the Scorpid Reavers of the north half
+
+step Mirage Raceway
+  zone Thousand Needles
+  accept 1178 only Orc,Tauren,Troll,Undead -- Pozzik: for Gazlowe in Ratchet, later on the route
+  turnin 1104 only Orc,Tauren,Troll,Undead -- Fizzle Brassbolts
+  accept 1106 only Orc,Tauren,Troll,Undead -- Fizzle Brassbolts: his letter goes to Martek in the Badlands, at 39
+  accept 1111 only Orc,Tauren,Troll,Undead -- Kravel Koalbeard: his parts order goes to Wharfmaster Dizzywig in Ratchet, later on the route
 
 step Level 32
   when level<32
@@ -268,55 +479,71 @@ step Level 32
   level 32 grind 4140                 -- grind on Scorpid Reaver
 
 step The southern flats
+  label q1175
   zone Thousand Needles
   tip South of the raceway, the Saltstone Crystalhides (32-33) and Gazers (34-35) roam the far end of the flats.
   tip Careful: the level 35 Gazers can still be two over you: pull them one at a time from the camp's edge, never two together.
-  kill 4151 quest 1175.2 @78.4,87.9 map 1441
-  kill 4150 quest 1175.3 @77.1,88.4 map 1441
+  kill 4151 quest 1175.2 @78.4,87.9 map 1441 only Orc,Tauren,Troll,Undead
+  kill 4150 quest 1175.3 @77.1,88.4 map 1441 only Orc,Tauren,Troll,Undead
+
+step Gadgetzan flight master
+  zone Tanaris
+  goto 51.6,25.5 "Gadgetzan flight master"
+  getfp "Gadgetzan"
+
+step To The Rustmaul Dig Site
+  zone Thousand Needles
+  goto 71.3,85.0 "To The Rustmaul Dig Site"
 
 step The Rustmaul Dig Site
   zone Thousand Needles
   tip West of them the silithid swarm the dig site. Searchers and Hive Drones walk among the mounds; the Invaders (34-35) stay inside the hive cave. The first silithid you kill drops a Cracked Silithid Carapace: open it.
   tip Careful: Hive Drones call for help when they fall to 20% health, and the Silithid Ravager (37, rare) walks the dig: take the Searchers and Drones (32-34) outside first, then pull the Invaders (34-35) one at a time from the cave mouth.
-  kill 4130 quest 1147.1 @69.8,83.3 map 1441
-  kill 4133 quest 1147.2 @68.0,85.7 map 1441
-  kill 4131 quest 1147.3 @64.8,86.0 map 1441
+  kill 4130 quest 1147.1 @69.8,83.3 map 1441 only Orc,Tauren,Troll,Undead
+  kill 4133 quest 1147.2 @68.0,85.7 map 1441 only Orc,Tauren,Troll,Undead
+  kill 4131 quest 1147.3 @64.8,86.0 map 1441 only Orc,Tauren,Troll,Undead
   collect 5877 x1
-  accept 1148 item 5877
+  accept 1148 item 5877 only Orc,Tauren,Troll,Undead
 
 step Parts of the Swarm
   zone Thousand Needles
   tip Keep killing silithid at the dig site for the heart, the talons and the carapaces.
-  collect 5855 quest 1148.1
-  collect 5854 quest 1148.2
-  collect 5853 quest 1148.3
+  collect 5855 quest 1148.1 only Orc,Tauren,Troll,Undead
+  collect 5854 quest 1148.2 only Orc,Tauren,Troll,Undead
+  collect 5853 quest 1148.3 only Orc,Tauren,Troll,Undead
 
 step Moktar Krin
   zone Thousand Needles
   tip North from the dig to Moktar Krin's camp on the western edge of the flats.
-  turnin 1147
+  turnin 1147 only Orc,Tauren,Troll,Undead
 
 step Mirage Raceway
   zone Thousand Needles
   tip East to the raceway, on the way south to Gadgetzan.
-  turnin 1175                         -- Trackmaster Zherin
+  turnin 1175 only Orc,Tauren,Troll,Undead -- Trackmaster Zherin
+
+step To Freewind Post
+  zone Thousand Needles
+  goto 46.1,51.5 "Freewind Post"
 
 step Gadgetzan
   zone Tanaris
   tip South from the raceway over the Tanaris border to Gadgetzan, the walled goblin town: learn its flight path and fly back to Freewind Post from there, which is quicker than the walk west across the flats, and the next guides fly straight to Gadgetzan.
   goto 51.6,26.0 map 1446 "Gadgetzan"
-  getfp "Gadgetzan"
-
-step Fly to Freewind Post
-  zone Tanaris
-  fly "Freewind Post"
-  zone Thousand Needles
 
 step Freewind Post
   zone Thousand Needles
   tip Cliffwatcher Longhorn stands in the middle of the post, on the way to the flight master.
-  accept 5361                         -- Cliffwatcher Longhorn: for Nataka Longhorn in Desolace, next
+  accept 5361 only Orc,Tauren,Troll,Undead -- Cliffwatcher Longhorn: for Nataka Longhorn in Desolace, next
   vendor nearest
+
+step Fly to Sun Rock Retreat
+  zone Thousand Needles
+  zone Stonetalon Mountains
+  zone Thousand Needles
+  goto 45.0,49.1 "Freewind Post flight master"
+
+# ---------------------------------------------------------------- Into Desolace
 
 step Fly to Sun Rock Retreat
   zone Thousand Needles
@@ -324,44 +551,30 @@ step Fly to Sun Rock Retreat
   fly "Sun Rock Retreat"
   zone Stonetalon Mountains
 
-# ---------------------------------------------------------------- Into Desolace
-
-step Desolace
+step To Ghost Walker Post
   zone Desolace
-  goto 60.9,61.9 "Scrabblescrew's Camp"
-
-step Scrabblescrew's Camp
-  zone Desolace
-  tip Head south out of Stonetalon into Desolace and follow the road south to Smeed's camp.
-  accept 5561                         -- Smeed Scrabblescrew
+  goto 55.4,55.8 "To Ghost Walker Post"
 
 step Ghost Walker Post
   zone Desolace
-  tip Felgur stands in the post, Nataka Longhorn up on its rise; Takata Steelblade and Maurin Bonesplitter wait on the rise west of it, above the Kodo Graveyard.
-  accept 1365                         -- Felgur Twocuts
-  turnin 5361                         -- Nataka Longhorn, up on the rise
+  tip Felgur stands in the post, Nataka Longhorn up on its rise.
+  turnin 5361 only Orc,Tauren,Troll,Undead -- Nataka Longhorn, up on the rise
 
 step Takata Steelblade
   when onquest 1432
   zone Desolace
-  turnin 1432                         -- Takata Steelblade
+  turnin 1432 only Orc,Tauren,Troll,Undead -- Takata Steelblade
 
 step Takata and Maurin
   zone Desolace
-  accept 1433                         -- Takata Steelblade
-  accept 1434
-  turnin 1433                         -- Maurin Bonesplitter
+  accept 1433 only Orc,Tauren,Troll,Undead -- Takata Steelblade
+  accept 1434 only Orc,Tauren,Troll,Undead
+  turnin 1433 only Orc,Tauren,Troll,Undead -- Maurin Bonesplitter
   accept 1435
 
-step Kodo Graveyard
-  zone Desolace
-  tip Use Smeed's Kodo Kombobulator on an Aged, Dying or Ancient Kodo in the graveyard and walk the tamed kodo back to Smeed. At his camp, talk to the kodo: that counts it and lets you tame the next. Five kodos, one at a time. Careful: leave the kodo skulls on the ground alone: opening one raises a Kodo Apparition (37-38) that hits hard.
-  use 13892 @51.0,58.5 "Kodo Kombobulator" -- on an Aged, Dying or Ancient Kodo in the graveyard; don't kill it
-  talk 4700 quest 5561.1 @60.6,61.6   -- the tamed kodo, at Smeed's camp: talk to it, five times
-
-step Scrabblescrew's Camp
-  zone Desolace
-  turnin 5561                         -- Smeed Scrabblescrew
+step Aka'rai
+  tip Aka'rai may not be here on Forever: if Aka'rai doesn't offer Hate the Hatefury, skip it.
+  accept 97265 only Orc,Tauren,Troll,Undead optional
 
 # ---------------------------------------------------------------- The west coast
 
@@ -369,94 +582,82 @@ step Shadowprey Village
   zone Desolace
   tip Head west to the troll village on the coast, keeping clear of the Gelkis Village on the way. Aka'rai stands on the path just north of the village.
   tip Aka'rai may not be here on Forever: if Aka'rai doesn't offer Hate the Hatefury, skip it.
-  accept 97265 optional               -- Aka'rai: the Hatefury satyrs of Sargeron, later in this guide
-  sethome "Shadowprey Village"        -- Innkeeper Sikewa
-  accept 5763                         -- Roon Wildmane: for Hemet Nesingwary in Stranglethorn, next guide
+  sethome "Shadowprey Village"
+  accept 5763 only Orc,Tauren,Troll,Undead -- Roon Wildmane: for Hemet Nesingwary in Stranglethorn, next guide
   accept 6142                         -- Mai'Lahii
   getfp "Shadowprey Village"          -- Thalon, at the village's south-west end
-
-step Ethel Rethor
-  zone Desolace
-  tip Head north along the coast, then inland to the ruined tower of Ethel Rethor: Azore Aldamort waits inside. The coast's clams and naga come after Thunder Axe Fortress, on one walk north to Ranazjar Isle.
-  accept 5741                         -- Azore Aldamort
-
-step Thunder Axe Fortress
-  zone Desolace
-  tip Head east to Thunder Axe Fortress. Beat a Burning Blade cultist down, then use the Burning Gem on it before it dies to fill one Infused Burning Gem. The Burning Blade Seer stands on the fortress's top floor with the Sceptre. The cultists also drop a Flayed Demon Skin now and then (1-5%); if one drops, read it. Leave the red Hand of Iruxos Crystal for now: its Demon Spirit is 37, and the second Desolace visit comes back for it.
-  collect 6435 quest 1435 @55.0,26.5
-  collect 15750 quest 5741 @55.2,30.1 -- On the top floor
-  collect 20310 x1 optional
-  accept 1480 optional
-
-step Ethel Rethor
-  zone Desolace
-  tip Back west to Azore.
-  turnin 5741                         -- Azore Aldamort
-  note Azore's next errand, the Book of the Ancients, needs Lord Kragaru (38) out on Ranazjar Isle: leave it, he is over your level.
 
 step Rackmore's Log
   zone Desolace
   tip Rackmore's Log lies on the ground just south-west of Azore's tower, on the way down to the shore: read it. Its two keys drop only while you have the quest.
-  accept 6161 object 177787           -- Rackmore's Log
+  accept 6161 object 177787 only Orc,Tauren,Troll,Undead -- Rackmore's Log
 
 step Clam beds
   zone Desolace
-  tip West to the shore. Giant Softshell Clams lie in the shallows and the Enraged Reef Crawlers walk the beach: each clam you open on the sea floor, and some crawlers, give a Soft-shelled Clam. Open each one in your bags for its meat.
-  tip The Drysnap Crawlers and Pincers on the same beach carry Rackmore's Silver Key, about one in seven.
+  tip Head north up the coast. Giant Softshell Clams lie in the shallows and the Enraged Reef Crawlers walk the beach: each clam you open on the sea floor, and some crawlers, give a Soft-shelled Clam. Open each one in your bags for its meat.
   interact 177784 quest 6142.1 @30.6,31.9 map 1443 -- Giant Softshell Clams, on the sea floor
   use 15874 quest 6142.1 @30.6,31.9 map 1443 -- Soft-shelled Clam: open it in your bags
+  collect 15878 quest 6161.1 @33.4,30.1 map 1443 only Orc,Tauren,Troll,Undead -- Rackmore's Silver Key, from the Drysnap crabs; underwater
   collect 15924 quest 6142            -- Underwater
-  collect 15878 quest 6161.1 @33.4,30.1 map 1443 -- Rackmore's Silver Key, from the Drysnap crabs
 
 step Sar'theris Strand
   zone Desolace
   tip Keep north to Sar'theris Strand for Rackmore's Golden Key: any Slitherblade can drop it.
   tip Careful: the Myrmidons (34-35) hold the beach's northern half with the Sea Witches and Oracles (34-36, casters), up to two over you at 33: work the Naga and Sorceresses (32-33) of the southern half until the key drops, and leave the north for the second Desolace visit, at 38.
-  collect 15881 quest 6161.2          -- Rackmore's Golden Key, from the Slitherblade naga
+  collect 15881 quest 6161.2 only Orc,Tauren,Troll,Undead -- Rackmore's Golden Key, from the Slitherblade naga
+
+step Ethel Rethor
+  zone Desolace
+  tip Head north along the coast, then inland to the ruined tower of Ethel Rethor: Azore Aldamort waits inside. The coast's clams and naga come after Thunder Axe Fortress, on one walk north to Ranazjar Isle.
+  accept 5741 only Orc,Tauren,Troll,Undead -- Azore Aldamort
+
+step Thunder Axe Fortress
+  zone Desolace
+  tip Head east to Thunder Axe Fortress. Beat a Burning Blade cultist down, then use the Burning Gem on it before it dies to fill one Infused Burning Gem. The Burning Blade Seer stands on the fortress's top floor with the Sceptre. The cultists also drop a Flayed Demon Skin now and then (1-5%); if one drops, read it. Hand of Iruxos: clear the middle of the largest building, then use the Demon Pick on the red Hand of Iruxos Crystal there. A Demon Spirit (37) comes out: kill it for the Demon Box.
+  collect 15750 quest 5741 @55.2,30.1 only Orc,Tauren,Troll,Undead -- On the top floor
+  collect 6435 quest 1435 @55,26.5 map 1443 era
+  collect 20310 x1 optional
+  accept 1480 optional only Orc,Tauren,Troll,Undead
+
+step Ethel Rethor
+  zone Desolace
+  tip Back west to Azore.
+  turnin 5741 only Orc,Tauren,Troll,Undead -- Azore Aldamort
+  note Azore's next errand, the Book of the Ancients, needs Lord Kragaru (38) out on Ranazjar Isle: leave it, he is over your level.
 
 step Rackmore's Chest
   zone Desolace
   tip Swim out to Ranazjar Isle off the far northern tip: Rackmore's Chest stands on the shore beside the Serpent Statue. Open it with both keys; leave the statue alone.
-  turnin 6161 @30.0,8.7 map 1443     -- Rackmore's Chest
+  turnin 6161 @30.0,8.7 map 1443 only Orc,Tauren,Troll,Undead -- Rackmore's Chest
 
 # ---------------------------------------------------------------- North-east
-
-step Sargeron
+step Sargeron: kill these as you meet them
   zone Desolace
   tip Head east past Thunder Axe Fortress and along the northern hills to the satyrs' ruins of Sargeron. Kill every kind you meet for Aka'rai; the Shadowstalkers walk unseen.
   tip Careful: Hatefury Rogues use Hide when they spawn, so they are stealthed until you find them.
-  kill 4670 quest 1434.1
-  kill 4672 quest 1434.2
-  kill 4673 quest 1434.3
-  kill 4675 quest 1434.4
-  kill 4674 quest 97265.3 optional @75.28,20.33 map 1443 -- Hatefury Shadowstalker
-  kill 4675 quest 97265.2 optional
-  kill 4671 quest 97265.1 optional @77.94,24.1 map 1443 -- Hatefury Trickster, on the way south
-  kill 4672 quest 97265.4 optional
-  kill 4670 quest 97265.5 optional
-
-step Khan Dez'hepah
-  zone Desolace
-  tip South to Kolkar Village. Khan Dez'hepah (35) walks among the tents on the east side with a Battle Lord or two (32-33): clear around him, then pull him alone at full health.
-  tip Careful: Kolkar Battle Lords call nearby allies within 30 yd once they fall to 20% health.
-  collect 6066 quest 1365
+  kill 4675 quest 97265.2 @74.2,23.6 map 1443 only Orc,Tauren,Troll,Undead optional
+  kill 4674 quest 97265.3 @74.2,23.6 map 1443 only Orc,Tauren,Troll,Undead optional
+  kill 4673 quest 1434.3 only Orc,Tauren,Troll,Undead
+  kill 4675 quest 1434.4 only Orc,Tauren,Troll,Undead
+  kill 4671 quest 97265.1 @76.0,22.5 map 1443 only Orc,Tauren,Troll,Undead optional
+  kill 4672 quest 97265.4 @73.7,21.3 map 1443 only Orc,Tauren,Troll,Undead optional
+  kill 4670 quest 97265.5 @76.0,22.5 map 1443 only Orc,Tauren,Troll,Undead optional
+  kill 4670 quest 1434.1 only Orc,Tauren,Troll,Undead
+  kill 4672 quest 1434.2 only Orc,Tauren,Troll,Undead
 
 step Ghost Walker Post
   zone Desolace
-  tip South-west down the road to the post.
-  turnin 1434                         -- Takata Steelblade
-  turnin 1435                         -- Maurin Bonesplitter
-  turnin 1480 optional
-  accept 1436                         -- Takata Steelblade: for Keldran in Orgrimmar, next guide
-  note Takata's next errand sends you after a demon lord with an elite guard: skip it.
-  turnin 1365                         -- Felgur Twocuts
+  tip Takata Steelblade and Maurin Bonesplitter wait on the rise west of it, above the Kodo Graveyard. South-west down the road to the post.
+  turnin 1434 only Orc,Tauren,Troll,Undead -- Takata Steelblade
+  accept 1436 only Orc,Tauren,Troll,Undead -- Takata Steelblade: for Keldran in Orgrimmar, next guide
   note Felgur now offers Centaur Bounty: the second Desolace visit, at 38, takes it on its way to the Valley of Spears.
+  turnin 1435                         -- Maurin Bonesplitter
+  turnin 1480 optional only Orc,Tauren,Troll,Undead
 
 # ---------------------------------------------------------------- Shadowprey
 
 step Shadowprey Village
   zone Desolace
   tip West to Shadowprey: your hearthstone is bound there.
-  turnin 97265 npc 268705 optional    -- Aka'rai, on the path just north of the village
   turnin 6142                         -- Mai'Lahii
   note Taiga's Hand of Iruxos, Drulzegar's Other Fish to Fry and Desolace's other 37-40 quests wait for the second visit, at 38: the next guides fly to Orgrimmar and take the zeppelin to Stranglethorn Vale.

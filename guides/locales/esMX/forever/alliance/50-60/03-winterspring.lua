@@ -95,7 +95,7 @@ return {
 	["{zone:1455} inn"] = "Posada de {zone:1455}",
 
 	-- Step 20: Laris Geardawdle
-	-- {npc:9616} Laris Geardawdle · {object:32356} Hall of Explorers (no name in this language: may be words) · {zone:1448} Felwood
+	-- {npc:9616} Laris Geardawdle · {object:32356} Hall of Explorers · {zone:1448} Felwood
 	["{npc:9616} works in the {object:32356}: hand him {zone:1448}'s ooze jars now, on your way through."] = "{npc:9616} trabaja en {object:32356}: entrégale ahora los frascos de moco de {zone:1448}, de paso.",
 	-- {zone:1451} Silithus
 	["Its jars are filled on the {zone:1451} guide's Un'Goro visit: keep it"] = "Sus frascos se llenan en la visita a Un'Goro de la guía de {zone:1451}: guárdala",

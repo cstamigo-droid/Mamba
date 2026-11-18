@@ -31,10 +31,12 @@ return {
 	-- {item:15290} Brown Kodo
 	["{item:15290}, 20g"] = "{item:15290}, 20g",
 	["new in Forever, 20g; beta players found it here"] = "nuevo en Forever, 20 de oro; los jugadores de la beta lo encontraron aquí",
-	-- {item:277960} Lavender Kodo
-	["{item:277960} is a new Forever kodo (level 40, 20g in the client) whose source is not known yet."] = "{item:277960} es un kodo nuevo de Forever (nivel 40, 20 de oro en el cliente) cuyo origen todavía no se conoce.",
+	-- {spell:1303075} Lavender Kodo
+	-- was: ["{item:277960} is a new Forever kodo (level 40, 20g in the client) whose source is not known yet."] = "{item:277960} es un kodo nuevo de Forever (nivel 40, 20 de oro en el cliente) cuyo origen todavía no se conoce."
+	["{spell:1303075} is a new Forever kodo (level 40, 20g in the client) whose source is not known yet."] = "{spell:1303075} es un nuevo kodo de Forever (nivel 40, 20g en el cliente) cuya fuente aún no se conoce.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["{item:275993} and {item:277960} are new Forever kodos (level 40, 20g in the client) whose source is not known yet."] = "{item:275993} y {item:277960} son kodos nuevos de Forever (nivel 40, 20g en el cliente) cuyo origen aún no se conoce.",
+	-- ["{item:277960} is a new Forever kodo (level 40, 20g in the client) whose source is not known yet."] = "{item:277960} es un kodo nuevo de Forever (nivel 40, 20 de oro en el cliente) cuyo origen todavía no se conoce.",
 	-- ["{npc:3690} and {npc:3685}'s kodos are in {area:222}, {zone:1412}. At 40 {npc:3690} teaches {skill:762} (100g per Blizzard's designers), and learning it gives you a mount. The Forever client lets every Horde race ride these."] = "{npc:3690} y los kodos de {npc:3685} están en {area:222}, {zone:1412}. A nivel 40, {npc:3690} enseña {skill:762} (100g según los diseñadores de Blizzard), y al aprenderla recibes una montura. El cliente de Forever permite a todas las razas de la Horda montarlos.",
 }

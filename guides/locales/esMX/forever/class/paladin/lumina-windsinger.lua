@@ -65,7 +65,7 @@ return {
 	["{item:267361}, on Arugal's table"] = "{item:267361}, en la mesa de Arugal",
 
 	-- Step 9: Whitestone Oak Lumber
-	-- {area:1581} The Deadmines · {area:20} Moonbrook · {zone:1436} Westfall · {zone:1458} Undercity · {object:3202} Grom'gol (no name in this language: may be words) · {zone:1434} Stranglethorn Vale · {zone:1431} Duskwood
+	-- {area:1581} The Deadmines · {area:20} Moonbrook · {zone:1436} Westfall · {zone:1458} Undercity · {object:3202} Grom'gol · {zone:1434} Stranglethorn Vale · {zone:1431} Duskwood
 	-- plural, as words: Goblin Woodcarvers = {npc:641} Goblin Woodcarver
 	["{area:1581} lies under {area:20} in {zone:1436}, Alliance land: a group of five at about 17-24. From the {zone:1458} take the zeppelin to {object:3202} in {zone:1434} and go north through {zone:1431} into {zone:1436}. The way in is the {area:20} mine. The Goblin Woodcarvers (elite, level 18-19) in Sneed's mast room drop the lumber every time."] = "{area:1581} está debajo de {area:20}, en {zone:1436}, tierra de la Alianza: un grupo de cinco de nivel 17-24 más o menos. Desde {zone:1458} toma el zepelín a {object:3202}, en {zone:1434}, y ve al norte por {zone:1431} hasta {zone:1436}. La entrada es la mina de {area:20}. Los tallistas goblin (élite, nivel 18-19) de la sala del mástil de Sneed sueltan la madera siempre.",
 	-- {area:1581} The Deadmines · {area:20} Moonbrook
@@ -74,14 +74,14 @@ return {
 	["Goblin Woodcarvers, inside"] = "Talladores de madera goblin, dentro",
 
 	-- Step 10: Ulric Frostveil
-	-- {npc:259649} Ulric Frostveil · {area:2897} Zoram'gar Outpost · {zone:1440} Ashenvale · {object:3202} Grom'gol (no name in this language: may be words) · {zone:1458} Undercity · {zone:1454} Orgrimmar · {zone:1413} Barrens
+	-- {npc:259649} Ulric Frostveil · {area:2897} Zoram'gar Outpost · {zone:1440} Ashenvale · {object:3202} Grom'gol · {zone:1458} Undercity · {zone:1454} Orgrimmar · {zone:1413} Barrens
 	["{npc:259649} waits at {area:2897} on {zone:1440}'s west coast: take the zeppelin from {object:3202} (or the {zone:1458}) to {zone:1454}, then go north through the {zone:1413} into {zone:1440} and west along the road. Andruk, the outpost's wind rider master, saves you the walk next time. Take {npc:259649}'s quest before you hunt the naga: the Kor Gem only drops while you have it."] = "{npc:259649} espera en {area:2897}, en la costa oeste de {zone:1440}: toma el zepelín desde {object:3202} (o {zone:1458}) a {zone:1454}, luego ve al norte por {zone:1413} hasta {zone:1440} y al oeste por el camino. Andruk, el maestro de jinetes del viento del puesto, te ahorra la caminata la próxima vez. Toma la misión de {npc:259649} antes de cazar a los nagas: la gema Kor solo cae mientras la tienes.",
 
 	-- Step 11: The north end of the Zoram Strand
 	-- {area:414} Zoram Strand
-	["The north end of the {area:414}"] = "",
+	["The north end of the {area:414}"] = "El extremo norte de {area:414}",
 	-- {area:414} Zoram Strand
-	["The naga's flooded ruins lie just past the north end of the {area:414}. The arrow cannot find its own way down into them, so it leads you to the water's edge first: from there swim north into the ruins."] = "",
+	["The naga's flooded ruins lie just past the north end of the {area:414}. The arrow cannot find its own way down into them, so it leads you to the water's edge first: from there swim north into the ruins."] = "Las ruinas inundadas de los nagas están justo después del extremo norte de {area:414}. La flecha no puede encontrar sola el camino hacia abajo, así que primero te lleva hasta la orilla del agua: desde ahí nada al norte hacia las ruinas.",
 
 	-- Step 12: The Corrupted Kor Gem
 	-- {item:6995} Corrupted Kor Gem

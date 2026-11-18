@@ -3,78 +3,26 @@ guide forever/alliance/nightelf/02-darkshore
 title Darkshore
 race NightElf
 faction Alliance
-levels 12-15
+levels 12-14
 zone Darkshore
 next forever/alliance/02-westfall
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
-# Added here: A Fishy Peril (40); Humble Beginnings (399), from Baros Alexston on the walk through
-# Stormwind (02-westfall hands it in); Philmor's Favor (97220) and Gatehouse Goods (97222) from the
-# harbor to the cheese shop beside the flight master. For Love Eternal (963) waits for 03-darkshore:
-# Anaya Dawnrunner is level 16, and the shared Darkshore guide takes it at about 17.
-# Left out: Expanding Horizons (97914), The Absent Minded Prospector (729), Deep Ocean, Vast Sea (982), The Tower of Althalaxx (965), Cave Mushrooms (947), WANTED: Murkdeep! (4740), Fruit of the Sea (1138), Buzzbox 411 (1001), Cleansing of the Infected (2138), Thundris Windweaver (4761), Tharnariun's Hope (2139), The Cliffspring River (4762), Beached Sea Creature (4730), Beached Sea Turtle (4727), Beached Sea Turtle (4725), A Lost Master (986), The Blackwood Corrupted (4763), Buzzbox 323 (1002), Buzzbox 525 (1003), Onu (948), The Master's Glaive (944), Therylune's Escape (945), The Powers Below (968), The Twilight Camp (949), It's All Fun and Games Until... (98042), Return to Onu (950), The Absent Minded Prospector (731), Beached Sea Turtle (4731), Beached Sea Creature (4733), Beached Sea Turtle (4732), Mathystra Relics (951), The Sleeper Has Awakened (5321), Holy Diver (87760), A Lost Master (993), The Tower of Althalaxx (966), The Tower of Althalaxx (967), Gyromast's Retrieval (2098), Escape Through Force (994), Trek to Ashenvale (990).
-
-# ---------------------------------------------------------------- Auberdine
-
-step Auberdine
-  when !turnedin 3524
-  zone Darkshore
-  tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
-  tip The boat docks west of the village. The flight master stands on the hill south of the inn; the quest givers are spread along the main street.
-  accept 3524                                 -- Gwennyth Bly'Leggonde
-  accept 98025                                -- The WANTED poster outside the inn
-
-# ---------------------------------------------------------------- The beach
-
-step The beach
-  when !turnedin 3524
-  tip Tide Crawlers scuttle along the shore below the village; Buzzbox 827 stands on the beach just south of the docks. Darkshore Threshers swim in the shallows. The Beached Sea Creature lies on the shore just south of the village.
-  collect 12242 quest 3524                    -- Sea Creature Bones
-
-step Auberdine
-  only Human,Dwarf,Gnome,Skyborne
-  zone Darkshore
-  accept 954                                  -- Thundris Windweaver, north end of the village
-  accept 958
-  accept 984                                  -- Terenthis
-  accept 2118                                 -- Tharnariun Treetender
-  accept 4811                                 -- Sentinel Glynda Nal'Shea
-
-step Auberdine
-  zone Darkshore
-  tip The boat docks west of the village. The flight master stands on the hill south of the inn; the quest givers are spread along the main street. Wizbang Cranktoggle stands upstairs in the inn: take the stairs inside, the arrow cannot tell the floors apart.
-  accept 983                                  -- Wizbang Cranktoggle, upstairs in the inn
-  accept 4811 only NightElf                   -- Sentinel Glynda Nal'Shea
-  turnin 1141 optional                        -- Gubber Blump
-
-step Gwennyth Bly'Leggonde
-  when !turnedin 3524
-  zone Darkshore
-  turnin 3524                                 -- Gwennyth Bly'Leggonde
-  accept 4681
-
-step The skeletal turtle
-  collect 12289 quest 4681                    -- Sea Turtle Remains, on the beach west of the docks; underwater
-  turnin 4681                                 -- Gwennyth Bly'Leggonde
-
-step Buzzbox 827
-  when onquest 983
-  tip Only if you still carry Buzzbox 827's quest: the Tide Crawlers scuttle along the shore below the village, and Buzzbox 827 stands on the beach just south of the docks.
-  collect 5385 quest 983 @35.6,47.1           -- Crawler Legs: the Tide Crawlers
-  turnin 983                                  -- Buzzbox 827
+# Left out: The Fragments Within (4813).
 
 # ---------------------------------------------------------------- First loop: south-east and north-east
 
 step Bears and the Blackwood camp
+  when onquest 2118,984
   tip Rabid Thistle Bears roam the hills south of Auberdine: use Tharnariun's Hope on one to capture it. Then walk up to the furbolg camp just east of them: nothing to kill yet.
+  goto 39.3,53.5
   complete 2118 @38.21,52.59 map 1439 era -- the Rabid Thistle Bears nearest Tharnariun
   complete 984 @39.9,53.9                     # any of four furbolg camps completes it; this is the one by the bears (#560)
 
 step Ameth'Aran
   tip Sentinel Tysha Moonblade stands at the north edge of the ruins. Cursed, Writhing and Wailing Highborne haunt them; Anaya Dawnrunner's ghost walks among them, Jai'vhanel the owl circles east of them. The two tablets lie in the ruins; a Beached Sea Turtle lies on the shore west of them.
-  accept 4722                                 -- Beached Sea Turtle
   accept 953                                  -- Sentinel Tysha Moonblade
   collect 5360 quest 958                      -- Highborne Relics
   collect 281038 quest 98025                  -- Feather of Jai'vhanel
@@ -83,7 +31,9 @@ step Ameth'Aran
   turnin 953
 
 step The red crystal
+  when onquest 4811
   tip Climb the eastern mountains east of Ameth'Aran; the Mysterious Red Crystal sits on a ledge.
+  goto 47.2,48.7
   complete 4811 @47.2,48.7                    -- Mysterious Red Crystal
 
 step Bashal'Aran
@@ -96,45 +46,27 @@ step Bashal'Aran
   collect 5338 quest 956 @45.5,36.5 map 1439 -- Ancient Moonstone Seal: Deth'ryll Satyrs
   turnin 956
   accept 957
-  accept 4723                                 -- Beached Sea Creature
 
 step Auberdine
   turnin 958
-  turnin 984                                  -- Terenthis
-  accept 985
-
-step Auberdine
   turnin 2118                                 -- Tharnariun Treetender
   turnin 4811                                 -- Sentinel Glynda Nal'Shea
+  turnin 984                                  -- Terenthis
+  accept 985
+  accept 2118 only Human,Dwarf,Gnome,Skyborne -- Tharnariun Treetender
   accept 4812
-  turnin 98025
-  turnin 4722                                 -- Gwennyth Bly'Leggonde
-  turnin 4723
-  use 14338 quest 4812.1 @37.8,44.0 map 1439
-  collect 14339 quest 4812                    -- Fill the tube at the moonwell in the village
-  vendor nearest
 
 # ---------------------------------------------------------------- Second loop
 
 step Blackwood furbolgs
   zone Darkshore
-  tip Blackwood Pathfinders and Windtalkers hold the camp south-east of Auberdine.
   tip Careful: the Windtalkers (13-14) cast from range and the furbolgs stand in pairs: pull them one at a time.
-  kill 2167 quest 985
+  kill 2167 quest 985                 -- Blackwood Pathfinder walks around here: look inside the circle on the map
   kill 2324 quest 985
-
-step The southern beaches
-  tip Follow the coast south past Ameth'Aran: one Beached Sea Creature lies on the shore west of the Grove, another further south near Remtravel's Excavation. Three more remains lie further south-west among Greymist Oracles and Tidehunters (18-20): the guide leaves them for the last loop, when you are closer to their level.
-  accept 4728                                 -- Beached Sea Creature
 
 step Ameth'Aran
   tip Back north to Ameth'Aran: the flame burns in the south of the ruins.
   interact 16393 quest 957.1 @42.4,61.8 map 1439 -- Ancient Flame
-
-step The red crystal
-  tip Back north-east into the mountains to the crystal.
-  turnin 4812                                 -- Mysterious Red Crystal
-  accept 4813
 
 step Bashal'Aran
   tip North along the hills to Asterion, then west down to Auberdine.
@@ -142,12 +74,8 @@ step Bashal'Aran
 
 step Auberdine
   turnin 985                                  -- Terenthis
-  turnin 4813                                 -- Sentinel Glynda Nal'Shea
-  vendor nearest
-  turnin 4728                                 -- Gwennyth Bly'Leggonde
 
 step Boat to Stormwind Harbor
-  only NightElf
   zone Darkshore
   goto 30.76,40.92 "Boat to Stormwind Harbor"
 
@@ -157,21 +85,43 @@ step Manifest Clerk Philmor
   tip Off the boat, Manifest Clerk Philmor stands on the harbor: his shipment goes to Elaine Trias' cheese shop in the Trade District, beside the flight master.
   accept 97220 @30.49,28.75 live
 
-step Stormwind flight master
-  only NightElf
+step To Stormwind
   zone Stormwind City
-  goto 66.3,62.7 "Stormwind flight master"
-  getfp "Stormwind" only NightElf
-  turnin 97220                                -- Elaine Trias, in her cheese shop
-  accept 97222
-  interact 460004 quest 97222.1               -- Up the stairs in her shop: leave the shipment at the Gatehouse Door
-  turnin 97222
+  goto 49.2,30.3 "To Stormwind"
+
+step Inn and flight master
+  getfp "Stormwind"
 
 step Baros Alexston
   only NightElf
   zone Stormwind City
   tip Baros Alexston stands in Cathedral Square, west of the Trade District: his compass is in his old house in Westfall, on the way.
   accept 399
+
+step Woo Ping
+  only Warrior,NightElf
+  zone Stormwind City
+  when money>=10s
+  when !skill "Two-Handed Swords" 1
+  tip While you're here: learn Two-Handed Swords from Woo Ping (Trade District, 10 silver); two-handers level a Warrior fastest.
+  train 11867                         -- Woo Ping
+
+step Woo Ping
+  only Rogue,NightElf
+  zone Stormwind City
+  when money>=10s
+  when !skill "Swords" 1
+  tip While you're here: learn Swords from Woo Ping (Trade District, 10 silver); a sword in the main hand levels a Rogue steadily.
+  train 11867                         -- Woo Ping
+
+step Stormwind flight master
+  only NightElf
+  zone Stormwind City
+  goto 66.3,62.7 "Stormwind flight master"
+  turnin 97220                                -- Elaine Trias, in her cheese shop
+  accept 97222
+  interact 460004 quest 97222.1               -- Up the stairs in her shop: leave the shipment at the Gatehouse Door
+  turnin 97222
 
 step Woo Ping
   only Warrior,NightElf
@@ -197,14 +147,15 @@ step Druid trainer
 step Elwynn Forest
   only NightElf
   zone Elwynn Forest
-  goto 43.5,65.3 "Goldshire"
+  goto 43.5,65.3 "Elwynn Forest"
 
 step Class trainer
-  only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock
+  only Warrior,Hunter,Rogue,Priest
   zone Elwynn Forest
-  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock
+  train class only Warrior,Hunter,Rogue,Priest
 
 step Shaman trainer
+  zone Elwynn Forest
   only Shaman
   train class only Shaman -- Teo Hammerstorm in Dun Morogh; Goldshire has no shaman trainer
 
@@ -212,3 +163,282 @@ step Remy "Two Times"
   zone Elwynn Forest
   accept 40
   turnin 40
+
+step Boat to Auberdine
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
+
+step Gubber Blump
+  zone Darkshore
+  when skill Fishing 1
+  tip Fishers only: Gubber Blump stands on the pier. His Darkshore Grouper is fished from the pier itself.
+  accept 1141 optional                        -- Gubber Blump, on the pier
+
+step Moonglade
+  only Druid
+  zone Darkshore
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Learn Moonglade's flight path from Sindrayl, south of the lake, for later trips. Then Silva Fil'naveth in Nighthaven flies Druids straight to Rut'theran Village from her gossip: hers is no flight path to learn. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
+  zone Moonglade
+  getfp "Moonglade"
+  fly "Rut'theran Village"
+
+step Back to Darnassus
+  only Druid
+  zone Darnassus
+  tip Nessa stands on the Rut'theran dock where you land.
+  turnin 6343                                 -- Nessa Shadowsong
+
+step Cenarion Enclave
+  only Druid
+  zone Darnassus
+  goto 35.8,11.6 "Cenarion Enclave"
+
+step Back to Darnassus
+  only Druid
+  zone Darnassus
+  tip Then take the portal up to Mathrengyl in the Cenarion Enclave.
+  turnin 5925 only Druid -- Mathrengyl Bearwalker, in the Cenarion Enclave
+  accept 5921 only Druid
+
+step Moonglade
+  only Druid
+  zone Darkshore
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Learn Moonglade's flight path from Sindrayl, south of the lake, for later trips. Then Silva Fil'naveth in Nighthaven flies Druids straight to Rut'theran Village from her gossip: hers is no flight path to learn. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
+  turnin 5921                                 -- Dendrite Starblaze
+
+step Moonglade
+  only Druid
+  zone Moonglade
+  accept 5929
+  complete 5929 @39.1,27.5                    -- Speak with the Great Bear Spirit
+  turnin 5929
+
+step Moonglade
+  only Druid
+  zone Moonglade
+  accept 5931
+
+step Back to Darnassus
+  only Druid
+  zone Darnassus
+  turnin 5931                                 -- Mathrengyl Bearwalker
+
+step Back to Darnassus
+  only Druid
+  zone Darnassus
+  accept 6001
+
+step The Moonkin Stone
+  only Druid
+  zone Darkshore
+  tip Go back down to Rut'theran Village and fly to Auberdine. The Moonkin Stone stands in the hills just east of the village: use the Cenarion Moondust there, defeat Lunaclaw and speak to the Lunaclaw Spirit.
+  fly "Auberdine"
+  use 15208 @43.5,46.0                        -- Cenarion Moondust
+  talk 12144 quest 6001.1
+
+step Body and Heart
+  only Druid
+  zone Darnassus
+  tip Fly to Rut'theran Village once more and take the portal up to Mathrengyl, then fly back to Auberdine.
+  fly "Rut'theran Village"
+  goto 35.8,11.6 "Cenarion Enclave"
+  turnin 6001                                 -- Mathrengyl Bearwalker: Bear Form
+  fly "Auberdine"
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+# Added here: A Fishy Peril (40); Humble Beginnings (399), from Baros Alexston on the walk through
+# Stormwind (02-westfall hands it in); Philmor's Favor (97220) and Gatehouse Goods (97222) from the
+# harbor to the cheese shop beside the flight master. For Love Eternal (963) waits for 03-darkshore:
+# Anaya Dawnrunner is level 16, and the shared Darkshore guide takes it at about 17.
+# Left out: Expanding Horizons (97914), The Absent Minded Prospector (729), Deep Ocean, Vast Sea (982), The Tower of Althalaxx (965), Cave Mushrooms (947), WANTED: Murkdeep! (4740), Fruit of the Sea (1138), Buzzbox 411 (1001), Cleansing of the Infected (2138), Thundris Windweaver (4761), Tharnariun's Hope (2139), The Cliffspring River (4762), Beached Sea Creature (4730), Beached Sea Turtle (4727), Beached Sea Turtle (4725), A Lost Master (986), The Blackwood Corrupted (4763), Buzzbox 323 (1002), Buzzbox 525 (1003), Onu (948), The Master's Glaive (944), Therylune's Escape (945), The Powers Below (968), The Twilight Camp (949), It's All Fun and Games Until... (98042), Return to Onu (950), The Absent Minded Prospector (731), Beached Sea Turtle (4731), Beached Sea Creature (4733), Beached Sea Turtle (4732), Mathystra Relics (951), The Sleeper Has Awakened (5321), Holy Diver (87760), A Lost Master (993), The Tower of Althalaxx (966), The Tower of Althalaxx (967), Gyromast's Retrieval (2098), Escape Through Force (994), Trek to Ashenvale (990).
+
+# ---------------------------------------------------------------- Auberdine
+
+step Auberdine
+  when !turnedin 3524
+  zone Darkshore
+  tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
+  tip The boat docks west of the village. The flight master stands on the hill south of the inn; the quest givers are spread along the main street.
+  accept 98025                                -- The WANTED poster outside the inn
+
+step To Auberdine
+  zone Darkshore
+  goto 31.8,46.3 "To Auberdine"
+
+step The skeletal turtle
+  collect 12289 quest 4681 @31.8,46.3 map 1439 -- Sea Turtle Remains, on the beach west of the docks; underwater
+  sethome "Auberdine"
+  turnin 4681                                 -- Gwennyth Bly'Leggonde
+
+step Ameth'Aran
+  accept 4722                                 -- Beached Sea Turtle
+
+step Bashal'Aran
+  accept 4723                                 -- Beached Sea Creature
+
+step Auberdine
+  turnin 98025
+  turnin 4722                                 -- Gwennyth Bly'Leggonde
+  turnin 4723
+  use 14338 quest 4812.1 @37.8,44.0 map 1439
+  collect 14339 quest 4812                    -- Fill the tube at the moonwell in the village
+  vendor nearest
+
+step The southern beaches
+  tip Follow the coast south past Ameth'Aran: one Beached Sea Creature lies on the shore west of the Grove, another further south near Remtravel's Excavation. Three more remains lie further south-west among Greymist Oracles and Tidehunters (18-20): the guide leaves them for the last loop, when you are closer to their level.
+  accept 4728                                 -- Beached Sea Creature
+
+step Auberdine
+  vendor nearest
+  turnin 4728                                 -- Gwennyth Bly'Leggonde
+
+step Boat to Stormwind Harbor
+  zone Darkshore
+  goto 30.76,40.92 "Boat to Stormwind Harbor"
+
+step Into Elwynn Forest
+  zone Elwynn Forest
+  goto 32.3,49.9 "Into Elwynn Forest"
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+# Added here: Humble Beginnings (399): taken in Stormwind on the way in, the compass at the
+# Alexston Farmstead on the west loop, handed in on the Stormwind visit before the boat. Humans
+# take Thor's flight to Stormwind on the first Sentinel Hill visit for Continue to Stormwind (6281),
+# Dungar Longdrink (6261) and Return to Lewis (6285), and hand Elmore's Task (1097) to Grimand
+# Elmore before the boat, taking his Stormpike's Delivery (353) for the Algaz Station in 03-loch-modan.
+# Business in Auberdine (97894) is taken from Borgus Steelhand on that visit.
+# On the Thor flight's Stormwind visit (about 13), Human Warriors do Defensive Stance (1638-1665: Ilsa Corbin,
+# Harry Burlguard and Bartleby stand in Old Town by Osric's shop) and Human Priests hand Divine Grace (94774) to
+# High Priestess Laurena across Cathedral Square from Baros, instead of a trip at the end of the guide.
+# Added 2026-11-07 (Alliance 12-20 zone order): east Elwynn for Dwarves and Gnomes, on the walk from
+# Goldshire to Westfall at about 13.5-14.5 (Humans do it in their start guide; Night Elves and Skyborne
+# arrive at 14.5, where its level 9-10 quests turn grey before the loop ends): A Fishy Peril (40,
+# Further Concerns needs it), Guard Thomas' chain, the Eastvale Logging Camp and the Tower of Azora in one
+# loop; Report to Gryan Stoutmantle (109) comes from Dughan on the way in.
+# Left out for them: Delicate Instruments (91723) and Good Steel (91732), level 7-8 quests handed in at about
+# 14.5 for 60-80% of their XP whose work is in the Jasperlode Mine among its elites (players' recordings, 0.3.5+:
+# handed in by 6-7 people at 14.4-14.5, 4 abandons of 91723), so the loop skips the mine;
+# The Jasperlode Mine (76) and Westbrook's chain (239, 11), which need The Fargodeep
+# Mine (62) first (players' recordings: never offered without it), and Delicate Instruments' second
+# part (91724), a second trip to Stone Cairn Lake for one hand-in at the tower.
+# Alba Fairmoon's Toxic Soil chain (92742 to 92748) is for every Alliance race, Humans included: players'
+# recordings show Humans taking and handing it in (2026-11-08), so #144's Human exclusion is lifted.
+
+# ---------------------------------------------------------------- East Elwynn (Dwarves and Gnomes)
+
+step Goldshire
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip On the road from Stormwind to Westfall, Goldshire is the first stop: Remy "Two Times" stands outside the inn, Marshal Dughan beside him. Remy's A Fishy Peril goes straight to Dughan, who then gives Further Concerns; his Report to Gryan Stoutmantle goes with you to Westfall.
+  accept 40                                   -- Remy "Two Times"
+  turnin 40                                   -- Marshal Dughan
+  accept 35
+
+step The Tower of Azora
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip East along the road past Crystal Lake: Hamish Bergwort and Blixie Fitzwink stand at the foot of the tower.
+  accept 91725                                -- Blixie Fitzwink
+
+step Elwynn Forest
+  zone Elwynn Forest
+  goto 74.0,72.2 "Elwynn Forest"
+
+step The bridge
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Guard Thomas guards the bridge on the road east; Ormin Pelford stands just across it. His tools and Thomas's Prowlers and bears are south of the bridge, on the way back.
+  turnin 35                                   -- Guard Thomas
+  accept 37
+  accept 52
+  accept 91733                                -- Ormin Pelford
+
+step The Eastvale Logging Camp
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Careful: Elmpaw, a level 12 elite gnoll, walks the woods and hills from the logging camp north to Stone Cairn Lake and the gnoll camps: keep clear of him when you see him coming.
+  accept 83                                   -- Sara Timberlain, inside
+  accept 5545                                 -- Supervisor Raelen
+  collect 13872 quest 5545                    -- Bundle of Wood
+  turnin 5545                                 -- Supervisor Raelen
+
+step A half-eaten body
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip It lies by the river north-west of the logging camp.
+  turnin 37 object 55                     -- A half-eaten body
+  accept 45
+
+step Stone Cairn Lake
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Careful: the Rogue Wizards cast from range and a Defias Bodyguard (10) walks the shore with them: pull them one at a time.
+  collect 1019 quest 83                       -- Red Linen Bandanas
+  turnin 45                                   -- Rolf's corpse
+  accept 71
+
+step The gnoll camps
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Riverpaw gnolls camp in the hills west of Stone Cairn Lake; the Stolen Enchanting Supplies lie in their camps.
+  collect 247805 quest 91725                  -- Stolen Enchanting Supplies
+
+step The Tower of Azora
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Follow the hills south to the tower.
+  turnin 91725                                -- Blixie Fitzwink
+
+step Downstream
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip The Waterlogged Saw, Axe and Toolbox lie in the river south of the bridge. Princess, a big boar, roots in the Brackwell Pumpkin Patch west of the river with her Porcine Entourage: pull the piglets away first. Kill Prowlers and Young Forest Bears on the way. Careful: Croaky is a level 11 elite on the murloc shore. Only go for his head with a group; otherwise leave him: it's optional.
+  kill 118 quest 52                           -- Prowler
+  kill 822 quest 52                           -- Young Forest Bear
+  collect 247813 quest 91733                  -- Waterlogged Saw
+  collect 247818 quest 91733                  -- Waterlogged Toolbox
+  collect 247817 quest 91733                  -- Waterlogged Axe
+
+step Surena Caledon
+  only Gnome,Warlock
+  when onquest 1688
+  zone Elwynn Forest
+  tip Gakin's The Binding needs Surena's Choker: Surena Caledon (level 9) stands by the farmhouse of the Brackwell Pumpkin Patch, just south of the river.
+  collect 6810 quest 1688.1                   -- Surena's Choker: Surena Caledon
+
+step The bridge
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  turnin 91733                                -- Ormin Pelford
+  turnin 71                                   -- Guard Thomas
+  accept 39
+  turnin 52
+
+step The Eastvale Logging Camp
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  turnin 83                                   -- Sara Timberlain, inside
+
+step Elwynn Forest
+  zone Elwynn Forest
+  goto 42.1,65.9 "Elwynn Forest"
+
+step Goldshire
+  only Dwarf,Gnome
+  zone Elwynn Forest
+  tip Follow the road west to Goldshire, on the way to Westfall: Marshal Dughan stands outside the inn.
+  turnin 39                                   -- Marshal Dughan
+
+step To The Jansen Stead
+  zone Westfall
+  goto 59.9,19.4 "To The Jansen Stead"
+
+step Westfall
+  only Dwarf,Gnome,Skyborne
+  zone Westfall
+  goto 59.9,19.4 "Westfall"

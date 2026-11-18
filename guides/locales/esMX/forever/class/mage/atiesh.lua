@@ -27,7 +27,7 @@ return {
 	["Two more raid bosses, a full 40-player raid each, both pieces always drop: the {item:22733} from {npc:15990} on his throne at the top of Naxxramas, the {item:22734} from {npc:15727} at the bottom of the {area:16076}, behind the {area:3478} in southern {zone:1451}. Each boss comes back once a week."] = "Dos jefes de banda más, cada uno una banda completa de 40 jugadores, y las dos piezas siempre caen: {item:22733} de {npc:15990}, en su trono en lo alto de Naxxramas, y {item:22734} de {npc:15727}, al fondo de {area:16076}, detrás de {area:3478}, en el sur de {zone:1451}. Cada jefe reaparece una vez por semana.",
 	-- {item:22733} Staff Head of Atiesh · {npc:15990} Kel'Thuzad
 	["{item:22733}: {npc:15990}, Naxxramas"] = "{item:22733}: {npc:15990}, Naxxramas",
-	-- {item:22734} Base of Atiesh · {npc:15727} C'Thun · {area:16076} Temple of Ahn'Qiraj · {object:176146} Gate of Ahn'Qiraj (no name in this language: may be words)
+	-- {item:22734} Base of Atiesh · {npc:15727} C'Thun · {area:16076} Temple of Ahn'Qiraj · {object:176146} Gate of Ahn'Qiraj
 	["{item:22734}: {npc:15727}, {area:16076}, past the {object:176146}"] = "{item:22734}: {npc:15727}, {area:16076}, pasando {object:176146}",
 
 	-- Step 4: Back to Anachronos

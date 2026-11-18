@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Mamba Errores
+## Notes: Guarda los errores de Lua del juego (de cualquier addon) en SavedVariables para revisarlos fuera del juego. /errores
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariables: MambaErroresDB
+
+Errores.lua

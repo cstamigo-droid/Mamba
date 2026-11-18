@@ -663,8 +663,10 @@ pub fn load_web_names(sources: &Path, locale: &str) -> Result<WebNames, String> 
 // ---------------------------------------------------------------- names the client showed
 
 /// Where a seen name was read: the client's cache of what the server sent it (`client-wdb`), or a name
-/// the client gave a unit in play (`client-learning`, Polestar's Names.Learn).
-pub const OBSERVED_SOURCES: [&str; 2] = ["client-wdb", "client-learning"];
+/// the client gave a unit in play (`client-learning`, Polestar's Names.Learn). Mamba (18-11): or the
+/// Forever server's own database in that language (`forever-tdb`, its *_template_locale tables; GPL-2.0,
+/// authorized by Cristian 17-11), for the names the client has not cached yet (esMX had none without DingDB).
+pub const OBSERVED_SOURCES: [&str; 3] = ["client-wdb", "client-learning", "forever-tdb"];
 
 /// One language's names the Forever client showed players, per kind (quest, npc, object, item), and the
 /// issues or pull requests they came from.
@@ -672,6 +674,8 @@ pub const OBSERVED_SOURCES: [&str; 2] = ["client-wdb", "client-learning"];
 pub struct ObservedNames {
 	pub names: [Names; 4],
 	pub refs: BTreeSet<u64>,
+	/// Mamba: how many of these names came from ForeverTDB (`forever-tdb`), credited apart.
+	pub from_tdb: usize,
 }
 
 impl ObservedNames {
@@ -724,6 +728,9 @@ pub fn load_observed_names(dir: &Path, locale: &str) -> Result<ObservedNames, St
 		let k = NAME_KINDS.iter().position(|x| *x == &c[1]).unwrap();
 		if out.names[k].insert(c[2].parse().unwrap(), name.to_string()).is_some() {
 			return Err(bad("named twice"));
+		}
+		if r["source"].as_str() == Some("forever-tdb") {
+			out.from_tdb += 1;
 		}
 		out.refs.insert(reference);
 	}

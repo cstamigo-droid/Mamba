@@ -2,340 +2,424 @@
 guide forever/horde/40-50/05-the-hinterlands
 title The Hinterlands & Blasted Lands
 faction Horde
-levels 49-50
+levels 48-49
 zone The Hinterlands
 next forever/horde/40-50/06-azshara
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
-# Added here: Gammerita, Mon! (7816), Return to Fel'Zerul (1444), Fall From Grace (2784),
-# The Disgraced One (2621), The Missing Orders (2622).
-# Left out: Assisting Arch Druid Runetotem (3784).
+# Added here: Fall From Grace (2784).
 
-step Fly to Tarren Mill
+# ---------------------------------------------------------------- The Blasted Lands
+
+step Fly to Stonard
+  only Orc,Troll,Tauren,Undead
   zone Searing Gorge
   goto 34.8,30.6 "Thorium Point flight master"
+  fly "Stonard"
+  zone Swamp of Sorrows
+
+step Fly to Undercity
+  only Skyborne
+  zone Searing Gorge
+  goto 34.8,30.6 "Thorium Point flight master"
+  fly "Undercity"
+  zone Undercity
+
+step To Dreadmaul Hold
+  only Orc,Troll,Tauren,Undead
+  zone Blasted Lands
+  goto 50.6,14.2 "To Dreadmaul Hold"
+
+step The bloodmages
+  only Orc,Troll,Tauren,Undead
+  zone Blasted Lands
+  tip Ride west out of Stonard and south through the canyon into the Blasted Lands; the two bloodmages stand by the road just inside.
+  accept 2581 only Orc,Tauren,Troll,Undead -- Bloodmage Drazial
+  accept 2583 only Orc,Tauren,Troll,Undead
+  accept 2585 only Orc,Tauren,Troll,Undead
+  accept 2601 only Orc,Tauren,Troll,Undead -- Bloodmage Lynnore
+  accept 2603 only Orc,Tauren,Troll,Undead
+
+step Fallen Hero of the Horde
+  only Orc,Troll,Tauren,Undead
+  zone Swamp of Sorrows
+  accept 2784 only Orc,Tauren,Troll,Undead
+  accept 2801 only Orc,Tauren,Troll,Undead
+  turnin 2801 only Orc,Tauren,Troll,Undead
+  turnin 2784 only Orc,Tauren,Troll,Undead
+  accept 2621 only Orc,Tauren,Troll,Undead
+
+step Dreadmaul Hold: kill these as you meet them
+  only Orc,Troll,Tauren,Undead
+  zone Blasted Lands
+  tip The five quests share the same parts: gather them all in one sweep. West of the road the Black Slayer vultures, Starving Snickerfangs, Scorpok Stingers and Deatheye basilisks share the hills.
+  tip East of the road the Ashmane boars and Grunters root on the slopes beside the Redstone basilisks. Stay away from the level 52 Helboars further south.
+  collect 8391 x2 quest 2603.2 only Orc,Tauren,Troll,Undead
+  collect 8391 x3 quest 2581.1 only Orc,Tauren,Troll,Undead
+  collect 8393 x1 quest 2581.3 only Orc,Tauren,Troll,Undead
+  collect 8393 x3 quest 2585.1 only Orc,Tauren,Troll,Undead
+  collect 8393 x2 quest 2583.2 only Orc,Tauren,Troll,Undead
+  collect 8396 x10 quest 2603.1 only Orc,Tauren,Troll,Undead
+  collect 8396 x2 quest 2601.2 only Orc,Tauren,Troll,Undead
+  collect 8396 x2 quest 2585.2 only Orc,Tauren,Troll,Undead
+  collect 8394 x10 quest 2601.1 only Orc,Tauren,Troll,Undead
+  collect 8394 x1 quest 2583.3 only Orc,Tauren,Troll,Undead
+  collect 8392 x3 quest 2583.1 only Orc,Tauren,Troll,Undead
+  collect 8392 x2 quest 2581.2 only Orc,Tauren,Troll,Undead
+  collect 8392 x1 quest 2585.3 only Orc,Tauren,Troll,Undead
+
+step The bloodmages
+  only Orc,Troll,Tauren,Undead
+  tip Ride back north to the bloodmages.
+  turnin 2581 only Orc,Tauren,Troll,Undead -- Bloodmage Drazial
+  turnin 2583 only Orc,Tauren,Troll,Undead
+  turnin 2585 only Orc,Tauren,Troll,Undead
+  turnin 2601 only Orc,Tauren,Troll,Undead -- Bloodmage Lynnore
+  turnin 2603 only Orc,Tauren,Troll,Undead
+  note Their follow-ups ask for the same parts again for a buff item and pay no experience: leave them.
+
+step Dispatch Commander Ruag
+  only Orc,Troll,Tauren,Undead
+  zone Swamp of Sorrows
+  turnin 2621 only Orc,Tauren,Troll,Undead -- Upstairs
+  accept 2622 only Orc,Tauren,Troll,Undead
+  turnin 2622 only Orc,Tauren,Troll,Undead -- Inside
+
+step Fly to Flame Crest
+  only Orc,Troll,Tauren,Undead
+  zone Swamp of Sorrows
+  goto 46.1,54.7 "Stonard flight master"
+  fly "Flame Crest"
+  zone Burning Steppes
+
+step To Lake Everstill
+  only Orc,Troll,Tauren,Undead
+  zone Redridge Mountains
+  goto 26.0,54.0 "To Lake Everstill"
+
+step Hilary's Necklace
+  only Orc,Troll,Tauren,Undead
+  collect 10958 quest 3741.1 @25.7,54.0 map 1433 only Orc,Tauren,Troll,Undead -- Underwater
+
+step Hilary
+  only Orc,Troll,Tauren,Undead
+  turnin 3741 only Orc,Tauren,Troll,Undead
+
+step To Flame Crest
+  only Orc,Troll
+  zone Burning Steppes
+  goto 65.6,24.2 "To Flame Crest"
+
+step Fly to The Sepulcher
+  only Orc,Troll
+  zone Burning Steppes
+  goto 65.6,24.2 "Flame Crest flight master"
+  fly "The Sepulcher"
+  zone Silverpine Forest
+
+step Apothecary Renferrel
+  only Orc,Troll,Tauren,Undead
+  turnin 445 only Orc,Troll
+
+step Fly to Undercity
+  only Orc,Troll,Tauren,Undead
+  zone Silverpine Forest
+  goto 45.6,42.4 "The Sepulcher flight master" only Orc,Skyborne,Troll
+  fly "Undercity" only Orc,Skyborne,Troll
+  zone Undercity
+
+# ---------------------------------------------------------------- The Undercity
+
+step Fly to Undercity
+  only Tauren,Undead
+  zone Swamp of Sorrows
+  goto 46.0,54.7 "Stonard flight master"
+  fly "Undercity"
+
+step Undercity
+  zone Undercity
+  accept 3784 only Orc,Tauren,Troll,Undead -- Innkeeper Norman: for Thunder Bluff, around level 50
+  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock
+
+step Hunter trainer
+  only Hunter
+  train class only Hunter -- Quel'ana Quickgale in Zephras Isle; Ruins of Lordaeron has no hunter trainer
+
+step Rogue trainer
+  only Rogue
+  train class only Rogue -- Eltheen Nightbreeze in Zephras Isle; Ruins of Lordaeron has no rogue trainer
+
+step Shaman trainer
+  only Shaman
+  train class only Shaman -- Ingrid Dunwald in Dun Morogh; Ruins of Lordaeron has no shaman trainer
+
+step Mage trainer
+  only Mage
+  train class only Mage -- Anathamaas Aetherwind in Zephras Isle; Ruins of Lordaeron has no mage trainer
+
+step Druid trainer
+  only Druid
+  train class only Druid -- Lotheluum Starbreeze in Zephras Isle; Ruins of Lordaeron has no druid trainer
+
+step Fly to Tarren Mill
+  zone Undercity
+  goto 63.1,48.3 "Undercity flight master"
   fly "Tarren Mill"
   zone Hillsbrad Foothills
 
-step The Hinterlands
+step To Shindigger's Camp
   zone The Hinterlands
-  goto 26.7,48.6 "Gilveradin's camp"
+  goto 26.7,48.6 "To Shindigger's Camp"
 
 # ---------------------------------------------------------------- Into the Hinterlands
 
 step Gilveradin's camp
   zone The Hinterlands
   tip Ride north-east from Tarren Mill into the Hinterlands and east along the road; Gilveradin Sunchaser camps on the hill south of the elves' Quel'Danil Lodge.
-  turnin 650                            -- Gilveradin Sunchaser
-  accept 77
+  turnin 650 only Orc,Tauren,Troll,Undead -- Gilveradin Sunchaser
+  accept 77 only Orc,Tauren,Troll,Undead
 
 step Highvale
   tip The Highvale elves camp around Quel'Danil Lodge. Burn the report, the notes and the records in their camps. Rin'ji is held inside the lodge: lead him out and fight off the ambush on the way.
-  tip Careful: Groups of about three elves ambush the escort, usually twice.
-  interact 144073 quest 2995.3          -- Highvale Report
-  interact 144072 quest 2995.2          -- Highvale Notes
-  interact 144071 quest 2995.1          -- Highvale Records
-  accept 2742                           -- Rin'ji
-  complete 2742
+  interact 144073 quest 2995.3 only Orc,Tauren,Troll,Undead -- Highvale Report
+  interact 144072 quest 2995.2 only Orc,Tauren,Troll,Undead -- Highvale Notes
+  interact 144071 quest 2995.1 only Orc,Tauren,Troll,Undead -- Highvale Records
+  accept 2742 only Orc,Tauren,Troll,Undead -- Rin'ji
+  complete 2742 only Orc,Tauren,Troll,Undead
+
+step Grim Message
+  when onquest 2932
+  tip South of the lodge the Witherbark trolls hold their villages. Every one of them carries a skull: with twenty, use Nimboya's Pike to make the Laden Pike, then plant it inside the village.
+  collect 9320 x20 "Witherbark Skull" quest 2932 only Orc,Tauren,Troll,Undead
+  use 15002 "Nimboya's Pike" @29.5,58.5
+  use 9319 "Nimboya's Laden Pike" @29.5,58.5
+  interact 142698 quest 2932.1 only Orc,Tauren,Troll,Undead
+  collect 8684 quest 77.1 only Orc,Tauren,Troll,Undead
+  interact 142700 quest 2932.2 only Orc,Tauren,Troll,Undead
+  collect 9320 quest 2932.3 only Orc,Tauren,Troll,Undead
 
 step Violet Tragan
   tip East of the village, the violet flower grows in the hills.
-  collect 8526 quest 2641.1 @40.6,59.7 -- Underwater
+  collect 8526 quest 2641.1 @40.6,59.7 only Orc,Tauren,Troll,Undead -- Underwater
+
+step The Atal'ai Exile
+  tip South-west again, the exile hides by the ruins of Shadra'Alor.
+  turnin 1429 only Orc,Tauren,Troll,Undead -- Atal'ai Exile
 
 # ---------------------------------------------------------------- Revantusk Village
 
 step Revantusk Village
-  tip Follow the roads east across the Hinterlands to the troll village on the eastern coast.
-  accept 7839                           -- Smith Slagtree
-  sethome "Revantusk Village" npc 14731 -- Lard
-  accept 7840
-  getfp "Revantusk Village"
-  accept 7815                           -- Katoom the Angler
-  accept 7830
-  accept 7829
-  accept 7828                           -- Huntsman Markhor
-  accept 7841                           -- Otho Moji'ko
-  accept 7844                           -- Mystic Yayo'jin
+  tip Primal Torntusk stands up on top of the inn, above Lard: go up, the arrow cannot tell the levels apart.
+  accept 7839 only Orc,Tauren,Troll,Undead -- Smith Slagtree
+  accept 7840                         -- Inside
+  accept 7815 only Orc,Tauren,Troll,Undead -- Katoom the Angler
+  getfp "Revantusk Village" npc 4314    -- Gorkas
+  accept 7828 only Orc,Tauren,Troll,Undead -- Huntsman Markhor
+  accept 7829 only Orc,Tauren,Troll,Undead
+  accept 7830 only Orc,Tauren,Troll,Undead
+  accept 7841 only Orc,Tauren,Troll,Undead -- Otho Moji'ko
+  accept 7844 only Orc,Tauren,Troll,Undead -- Mystic Yayo'jin
 
 step Revantusk Village
-  when group 7816
-  accept 7816
+  when group 7850
+  accept 7850 only Orc,Tauren,Troll,Undead -- Primal Torntusk
+
+step Revantusk Village
+  when group 7845
+  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Kidnapped Elder Torntusk! needs a group of 3. Skip it if you are alone: the route has you grind the XP back.
+  accept 7845 only Orc,Tauren,Troll,Undead
 
 step Revantusk Village
   when group 7849
-  tip Separation Anxiety, Kidnapped Elder Torntusk! and Dark Vessels are group quests: they send you into Jintha'Alor, whose trolls are elite (46-50). Take them with a group of three or more; skip them if you are alone, the route has you grind the experience back.
-  tip Primal Torntusk stands up on top of the inn, above Lard: go up, the arrow cannot tell the levels apart.
-  accept 7849                           -- Huntsman Markhor
-  accept 7845                           -- Primal Torntusk
-  accept 7850
+  accept 7849 only Orc,Tauren,Troll,Undead
+
+step On the way
+  along until q7828
+  kill 2926 quest 7828.1 only Orc,Tauren,Troll,Undead
+  kill 2925 quest 7828.2 only Orc,Tauren,Troll,Undead
+  kill 4466 quest 7844.1 only Orc,Tauren,Troll,Undead
+  kill 4467 quest 7844.2 only Orc,Tauren,Troll,Undead
 
 # ---------------------------------------------------------------- The north coast
 
 step The Overlook Cliffs: kill these as you meet them
   zone The Hinterlands
   tip The big turtles crawl along the beaches north of the village, and Whiskey Slim's bottles of port lie on the same beaches, from the village up to the Overlook Cliffs: pick them up as you go. A snapjaw can drop OOX-09/HL's distress beacon, rarely: keep it.
-  tip Careful: the biggest Saltwater Snapjaws are 50: pull them one at a time.
-  kill 2505 quest 7815.1
-  collect 3900 x12 quest 580.1          -- Pupellyverbos Port, on the beaches
+  kill 2505 quest 7815.1 only Orc,Tauren,Troll,Undead
   collect 8704 optional                 -- OOX-09/HL Distress Beacon, a rare drop
-
-step The Overlook Cliffs: kill these as you meet them
-  when group 7816
-  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Gammerita is a level 48 elite: most classes solo it at level 50, but you may need help. Skip it if you are alone: the route has you grind the XP back.
-  tip Gammerita walks the shore below the Overlook Cliffs, from the arrow south to about 75,66 and north to about 82,52: if she isn't at the arrow, follow the shore.
-  collect 19023 quest 7816.1 @80.4,58.2 map 1425
+  collect 3900 x12 quest 580.1 only Orc,Tauren,Troll,Undead -- Pupellyverbos Port, on the beaches
 
 step Rin'ji's Secret
   tip The secret lies on the Overlook Cliffs, above the beach.
-  turnin 2742 object 142127
-  accept 2782 object 142127             -- for Oran Snakewrithe in the Undercity, around level 50
+  turnin 2742 object 142127 only Orc,Tauren,Troll,Undead
+  accept 2782 object 142127 only Orc,Tauren,Troll,Undead -- for Oran Snakewrithe in the Undercity, around level 50
 
 step Lard's lunch
   tip North along the coast, Lard's picnic basket is on the small island; a Vilebranch Kidnapper guards it.
   collect 19034 quest 7840.1 @84.5,41.2
 
-step Cortello's Riddle
-  when onquest 626
-  turnin 626                          -- Underwater
-
-# ---------------------------------------------------------------- The temples and the central hills
-
-step Shaol'watha: kill these as you meet them
+# ---------------------------------------------------------------- Jintha'Alor
+step The Altar of Zul: kill these as you meet them
+  label q7828
   zone The Hinterlands
   tip West of the island, the Vilebranch scalpers hold the temples of Agol'watha and Shaol'watha. Slagtree's tools lie at one of the temples.
+  tip On the way back east, the Vilebranch soothsayers hold the Altar of Zul, the troll temple south of the central hills. Qiaga and Morta'gya the Keeper (elite, 50) stand at its top: take the soothsayers on the lower steps.
+  kill 4466 quest 7844.1 only Orc,Tauren,Troll,Undead
+  kill 2925 quest 7828.2 only Orc,Tauren,Troll,Undead
+  kill 4467 quest 7844.2 only Orc,Tauren,Troll,Undead
+  kill 2926 quest 7828.1 only Orc,Tauren,Troll,Undead
+
+step Shaol'watha
+  collect 19033 quest 7839.1 only Orc,Tauren,Troll,Undead
+
+step The central hills
   tip The Silvermane Stalkers, Savage Owlbeasts and Razorbeak Skylords share the hills between the temples and Skulk Rock. Use the Wildkin Muisek Vessel on the owlbeasts you kill. The Skylords also drop Long Elegant Feathers: keep ten for Otho's second message.
-  tip Careful: Silvermane Stalkers are level 47-48 and stay stealthed while out of combat. Up close they use Infected Bite. When a Silvermane Howler falls to 50% health or lower, it calls for help from anything within 25 yd.
-  kill 2926 quest 7828.1
-  collect 19033 quest 7839.1
-  kill 4466 quest 7844.1
-  kill 4467 quest 7844.2
-  collect 19025 quest 7830.1
-  kill 2929 quest 7829.1
+  kill 2926 quest 7828.1 only Orc,Tauren,Troll,Undead
+  kill 2929 quest 7829.1 only Orc,Tauren,Troll,Undead
+  collect 19025 quest 7830.1 only Orc,Tauren,Troll,Undead
+  collect 9594 quest 3123.1
+  collect 4589 x10 "Long Elegant Feather"
 
 step Skulk Rock
   tip The crates of Hinterlands Honey Ripple lie around the abandoned Horde camp at Skulk Rock, among the oozes.
-  collect 8684 quest 77.1
-
-step Wildkin Muisek
-  tip Careful: Stealthed wolves and griffons roam the Valorwind Lake area.
-  collect 9594 quest 3123.1
-  use 9618 quest 3123.1 @61.0,42.8 map 1425
-  collect 4589 x10 "Long Elegant Feather"
-
-# ---------------------------------------------------------------- The west
-step The Altar of Zul: kill these as you meet them
-  zone The Hinterlands
-  tip South-west of the lake, the Vilebranch soothsayers hold the Altar of Zul, the troll temple south of the central hills. Qiaga and Morta'gya the Keeper (elite, 50) stand at its top: take the soothsayers on the lower steps.
-  tip South-west, the Silvermane Howlers roam the hills east of the Witherbark villages.
-  kill 4466 quest 7844.1
-  kill 4467 quest 7844.2
-  kill 2925 quest 7828.2
+  collect 8684 quest 77.1 only Orc,Tauren,Troll,Undead
 
 step OOX-09/HL
   tip Only with the distress beacon: the robot sits at the head of the river west of Skulk Rock. Escort it east to the shore beyond the Overlook Cliffs; its reward waits with Oglethorpe in Booty Bay.
-  tip Careful: Two ambushes spawn during the escort: first three wildkin owlbeasts, then three trolls. Before each, the robot halts and announces it senses danger. Oozes, stealthed wolves and a large turtle along the path can join fights, and they respawn even if cleared beforehand.
   accept 485 optional
   turnin 485 optional                   -- Homing Robot OOX-09/HL
   accept 836 optional
   complete 836 optional
 
-step Gilveradin's camp
-  turnin 77                             -- Gilveradin Sunchaser
-  accept 81                             -- for Dran Droffers in Orgrimmar, around level 50
+# ---------------------------------------------------------------- The west
+
+step Silvermane Howlers
+  tip South-west, the Silvermane Howlers roam the hills east of the Witherbark villages.
+  kill 2925 quest 7828.2 only Orc,Tauren,Troll,Undead
 
 step Highvale
   tip Back west to Quel'Danil Lodge; rangers and marksmen stay near the lodge, scouts and outrunners on the slopes south of it.
-  kill 2692 quest 7841.1
-  kill 2691 quest 7841.2
-  kill 2694 quest 7841.3
-  kill 2693 quest 7841.4
+  kill 2692 quest 7841.1 only Orc,Tauren,Troll,Undead
+  kill 2691 quest 7841.2 only Orc,Tauren,Troll,Undead
+  kill 2694 quest 7841.3 only Orc,Tauren,Troll,Undead
+  kill 2693 quest 7841.4 only Orc,Tauren,Troll,Undead
+
+step Gilveradin's camp
+  turnin 77 only Orc,Tauren,Troll,Undead -- Gilveradin Sunchaser
+  accept 81 only Orc,Tauren,Troll,Undead -- for Dran Droffers in Orgrimmar, around level 50
+
+step Jintha'Alor
+  tip Huntsman Malkhor's skull lies on a pile below the Vilebranch ruins, his bones on a pile at the foot of Jintha'Alor. The Vessels of Tainted Blood sit on the lower terraces, and Elder Torntusk is held at the top. Keep to the paths: the trolls inside are elite.
+  note His next request, going on to the Altar of Zul, is for a group.
 
 step Jintha'Alor
   when group 7849
-  tip Huntsman Malkhor's skull lies on a pile below the Vilebranch ruins, his bones on a pile at the foot of Jintha'Alor. The Vessels of Tainted Blood sit on the lower terraces, and Elder Torntusk is held at the top. The trolls inside are elite: stay with your group and keep to the paths.
-  collect 19069 quest 7849.1 @58.6,64.8
-  turnin 7845                           -- Elder Torntusk, at the top of Jintha'Alor
-  note His next request, going on to the Altar of Zul, is for a group.
-  collect 19070 quest 7849.2 @62.1,75.3
-  collect 19071 quest 7850.1
+  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Separation Anxiety needs a group of 3. Skip it if you are alone: the route has you grind the XP back.
+  collect 19069 quest 7849.1 @58.6,64.8 group 3 only Orc,Tauren,Troll,Undead
+  collect 19070 quest 7849.2 @62.1,75.3 group 3 only Orc,Tauren,Troll,Undead
+
+step Jintha'Alor
+  when group 7850
+  tip These are elite mobs: grouping up is encouraged, look for people to do it with. Dark Vessels needs a group of 3. Skip it if you are alone: the route has you grind the XP back.
+  collect 19071 quest 7850.1 group 3 only Orc,Tauren,Troll,Undead
+
+step Jintha'Alor
+  when group 7845
+  turnin 7845 only Orc,Tauren,Troll,Undead -- Elder Torntusk, at the top of Jintha'Alor
+
+step Level 49.03
+  when !group 7845
+  when level<49.03
+  tip If you skipped Kidnapped Elder Torntusk!, grind here to level 49.03 to stay on the route's plan.
+  goto 50.7,58.8 map 1425 "Silvermane Howler"
+  level 49.03 grind 2925                -- grind on Silvermane Howler
 
 step Revantusk Village
-  turnin 7839                           -- Smith Slagtree
+  tip Primal Torntusk stands up on top of the inn, above Lard: go up, the arrow cannot tell the levels apart.
+  turnin 7844 only Orc,Tauren,Troll,Undead -- Mystic Yayo'jin
+  turnin 7841 only Orc,Tauren,Troll,Undead -- Otho Moji'ko
+  accept 7842 only Orc,Tauren,Troll,Undead
+  turnin 7828 only Orc,Tauren,Troll,Undead -- Huntsman Markhor
+  turnin 7829 only Orc,Tauren,Troll,Undead
+  turnin 7830 only Orc,Tauren,Troll,Undead
+  turnin 7815 only Orc,Tauren,Troll,Undead -- Katoom the Angler
   turnin 7840                           -- Lard, inside
-  turnin 7815                           -- Katoom the Angler
-  turnin 7830
-  turnin 7829
-  turnin 7828                           -- Huntsman Markhor
-  turnin 7841                           -- Otho Moji'ko
-  accept 7842
-  turnin 7844                           -- Mystic Yayo'jin
-  turnin 7842
-  accept 7843
+  turnin 7839 only Orc,Tauren,Troll,Undead -- Smith Slagtree
+  turnin 7842 only Orc,Tauren,Troll,Undead
+  accept 7843 only Orc,Tauren,Troll,Undead
 
 step Revantusk Village
   when group 7849
-  tip Primal Torntusk stands up on top of the inn, above Lard: go up, the arrow cannot tell the levels apart.
-  turnin 7850                           -- Primal Torntusk
-  turnin 7849                           -- Huntsman Markhor
+  turnin 7849 only Orc,Tauren,Troll,Undead
 
 step Revantusk Village
-  when group 7816
-  turnin 7816
-
-step Level 49.02
-  when level<49.02
-  tip If you skipped Gammerita, Mon! or the Jintha'Alor group quests, grind here to level 49.02 to stay on the route's plan.
-  goto 77.8,68.9 map 1425 "Saltwater Snapjaw"
-  level 49.02 grind 2505               -- grind on Saltwater Snapjaw
-
-step The Atal'ai Exile
-  tip South-west again, the exile hides by the ruins of Shadra'Alor.
-  turnin 1429                           -- Atal'ai Exile
-  accept 1444
-
-step Grim Message
-  when onquest 2932
-  tip South of the lodge the Witherbark trolls hold their villages. Every one of them carries a skull: with twenty, use Nimboya's Pike to make the Laden Pike, then plant it inside the village.
-  goto 23.4,58.1
-  collect 9320 x20 "Witherbark Skull"
-  use 15002 "Nimboya's Pike" @29.5,58.5
-  use 9319 "Nimboya's Laden Pike" @29.5,58.5
-  complete 2932
+  when group 7850
+  turnin 7850 only Orc,Tauren,Troll,Undead -- Primal Torntusk
 
 # ---------------------------------------------------------------- Aerie Peak
 
 step Aerie Peak
   tip Ride all the way west to the Wildhammer town of Aerie Peak and place the message by the well in its centre. The town is full of Alliance guards: get in, place it and get out.
   goto 14.3,48.1 "Aerie Peak well"
-  complete 7843
+  complete 7843 only Orc,Tauren,Troll,Undead
+
+step Level 49.42
+  when level<49.42
+  tip If you skipped Separation Anxiety or Dark Vessels, grind here to level 49.42 to stay on the route's plan.
+  goto 77.3,66.9 map 1425 "Saltwater Snapjaw"
+  level 49.42 grind 2505                -- grind on Saltwater Snapjaw
 
 step Revantusk Village
-  turnin 7843                           -- Otho Moji'ko
+  turnin 7843 only Orc,Tauren,Troll,Undead -- Otho Moji'ko
 
-step Fly to Stonard
-  when taxi "Stonard"
+step Fly to Rog'mar
+  only Orc,Tauren,Troll,Undead
   zone The Hinterlands
   goto 81.7,81.9 "Revantusk Village flight master"
-  fly "Stonard"
-  zone Swamp of Sorrows
+  fly "Rog'mar"
 
-step To Stonard
-  when !taxi "Stonard"
-  zone Swamp of Sorrows
-  tip No flight path to Stonard yet: the arrow takes the quickest way there (by the Grom'gol flight and the road through Duskwood and Deadwind Pass). Learn Stonard's flight path when you arrive.
-  getfp "Stonard"
+step Boat to Steamwheedle Port
+  only Orc,Tauren,Troll,Undead
+  zone Riverglades
+  goto 80.6,54.6 "Boat to Steamwheedle Port" live
 
-step Fel'zerul
-  turnin 1444                         -- On the top floor
+step Fly to Ratchet
+  only Orc,Troll,Tauren,Undead
+  zone Tanaris
+  goto 51.6,25.5 "Gadgetzan flight master"
+  fly "Ratchet"
+  zone The Barrens
 
-step Fallen Hero of the Horde
-  tip The ghostly orc stands by the road where the swamp meets the canyon into the Blasted Lands. Listen to his story.
-  accept 2784
+step Into Tirisfal Glades
+  only Skyborne
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
 
-step Fall From Grace
-  talk 7572 quest 2784.1 @34.3,66.1 map 1435
+step Zeppelin to Orgrimmar
+  only Skyborne
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
 
-step Fallen Hero of the Horde
-  turnin 2784
-  accept 2621                           -- for Dispatch Commander Ruag in Stonard, after the Blasted Lands
+step Fly to Ratchet
+  only Skyborne
+  zone Orgrimmar
+  goto 45.3,63.8 "Orgrimmar flight master"
+  fly "Ratchet"
+  zone The Barrens
 
-step The bloodmages
-  zone Blasted Lands
-  tip Ride west out of Stonard and south through the canyon into the Blasted Lands; the two bloodmages stand by the road just inside.
-  accept 2583
-  accept 2585
-  accept 2581                           -- Bloodmage Drazial
-  accept 2601                           -- Bloodmage Lynnore
-  accept 2603
-# Route from the Polestar route simulator's Horde consensus (Tauren export),
-# visits 49-53, levels 47.6-49.5. Checked by lint, not play-tested on
-# Forever yet. Era + known Forever quests only.
-#
-# Flow (as shipped): Thorium Point (where the previous guide ends) -> fly
-# Tarren Mill -> Gilveradin's camp -> Highvale and Rin'ji -> the Violet
-# Tragan -> Revantusk Village (flight path, bind) -> the north coast -> the
-# Vilebranch temples and the central hills -> Skulk Rock -> the Altar of Zul
-# -> Gilveradin -> Highvale -> Jintha'Alor (group) -> Revantusk -> the
-# Atal'ai Exile -> the Witherbark village (Grim Message) -> Aerie Peak ->
-# Revantusk -> fly Stonard -> the Fallen Hero -> the bloodmages in the
-# Blasted Lands -> Stonard, where the next guide starts.
-#
-# Deviations from the export:
-# - The Booty Bay stop (visit 49) is dropped: a flight and a zeppelin for
-#   one accept, Whiskey Slim's Lost Grog (580), and the optional OOX-17/TN
-#   turn-in (648, carried on to the next Booty Bay visit). Since 0.3.7 580
-#   is taken on 40-50/01's Booty Bay inn stop instead, its bottles picked up
-#   on the north coast here and handed in on 40-50/06's Booty Bay stop.
-# - The Swamp of Sorrows return (visit 51) is gone: Threat From the Sea and
-#   Continued Threat (1426-1428) are finished in forever/horde/40-50/03-feralas.
-# - The Blasted Lands come first, straight from Thorium Point by way of
-#   Stonard, then the Undercity on the way to Tarren Mill: no Undercity
-#   bind, no hearth back to it, no zeppelin.
-# - Hinterlands: Gilveradin, the Highvale records, Rin'ji, the Grim Message,
-#   the Violet Tragan and the Atal'ai Exile are done on the way in from
-#   Tarren Mill; Elder Torntusk is visited with the rest of Jintha'Alor. The
-#   Long Elegant Feathers for Another Message to the Wildhammer (7842) drop
-#   from the Razorbeak Skylords in the central hills before the quest is in
-#   your log, so it is handed in the moment you take it.
-# - A short grind check after the bloodmages (level 48) covers the
-#   experience lost with the dropped stops here and in the previous guide.
-# - Highvale: the report, the notes and the records nearest first, then
-#   Rin'ji. Revantusk Village: round the village from the west side, where
-#   you ride in; Gorkas, the flight master at the far east end, last.
-#
-# Class training: none in this guide; every class trains next in Orgrimmar at
-# about 50 (40-50/06; Druids and Paladins in Thunder Bluff).
-#
-# Optional: Find and Rescue OOX-09/HL! (485, 836): the beacon is a rare drop.
-#
-# Accepted here, finished later on the route: Rin'ji's Secret (2782),
-# Ripple Delivery (81), Lines of Communication
-# (2995), Assisting Arch Druid Runetotem (3784); Grim Message (2932),
-# Sprinkle's Secret Ingredient (2641) and Testing the Vessel (3123) leave
-# here with their objectives done.
-#
-# Left out: Tabetha's Task (2861): the export never hands it in. Venom Bottles
-# (2933): its bottles lie in the troll villages here, but its hand-in is
-# Apothecary Lydon in Tarren Mill, which the route passes only on the way in,
-# before the bottles; the next visit would be a landing at about 52 for a
-# fifth of its experience (0.4.0 route audit).
+step Boat to Booty Bay
+  zone The Barrens
+  goto 63.4,38.5 "Boat to Booty Bay"
 
-# ---------------------------------------------------------------- The Blasted Lands
+step Into Westfall
+  zone Westfall
+  goto 73.0,77.1 "Into Westfall"
 
-step Serpent's Coil: kill these as you meet them
-  zone Blasted Lands
-  tip The five quests share the same parts: gather them all in one sweep. West of the road the Black Slayer vultures, Starving Snickerfangs, Scorpok Stingers and Deatheye basilisks share the hills.
-  tip East of the road the Ashmane boars and Grunters root on the slopes beside the Redstone basilisks. Stay away from the level 52 Helboars further south.
-  tip Careful: Scorpok Stingers (50-51) use Venom Sting; Clack the Reaver adds Knockdown. Pull the Stingers one at a time.
-  collect 8393 x1 quest 2581.3
-  collect 8393 x2 quest 2583.2
-  collect 8393 x3 quest 2585.1
-  collect 8396 x2 quest 2601.2
-  collect 8396 x2 quest 2585.2
-  collect 8396 x10 quest 2603.1
-  collect 8391 x3 quest 2581.1
-  collect 8391 x2 quest 2603.2
-  collect 8394 x10 quest 2601.1
-  collect 8394 x1 quest 2583.3
-  collect 8392 x3 quest 2583.1
-  collect 8392 x1 quest 2585.3
-  collect 8392 x2 quest 2581.2
+step To Westfall Lighthouse
+  zone Westfall
+  goto 30.0,86.0 "To Westfall Lighthouse"
 
-step The bloodmages
-  tip Ride back north to the bloodmages.
-  turnin 2601                           -- Bloodmage Lynnore
-  turnin 2603
-  note Their follow-ups ask for the same parts again for a buff item and pay no experience: leave them.
-  turnin 2583
-  turnin 2585
-  turnin 2581                           -- Bloodmage Drazial
-
-step Stonard
-  zone Swamp of Sorrows
-  tip Ride back north through the canyon to Stonard.
-  turnin 2621                           -- Dispatch Commander Ruag
-  accept 2622
-  turnin 2622                           -- Bengor
-  note Bengor's The Swamp Talker is a level 55 quest: leave it.
+step Captain Grayson
+  turnin 103 only Orc,Tauren,Troll,Undead

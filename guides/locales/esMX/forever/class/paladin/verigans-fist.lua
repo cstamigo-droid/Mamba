@@ -11,7 +11,7 @@ return {
 	["The Alliance paladin's rare two-handed mace for the 20s, with a shield and {spell:5502} on the way."] = "La maza rara de dos manos del paladín de la Alianza para los veintes, con un escudo y {spell:5502} en el camino.",
 
 	-- Step 1: The Tome of Valor (Ironforge)
-	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries (no name in this language: may be words) · {object:32362} Mystic Ward (no name in this language: may be words) · {item:6776} Tome of Valor · {npc:6171} Duthorian Rall · {zone:1453} Stormwind · {area:2257} Deeprun Tram · {zone:1455} Ironforge
+	-- {npc:6179} Tiza Battleforge · {object:32386} Hall of Mysteries · {object:32362} Mystic Ward · {item:6776} Tome of Valor · {npc:6171} Duthorian Rall · {zone:1453} Stormwind · {area:2257} Deeprun Tram · {zone:1455} Ironforge
 	["At 20 {npc:6179}, upstairs in the {object:32386} in the {object:32362}, gives you the {item:6776}. Right-click it: it sends you to {npc:6171} in {zone:1453}'s Cathedral of Light. Take the {area:2257} from {zone:1455} to {zone:1453}."] = "A nivel 20, {npc:6179}, en el piso de arriba de {object:32386} en {object:32362}, te da {item:6776}. Haz clic derecho en él: te manda con {npc:6171} en la Catedral de la Luz de {zone:1453}. Toma {area:2257} de {zone:1455} a {zone:1453}.",
 
 	-- Step 2: The Tome of Valor
@@ -72,9 +72,9 @@ return {
 
 	-- Step 12: The north end of the Zoram Strand
 	-- {area:414} Zoram Strand
-	["The north end of the {area:414}"] = "",
+	["The north end of the {area:414}"] = "El extremo norte de {area:414}",
 	-- {area:414} Zoram Strand · {zone:1439} Darkshore
-	["The naga's flooded ruins lie just past the north end of the {area:414}, south of {zone:1439} along the coast. The arrow cannot find its own way down into them, so it leads you to the water's edge first: from there swim north into the ruins."] = "",
+	["The naga's flooded ruins lie just past the north end of the {area:414}, south of {zone:1439} along the coast. The arrow cannot find its own way down into them, so it leads you to the water's edge first: from there swim north into the ruins."] = "Las ruinas inundadas de los nagas están justo después del extremo norte de {area:414}, al sur de {zone:1439} a lo largo de la costa. La flecha no puede encontrar sola el camino hacia abajo, así que primero te lleva hasta la orilla del agua: desde ahí nada al norte hacia las ruinas.",
 
 	-- Step 13: The Corrupted Kor Gem
 	-- {item:6995} Corrupted Kor Gem

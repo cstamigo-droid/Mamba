@@ -18,26 +18,21 @@ Table: https://wago.tools/db2/ItemSparse/csv?build=1.60.1.70532&locale=esMX
 Table: https://wago.tools/db2/Map/csv?build=1.60.1.70532&locale=esMX
 Table: https://wago.tools/db2/TaxiNodes/csv?build=1.60.1.70532&locale=esMX
 The client's own strings: names only.
-Names taken: 23216 items, 22 instances, 224 encounters, 68 factions, 61 flight points.
+Names taken: 17269 items, 22 instances, 224 encounters, 68 factions, 61 flight points.
 
-The web quest database, World of Warcraft: Forever pages
---------------------------------------------------------
-Pages: the Spanish (Latin America) list pages and tooltips
-Read: 2026-10-16 to 2026-10-16
-Public web pages; the game's names only (facts), credited in THIRD_PARTY.md.
-Names taken: 257 quests, 353 NPCs, 83 objects, 485 items, 26 quest objectives.
+Names the World of Warcraft: Forever client showed players
+----------------------------------------------------------
+File: data/i18n/names-observed/esMX.json in the Polestar repository
+The server's own names, read from the client's cache and from the names it
+gave units in play, collected by players and reviewed in the repository
+(#1).
+Mamba: 19726 of these names are not from the client's cache but from the Forever
+server's own database, ForeverTDB (https://github.com/advocaite/TrinityCore/tree/forever,
+its *_template_locale tables; GPL-2.0), used as facts: names only.
+Names taken: 4796 quests, 6185 NPCs, 1036 objects.
 
-DingDB, the game database of Ding! by Yendi (@moust4ki)
--------------------------------------------------------
-URL: https://github.com/moust4ki/DingGuideWoWForever
-Version: v1.8.1, commit fb0a06a43d054ab53b67e8d7af9743a9f8953ac3
-File: Ding/DB/CREDITS.md (sha256 d32ce3d857766e88d0afd94d39eb0d4e3317ccc5538a46720f0ac743dfd64ab9)
-File: Ding/DB/Locales/esMX.lua (sha256 380da93d12f47ede6b8e248a8d8096431de6a8865e9cd5cf8ff775cb78a90ceb)
-License: GPL-3.0 (Copyright Yendi), used in Polestar with his permission
-(THIRD_PARTY.md in the Polestar repository).
-Names taken: 4161 quests, 6237 NPCs, 1045 objects, 11 items.
-DingDB's base data is generated from Questie and QuestieDB: see CREDITS.md
-beside this file.
+Built with --no-questie: no names from DingDB (whose base data comes from
+QuestieDB).
 
 pfQuest database by Shagu
 -------------------------

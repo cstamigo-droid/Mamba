@@ -2,103 +2,276 @@
 guide forever/horde/50-60/02-felwood
 title Felwood & Western Plaguelands
 faction Horde
-levels 52-55
+levels 52-54
 zone Felwood
 next forever/horde/50-60/03-winterspring
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
-# Left out: Little Pamela (5142).
-# Moved out (0.4.0 level tidy): Terrordale (6164, 5901's termites) to 50-60/05's Egan stop at about 56, Tirion's hunts
-# (5542-5544) to 50-60/05's ride past his house, Unfinished Business (6004) and The Wildlife Suffers Too (4985) to
-# 50-60/06's Plaguelands visit at about 58: their ground is level 54-56 and this guide starts about 53.
+# Added here: Rescue From Jaedenar (5203).
+# Left out: Glyphed Oaken Branch (4987), Minion's Scourgestones (5402), Invader's Scourgestones (5403), Auntie Marlene (5152), A Strange Historian (5153), The Annals of Darrowshire (5154), Brother Carlin (5210), Corrupted Sabers (4506), Seeking Spiritual Aid (5158).
 
-step Mulgris Deepriver
+# ---------------------------------------------------------------- Western Plaguelands
+
+step Western Plaguelands
   zone Western Plaguelands
-  tip He camps by the Writhing Haunt, south-east of Dalson's Tears.
-  accept 4984                         -- Inside
+  goto 38.4,54.1 "Western Plaguelands"
 
-step Diseased Wolves
-  tip The wolves roam the fields between Andorhal, Dalson's Tears and the Writhing Haunt. Finish them on the ride back east. Careful: the biggest are 54: pull them one at a time.
-  kill 1817 quest 4984
-
-step Dalson's Tears farmhouse
-  tip The diary lies in the farmhouse, the cabinet stands inside and the outhouse is behind it. A Wandering Skeleton carries the outhouse key; Farmer Dalson comes out when you open the outhouse and carries the cabinet key.
-  turnin 5058 direct
-  collect 12738 @47.7,49.9 map 1422
-  collect 12739 @48.1,49.7 -- Farmer Dalson
-  turnin 5059 direct
-  turnin 5060 direct
-
-step Mulgris Deepriver
-  turnin 4984                         -- Inside
-  note His next hunt, the Diseased Grizzlies (55-56), waits for the Plaguelands visit at about 58.
-
-step Tirisfal Glades
-  zone Tirisfal Glades
-  goto 83.2,68.5 "The Bulwark"
-
-step High Executor Derrington
-  when !onquest 5096
-  when !turnedin 5096
-  zone Tirisfal Glades
-  tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
-  tip Take a Box of Incendiaries from the crate next to Derrington for Scarlet Diversions.
-  accept 5096                         -- High Executor Derrington
+step Janice Felstone
+  zone Western Plaguelands
+  tip Leave the Undercity and ride east along the road through Tirisfal Glades, past the Bulwark. Felstone Farm is the first farm along the road; Janice waits in the house.
+  note Keep the parcel: Royal Overseer Bauhaus is in the Undercity.
 
 step Scarlet forward camp
-  when !turnedin 5096
-  zone Western Plaguelands
-  tip From the Bulwark, follow the road east into the Western Plaguelands. The Scarlet Crusade's tents stand just past Felstone Farm, between Felstone Field and Dalson's Tears. Torch the command tent with the Box of Incendiaries and plant the Scourge banner. Careful: the Scarlets around the tents reach 54 and the Invokers cast: come in from the side nearest the command tent and leave the others be.
+  when onquest 5096
+  tip The Scarlet Crusade's tents stand between Felstone Field and Dalson's Tears. Torch the command tent with the Box of Incendiaries and plant the Scourge banner.
+  goto 26.5,56.2
   interact 176088
-  complete 5096
+  interact 176088 quest 5096.1 only Orc,Tauren,Troll,Undead
+  collect 12814 quest 5096.2 only Orc,Tauren,Troll,Undead
 
 step The Bulwark
   zone Tirisfal Glades
   tip Ride south-west past Felstone Farm and follow the road west back to the Bulwark.
-  turnin 5407 direct optional -- Argent Officer Garush
-  turnin 5408 direct optional
-  turnin 5096                         -- High Executor Derrington
-  accept 5098
-  accept 5228
-  turnin 5228                         -- Shadow Priestess Vandis
+  turnin 5096 only Orc,Tauren,Troll,Undead -- High Executor Derrington
+
+step Into Western Plaguelands
+  zone Western Plaguelands
+  goto 28.6,57.5 "Into Western Plaguelands"
+
+step Into Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 8.8,66.2 "Into Eastern Plaguelands"
+
+step Into Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 7.6,43.7 "Into Eastern Plaguelands"
+
+step Tirion Fordring
+  zone Eastern Plaguelands
+  tip Ride north along the eastern hills; Tirion lives in a small house by the Thondroril River, at the border with the Eastern Plaguelands.
+  accept 5544 only Orc,Tauren,Troll,Undead
+  note Tirion's hunts are in the Eastern Plaguelands: keep them for later.
+  accept 5542 only Orc,Tauren,Troll,Undead
+  accept 5543 only Orc,Tauren,Troll,Undead
+
+step Into Western Plaguelands
+  only Orc,Tauren,Troll,Undead
+  zone Western Plaguelands
+  goto 70.0,17.0 "Into Western Plaguelands"
+
+step Into Western Plaguelands
+  only Orc,Tauren,Troll,Undead
+  zone Western Plaguelands
+  goto 51.9,28.1 "Into Western Plaguelands"
+
+step Kirsta Deepshadow
+  zone Western Plaguelands
+  tip Ride back west over the river and on to the Northridge Lumber Camp; Kirsta hides on the hill north-east of it.
+  accept 6004 only Orc,Tauren,Troll,Undead
+
+step Scarlet Crusade
+  tip Knights and magi work the Northridge Lumber Camp; the medics and hunters camp south of it.
+  kill 1833 quest 6004.4 only Orc,Tauren,Troll,Undead -- Scarlet Knight walks around Northridge Lumber Camp: look inside the circle on the map
+  kill 1826 quest 6004.3 only Orc,Tauren,Troll,Undead
+  kill 10605 quest 6004.1 only Orc,Tauren,Troll,Undead
+  kill 1831 quest 6004.2 only Orc,Tauren,Troll,Undead
+
+step Into Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 44.6,69.8 "Into Eastern Plaguelands"
+
+step The western hills
+  zone Eastern Plaguelands
+  tip Plaguehound Runts and Plaguebats roam the hills north of the Marris Stead, Carrion Grubs crawl among them; work north toward Terrordale.
+  collect 13853 quest 5544.1 only Orc,Tauren,Troll,Undead
+  kill 8597 quest 5542.2 only Orc,Tauren,Troll,Undead -- Plaguehound, 90 yd north
+
+step Into Western Plaguelands
+  zone Western Plaguelands
+  goto 51.9,28.1 "Into Western Plaguelands"
+
+step Kirsta Deepshadow
+  zone Western Plaguelands
+  turnin 6004 only Orc,Tauren,Troll,Undead
+
+step Into Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 11.3,34.6 "Into Eastern Plaguelands"
+
+step Into Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 7.6,43.7 "Into Eastern Plaguelands"
+
+step Tirion Fordring
+  zone Eastern Plaguelands
+  tip Ride east to Tirion's hut by the Thondroril River and hear him out.
+  turnin 5544 only Orc,Tauren,Troll,Undead
+
+step To Terrordale: kill these as you meet them
+  zone Eastern Plaguelands
+  goto 21.5,21.7 "To Terrordale: kill these as you meet them"
+  kill 8598 quest 5542.3 only Orc,Tauren,Troll,Undead -- Frenzied Plaguehound, 100 yd south-west
+
+step Terrordale: kill these as you meet them
+  zone Eastern Plaguelands
+  tip The book lies in the ruined inn of Terrordale.
+  tip The Large Termite Mounds stand all over the hills east of Terrordale. Use the Empty Termite Jar on each mound you pass.
+  collect 15043 quest 5901 only Orc,Tauren,Troll,Undead
+
+step Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 80.1,57.0 "Eastern Plaguelands"
+
+step Light's Hope Chapel
+  tip Ride south back to the road and follow it east across the whole zone to Light's Hope Chapel.
+  getfp "Light's Hope Chapel"
+
+step Pamela Redpath
+  tip Pamela's ghost stands in the ruins of Darrowshire, in the south-west.
+  accept 5149
+
+step Pamela's Doll
+  tip The doll's head and its two sides lie in the houses around Pamela; join them from your bags.
+  collect 12886                       -- Inside
+  collect 12887
+  collect 12888                       -- Inside
+  collect 12885 quest 5149 @38.5,91.4
+
+step Pamela Redpath
+  turnin 5149
+  note Keep Auntie Marlene: Marlene lives at Sorrow Hill in the Western Plaguelands.
+
+step Back to Light's Hope Chapel
+  note Defenders of Darrowshire's spirits come with the Corin's Crossing stop later in this guide: keep it.
+
+step To Dalson's Tears farmhouse
+  zone Western Plaguelands
+  goto 47.8,50.7 "To Dalson's Tears farmhouse"
+
+step Dalson's Tears farmhouse
+  tip The diary lies in the farmhouse, the cabinet stands inside and the outhouse is behind it. A Wandering Skeleton carries the outhouse key; Farmer Dalson comes out when you open the outhouse and carries the cabinet key.
+  accept 5058 only Orc,Tauren,Troll,Undead -- Mrs. Dalson's Diary, inside
+  turnin 5058 only Orc,Tauren,Troll,Undead
+  accept 5060                         -- Locked Cabinet, inside
+  collect 12739 quest 5060 @48.1,49.7 -- Farmer Dalson
+  turnin 5060
+
+step Sorrow Hill
+  tip Argent Officer Pureheart stands at the south end of the Sorrow Hill graveyard, where the road from Tarren Mill comes in; Marlene's house stands by the road, and Joseph Redpath's monument is in the graveyard behind it.
+  accept 5142 only Orc,Tauren,Troll,Undead -- Upstairs
+  note Keep Little Pamela: Pamela is in Darrowshire, visited again later.
+
+step Mulgris Deepriver
+  tip He camps by the Writhing Haunt, south-east of Dalson's Tears.
+  accept 4984 only Orc,Tauren,Troll,Undead -- Inside
+
+step Chromie
+  note Brother Carlin goes to Light's Hope Chapel: keep it for later.
+
+step Diseased Wolves
+  tip The wolves roam the fields between Andorhal, Dalson's Tears and the Writhing Haunt. Finish them on the ride back east.
+  kill 1817 quest 4984 only Orc,Tauren,Troll,Undead
+
+step Level 53
+  when level<53
+  tip Top up here to level 53 before Mulgris sends you after the Diseased Grizzlies (55-56): the Carrion Lurkers (52-53) on the way from Dalson's Tears to the Writhing Haunt are at your level. Or, with a group, run the Sunken Temple dungeon or the Blackrock Depths dungeon instead.
+  goto 51.1,64.3 map 1422 "Carrion Lurker"
+  level 53 grind 1821                  -- grind on Carrion Lurker
+
+step Mulgris Deepriver
+  turnin 4984 only Orc,Tauren,Troll,Undead -- Inside
+  accept 4985 only Orc,Tauren,Troll,Undead
+
+step Diseased Grizzlies
+  tip The bears roam the hills north and east of the Writhing Haunt.
+  kill 1816 quest 4985 only Orc,Tauren,Troll,Undead
+
+step Mulgris Deepriver
+  turnin 4985 only Orc,Tauren,Troll,Undead -- Inside
+  note Keep the branch: Nara Wildmane is in Thunder Bluff.
+
+step Eastern Plaguelands
+  zone Eastern Plaguelands
+  goto 14.5,33.5 "Eastern Plaguelands"
+
+step To Augustus the Touched
+  zone Eastern Plaguelands
+  goto 12.6,32.3 "To Augustus the Touched"
+
+# ---------------------------------------------------------------- Eastern Plaguelands
+
+step Augustus the Touched
+  zone Eastern Plaguelands
+  tip Follow the road east through the Western Plaguelands and across the river into the Eastern Plaguelands; leave it north for Terrordale, the ruined town in the north-west. Augustus sits in a hut at its edge.
+  accept 6164 only Orc,Tauren,Troll,Undead -- Inside; walks around Terrordale: the map marks where to look
+
+step Terrordale: kill these as you meet them
+  zone Eastern Plaguelands
+  collect 15884 quest 6164 @17.4,31.1 only Orc,Tauren,Troll,Undead -- Upstairs
+
+step Terrordale: kill these as you meet them
+  zone Eastern Plaguelands
+  tip The book lies in the ruined inn of Terrordale; the undead in the town are 54-56, so pull them one at a time.
+  tip The Large Termite Mounds stand all over the hills east of Terrordale. Use the Empty Termite Jar on each mound you pass.
+  collect 12840 quest 5408 optional only Orc,Tauren,Troll,Undead -- Minion's Scourgestones: the Terrordale undead drop them while you wear the Argent Dawn Commission
+  note Keep Augustus' Receipt Book: Augustus takes it back on the Eastern Plaguelands guide's Terrordale stop.
+
+step Into Tirisfal Glades
+  zone Tirisfal Glades
+  goto 83.2,68.4 "Into Tirisfal Glades"
+
+step The Bulwark
+  zone Tirisfal Glades
+  turnin 5408 optional only Orc,Tauren,Troll,Undead
+  accept 5098 only Orc,Tauren,Troll,Undead
+  accept 5228 only Orc,Tauren,Troll,Undead
+  turnin 5901 only Orc,Tauren,Troll,Undead -- Mickey Levine
+  accept 5902 only Orc,Tauren,Troll,Undead
+  note Derrington's watchtowers, Vandis' cauldron and Mickey's barrel are done on a later visit: keep them.
+  turnin 5228 only Orc,Tauren,Troll,Undead -- Shadow Priestess Vandis
   accept 5229
-  note Derrington's watchtowers and Vandis' cauldron are done on a later visit: keep them.
 
-step Tirisfal Glades
+step To Class trainer
   zone Tirisfal Glades
-  goto 61.8,59.2 "Brill"
+  goto 60.8,52.1 "To Class trainer"
 
-step Paladin trainer
-  only Paladin
-  when level>=54
-  zone Tirisfal Glades
-  train class only Paladin -- Shari Stilwell in Tirisfal Glades; Orgrimmar has no paladin trainer
+step Class trainer
+  only Paladin,Priest,Warlock
+  train class only Paladin,Priest,Warlock
+
+step Warrior trainer
+  only Warrior
+  train class only Warrior -- Seena Skybreaker in Zephras Isle; Brill has no warrior trainer
+
+step Hunter trainer
+  only Hunter
+  train class only Hunter -- Quel'ana Quickgale in Zephras Isle; Brill has no hunter trainer
+
+step Rogue trainer
+  only Rogue
+  train class only Rogue -- Eltheen Nightbreeze in Zephras Isle; Brill has no rogue trainer
+
+step Shaman trainer
+  only Shaman
+  train class only Shaman -- Ingrid Dunwald in Dun Morogh; Brill has no shaman trainer
+
+step Mage trainer
+  only Mage
+  train class only Mage -- Anathamaas Aetherwind in Zephras Isle; Brill has no mage trainer
+
+step Druid trainer
+  only Druid
+  train class only Druid -- Lotheluum Starbreeze in Zephras Isle; Brill has no druid trainer
 
 step Zeppelin to Orgrimmar
   zone Tirisfal Glades
   goto 60.7,58.9 "Zeppelin to Orgrimmar"
 
-step Orgrimmar
+step To Orgrimmar
   zone Orgrimmar
-  goto 51.5,45.6 "The middle of Orgrimmar"
-
-step Jes'rimon
-  zone Orgrimmar
-  when onquest 4300
-  tip Jes'rimon takes the ravasaur claws from Un'Goro; he stands in the Cleft of Shadow, a short walk from the middle of the city.
-  turnin 4300                           -- Jes'rimon, the Cleft of Shadow
-
-step Class trainer
-  only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
-  when level>=54
-  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
-
-step Druid trainer
-  only Druid
-  when level>=54
-  train class only Druid -- Sheal Runetotem in Mulgore; Orgrimmar has no druid trainer
+  goto 45.3,63.7 "To Orgrimmar"
 
 step Fly to Splintertree Post
   zone Orgrimmar
@@ -108,147 +281,200 @@ step Fly to Splintertree Post
 
 # ---------------------------------------------------------------- To Felwood
 
-step Felwood
+step To Emerald Sanctuary
   zone Felwood
-  goto 50.9,81.6 "Emerald Sanctuary"
+  goto 50.9,81.6 "To Emerald Sanctuary"
 
 # ---------------------------------------------------------------- Emerald Sanctuary and Jaedenar
 
 step Emerald Sanctuary
   zone Felwood
   tip The druids' camp is just past the border.
-  accept 5156                         -- Taronn Redfeather
-  accept 86577                        -- Kelek Skykeeper, beside Taronn: A Sampling of Putrescence, the organs of Felwood's bears and wolves
-  accept 5155                         -- Greta Mosshoof
-  accept 8460                         -- Grazle, at the south edge of the camp
-  accept 4102                         -- Maybess Riverbreeze, on the west side of the camp
-
-step Deadwood Village
-  tip The Deadwood furbolg village lies just south of the Sanctuary. Every Deadwood kill also raises your Timbermaw Hold reputation; keep the headdress feathers.
-  kill 7153 quest 8460.1
-  kill 7154 quest 8460.3
-  kill 7155 quest 8460.2
+  accept 5156 only Orc,Tauren,Troll,Undead -- Taronn Redfeather
+  accept 5155 only Orc,Tauren,Troll,Undead -- Greta Mosshoof
+  accept 8460 only Orc,Tauren,Troll,Undead -- Grazle, at the south edge of the camp
+  accept 4102 only Orc,Tauren,Troll,Undead -- Maybess Riverbreeze, just west of the camp
 
 step Southern Jaedenar
   tip Follow the road north-west. The south of Jaedenar, around its corrupted moonwell, is held by Shadow Council cultists, adepts, guardsmen and their hounds.
-  kill 7125 quest 5155.1
-  kill 7113 quest 5155.2
-  kill 7115 quest 5155.3
-  kill 7112 quest 5155.4
+  kill 7125 quest 5155.1 only Orc,Tauren,Troll,Undead
+  kill 7113 quest 5155.2 only Orc,Tauren,Troll,Undead
+  kill 7115 quest 5155.3 only Orc,Tauren,Troll,Undead
+  kill 7112 quest 5155.4 only Orc,Tauren,Troll,Undead
+
+step A Strange Red Key
+  tip Only if a Blood Red Key dropped: use it to start the quest, then free Arko'narin in her cage in Shadow Hold, the cave at the north end of Jaedenar, and escort her out.
+  getfp "Bloodvenom Post"
+  accept 5202 optional only Orc,Tauren,Troll,Undead
+  turnin 5202 optional only Orc,Tauren,Troll,Undead -- Captured Arko'narin, below ground
+
+step A Strange Red Key
+  when onquest 5203
+  complete 5203 optional only Orc,Tauren,Troll,Undead
+
+step Captured Arko'narin
+  accept 5203 only Orc,Tauren,Troll,Undead -- Below ground
+
+step Rescue From Jaedenar
+  goto 36.2,55.5
 
 step Emerald Sanctuary
-  turnin 5155                         -- Greta Mosshoof
+  turnin 5155 only Orc,Tauren,Troll,Undead -- Greta Mosshoof
   accept 5157
-  turnin 8460
-  accept 8462
-  turnin 8466 direct optional
 
-# ---------------------------------------------------------------- North through Felwood
+step Deadwood Village
+  tip The Deadwood furbolg village lies just south of the Sanctuary. Every Deadwood kill also raises your Timbermaw Hold reputation; keep the headdress feathers.
+  kill 7153 quest 8460.1 only Orc,Tauren,Troll,Undead
+  kill 7155 quest 8460.2 only Orc,Tauren,Troll,Undead
+  kill 7154 quest 8460.3 only Orc,Tauren,Troll,Undead
 
-step The Jaedenar moonwell
-  tip Back north to Jaedenar. Fill Greta's canteen at the corrupted moonwell in the middle of the southern camp.
-  use 12922 quest 5157.1 @35.2,59.8 map 1448
-  collect 12907 quest 5157 @35.2,59.8
+step Grazle
+  turnin 8460 only Orc,Tauren,Troll,Undead
+  accept 8466 optional only Orc,Tauren,Troll,Undead -- Only with 5 Deadwood Headdress Feathers
+  turnin 8466 optional only Orc,Tauren,Troll,Undead
+  accept 5204 only Orc,Tauren,Troll,Undead
 
-step Bloodvenom Post
-  tip The Horde camp just north of Jaedenar.
-  getfp "Bloodvenom Post"
-  accept 6162                         -- Dreka'Sur
-  accept 4521                         -- Trull Failbane: the owlbeasts are in Winterspring
-  accept 4505                         -- Winna Hazzard
-
-step Shatter Scar Vale
-  tip East of Bloodvenom Post, the cratered vale where the Entropic Beasts and Horrors roam. Kill two of each, then walk to each of the three fel-water craters.
-  goto 41.6,43.0 "Southern crater"
-  goto 40.4,41.2 "Western crater"
-  goto 42.2,40.3 "Northern crater"
-  complete 5156
-  kill 9878 quest 5156.1
-  kill 9879 quest 5156.2
-
-step Statue of Malorne
-  tip The Statue of Malorne stands just south of the vale, by the road north: its bauble starts a quest for Winna Hazzard at Bloodvenom Post.
-  accept 86612 object 661778 @42.0,47.3 -- Statue of Malorne
-
-step Irontree Woods
-  tip Follow the road north-east to Irontree Woods. The Warpwood Moss Flayers and Shredders on the east side of the woods each carry a Blood Amber; Angerclaw Grizzlies and Felpaw Ravagers roam the same woods for Talo, and their organs are Kelek's.
-  tip Felpaw Village's Deadwood Den Watchers (53-54) and Avengers (54-55) are next: below level 54, keep hunting the grizzlies and ravagers (51-52) here until 54. The hand-ins at Timbermaw Hold, the Emerald Sanctuary and Bloodvenom Post that follow take you most of the way to 55. Or, with a group, run the Sunken Temple dungeon or the Blackrock Depths dungeon instead.
-  kill 8957 quest 4120.1
-  kill 8961 quest 4120.2
-  collect 277958 quest 86577.1        -- Putrescent Bear Organs, from the Angerclaw bears
-  collect 277959 quest 86577.2        -- Putrescent Wolf Organs, from the Felpaw wolves
-  level 54 grind 8957                 -- grind on Angerclaw Grizzly
-
-step Irontree Woods
-  collect 11503 quest 4102            -- Below ground
-
-step Felpaw Village
-  tip The Deadwood furbolg village just west of the tunnel. Chieftain Bloodmaw (56) stands among them. Meilosh, a friendly furbolg, sits at the north end of the village.
-  accept 6031 optional                -- Meilosh: keep 30 Runecloth for him; he trades only at Neutral with the Timbermaw; below ground
+step Grazle
+  when onquest 5203
+  turnin 5203 optional only Orc,Tauren,Troll,Undead
 
 step Nafien
   tip The road ends at Nafien, outside the Timbermaw Hold tunnel in the far north-east.
-  turnin 8462
-  accept 8461
+  accept 8461 only Orc,Tauren,Troll,Undead
 
 step Felpaw Village
-  tip Careful: Den Watchers are level 53-54 and the Deadwood Avengers 54-55; they call nearby allies within 25 yd once below 50% health and run off for help below 15%.
-  tip Keep killing them until one drops a Deadwood Ritual Totem, about one kill in thirty, then right-click it: Kernda in Timbermaw Hold takes it once the Timbermaw are Neutral to you, now if they already are, or when the last guide passes the cave again at 59.
-  kill 7156 quest 8461.1
-  kill 7157 quest 8461.2
-  kill 7158 quest 8461.3
-  collect 20741                       -- Deadwood Ritual Totem
-  accept 8470
+  tip The Deadwood furbolg village just west of the tunnel. Chieftain Bloodmaw (56) stands among them.
+  level 54
+  kill 7156 quest 8461.1 only Orc,Tauren,Troll,Undead
+  kill 7157 quest 8461.2 only Orc,Tauren,Troll,Undead
+  kill 7158 quest 8461.3 only Orc,Tauren,Troll,Undead
 
 step Nafien
-  turnin 8461
-  accept 8465
-  turnin 8467 direct optional
+  turnin 8461 only Orc,Tauren,Troll,Undead
+  accept 8465 only Orc,Tauren,Troll,Undead
+  accept 8467 optional only Orc,Tauren,Troll,Undead -- Only with 5 Deadwood Headdress Feathers
+  turnin 8467 optional only Orc,Tauren,Troll,Undead
   note Keep Speak to Salfa for Winterspring.
 
+step Felpaw Village
+  accept 6031 optional only Orc,Tauren,Troll,Undead -- Meilosh: keep 30 Runecloth for him; he trades only at Neutral with the Timbermaw; below ground
+  tip Meilosh, a friendly furbolg, sits at the north end of the village. Only with 30 Runecloth, and only at Neutral with the Timbermaw: follow the road north to Timbermaw Hold; Meilosh trades just inside the entrance.
+  turnin 6031 optional only Orc,Tauren,Troll,Undead
+
+# Re-seeded for flow in 0.3.5: Speak to Salfa is handed in where the tunnel
+# comes out, instead of on a later ride back west from Everlook.
+step Through Timbermaw Hold
+  zone Winterspring
+  tip Walk into the Timbermaw Hold tunnel beside Nafien and never attack the Timbermaw furbolgs inside. Salfa stands at the tunnel's Winterspring exit; then follow the road east to Everlook, the goblin town where the next guide starts.
+  turnin 8465 only Orc,Tauren,Troll,Undead -- Salfa
+
+step Fly to Valormok
+  only Skyborne
+  zone Felwood
+  goto 34.4,53.9 "Bloodvenom Post flight master"
+  fly "Valormok"
+
+step Into Ashenvale
+  only Skyborne
+  zone Ashenvale
+  goto 94.6,47.6 "Into Ashenvale"
+
+step Into Felwood
+  only Skyborne
+  zone Felwood
+  goto 54.9,92.7 "Into Felwood"
+
+step Into Winterspring
+  only Skyborne
+  zone Winterspring
+  goto 28.0,34.6 "Into Winterspring"
+
+step To Everlook
+  only Skyborne
+  zone Winterspring
+  goto 60.5,36.3 "To Everlook"
+
+step Through Timbermaw Hold
+  zone Winterspring
+  getfp "Everlook"
+
+step Fly to Bloodvenom Post
+  zone Winterspring
+  fly "Bloodvenom Post"
+
 step Timbermaw Hold
-  tip Step into the cave: Kernda stands just inside.
-  turnin 8470 optional                -- Kernda: the Timbermaw speak to you only from Neutral; walks around here: look inside the circle on the map
+  zone Felwood
+  accept 8462 only Orc,Tauren,Troll,Undead
+  turnin 8462 only Orc,Tauren,Troll,Undead
+
+# ---------------------------------------------------------------- North through Felwood
+
+step On the way
+  along until q5156
+  kill 9878 quest 5156.1 only Orc,Tauren,Troll,Undead
+  kill 9879 quest 5156.2 only Orc,Tauren,Troll,Undead
+
+step The Jaedenar moonwell
+  tip Back north to Jaedenar. Fill Greta's canteen at the corrupted moonwell in the middle of the southern camp.
+  collect 12907 quest 5157 @35.2,59.8
+
+step Rakaiah
+  tip Only if you rescued Arko'narin: the succubus Rakaiah waits in the middle of Jaedenar, beside the Remains of Trey Lightforge.
+  kill 9518 quest 5204 optional only Orc,Tauren,Troll,Undead -- Below ground
+
+step Bloodvenom Post
+  tip The Horde camp just north of Jaedenar.
+  accept 6162 only Orc,Tauren,Troll,Undead -- Dreka'Sur
+  accept 4521 only Orc,Tauren,Troll,Undead -- Trull Failbane: the owlbeasts are in Winterspring
+
+step Shatter Scar Vale
+  label q5156
+  tip East of Bloodvenom Post, the cratered vale where the Entropic Beasts and Horrors roam. Kill two of each, then walk to each of the three fel-water craters.
+  kill 9878 quest 5156.1 only Orc,Tauren,Troll,Undead
+  kill 9879 quest 5156.2 only Orc,Tauren,Troll,Undead
+  goto 41.6,43.0 "Southern crater"
+  goto 40.4,41.2 "Western crater"
+  goto 42.2,40.3 "Northern crater"
+  complete 5156 only Orc,Tauren,Troll,Undead
+
+step Irontree Woods: kill these as you meet them
+  zone Felwood
+  tip Follow the road north-east to Irontree Woods. The Warpwood Moss Flayers and Shredders on the east side of the woods each carry a Blood Amber; Angerclaw Grizzlies and Felpaw Ravagers roam the same woods for Talo. Below level 54.21, keep hunting the grizzlies and ravagers: the hand-ins at Bloodvenom Post and the Emerald Sanctuary take you to level 55. Or, with a group, run the Blackrock Depths dungeon or the Sunken Temple dungeon instead.
+  kill 8961 quest 4120.2 only Orc,Tauren,Troll,Undead
+  kill 8957 quest 4120.1 only Orc,Tauren,Troll,Undead
+  collect 11503 quest 4102 only Orc,Tauren,Troll,Undead -- Below ground
+
+step Felpaw Village
+  collect 20741 optional              -- Deadwood Ritual Totem, a rare drop
+  accept 8470 optional only Orc,Tauren,Troll,Undead
 
 # ---------------------------------------------------------------- Back south
 
 step Emerald Sanctuary
   tip Ride the road south through Felwood to the Sanctuary.
-  turnin 5156                         -- Taronn Redfeather
+  turnin 5156 only Orc,Tauren,Troll,Undead -- Taronn Redfeather
   turnin 5157                         -- Greta Mosshoof
-  accept 5158
-  turnin 4102                         -- Maybess Riverbreeze, on the west side of the Sanctuary
-  turnin 86577                        -- Kelek Skykeeper
+  turnin 4102 only Orc,Tauren,Troll,Undead -- Maybess Riverbreeze, on the west side of the Sanctuary
   note Keep Seeking Spiritual Aid: Islen Waterseer is in the Barrens.
 
 step Overlord Ror
   tip Ror stands at the far south end of Deadwood Village.
-  collect 15879 quest 6162 @48.2,94.3
-
-step The Jadefire moonwell
-  tip Ride back south past Jaedenar to the corrupted moonwell of the Jadefire satyrs and fill Winna's flasket there.
-  use 12566 quest 4505.1 @32.3,66.6 map 1448
-  collect 12567 quest 4505 @32.3,66.6
+  collect 15879 quest 6162 @48.2,94.3 only Orc,Tauren,Troll,Undead
 
 # ---------------------------------------------------------------- North to Winterspring
 
 step Bloodvenom Post
   tip Ride north up the road again.
-  turnin 6162                         -- Dreka'Sur
-  turnin 4505
-  turnin 86612                        -- Winna Hazzard: the Stag Lord's Bauble
-  accept 4506
+  turnin 6162 only Orc,Tauren,Troll,Undead -- Dreka'Sur
 
-step Winna's kitten
-  tip Take the kitten to the same moonwell and release it there with Winna's Kitten Carrier; once it has turned into a Corrupted Saber, bring it back to Winna and click on it to hand it over.
-  use 12565 quest 4506.1 @32.3,66.6 map 1448 -- Winna's Kitten Carrier, at the Jadefire moonwell
-  complete 4506
+step Retribution of the Light
+  kill 9518 quest 5204.1 @38.4,50.5 map 1448 only Orc,Tauren,Troll,Undead -- Below ground
 
-step Winna Hazzard
-  turnin 4506
+step Remains of Trey Lightforge
+  turnin 5204 optional only Orc,Tauren,Troll,Undead
+  accept 5385 only Orc,Tauren,Troll,Undead -- Below ground
 
-step Level 55
-  when level<55
-  tip Winterspring's quests are 55-58. Below 55 after Winna's hand-ins? Felpaw Village's Deadwood furbolgs (53-55) are at your level and on your way north to Timbermaw Hold's tunnel: kill them until level 55. Every kill also raises your Timbermaw reputation. Careful: the Den Watchers and Avengers call nearby allies once below half health and run off for help when nearly dead: pull one at a time from the village's edge. This is a long top-up for a player who follows only this route. Or, with a group, run the Blackrock Depths dungeon or the Sunken Temple dungeon instead.
-  goto 61.5,10.5 map 1448 "Felpaw Village"
-  level 55 grind 7157                 -- grind on Deadwood Avenger
+step Felpaw Village
+  when onquest 8470
+  tip Back at Felpaw Village, the Deadwood furbolgs (53-54) are close to the tunnel and every kill raises your Timbermaw reputation.
+  turnin 8470 optional only Orc,Tauren,Troll,Undead -- Kernda, at the tunnel mouth

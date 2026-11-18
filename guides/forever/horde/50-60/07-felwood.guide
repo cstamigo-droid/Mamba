@@ -2,17 +2,17 @@
 guide forever/horde/50-60/07-felwood
 title Felwood, Moonglade & Winterspring
 faction Horde
-levels 59-60
+levels 59-59
 zone Felwood
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
-# Left out: A Strange One (6605).
+# Left out: Cleansed Water Returns to Felwood (5159), Umber, Archivist (6844), Linken's Memory (3942), Dousing the Flames of Protection (5165), A Final Blow (5242), Uncovering Past Secrets (6845), Under the Chitin Was... (1185).
 
-step Tirisfal Glades
+step Into Tirisfal Glades
   zone Tirisfal Glades
-  goto 63.0,74.4 "The zeppelin towers"
+  goto 60.7,58.9 "Into Tirisfal Glades"
 
 step Zeppelin to Orgrimmar
   zone Tirisfal Glades
@@ -20,8 +20,7 @@ step Zeppelin to Orgrimmar
 
 step Orgrimmar
   zone Orgrimmar
-  when !has 14047 x60
-  goto 45.3,63.7 "Orgrimmar flight master"
+  goto 37.7,87.9 "Orgrimmar"
 # Built from the simulator's consensus route (Horde, visits 102-116) and
 # machine-checked with lint; not play-tested on Forever yet. The end of the
 # Horde leveling chain.
@@ -77,199 +76,87 @@ step Orgrimmar
 # ---------------------------------------------------------------- Orgrimmar
 
 step Vehena
-  when has 14047 x60
+  when onquest 7836,7824
   zone Orgrimmar
   tip In the Valley of Spirits.
-  turnin 7836 direct -- sixty Runecloth
+  turnin 7836 optional                -- sixty Runecloth, if you carry them
+  turnin 7824 optional
 
-step Rashona Straglash
-  when has 14047 x60
-  zone Orgrimmar
-  turnin 7824 direct -- sixty Runecloth
-
-step Fly to Splintertree Post
+step Fly to Bloodvenom Post
   zone Orgrimmar
   goto 45.3,63.7 "Orgrimmar flight master"
-  fly "Splintertree Post"
-  zone Ashenvale
-
-step Felwood
+  fly "Bloodvenom Post"
   zone Felwood
-  goto 51.2,82.1 "The Emerald Sanctuary"
 
 # ---------------------------------------------------------------- Southern Felwood
 
 step The Emerald Sanctuary
   zone Felwood
   tip Fly to Splintertree Post and ride north-west along the road out of Ashenvale into Felwood. The Emerald Sanctuary is the druids' camp just past the border.
-  turnin 5159                         -- Greta Mosshoof
-  accept 5165
-  turnin 3942                         -- Eridan Bluewind, inside
   note Eridan's Silver Heart needs an Irontree Heart from northern Felwood and a ride back here. Skip it.
 
-step Dousing the Flames of Protection
-  tip Ride north-west to Jaedenar. The four braziers stand among the Shadow Council's buildings; use the Cleansed Water on each one.
-  tip Careful: Shadow Council mobs of level 53-55 fill the cave and often come in large linked groups, many with stuns. A group of 2-3 players is recommended.
-  interact 176159 quest 5165.2        -- Below ground
-  interact 176160 quest 5165.3        -- Below ground
-  interact 176158 quest 5165.1        -- Below ground
-  interact 176161 quest 5165.4        -- Below ground
-
-step Greta Mosshoof
-  tip Back south to the Sanctuary, a short ride.
-  turnin 5165
-  accept 5242
+step To Bloodvenom Post
+  zone Felwood
+  goto 34.2,52.3 "To Bloodvenom Post"
 
 # ---------------------------------------------------------------- Northern Felwood
 
 step Bloodvenom Post
-  zone Felwood
   tip Ride north along the road, past Jaedenar, to Bloodvenom Post.
-  turnin 4741                         -- Trull Failbane
+  turnin 6605 only Orc,Tauren,Troll,Undead -- Winna Hazzard
+  turnin 4741 only Orc,Tauren,Troll,Undead -- Trull Failbane
   note Trull's next Wild Guardians would bring you back here from Winterspring. Skip it.
 
-step A Final Blow
-  tip Moora, Salia and Shadow Lord Fel'dan wait at the back of Shadow Hold, the cave in Jaedenar's north. Clear the tunnel as you go.
-  tip Careful: The three bosses fight as a group. Kill the nearby mobs first so you don't pull extra enemies.
-  kill 9861 quest 5242.1              -- Below ground
-  kill 9860 quest 5242.2              -- Below ground
-  collect 13207 quest 5242.3          -- Below ground
-  collect 11515 x6 -- Corrupted Soul Shards from the cultists, Salve via Hunting
+step Bloodvenom Post
+  accept 4505                         -- Winna Hazzard
 
-step A Strange Red Key
-  when has 13140
-  tip A Blood Red Key dropped: the Jaedenar Enforcers, Darkweavers, Warlocks and Legionnaires of Shadow Hold carry one now and then. Use it to start the quest, then free Arko'narin from her cage in the cave's south end on your way out.
-  accept 5202 optional
+step The Jadefire moonwell
+  collect 12567 quest 4505 @32.3,66.6
 
-step Captured Arko'narin
-  when onquest 5202
-  turnin 5202                         -- Captured Arko'narin, below ground
-
-step Maybess Riverbreeze
-  when available 5887
-  when has 11515 x6
-  tip On the way back south to Greta, Maybess takes the shards on the west side of the Sanctuary.
-  turnin 5887 direct -- Maybess Riverbreeze
-
-step Greta Mosshoof
-  tip South to the Sanctuary once more.
-  turnin 5242
+step Winna Hazzard
+  turnin 4505
 
 step Toxic Horrors
-  tip Ride north up the Felwood road to Irontree Woods; the Toxic Horrors ooze between the trees, and most of them drop a droplet.
   tip Careful: Ancient Irontree Walkers, level 59 elites, walk among the Toxic Horrors, and Vartrus the Ancient (63, elite) roams the woods: work the Horrors at the north tip of Irontree Woods, one at a time.
-  collect 12822 quest 5086.1 @50.6,22.4
+  collect 12822 quest 5086.1 @50.6,22.4 map 1448 era only Orc,Tauren,Troll,Undead
 
-step Moonglade
+step Kernda
+  when onquest 8471
+  turnin 8471 only Orc,Tauren,Troll,Undead
+
+step To Rabine Saturna
   zone Moonglade
-  goto 44.9,35.6 "Umber"
-
-# ---------------------------------------------------------------- Moonglade
-
-step Umber
-  zone Moonglade
-  tip Through the Timbermaw tunnel to Moonglade. Umber reads in a house in Nighthaven.
-  turnin 6844                         -- Umber walks around Nighthaven: look inside the circle on the map
-  accept 6845
+  goto 51.7,45.1 "To Rabine Saturna"
 
 step Rabine Saturna
-  turnin 5527
-
-step Class trainer
-  only Druid
-  train class only Druid
-
-step Rabine Saturna
-  turnin 6845
+  turnin 5527 only Orc,Tauren,Troll,Undead
   note Rabine's Shards of the Felvine needs Dire Maul. Skip it.
 
-step Umber
-  turnin 1185 direct
-
-step Winterspring
+step To Donova Snowden
   zone Winterspring
-  goto 31.3,45.2 "Donova Snowden"
+  goto 31.3,45.2 "To Donova Snowden"
+
+# ---------------------------------------------------------------- Winterspring
 
 step Donova Snowden
   zone Winterspring
   tip Back into the Timbermaw tunnel and take the Winterspring exit; Donova camps by the hot springs just outside.
-  turnin 980                          -- From Krakle in Un'Goro
-  accept 4842
-  turnin 5086
-  accept 5087
-
-# ---------------------------------------------------------------- Winterspring
+  turnin 5086 optional only Orc,Tauren,Troll,Undead
+  accept 5087 only Orc,Tauren,Troll,Undead
 
 step Winterfall Runners
+  zone Winterspring
   tip The runners walk the road from Timbermaw Hold toward Winterfall Village in small groups; wait by the road near Donova and kill them as they pass. Each one carries a crate.
-  tip Careful: Turning in spawns three or four level 56-57 Winterfall ambushers that attack you; you can escape them while mounted, in stealth or with Feign Death, and they then gather by the lake so you can take the next quest.
-  collect 12829 quest 5087.1
+  collect 12829 quest 5087.1 only Orc,Tauren,Troll,Undead
 
-step Salfa
-  accept 8464
-  note Winterfall Activity's village is north-east of Everlook, on this guide's way back from Darkwhisper Gorge.
-
-step Meilosh
-  when complete 6031
-  zone Felwood
-  tip With 30 Runecloth in your bags: follow the road north to Timbermaw Hold; Meilosh trades just inside the entrance.
-  turnin 6031                         -- Below ground
-
-step Kernda
-  when onquest 8470
-  zone Felwood
-  tip The Deadwood totem from Felpaw Village, if Kernda didn't take it then: she waits at the tunnel mouth of Timbermaw Hold and speaks to you from Neutral with the Timbermaw, which the Deadwood furbolgs of Felwood brought you to.
-  turnin 8470                         -- Kernda walks around here: look inside the circle on the map
-
-step Winterspring
+step Winterfall Runners
   zone Winterspring
-  goto 59.8,74.3 "Darkwhisper Gorge"
+  when onquest 5087
+  turnin 5087 only Orc,Tauren,Troll,Undead -- Donova Snowden
 
-# ---------------------------------------------------------------- Darkwhisper Gorge and Winterfall Village
-
-step Darkwhisper Gorge
-  tip Ride east, then south down Frostwhisper Gorge. The Frostmaul giants there are elite level 59: keep to the middle and keep moving. The strange source is at the mouth of Darkwhisper Gorge, at the south end.
-  goto 59.8,74.2 "Darkwhisper Gorge"
-  complete 4842
-
-step Level 59.9
+step Winterfall Runners
   zone Winterspring
-  when level<59.9
-  tip Top up here to level 59.9 before the hand-ins at Winterspring: they take you to level 60. The Rabid Shardtooths (59) of Frostwhisper Gorge, just north of the strange source, give far more experience than the furbolgs by Timbermaw Hold. Or, with a group, run the Scholomance dungeon or the Stratholme dungeon instead.
-  goto 60.1,71.2 map 1452 "Rabid Shardtooth"
-  level 59.9 grind 7446               -- grind on Rabid Shardtooth
-
-step Are We There, Yeti?
-  tip Ride north to Everlook.
-  kill 10978 quest 5163.1 @61.5,38.6 map 1452 "Scare Legacki with Umi's Mechanical Yeti"
-
-step Everlook
-  turnin 5163                         -- Umi Rumplesnicker
-
-step Winterfall Village
-  tip The furbolg village fills the valley north-east of Everlook. Kill Shamans first; they heal. High Chief Winterfall (59, elite) and Xandivious (62) are in the cave at the back: stay out.
-  kill 7440 quest 8464.2
-  kill 7438 quest 8464.3
-  kill 7439 quest 8464.1
-
-step Donova Snowden
-  tip Ride back west along the road to Frostfire Hot Springs.
-  turnin 4842
-  turnin 5087                         -- Donova Snowden
   note Donova next sends you after High Chief Winterfall, an elite in his cave. Skip it.
-
-step Salfa
-  tip North of Donova, at the tunnel's Winterspring exit.
-  turnin 8464
-
-step Beads for Salfa
-  tip Salfa takes the beads only once Winterfall Activity is handed in: any Winterfall furbolg can carry them, and the camps just south of Salfa are the closest.
-  goto 31.6,36.6 "Frostfire Winterfall camp"
-  collect 21383 x5
-
-step Salfa
-  when has 21383 x5
-  turnin 8469 direct
 
 # ---------------------------------------------------------------- Level 60
 

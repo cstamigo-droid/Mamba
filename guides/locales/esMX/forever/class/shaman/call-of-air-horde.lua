@@ -67,15 +67,17 @@ return {
 	-- plural, as words: Twisted Earth Totems = {item:274045} Twisted Earth Totem
 	["Twisted Earth Totems"] = "Tótems de tierra retorcidos",
 	-- {area:75} Stonard · {zone:1435} Swamp of Sorrows
-	-- plural, as words: Twisted Earth Totems = {item:274045} Twisted Earth Totem · The Lost Ones = {npc:256028} The Lost One
+	-- plural, as words: Twisted Earth Totems = {item:274045} Twisted Earth Totem · Lost Ones = {npc:254797} Lost One
 	["Five Twisted Earth Totems. The Lost Ones (murlocs, level 34-39) north and north-east of {area:75} in the {zone:1435} carry them; most run for help when hurt."] = "Cinco Tótems de tierra retorcidos. Los Perdidos (múrlocs, nivel 34-39) al norte y noreste de {area:75}, en {zone:1435}, los llevan; la mayoría huye a pedir ayuda cuando está herida.",
 
 	-- Step 17: The steam pools
 	["The steam pools"] = "Las pozas de vapor",
-	-- {npc:5905} Prate Cloudseer · {item:268582} Corrupted Totems · {area:484} Freewind Post · {npc:216474} Ravaging Tempest · {item:212792} Eye of the Tempest
-	["{npc:5905} hands you the {item:268582}. Place the {item:268582} at the steam pools north-west of {area:484} to call the corrupted elementals and then the {npc:216474}; Razormane quilboar join the fight while the ritual runs. A group quest: bring at least one or two friends. The {item:212792} drops about every other kill, and every group member can loot it."] = "{npc:5905} te da {item:268582}. Coloca {item:268582} en las pozas de vapor al noroeste de {area:484} para llamar a los elementales corrompidos y luego a la {npc:216474}; los jabaespines Crines de Acero se unen a la pelea mientras dura el ritual. Es una misión de grupo: lleva al menos uno o dos amigos. {item:212792} cae más o menos en una de cada dos muertes, y todos los del grupo pueden saquearlo.",
-	-- {item:212792} Eye of the Tempest · {npc:216474} Ravaging Tempest
-	["{item:212792}, from the {npc:216474}"] = "{item:212792}, de la {npc:216474}",
+	-- {npc:5905} Prate Cloudseer · {spell:23424} Corrupted Totems · {area:484} Freewind Post · {item:212792} Eye of the Tempest
+	-- was: ["{npc:5905} hands you the {item:268582}. Place the {item:268582} at the steam pools north-west of {area:484} to call the corrupted elementals and then the {npc:216474}; Razormane quilboar join the fight while the ritual runs. A group quest: bring at least one or two friends. The {item:212792} drops about every other kill, and every group member can loot it."] = "{npc:5905} te da {item:268582}. Coloca {item:268582} en las pozas de vapor al noroeste de {area:484} para llamar a los elementales corrompidos y luego a la {npc:216474}; los jabaespines Crines de Acero se unen a la pelea mientras dura el ritual. Es una misión de grupo: lleva al menos uno o dos amigos. {item:212792} cae más o menos en una de cada dos muertes, y todos los del grupo pueden saquearlo."
+	["{npc:5905} hands you the {spell:23424}. Place the {spell:23424} at the steam pools north-west of {area:484} to call the corrupted elementals and then the Ravaging Tempest; Razormane quilboar join the fight while the ritual runs. A group quest: bring at least one or two friends. The {item:212792} drops about every other kill, and every group member can loot it."] = "{npc:5905} te da {spell:23424}. Coloca {spell:23424} en las pozas de vapor al noroeste de {area:484} para llamar a los elementales corruptos y luego a la Ravaging Tempest; los jabaespines Razormane se unen a la pelea mientras dura el ritual. Es una misión de grupo: lleva al menos uno o dos amigos. {item:212792} se suelta aproximadamente cada dos muertes, y cada miembro del grupo puede saquearlo.",
+	-- {item:212792} Eye of the Tempest
+	-- was: ["{item:212792}, from the {npc:216474}"] = "{item:212792}, de la {npc:216474}"
+	["{item:212792}, from the Ravaging Tempest"] = "{item:212792}, de Ravaging Tempest",
 
 	-- Step 19: Bath'rah the Windwatcher
 	-- {npc:6176} Bath'rah the Windwatcher · {zone:1416} Alterac Mountains · {area:272} Tarren Mill · {item:280607} Lightning's Grasp · {item:280605} Tidebringer's Claw · {item:280604} Rage of the Storm · {item:280696} Elementalist's Guard
@@ -93,6 +95,8 @@ return {
 	-- ["The Mirefin murlocs of northern {zone:1445} carry the Twisted Water Totems."] = "Los múrlocs Ancalodo del norte de {zone:1445} llevan los Tótems de agua retorcidos.",
 	-- ["The Stonevault troggs in the south of the {zone:1418} carry the Twisted Fire Totems."] = "Los troggs Grutacanto del sur de {zone:1418} llevan los Tótems de fuego retorcidos.",
 	-- ["{area:1717} is a dungeon at the southern edge of the {zone:1413} (the arrow points at its entrance); {npc:4421} is its last boss. Bring a group."] = "{area:1717} es un calabozo en el borde sur de {zone:1413} (la flecha apunta a su entrada); {npc:4421} es su último jefe. Lleva un grupo.",
+	-- ["{item:212792}, from the {npc:216474}"] = "{item:212792}, de la {npc:216474}",
+	-- ["{npc:5905} hands you the {item:268582}. Place the {item:268582} at the steam pools north-west of {area:484} to call the corrupted elementals and then the {npc:216474}; Razormane quilboar join the fight while the ritual runs. A group quest: bring at least one or two friends. The {item:212792} drops about every other kill, and every group member can loot it."] = "{npc:5905} te da {item:268582}. Coloca {item:268582} en las pozas de vapor al noroeste de {area:484} para llamar a los elementales corrompidos y luego a la {npc:216474}; los jabaespines Crines de Acero se unen a la pelea mientras dura el ritual. Es una misión de grupo: lleva al menos uno o dos amigos. {item:212792} cae más o menos en una de cada dos muertes, y todos los del grupo pueden saquearlo.",
 	-- ["{npc:5905} hands you the {item:268582}: place them at the steam pools west of {area:484} and defeat the {npc:216474} they call. {quest:79366} is an elite quest: grouping up is advised."] = "{npc:5905} te da los {item:268582}: colócalos en las pozas de vapor al oeste de {area:484} y derrota a la {npc:216474} que invocan. {quest:79366} es una misión élite: se recomienda ir en grupo.",
 	-- ["{npc:6176} camps in the east of {zone:1416}, north-east of {area:272}."] = "{npc:6176} acampa en el este de {zone:1416}, al noreste de {area:272}.",
 	-- ["{npc:6176}: the {item:213086} and your weapon"] = "{npc:6176}: la {item:213086} y tu arma",

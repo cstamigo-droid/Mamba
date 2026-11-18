@@ -11,7 +11,7 @@ return {
 	["Your epic mount at 60, summoned at will: the faster step up from the Warhorse."] = "Tu montura épica a nivel 60, invocada a voluntad: el paso más rápido tras el caballo de guerra.",
 
 	-- Step 1: Lord Grayson Shadowbreaker (Ironforge)
-	-- {npc:5149} Brandur Ironhammer · {object:32362} Mystic Ward (no name in this language: may be words) · {quest:7670} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
+	-- {npc:5149} Brandur Ironhammer · {object:32362} Mystic Ward · {quest:7670} Lord Grayson Shadowbreaker · {zone:1453} Stormwind
 	["At 60 {npc:5149} in the {object:32362} sends you to {quest:7670} in {zone:1453}'s Cathedral of Light."] = "A nivel 60, {npc:5149} en {object:32362} te manda con {quest:7670} en la Catedral de la Luz de {zone:1453}.",
 
 	-- Step 2: Lord Grayson Shadowbreaker
@@ -22,7 +22,7 @@ return {
 	["{npc:6171}, Cathedral of Light"] = "{npc:6171}, Catedral de la Luz",
 
 	-- Step 3: High Priest Rohan
-	-- {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words)
+	-- {npc:11406} High Priest Rohan · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward
 	["{npc:11406}, the priest trainer, walks about the {object:32386} in {zone:1455}'s {object:32362}. He gives you his censer for a donation of 150 gold, taken at the hand-in. Keep the censer."] = "{npc:11406}, el instructor de sacerdotes, camina por {object:32386} en {object:32362} de {zone:1455}. Te da su incensario por una donación de 150 de oro, que se cobra al entregar. Guarda el incensario.",
 	-- {npc:11406} High Priest Rohan
 	["{npc:11406}: 150 gold"] = "{npc:11406}: 150 de oro",

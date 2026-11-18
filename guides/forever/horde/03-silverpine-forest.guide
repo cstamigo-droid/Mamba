@@ -2,7 +2,7 @@
 guide forever/horde/03-silverpine-forest
 title Silverpine Forest
 faction Horde
-levels 12-16
+levels 13-14
 zone Silverpine Forest
 next forever/horde/02-the-barrens
 
@@ -76,14 +76,6 @@ next forever/horde/02-the-barrens
 # The Engraved Ring (440) stays (c17 review): Magistrate Sevren is in Brill, on the road from
 # Silverpine to the zeppelin towers.
 #
-# Ragefire Chasm (`when dungeon "Ragefire Chasm"`, dungeons in the route): for a character who chose it,
-# Neeru Fireblade's Slaying the Beast (5761) is taken in the Cleft of Shadow on the last Orgrimmar stop,
-# at about 15; the portal is beside him, so the run follows at once and he takes the heart when you
-# come out. Left out: Hidden Enemies (5726-5730: the insignia from Skull Rock's cultists and three walks
-# between Thrall and Neeru), The Power to Destroy... (5725: Varimathras stands in the Royal Quarter, off
-# this guide's Apothecarium stop, and the route is next in the Undercity at about 25) and Rahauro's
-# quests (5722-5724: Thunder Bluff, first on the route at 27).
-#
 # Class quests: Orcs and Trolls hand the cultists' Neeru Fireblade (829) and The Admiral's Orders
 # (831) in on arrival in Orgrimmar. Troll Priests hand Hex of Weakness (5654) to Ur'kyo, their
 # trainer, on that arrival stop (02's Orgrimmar trip at 20 keeps it for anyone still carrying it). Tauren Druids leave the Strange Lockbox
@@ -113,14 +105,13 @@ step Orgrimmar
   tip Walk in by the main gate. Doras, the wind rider master, stands on the tower in the Valley of Strength; Innkeeper Gryshka keeps the inn below it, Thatog stands by the bank. Bind here: the Hearthstone brings you back from Silverpine Forest beside the zeppelin towers and the road to the Barrens.
   getfp "Orgrimmar"
   sethome "Orgrimmar" npc 6929        -- Innkeeper Gryshka
-  accept 97246                        -- Thatog
+  accept 97246 only Orc,Troll,Tauren,Skyborne -- Thatog
 
 step Borstan
   only Orc,Troll,Tauren,Skyborne
   zone Orgrimmar
   tip Borstan's Firepit is a few steps north.
-  turnin 97246                        -- Borstan
-  accept 97249
+  turnin 97246 only Orc,Troll,Tauren,Skyborne -- Borstan
 
 step Neeru Fireblade
   only Orc,Troll
@@ -128,14 +119,14 @@ step Neeru Fireblade
   when onquest 829,832
   tip The Cleft of Shadow is the canyon under the Valley of Strength; Neeru Fireblade stands at its far end.
   turnin 829
-  accept 809                          -- Neeru Fireblade: Ak'Zeloth stands at Far Watch Post, on the next guide's road to the Crossroads
+  accept 809 only Orc,Troll -- Neeru Fireblade: Ak'Zeloth stands at Far Watch Post, on the next guide's road to the Crossroads
   turnin 832                          -- Neeru Fireblade: Burning Shadows, from the Eye of Burning Shadow in Durotar
 
 step The Drag
   only Orc,Troll,Tauren,Skyborne
   zone Orgrimmar
   tip Kor'geld and Yelmak run the alchemy shop in the Drag; Whuut is next door.
-  accept 97242                        -- Kor'geld
+  accept 97242 only Orc,Troll,Tauren,Skyborne -- Kor'geld
 
 step Jandi
   only Orc,Troll
@@ -159,8 +150,8 @@ step Valley of Honor
   only Orc,Troll,Tauren,Skyborne
   zone Orgrimmar
   tip The cattails and speargrass grow along the water in the Valley of Honor, east of the Drag.
-  collect 277278 quest 97242.1
-  collect 277279 quest 97242.2
+  collect 277278 quest 97242.1 only Orc,Troll,Tauren,Skyborne
+  collect 277279 quest 97242.2 only Orc,Troll,Tauren,Skyborne
 
 step Thuwd
   only Orc,Troll
@@ -194,7 +185,6 @@ step Class trainer
   zone Orgrimmar
   tip Train while you are in the city: Druids and Paladins have no trainer here. Troll Priests: train with Ur'kyo in the Valley of Spirits, who takes Hex of Weakness.
   train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
-  turnin 5654 only Troll,Priest       -- Ur'kyo: Hex of Weakness
 
 step Sayoc
   only Orc,Troll,Tauren,Skyborne,Warrior
@@ -231,9 +221,9 @@ step Hanashi
 step Kor'geld
   only Orc,Troll,Tauren,Skyborne
   zone Orgrimmar
-  turnin 97242
-  accept 97275                        -- Yelmak
-  turnin 97275                        -- Whuut
+  turnin 97242 only Orc,Troll,Tauren,Skyborne
+  accept 97275 only Orc,Troll,Tauren,Skyborne -- Yelmak
+  turnin 97275 only Orc,Troll,Tauren,Skyborne -- Whuut
 
 step Whuut
   only Orc,Troll
@@ -248,20 +238,19 @@ step Valley of Wisdom
   only Orc,Troll,Tauren,Skyborne
   zone Orgrimmar
   tip Thra and Migi sit behind Grommash Hold in the Valley of Wisdom; the Smooth Boulders lie around them.
-  turnin 97249                        -- Migi
-  accept 97326                        -- Thra
-  collect 277952 quest 97326.1
-  turnin 97326
+  accept 97326 only Orc,Troll,Tauren,Skyborne -- Thra
+  collect 277952 quest 97326.1 only Orc,Troll,Tauren,Skyborne
+  turnin 97326 only Orc,Troll,Tauren,Skyborne
 
 step Thrall
   only Skyborne
   zone Orgrimmar
   tip Thrall stands in Grommash Hold. He offers Journey to the Crossroads and Exploring the Horde once Welcome to Azeroth is handed in.
   turnin 95350                        -- Thrall, inside Grommash Hold
-  accept 98024                        -- Thrall: keep it, Thork at the Crossroads in the Barrens guide
-  accept 93739 optional               -- Thrall: Exploring the Horde, a tour of the Horde's leaders
-  talk 3230 quest 93739.1 "Talk to Nazgrel" optional -- Speak with Nazgrel, in Grommash Hold
-  talk 10540 quest 93739.2 "Talk to Vol'jin" optional -- Speak with Vol'jin, in Grommash Hold
+  accept 98024 only Skyborne -- Thrall: keep it, Thork at the Crossroads in the Barrens guide
+  accept 93739 optional only Skyborne -- Thrall: Exploring the Horde, a tour of the Horde's leaders
+  talk 3230 quest 93739.1 "Talk to Nazgrel" optional only Skyborne -- Speak with Nazgrel, in Grommash Hold
+  talk 10540 quest 93739.2 "Talk to Vol'jin" optional only Skyborne -- Speak with Vol'jin, in Grommash Hold
 
 step Nazgrel
   zone Orgrimmar
@@ -281,31 +270,31 @@ step Brill
   only Orc,Troll,Tauren,Skyborne
   zone Tirisfal Glades
   tip Brill is a short walk north up the road from the zeppelin towers: Deathguard Terrence stands by the road into town, Apothecary Johaan in the apothecary's house on the west side of the square; Paladins: Shari Stilwell trains you in town.
-  accept 96895                        -- Deathguard Terrence
-  accept 445                          -- Apothecary Johaan, inside
+  accept 96895 only Orc,Troll,Tauren,Skyborne -- Deathguard Terrence
+  accept 445 only Orc,Troll,Tauren,Skyborne -- Apothecary Johaan, inside
   train class only Paladin            -- Shari Stilwell, in Brill
 
 step Hadric Harlson
   only Orc,Troll,Tauren,Skyborne
   zone Tirisfal Glades
   tip Back down the road past the zeppelin towers and east to Deathguard Linnea's camp: Hadric stands beside her.
-  turnin 96895
-  accept 96897
-  accept 96898
+  turnin 96895 only Orc,Troll,Tauren,Skyborne
+  accept 96897 only Orc,Troll,Tauren,Skyborne
+  accept 96898 only Orc,Troll,Tauren,Skyborne
 
 step The Cult of the Damned
   only Orc,Troll,Tauren,Skyborne
   zone Tirisfal Glades
   tip The cultists camp a short walk south-east of Hadric. Dark Neophytes and Dark Enforcers drop the Necrotic Crystal Fragments; more fragments, black crystals, lie on the ground among the tents.
-  kill 267006 quest 96897.1
-  kill 275437 quest 96897.2
-  collect 275851 quest 96898.1
+  kill 267006 quest 96897.1 only Orc,Troll,Tauren,Skyborne
+  kill 275437 quest 96897.2 only Orc,Troll,Tauren,Skyborne
+  collect 275851 quest 96898.1 only Orc,Troll,Tauren,Skyborne
 
 step Hadric Harlson
   only Orc,Troll,Tauren,Skyborne
   zone Tirisfal Glades
-  turnin 96897
-  turnin 96898
+  turnin 96897 only Orc,Troll,Tauren,Skyborne
+  turnin 96898 only Orc,Troll,Tauren,Skyborne
 
 step The Sepulcher
   zone Silverpine Forest
@@ -324,7 +313,7 @@ step The Sepulcher
   accept 421
   accept 428                          -- High Executor Hadrec, below ground
   accept 437
-  turnin 445                          -- Apothecary Renferrel: Delivery to Silverpine Forest
+  turnin 445 only Orc,Troll,Tauren,Skyborne -- Apothecary Renferrel: Delivery to Silverpine Forest
 
 step The Sepulcher
   zone Silverpine Forest
@@ -451,7 +440,7 @@ step The Undercity
   accept 97891                        -- Alessandro Luca
   turnin 97891                        -- Doctor Martin Felben, in the Apothecarium
   turnin 1359                         -- Apothecary Zinge, in the Apothecarium
-  accept 1358                         -- Apothecary Zinge: Helbrim at the Crossroads, in the next guide
+  accept 1358 only Tauren,Undead -- Apothecary Zinge: Helbrim at the Crossroads, in the next guide
   train class only Paladin            -- Garen Largo, the Undercity's paladin trainer
 
 step Brom Killian
@@ -488,17 +477,181 @@ step Lady Sylvanas Windrunner
   talk 10181 quest 93739.4 "Talk to Lady Sylvanas Windrunner" only Skyborne optional -- Speak with Lady Sylvanas Windrunner, in the Royal Quarter: Exploring the Horde
 
 step Zeppelin to Orgrimmar
+  only Orc,Tauren,Troll
   zone Tirisfal Glades
   goto 60.7,58.9 "Zeppelin to Orgrimmar"
 
 step Orgrimmar
+  only Orc,Tauren,Troll
   zone Orgrimmar
-  goto 55.6,72.3 "Orgrimmar's Valley of Strength"
+  goto 55.6,72.3 "Orgrimmar's main gate"
+
+step Fly to The Sepulcher
+  only Skyborne
+  zone Undercity
+  goto 63.1,48.3 "Undercity flight master"
+  fly "The Sepulcher"
+
+step Boat to Steamwheedle Port
+  only Skyborne
+  zone Riverglades
+  goto 80.6,54.6 "Boat to Steamwheedle Port" live only Warrior,Paladin,Priest,Mage,Warlock
+
+step Into Tirisfal Glades
+  only Skyborne,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Hunter
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Skyborne,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Rogue
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Skyborne,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Shaman
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Tirisfal Glades
+  only Skyborne,Druid
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Into Tirisfal Glades"
+
+step Zeppelin to Orgrimmar
+  only Skyborne,Druid
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin to Orgrimmar"
+
+step Into Thousand Needles
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone Thousand Needles
+  goto 74.2,93.6 "Into Thousand Needles" only Warrior,Paladin,Priest,Mage,Warlock
+
+step Into The Barrens
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone The Barrens
+  goto 44.1,91.2 "Into The Barrens"
+
+step To Camp Taurajo
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone The Barrens
+  goto 44.5,59.1 "To Camp Taurajo"
+
+step Fly to Orgrimmar
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone The Barrens
+  goto 44.5,59.1 "Camp Taurajo flight master"
+  fly "Orgrimmar"
 
 step Valley of Strength
   zone Orgrimmar
   tip Walk in through the main gate. Thatog stands in the Valley of Strength.
-  accept 97246                        -- Thatog
+  accept 97246 only Orc,Troll,Tauren,Skyborne -- Thatog
+
+step To Booty Bay
+  only Undead
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay" only Warrior,Hunter,Shaman,Druid
+
+step Boat to Ratchet
+  only Undead
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet" only Warrior,Hunter,Shaman,Druid
+
+step To Booty Bay
+  only Undead,Paladin
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay"
+
+step Boat to Ratchet
+  only Undead,Paladin
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet"
+
+step To Orgrimmar
+  only Undead,Paladin
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
+
+step To Booty Bay
+  only Undead,Rogue
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay"
+
+step Boat to Ratchet
+  only Undead,Rogue
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet"
+
+step To Orgrimmar
+  only Undead,Rogue
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
+
+step To Booty Bay
+  only Undead,Priest
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay"
+
+step Boat to Ratchet
+  only Undead,Priest
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet"
+
+step To Orgrimmar
+  only Undead,Priest
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
+
+step To Booty Bay
+  only Undead,Mage
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay"
+
+step Boat to Ratchet
+  only Undead,Mage
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet"
+
+step To Orgrimmar
+  only Undead,Mage
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
+
+step To Booty Bay
+  only Undead,Warlock
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "To Booty Bay"
+
+step Boat to Ratchet
+  only Undead,Warlock
+  zone Stranglethorn Vale
+  goto 26.3,73.6 "Boat to Ratchet"
+
+step To Orgrimmar
+  only Undead,Warlock
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
+
+step To Orgrimmar
+  only Undead
+  zone Orgrimmar
+  goto 45.1,63.9 "To Orgrimmar"
 
 step Valley of Strength
   zone Orgrimmar
@@ -507,30 +660,7 @@ step Valley of Strength
 step Valley of Strength
   zone Orgrimmar
   tip Borstan's Firepit is a few steps north.
-  turnin 97246                        -- Borstan
-  accept 97249
-
-step Neeru Fireblade
-  when dungeon "Ragefire Chasm"
-  zone Orgrimmar
-  tip For your Ragefire Chasm run: the Cleft of Shadow is the canyon under the Valley of Strength; Neeru Fireblade stands at its far end, next to the Ragefire Chasm portal.
-  accept 5761                         -- Neeru Fireblade
-
-step Ragefire Chasm
-  when dungeon "Ragefire Chasm"
-  when onquest 5761
-  zone Orgrimmar
-  tip Ragefire Chasm is a dungeon for a group of five, about levels 13 to 18, and a full run takes 30 to 45 minutes. Its portal is in the Cleft of Shadow, beside Neeru.
-  tip Inside: past Oggleflint and his troggs, Taragaman the Hungerer waits in the lava cave and drops his heart. Jergosh the Invoker and Bazzalan, further in, are for Thrall's Hidden Enemies, which this route leaves out.
-  enter "Ragefire Chasm" @52.6,49.0
-  complete 5761                       -- Slaying the Beast: Taragaman the Hungerer's Heart
-
-step Neeru Fireblade
-  when dungeon "Ragefire Chasm"
-  when complete 5761
-  zone Orgrimmar
-  tip Back out through the portal: Neeru stands beside it.
-  turnin 5761                         -- Neeru Fireblade
+  turnin 97246 only Orc,Troll,Tauren,Skyborne -- Borstan
 
 step Class trainer
   only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
@@ -538,12 +668,12 @@ step Class trainer
 
 step The Drag
   tip Kor'geld and Yelmak run the alchemy shop in the Drag; Whuut is next door.
-  accept 97242                        -- Kor'geld
+  accept 97242 only Orc,Troll,Tauren,Skyborne -- Kor'geld
 
 step Valley of Honor
   tip The cattails and speargrass grow along the water in the Valley of Honor, east of the Drag.
-  collect 277278 quest 97242.1
-  collect 277279 quest 97242.2
+  collect 277278 quest 97242.1 only Orc,Troll,Tauren,Skyborne
+  collect 277279 quest 97242.2 only Orc,Troll,Tauren,Skyborne
 
 step Sayoc
   only Paladin
@@ -554,16 +684,15 @@ step Sayoc
   train 11868                         -- Sayoc
 
 step Kor'geld
-  turnin 97242
-  accept 97275                        -- Yelmak
-  turnin 97275                        -- Whuut
+  turnin 97242 only Orc,Troll,Tauren,Skyborne
+  accept 97275 only Orc,Troll,Tauren,Skyborne -- Yelmak
+  turnin 97275 only Orc,Troll,Tauren,Skyborne -- Whuut
 
 step Valley of Wisdom
   tip Thra and Migi sit behind Grommash Hold in the Valley of Wisdom; the Smooth Boulders lie around them. The next guide walks from here to Far Watch Post and the Crossroads.
-  turnin 97249                        -- Migi
-  accept 97326                        -- Thra
-  collect 277952 quest 97326.1
-  turnin 97326
+  accept 97326 only Orc,Troll,Tauren,Skyborne -- Thra
+  collect 277952 quest 97326.1 only Orc,Troll,Tauren,Skyborne
+  turnin 97326 only Orc,Troll,Tauren,Skyborne
 
 step Zor Lonetree
-  accept 1061                         -- Zor Lonetree: Seereth Stonebreak, on the road into Stonetalon in the next guide
+  accept 1061 only Tauren,Undead -- Zor Lonetree: Seereth Stonebreak, on the road into Stonetalon in the next guide

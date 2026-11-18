@@ -2,9 +2,32 @@
 guide forever/alliance/30-40/04-stranglethorn-vale
 title Stranglethorn Vale
 faction Alliance
-levels 32-34
+levels 33-34
 zone Stranglethorn Vale
 next forever/alliance/30-40/02-desolace
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+
+step Boat to Menethil Harbor
+  only Dwarf,Gnome,NightElf,Skyborne
+  zone Dustwallow Marsh
+  goto 71.7,56.7 "Boat to Menethil Harbor"
+
+step Fly to Ironforge
+  only Dwarf,Gnome,NightElf,Skyborne
+  zone Wetlands
+  goto 9.5,59.7 "Menethil Harbor flight master"
+  fly "Ironforge"
+
+step Into Dun Morogh
+  zone Dun Morogh
+  goto 21.2,37.1 "Into Dun Morogh"
+
+step Portal to Stranglethorn Vale
+  zone Dun Morogh
+  goto 21.4,37.1 "Portal to Stranglethorn Vale"
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
@@ -29,89 +52,101 @@ next forever/alliance/30-40/02-desolace
 # in the ruins of Zul'Kunda on 04b's second loop, at about 36: the ruins' core holds Berserkers, Headhunters and Witch
 # Doctors of 36-37, three over players here (fix round 1, 0.4.0). Kebok's and the crate's quests are taken on this loop.
 
-step Boat to Booty Bay
-  when !zone "Stranglethorn Vale"
-  zone The Barrens
-  tip The boat from Ratchet's dock crosses to Booty Bay, on Stranglethorn's southern cape.
-  goto 63.4,38.5 "Boat to Booty Bay"
-
 # ---------------------------------------------------------------- Booty Bay
 
 step Booty Bay
   zone Stranglethorn Vale
   tip Bind your hearthstone at the inn: it is your way back here from the north of the jungle at the end of the loop.
   getfp "Booty Bay"
-  accept 575                          -- Drizzlik, by the bank; inside
-  accept 605                          -- Crank Fizzlebub, inside
+  accept 575 only Dwarf,Gnome,Human,NightElf -- Drizzlik, by the bank; inside
+  accept 605 only Dwarf,Gnome,Human,NightElf -- Crank Fizzlebub, inside
   sethome "Booty Bay"                 -- Innkeeper Skindle, The Salty Sailor Tavern; upstairs
-  turnin 98463 optional               -- Nixxrax Fillamug, in the Salty Sailor Tavern; upstairs
-  accept 198                          -- Krazek, in the tavern; upstairs: Private Thorsen is at the Rebel Camp, on the way
-  accept 201                          -- Krazek: Nesingwary's camp, on the way
-  accept 616                          -- Krazek
-  accept 189                          -- Kebok, in the tavern
-  accept 213                          -- Kebok: the Tumbled Crystals, on the northern loop
+  accept 198 only Dwarf,Gnome,Human,NightElf -- Krazek, in the tavern; upstairs: Private Thorsen is at the Rebel Camp, on the way
+  accept 201 only Dwarf,Gnome,Human,NightElf -- Krazek: Nesingwary's camp, on the way
+  accept 616 only Dwarf,Gnome,Human,NightElf -- Krazek
+  accept 189 only Dwarf,Gnome,Human,NightElf -- Kebok, in the tavern; upstairs
+  accept 213 only Dwarf,Gnome,Human,NightElf -- Kebok: the Tumbled Crystals, on the northern loop
+  turnin 98463 optional only Dwarf,Gnome,Human,NightElf -- Nixxrax Fillamug, in the Salty Sailor Tavern; upstairs
   vendor nearest
-  turnin 616                          -- Baron Revilgaz, upstairs in the tavern
-  accept 578
+  turnin 616 only Dwarf,Gnome,Human,NightElf -- Baron Revilgaz, upstairs in the tavern
+  accept 578 only Dwarf,Gnome,Human,NightElf
 
 step North to Nesingwary's Expedition
   zone Stranglethorn Vale
   tip Follow the main road north the length of the jungle, past the Grom'gol turn-off, to the hunters' camp just west of the road.
-  goto 35.7,10.5 "Nesingwary's Expedition"
+  goto 35.7,10.5 "Stranglethorn Vale"
+
+step Fly to Sentinel Hill
+  zone Stranglethorn Vale
+  goto 27.5,77.7 "Booty Bay flight master"
+  fly "Sentinel Hill"
+  zone Westfall
+
+step To Nesingwary's Expedition
+  zone Stranglethorn Vale
+  goto 35.6,11.0 "To Nesingwary's Expedition"
 
 # ---------------------------------------------------------------- Nesingwary's Expedition
 
 step Nesingwary's Expedition
   zone Stranglethorn Vale
   tip The hunters' tents stand just west of the road. Krazek's Investigate the Camp only asks you to look around it.
-  complete 201 @35.65,10.59           -- Investigate the Camp: just look around the hunters' camp
-  accept 583                          -- Barnil Stonepot
-  turnin 583                          -- Hemet Nesingwary
-  turnin 5762                         -- Hemet Nesingwary, from Thousand Needles
-  accept 194
-  accept 185                          -- Ajeck Rouack
-  accept 190                          -- Sir S. J. Erlgadin
+  complete 201 @35.65,10.59 only Dwarf,Gnome,Human,NightElf -- Investigate the Camp: just look around the hunters' camp
+  accept 583 only Dwarf,Gnome,Human,NightElf -- Barnil Stonepot
+  turnin 583 only Dwarf,Gnome,Human,NightElf -- Hemet Nesingwary
+  turnin 5762 only Dwarf,Gnome,Human,NightElf -- Hemet Nesingwary, from Thousand Needles
+  accept 194 only Dwarf,Gnome,Human,NightElf
+  accept 185 only Dwarf,Gnome,Human,NightElf -- Ajeck Rouack
+  accept 190 only Dwarf,Gnome,Human,NightElf -- Sir S. J. Erlgadin
+
+step Young Panther on the way
+  along until q190
+  kill 683 quest 190 only Dwarf,Gnome,Human,NightElf
+
+step Nesingwary's Expedition
+  zone Stranglethorn Vale
   accept 338 optional                 -- Barnil Stonepot
 
-step Young tigers and panthers
+step Stranglethorn Vale: kill these as you meet them
+  label q190
+  zone Stranglethorn Vale
   tip Both roam the grass around the camp and along the road north.
-  kill 681 quest 185                  -- Young Stranglethorn Tiger
-
-step River crocolisks
   tip River Crocolisks (30-31) swim the river right beside Nesingwary's camp and up toward the Rebel Camp.
-  collect 4053 quest 575              -- Large River Crocolisk Skin
+  collect 4053 quest 575 only Dwarf,Gnome,Human,NightElf -- Large River Crocolisk Skin
+  kill 681 quest 185 only Dwarf,Gnome,Human,NightElf -- Young Stranglethorn Tiger
+  kill 683 quest 190 only Dwarf,Gnome,Human,NightElf
 
 step Nesingwary's Expedition
-  turnin 185                          -- Ajeck Rouack
-  accept 186
+  turnin 185 only Dwarf,Gnome,Human,NightElf -- Ajeck Rouack
+  accept 186 only Dwarf,Gnome,Human,NightElf
 
 step Young Panther
-  kill 683 quest 190                  -- Young Panther
+  kill 683 quest 190 only Dwarf,Gnome,Human,NightElf -- Young Panther
 
 step Nesingwary's Expedition
-  turnin 190                          -- Sir S. J. Erlgadin
-  accept 191
+  turnin 190 only Dwarf,Gnome,Human,NightElf -- Sir S. J. Erlgadin
+  accept 191 only Dwarf,Gnome,Human,NightElf
 
 step Stranglethorn Tigers
   tip The adult tigers prowl the hills just south and west of the camp.
-  kill 682 quest 186                  -- Stranglethorn Tiger
+  kill 682 quest 186 only Dwarf,Gnome,Human,NightElf -- Stranglethorn Tiger
 
 step Ajeck Rouack
-  turnin 186
-  accept 187                          -- The elder tigers come later, on the way back from the Rebel Camp
+  turnin 186 only Dwarf,Gnome,Human,NightElf
+  accept 187 only Dwarf,Gnome,Human,NightElf -- The elder tigers come later, on the way back from the Rebel Camp
 
 # ---------------------------------------------------------------- Nesingwary's hunts
 
 step Panthers, raptors and elder tigers
   tip Back south past Nesingwary: Panthers and Stranglethorn Raptors run in the clearings west of the camp toward the coast; the elder tigers hold the hills south-west.
-  kill 736 quest 191                  -- Panther
+  kill 736 quest 191 only Dwarf,Gnome,Human,NightElf -- Panther
   accept 635 optional                 -- Gluggle (37, rare) on the coast west of camp drops the Pendant of Myzrael: four levels over you, leave him unless you are grouped
   accept 97328 @31.5,12.8 map 1434    -- Thoroughly Scavenged Supplies, a looted crate west of Nesingwary's camp: the Stolen Shipments lie in the Bloodscalp ruins on the coast, for the second Stranglethorn loop
 
 step Sir S. J. Erlgadin
   tip Back east to Nesingwary's camp on the way north to the Rebel Camp.
-  turnin 191
-  accept 192                          -- keep it: the Shadowmaw Panthers (37-38) wait for the 40-50 Stranglethorn guide
+  turnin 191 only Dwarf,Gnome,Human,NightElf
+  accept 192 only Dwarf,Gnome,Human,NightElf -- keep it: the Shadowmaw Panthers (37-38) wait for the 40-50 Stranglethorn guide
 
 # ---------------------------------------------------------------- Rebel Camp
 
@@ -119,70 +154,75 @@ step Rebel Camp
   tip Take the road north; the camp sits in the hills to the west.
   tip Private Thorsen offers Jungle Secrets only while he is out of the camp: about every half hour he walks down the path to the road, where two Kurzen's Agents ambush him. Help him kill them and take the quest at once, before he walks back up. He isn't there? Leave it: the guide passes Bookie Herod, which follows from it, as well.
   tip Private Thorsen spends most of his time at the top of the Rebel Camp's path, by the huts, and now and then walks down it to the road and back (about eight minutes). If he isn't at the arrow, look along that path.
-  accept 215 @40.3,8.4 optional       -- Private Thorsen, at the foot of the path
-  turnin 198 @38.0,3.4                -- Private Thorsen: at the top of the path by the huts, or on his walk down it
-  turnin 215                          -- Lieutenant Doren, in the hut
-  accept 200                          -- Lieutenant Doren: Bookie Herod's records lie at the edge of Kurzen's Compound, next
-  accept 210                          -- Corporal Kaleb: for Krazek in Booty Bay, later in this guide
-  accept 203                          -- Sergeant Yohwa
-  accept 204
+  accept 210 only Dwarf,Gnome,Human,NightElf -- Corporal Kaleb: for Krazek in Booty Bay, later in this guide
+  accept 203 only Dwarf,Gnome,Human,NightElf -- Sergeant Yohwa
+  accept 204 only Dwarf,Gnome,Human,NightElf
+  accept 215 optional @40.3,8.4 map 1434 era only Dwarf,Gnome,Human,NightElf -- Private Thorsen, at the foot of the path
+  turnin 215 only Dwarf,Gnome,Human,NightElf -- Lieutenant Doren, in the hut
+  accept 200 only Dwarf,Gnome,Human,NightElf -- Lieutenant Doren: Bookie Herod's records lie at the edge of Kurzen's Compound, next
+
+step Vul'Gol Ogre Mound: kill these as you meet them
+  zone Duskwood
+  tip Head south-west from Darkshire to the ogre mound. Abercrombie's Crate sits in the camp at its entrance; Splinter Fist ogres guard it. Zzarc' Vul is inside the ogre mound's cave: go in by the cave mouth on the mound's west side.
+  accept 96138 optional only Dwarf,Gnome,Human,NightElf -- Only if a Lost Watcher dropped Merrick's Bow: right-click it
+  kill 212 x8 quest 96138.1 optional only Dwarf,Gnome,Human,NightElf -- Splinter Fist Warrior
+  kill 892 x4 quest 96138.2 optional only Dwarf,Gnome,Human,NightElf -- Splinter Fist Taskmaster
+  collect 1968 quest 181.1 @38.0,80.0 map 1431 only Dwarf,Gnome,Human,NightElf -- Below ground
+
+step Rebel Camp
+  zone Stranglethorn Vale
+  turnin 198 @38,3.4 map 1434 era only Dwarf,Gnome,Human,NightElf -- Private Thorsen: at the top of the path by the huts, or on his walk down it
+
+step Kurzen's Compound: kill these as you meet them
+  zone Stranglethorn Vale
+  when onquest 200
+  tip The Kurzen rebels hold the camp east of the Rebel Camp; work its outer edge, where Jungle Fighters and Medicine Men stand, and loot the supply crates by the tents. Bookie Herod's records lie in a hut on the compound's west side. Careful: Kurzen Elites and Witch Doctors (36) hold the compound's eastern half, by the cave: stay on its west side.
+  turnin 200 only Dwarf,Gnome,Human,NightElf -- Bookie Herod's Records, in the hut
 
 step Kurzen's Compound: kill these as you meet them
   zone Stranglethorn Vale
   tip The Kurzen rebels hold the camp east of the Rebel Camp; work its outer edge, where Jungle Fighters and Medicine Men stand, and loot the supply crates by the tents. Bookie Herod's records lie in a hut on the compound's west side. Careful: Kurzen Elites and Witch Doctors (36) hold the compound's eastern half, by the cave: stay on its west side.
-  turnin 200                          -- Bookie Herod's Records, in the hut
-  accept 328                          -- The strongbox is deeper in, by the cave: on the northern loop (04b)
-  collect 2633 quest 204.1            -- Jungle Remedy
-  kill 937 quest 203                  -- Kurzen Jungle Fighter
-  collect 2634 quest 204.2            -- Venom Fern Extract, from a Kurzen Supplies crate
-
-step Level 33.2
-  when level<33.2
-  tip The elder tigers next are 34-35: short of 33.2? Keep on the Kurzen Jungle Fighters and Medicine Men around the compound's outer edge until level 33.2. Or, with a group, run the Scarlet Monastery dungeon (Library) instead.
-  goto 44.6,10.0 map 1434 "Kurzen Jungle Fighter"
-  level 33.2 grind 937                 -- grind on Kurzen Jungle Fighter
+  accept 328 only Dwarf,Gnome,Human,NightElf -- The strongbox is deeper in, by the cave: on the northern loop (04b); upstairs
+  collect 2633 quest 204.1 only Dwarf,Gnome,Human,NightElf -- Jungle Remedy
+  kill 937 quest 203 only Dwarf,Gnome,Human,NightElf -- Kurzen Jungle Fighter
+  collect 2634 quest 204.2 only Dwarf,Gnome,Human,NightElf -- Venom Fern Extract, from a Kurzen Supplies crate
 
 step Rebel Camp
-  turnin 203                          -- Sergeant Yohwa
-  turnin 204
+  turnin 203 only Dwarf,Gnome,Human,NightElf -- Sergeant Yohwa
+  turnin 204 only Dwarf,Gnome,Human,NightElf
 
 step Stranglethorn Vale: kill these as you meet them
   zone Stranglethorn Vale
   tip Careful: Troll camps are close to the tiger area, and trolls can join a fight if you pull carelessly.
   tip Careful: The raptor nest has young raptors that join the fight when you attack the adults.
-  kill 1085 quest 187                 -- Elder Stranglethorn Tiger
-  kill 685 quest 194                  -- Stranglethorn Raptor
+  kill 1085 quest 187 only Dwarf,Gnome,Human,NightElf -- Elder Stranglethorn Tiger
+  kill 685 quest 194 only Dwarf,Gnome,Human,NightElf -- Stranglethorn Raptor
+  collect 1519 quest 189 only Dwarf,Gnome,Human,NightElf -- Bloodscalp Ear from Bloodscalp Warrior, Bloodscalp Axe Thrower and others, 130 yd east
 
 step Nesingwary's Expedition
-  tip Barnil collects the Green Hills of Stranglethorn: the pages drop from almost every humanoid in the jungle. Turn the pages into chapters as you go.
-  accept 339 optional
-  accept 340 optional
-  accept 341 optional
-  accept 342 optional
-  turnin 187                          -- Ajeck Rouack
-  accept 188                          -- keep it: Sin'Dall (37) comes in the 40-50 Stranglethorn guide, at about 41
-  turnin 194                          -- Hemet Nesingwary
-  accept 195                          -- keep it: the Lashtail Raptors come on the second loop (04b), around Sin'Dall's hill
+  tip South along the road: the hunters' tents stand just west of it.
+  turnin 187 only Dwarf,Gnome,Human,NightElf -- Ajeck Rouack
+  accept 188 only Dwarf,Gnome,Human,NightElf -- keep it: Sin'Dall (37) comes in the 40-50 Stranglethorn guide, at about 41
+  turnin 194 only Dwarf,Gnome,Human,NightElf -- Hemet Nesingwary
+  accept 195 only Dwarf,Gnome,Human,NightElf -- keep it: the Lashtail Raptors come on the second loop (04b), around Sin'Dall's hill
 
 step The Savage Coast
   zone Stranglethorn Vale
   tip From Nesingwary's camp head west to the Crystalvein Mine near the coast; the Crystal Spine Basilisks around it drop the shards.
   tip The haunted island lies just off the coast south-west of the mine: just reach its edge. Careful: its Lesser Water Elementals are 36-37: don't stay. The Bloodscalp ruins of Zul'Kunda to the north wait for the second Stranglethorn loop.
-  collect 3918 quest 605 @24.2,17.7 map 1434 -- Singing Crystal Shard
-  complete 578 @21.9,22.4             -- The haunted island
+  collect 3918 quest 605 @24.2,17.7 map 1434 only Dwarf,Gnome,Human,NightElf -- Singing Crystal Shard
+  complete 578 @21.9,22.4 map 1434 era only Dwarf,Gnome,Human,NightElf -- The haunted island
 
 step Booty Bay
   tip Hearth back to Booty Bay.
-  turnin 575                          -- Drizzlik, inside
-  accept 577                          -- Drizzlik: the Snapjaw Crocolisks, on the northern loop
-  turnin 605                          -- Crank Fizzlebub, inside
-  turnin 201                          -- Krazek, upstairs
-  turnin 210                          -- Krazek, from Corporal Kaleb
+  turnin 575 only Dwarf,Gnome,Human,NightElf -- Drizzlik, inside
+  accept 577 only Dwarf,Gnome,Human,NightElf -- Drizzlik: the Snapjaw Crocolisks, on the northern loop
+  turnin 605 only Dwarf,Gnome,Human,NightElf -- Crank Fizzlebub, inside
+  turnin 201 only Dwarf,Gnome,Human,NightElf -- Krazek, upstairs
+  turnin 210 only Dwarf,Gnome,Human,NightElf -- Krazek, from Corporal Kaleb
   note Kebok's Bloodscalp ears wait for the second Stranglethorn loop: keep the quest.
-  turnin 578                          -- Baron Revilgaz, upstairs in the tavern
-  accept 601                          -- Baron Revilgaz: the water elementals rise around the haunted island, on the northern loop
-
-# ---------------------------------------------------------------- Stormwind
+  turnin 578 only Dwarf,Gnome,Human,NightElf -- Baron Revilgaz, upstairs in the tavern
+  accept 601 only Dwarf,Gnome,Human,NightElf -- Baron Revilgaz: the water elementals rise around the haunted island, on the northern loop
 
 step Fly to Stormwind
   zone Stranglethorn Vale
@@ -190,59 +230,59 @@ step Fly to Stormwind
   fly "Stormwind"
   zone Stormwind City
 
+# ---------------------------------------------------------------- Stormwind
+
 step Grimand Elmore
-  turnin 322
+  zone Stormwind City
+  turnin 322 only Dwarf,Gnome,Human,NightElf
 
 step Collin Mauren
   when complete 1078
   tip Collin Mauren is in the Slaughtered Lamb, in the Mage Quarter.
-  turnin 1078
-
-step Class training
-  zone Stormwind City
-  tip Your level 34 ranks: the class trainers stand around the Trade District, Old Town, the Cathedral and the Mage Quarter; Sheldras Moontree, the druid trainer, stands north-west of the Mage Quarter. Shamans train in Ironforge, later in 30-40.
-  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid
-
-step Boat to Auberdine
-  zone Stormwind City
-  goto 22.71,56.69 "Boat to Auberdine" live
+  turnin 1078 only Dwarf,Gnome,Human,NightElf
 
 # ---------------------------------------------------------------- To Desolace
+
+step Boat to Auberdine
+  only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Druid
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
 
 step Fly to Stonetalon Peak
   when taxi "Stonetalon Peak"
   only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Druid
   zone Darkshore
   tip You know the Stonetalon Peak flight: it lands closer to Desolace than Astranaar does. From the peak, follow the road south through the mountains to the Charred Vale.
+  zone Stonetalon Mountains
+  zone Darkshore
   goto 36.4,45.6 "Auberdine flight master"
   fly "Stonetalon Peak"
-  zone Stonetalon Mountains
 
 step Fly to Astranaar
   when !taxi "Stonetalon Peak"
   zone Darkshore
-  goto 36.4,45.6 "Auberdine flight master"
-  fly "Astranaar"
   zone Ashenvale
+  zone Darkshore
+  goto 36.4,45.6 "Auberdine flight master"
+
+step Boat to Auberdine
+  only Gnome,Human,Warlock
+  zone Stormwind City
+  goto 21.8,56.9 "Boat to Auberdine" live
 
 step Fly to Astranaar
   when taxi "Stonetalon Peak"
   only Warlock
   zone Darkshore
   tip Warlocks fly to Astranaar for the Heartswood, on the way west.
+  zone Ashenvale
+  zone Darkshore
   goto 36.4,45.6 "Auberdine flight master"
   fly "Astranaar"
-  zone Ashenvale
 
 step Heartswood
   only Warlock
   zone Ashenvale
   tip From Astranaar head north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. If you took What Is Love?, the Wooden Figurine lies in a house among the trees north of Maestra's Post (26.6,22.0). Then take the road west to Stonetalon.
   collect 6912 quest 1738.1               -- Heartswood
-  collect 190309 quest 65602.1 optional   -- Wooden Figurine, north of Maestra's Post
-
-step Stonetalon Mountains
-  when !zone "Desolace"
-  zone Stonetalon Mountains
-  goto 30.0,76.5 "The road to Nijel's Point"
-
+  collect 190309 quest 65602.1 optional only Gnome,Human -- Wooden Figurine, north of Maestra's Post

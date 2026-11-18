@@ -7,10 +7,12 @@
 -- The comments are rewritten by sync.
 return {
 	-- Guide
-	-- {spell:2652} Touch of Weakness · {quest:5644} Dark Sacrifice
-	["{spell:2652} and {quest:5644}"] = "{spell:2652} y {quest:5644}",
-	-- {spell:2652} Touch of Weakness · {quest:5644} Dark Sacrifice
-	["The Undead priest spells: {spell:2652} at 10, {quest:5644} (new in Forever) at 20. Free, no objectives."] = "Los hechizos de sacerdote no-muerto: {spell:2652} a nivel 10, {quest:5644} (nuevo en Forever) a nivel 20. Gratis, sin objetivos.",
+	-- {spell:2652} Touch of Weakness · {spell:1277324} Dark Sacrifice
+	-- was: ["{spell:2652} and {quest:5644}"] = "{spell:2652} y {quest:5644}"
+	["{spell:2652} and {spell:1277324}"] = "{spell:2652} y {spell:1277324}",
+	-- {spell:2652} Touch of Weakness · {spell:1277324} Dark Sacrifice
+	-- was: ["The Undead priest spells: {spell:2652} at 10, {quest:5644} (new in Forever) at 20. Free, no objectives."] = "Los hechizos de sacerdote no-muerto: {spell:2652} a nivel 10, {quest:5644} (nuevo en Forever) a nivel 20. Gratis, sin objetivos."
+	["The Undead priest spells: {spell:2652} at 10, {spell:1277324} (new in Forever) at 20. Free, no objectives."] = "Los hechizos de sacerdote no-muerto: {spell:2652} a nivel 10, {spell:1277324} (nuevo en Forever) a nivel 20. Gratis, sin objetivos.",
 
 	-- Step 1: Touch of Weakness: Tai'jin
 	-- {zone:1411} Durotar · {npc:3706} Tai'jin · {area:362} Razor Hill · {spell:2652} Touch of Weakness · {npc:4606} Aelthalyste · {zone:1458} Undercity
@@ -63,32 +65,48 @@ return {
 	["{quest:5663}: {npc:3044}'s letter"] = "{quest:5663}: la carta de {npc:3044}",
 
 	-- Step 10: Dark Sacrifice: Ur'kyo
-	-- {zone:1454} Orgrimmar · {npc:6018} Ur'kyo · {object:172961} Valley of Spirits · {quest:5644} Dark Sacrifice · {npc:4606} Aelthalyste · {zone:1458} Undercity
-	["At 20 in {zone:1454}, {npc:6018} in the {object:172961} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1454}, {npc:6018} en {object:172961} te da una carta de {quest:5644} para {npc:4606} en {zone:1458}.",
-	-- {npc:6018} Ur'kyo · {quest:5644} Dark Sacrifice
-	["{npc:6018}: take his {quest:5644} letter"] = "{npc:6018}: toma su carta de {quest:5644}",
+	-- {zone:1454} Orgrimmar · {npc:6018} Ur'kyo · {object:172961} Valley of Spirits · {spell:1277324} Dark Sacrifice · {npc:4606} Aelthalyste · {zone:1458} Undercity
+	-- was: ["At 20 in {zone:1454}, {npc:6018} in the {object:172961} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1454}, {npc:6018} en {object:172961} te da una carta de {quest:5644} para {npc:4606} en {zone:1458}."
+	["At 20 in {zone:1454}, {npc:6018} in the {object:172961} hands you a {spell:1277324} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1454}, {npc:6018} en {object:172961} te da una carta de {spell:1277324} para {npc:4606} en {zone:1458}.",
+	-- {npc:6018} Ur'kyo · {spell:1277324} Dark Sacrifice
+	-- was: ["{npc:6018}: take his {quest:5644} letter"] = "{npc:6018}: toma su carta de {quest:5644}"
+	["{npc:6018}: take his {spell:1277324} letter"] = "{npc:6018}: toma su carta de {spell:1277324}",
 
 	-- Step 11: Dark Sacrifice: Miles Welsh
-	-- {zone:1456} Thunder Bluff · {npc:3044} Miles Welsh · {area:1640} Spirit Rise · {quest:5644} Dark Sacrifice · {npc:4606} Aelthalyste · {zone:1458} Undercity
-	["At 20 in {zone:1456}, {npc:3044} in the cave under {area:1640} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1456}, {npc:3044}, en la cueva debajo de {area:1640}, te da una carta de {quest:5644} para {npc:4606} en {zone:1458}.",
-	-- {npc:3044} Miles Welsh · {quest:5644} Dark Sacrifice
-	["{npc:3044}: take his {quest:5644} letter"] = "{npc:3044}: toma su carta de {quest:5644}",
+	-- {zone:1456} Thunder Bluff · {npc:3044} Miles Welsh · {area:1640} Spirit Rise · {spell:1277324} Dark Sacrifice · {npc:4606} Aelthalyste · {zone:1458} Undercity
+	-- was: ["At 20 in {zone:1456}, {npc:3044} in the cave under {area:1640} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1456}, {npc:3044}, en la cueva debajo de {area:1640}, te da una carta de {quest:5644} para {npc:4606} en {zone:1458}."
+	["At 20 in {zone:1456}, {npc:3044} in the cave under {area:1640} hands you a {spell:1277324} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1456}, {npc:3044}, en la cueva bajo {area:1640}, te da una carta de {spell:1277324} para {npc:4606} en {zone:1458}.",
+	-- {npc:3044} Miles Welsh · {spell:1277324} Dark Sacrifice
+	-- was: ["{npc:3044}: take his {quest:5644} letter"] = "{npc:3044}: toma su carta de {quest:5644}"
+	["{npc:3044}: take his {spell:1277324} letter"] = "{npc:3044}: toma su carta de {spell:1277324}",
 
 	-- Step 12: Dark Sacrifice: Aelthalyste
-	-- {npc:4606} Aelthalyste · {object:36070} War Quarter · {quest:5679} Dark Sacrifice · {spell:2944} Devouring Plague
-	["At 20, {npc:4606} in the {object:36070} teaches {quest:5679} with a quest she gives and takes back at once (its text still speaks of {spell:2944}, which every priest now learns from the trainer)."] = "A nivel 20, {npc:4606} en {object:36070} enseña {quest:5679} con una misión que te da y recibe enseguida (su texto todavía habla de {spell:2944}, que ahora todos los sacerdotes aprenden del instructor).",
+	-- {npc:4606} Aelthalyste · {object:36070} War Quarter · {spell:1277324} Dark Sacrifice · {quest:5679} Devouring Plague
+	-- was: ["At 20, {npc:4606} in the {object:36070} teaches {quest:5644} with a quest she gives and takes back at once (its text still speaks of {spell:2944}, which every priest now learns from the trainer)."] = "A nivel 20, {npc:4606} en {object:36070} enseña {quest:5644} con una misión que te da y recibe enseguida (su texto todavía habla de {spell:2944}, que ahora todos los sacerdotes aprenden del instructor)."
+	["At 20, {npc:4606} in the {object:36070} teaches {spell:1277324} with a quest she gives and takes back at once (its text still speaks of {quest:5679}, which every priest now learns from the trainer)."] = "A nivel 20, {npc:4606} en {object:36070} enseña {spell:1277324} con una misión que te da y te recibe enseguida (su texto todavía habla de {quest:5679}, que ahora todos los sacerdotes aprenden del instructor).",
 
 	-- Step 13: Dark Sacrifice: Ur'kyo's letter
-	-- {quest:5646} Dark Sacrifice · {npc:6018} Ur'kyo
-	["{quest:5646}: {npc:6018}'s letter"] = "{quest:5646}: la carta de {npc:6018}",
+	-- {spell:1277324} Dark Sacrifice · {npc:6018} Ur'kyo
+	-- was: ["{quest:5646}: {npc:6018}'s letter"] = "{quest:5646}: la carta de {npc:6018}"
+	["{spell:1277324}: {npc:6018}'s letter"] = "{spell:1277324}: la carta de {npc:6018}",
 
 	-- Step 14: Dark Sacrifice: Miles Welsh's letter
-	-- {quest:5644} Dark Sacrifice · {npc:3044} Miles Welsh
-	["{quest:5644}: {npc:3044}'s letter"] = "{quest:5644}: la carta de {npc:3044}",
+	-- {spell:1277324} Dark Sacrifice · {npc:3044} Miles Welsh
+	-- was: ["{quest:5644}: {npc:3044}'s letter"] = "{quest:5644}: la carta de {npc:3044}"
+	["{spell:1277324}: {npc:3044}'s letter"] = "{spell:1277324}: la carta de {npc:3044}",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["At 10, go to {npc:4606} in the {zone:1458}'s {object:36070}. Priest trainers elsewhere ({npc:6018} in {zone:1454}, {npc:3706} in {area:362}, {npc:3044} in {zone:1456}) send you to her with a quest of the same name."] = "A nivel 10, ve con {npc:4606} en {object:36070} de {zone:1458}. Los instructores de sacerdote de otros lugares ({npc:6018} en {zone:1454}, {npc:3706} en {area:362}, {npc:3044} en {zone:1456}) te envían con ella mediante una misión del mismo nombre.",
+	-- ["At 20 in {zone:1454}, {npc:6018} in the {object:172961} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1454}, {npc:6018} en {object:172961} te da una carta de {quest:5644} para {npc:4606} en {zone:1458}.",
+	-- ["At 20 in {zone:1456}, {npc:3044} in the cave under {area:1640} hands you a {quest:5644} letter for {npc:4606} in the {zone:1458}."] = "A nivel 20 en {zone:1456}, {npc:3044}, en la cueva debajo de {area:1640}, te da una carta de {quest:5644} para {npc:4606} en {zone:1458}.",
 	-- ["At 20, {npc:4606} in the {object:36070} teaches {quest:5644} with a quest she gives and takes back at once (its text still speaks of {spell:2944}, which every priest now learns from the trainer)."] = "A nivel 20, {npc:4606} en {object:36070} enseña {quest:5644} con una misión que te da y recibe enseguida (su texto todavía habla de {spell:2944}, que ahora todos los sacerdotes aprenden del instructor).",
+	-- ["At 20, {npc:4606} in the {object:36070} teaches {quest:5679} with a quest she gives and takes back at once (its text still speaks of {spell:2944}, which every priest now learns from the trainer)."] = "A nivel 20, {npc:4606} en {object:36070} enseña {quest:5679} con una misión que te da y recibe enseguida (su texto todavía habla de {spell:2944}, que ahora todos los sacerdotes aprenden del instructor).",
 	-- ["At 20, {npc:4606} teaches {quest:5644}. {npc:6018} in {zone:1454} and {npc:3044} in {zone:1456} send you to her with a quest of the same name."] = "A nivel 20, {npc:4606} enseña {quest:5644}. {npc:6018} en {zone:1454} y {npc:3044} en {zone:1456} te envían con ella mediante una misión del mismo nombre.",
+	-- ["The Undead priest spells: {spell:2652} at 10, {quest:5644} (new in Forever) at 20. Free, no objectives."] = "Los hechizos de sacerdote no-muerto: {spell:2652} a nivel 10, {quest:5644} (nuevo en Forever) a nivel 20. Gratis, sin objetivos.",
 	-- ["The Undead priest spells: {spell:2652} at 10, {quest:5644} at 20."] = "Los hechizos de sacerdote no-muerto: {spell:2652} a nivel 10, {quest:5644} a nivel 20.",
+	-- ["{npc:3044}: take his {quest:5644} letter"] = "{npc:3044}: toma su carta de {quest:5644}",
+	-- ["{npc:6018}: take his {quest:5644} letter"] = "{npc:6018}: toma su carta de {quest:5644}",
+	-- ["{quest:5644}: {npc:3044}'s letter"] = "{quest:5644}: la carta de {npc:3044}",
+	-- ["{quest:5646}: {npc:6018}'s letter"] = "{quest:5646}: la carta de {npc:6018}",
+	-- ["{spell:2652} and {quest:5644}"] = "{spell:2652} y {quest:5644}",
 }

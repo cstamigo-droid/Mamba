@@ -2,7 +2,7 @@
 guide forever/alliance/30-40/06b-desolace
 title Desolace
 faction Alliance
-levels 38-39
+levels 39-40
 zone Desolace
 next forever/alliance/40-50/01-stranglethorn-vale
 pitch Kodo bones, demons and lost treasure in south Desolace.
@@ -10,6 +10,30 @@ pro Short: about one level of quests
 pro Then on to Stranglethorn Vale
 pro Stays on the main route
 con A long trip out to Kalimdor
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+
+step Fly to Southshore
+  zone Loch Modan
+  goto 33.9,50.8 "Thelsamar flight master"
+  fly "Southshore"
+  zone Hillsbrad Foothills
+
+step Boat to Auberdine
+  zone Hillsbrad Foothills
+  goto 50.6,69.9 "Boat to Auberdine"
+
+step Fly to Stonetalon Peak
+  zone Darkshore
+  goto 36.4,45.6 "Auberdine flight master"
+  fly "Stonetalon Peak"
+  zone Stonetalon Mountains
+
+step To Nijel's Point
+  zone Stonetalon Mountains
+  goto 41.0,83.0 "To Nijel's Point"
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
@@ -24,40 +48,59 @@ con A long trip out to Kalimdor
 
 # ---------------------------------------------------------------- To Theramore
 
+step Into The Barrens
+  zone The Barrens
+  goto 39.4,29.7 "Into The Barrens"
+
+step To Ratchet
+  zone The Barrens
+  goto 63.4,38.5 "To Ratchet"
+
+step Boat to Booty Bay
+  zone The Barrens
+  goto 63.4,38.5 "Boat to Booty Bay"
+
+step Fly to Thelsamar
+  zone Stranglethorn Vale
+  goto 27.5,77.7 "Booty Bay flight master"
+  fly "Thelsamar"
+
 step Fly to Menethil Harbor
   zone Loch Modan
+  zone Wetlands
+  zone Loch Modan
   goto 33.9,50.8 "Thelsamar flight master"
-  fly "Menethil Harbor"
-  zone Wetlands
-
-step Boat to Theramore
-  zone Wetlands
-  goto 5.13,63.61 "Boat to Theramore"
-
-step Theramore flight master
-  zone Dustwallow Marsh
-  tip Off the boat, walk up the pier to Baldruc, the flight master by the gate of Foothold Citadel.
-  goto 67.5,51.3 "Theramore flight master"
 
 step Nijel's Point
   zone Desolace
-  fly "Nijel's Point"
   sethome "Nijel's Point"
-  turnin 6141                         -- Brother Anton
-  accept 261
-  accept 1466
-  accept 1454                         -- Kreldig Ungor, if 30-40/02 didn't take it: the wreck lies below Azore's tower
-  accept 93224                        -- Captain Pentigast, if 30-40/02 didn't give it
+  turnin 6141 only Dwarf,Gnome,Human,NightElf -- Brother Anton
+  accept 261 only Dwarf,Gnome,Human,NightElf
+  accept 1466 only Dwarf,Gnome,Human,NightElf
+
+step To Stonetalon Peak
+  zone Stonetalon Mountains
+  goto 36.5,7.2 "To Stonetalon Peak"
+
+step Fly to Nijel's Point
+  zone Stonetalon Mountains
+  goto 36.5,7.2 "Stonetalon Peak flight master"
+  fly "Nijel's Point"
+  zone Desolace
+
+step To Kormek's Hut
+  zone Desolace
+  goto 62.3,39.0 "To Kormek's Hut"
 
 # ---------------------------------------------------------------- Desolace: the south loop
 
 step Bibbly F'utzbuckle
   tip Follow the road south to Kormek's Hut.
-  accept 5501
+  accept 5501 only Dwarf,Gnome,Human,NightElf
 
 step Kodo Graveyard
   tip Hornizz stands at the edge of the Kodo Graveyard, south-west of Kormek's Hut; Kodo Bones lie among the skeletons.
-  collect 13703 quest 5501            -- Kodo Bone
+  collect 13703 quest 5501 only Dwarf,Gnome,Human,NightElf -- Kodo Bone
 
 step Hornizz Brimbuzzle
   when group 6134
@@ -69,25 +112,21 @@ step Flesh Picker
   tip A Flesh Picker crawls about the Kodo Graveyard: catch one with the tool from Amaryllis Webb's Entomology Starter Kit.
   collect 213567 "Flesh Picker Specimen" @48.1,57.1
 
-step Maraudine centaurs
-  tip The Maraudine centaurs hold the Valley of Spears west of the graveyard; every kind drops the totems.
-  collect 254432 quest 93224.1        -- Carved Centaur Totem
-
 step Melizza Brimbuzzle
   tip Melizza is held in the centaur camp west of the graveyard. Free her and keep her alive on the walk out; she stops by the graveyard.
   tip Careful: The scripted groups are linked and only appear during the escort, so you cannot clear them in advance or pull them one at a time. Clearing the normal centaurs on the path before you start does help.
-  accept 6132
-  complete 6132 @40.1,61.6            -- escort Melizza back toward the graveyard
+  accept 6132 only Dwarf,Gnome,Human,NightElf
+  complete 6132 @40.1,61.6 only Dwarf,Gnome,Human,NightElf -- escort Melizza back toward the graveyard
 
 step Mannoroc Coven
   tip The demons gather at the Mannoroc Coven in southern Desolace. Nether Maidens (37-38) hold its north-west side and drop the wings; Doomwarder Captains (38) stand at the south end and drop the blood.
   tip Careful: Nether Sorceresses (39-40) stand beside the Doomwarder Captains, and Lord Azrethoc, a level 40 elite, walks the coven's middle: pull the captains away from them. Most of the mobs here walk patrol routes, so you can easily pull extra mobs.
-  collect 6251 quest 1466 @50.5,74.3 map 1443 -- Nether Wing, from the Nether Maidens
-  collect 6252 quest 1466 @51.7,83.4 map 1443 -- Doomwarder Blood, from the Doomwarder Captains
+  collect 6251 quest 1466 @50.5,74.3 map 1443 only Dwarf,Gnome,Human,NightElf -- Nether Wing, from the Nether Maidens
+  collect 6252 quest 1466 @51.7,83.4 map 1443 only Dwarf,Gnome,Human,NightElf -- Doomwarder Blood, from the Doomwarder Captains
 
 step The Valley of Bones
-  tip Undead Ravagers roam the bone fields south of the Magram village, east of the Coven: the arrow leads to their western edge. Careful: Magram Necrokhans and Corpsefeeders (45, elite) walk the bone fields further east, with Magram Necromancers (42): pull the Ravagers to you, away from them.
-  kill 11561 quest 261 @61.1,90.9 map 1443 -- Undead Ravager
+  tip Undead Ravagers roam the bone fields south of the Magram village, east of the Coven: the arrow leads to their western edge. Then use the Crate of Ghost Magnets at its arrow, on the fields' eastern side, to draw the Magrami Spectres. Careful: Magram Necrokhans and Corpsefeeders (45, elite) walk the bone fields between the two arrows, with Magram Necromancers (42): pull the Ravagers and the spectres to you, away from them.
+  kill 11561 quest 261 @61.1,90.9 map 1443 only Dwarf,Gnome,Human,NightElf -- Undead Ravager
 
 step The ghost magnets
   when group 6134
@@ -97,59 +136,78 @@ step The ghost magnets
 
 step Mannoroc Coven
   tip Back at the coven on the way west: the Mana Eaters (37-38) on its north edge and the Mage Hunters (38-39) further in drop the brains. Lord Azrethoc (40, elite) walks among the Mage Hunters: pull them out to you.
-  collect 6250 quest 1466 @52.2,68.1 map 1443 -- Felhound Brain
+  collect 6250 quest 1466 @52.2,68.1 map 1443 only Dwarf,Gnome,Human,NightElf -- Felhound Brain
 
 step Hornizz Brimbuzzle
-  turnin 6132
+  turnin 6132 only Dwarf,Gnome,Human,NightElf
 
 step Hornizz Brimbuzzle
   when group 6134
   turnin 6134                         -- Hornizz Brimbuzzle
 
 step Azore Aldamort
-  turnin 5741
-  turnin 93464                        -- Azore Aldamort: The Visiting Mage, from Magtoor in the Swamp of Sorrows
   tip Follow the road west across the north of Desolace to the ruins of Ethel Rethor. Azore's tower stands on the hill there, on the way to the wreck.
+  turnin 5741 only Dwarf,Gnome,Human,NightElf
+  turnin 93464                        -- Azore Aldamort: The Visiting Mage, from Magtoor in the Swamp of Sorrows
   accept 6027
-
-step Karnitol's Chest
-  tip The wrecked ship's chest lies just south-west of Azore's tower.
-  turnin 1454                         -- Karnitol's Chest
-  accept 1455
 
 step Claim Rackmore's Treasure!
   tip Rackmore's Log lies beside Karnitol's Chest, if you didn't take it on your first Desolace visit. His silver key drops from the Drysnap crabs around the wreck; the golden one comes from the Slitherblade naga on the north-west coast, next.
-  accept 6161                         -- Rackmore's Log, if 30-40/02 didn't take it
   collect 15878 quest 6161.1 @34.7,33.5 map 1443 -- Underwater
 
 step Sar'theris Strand: kill these as you meet them
   zone Desolace
-  tip The Slitherblade naga hold the north-west coast north of Azore's tower; Karnitol's satchel lies on the sea floor off it, and any naga can drop Rackmore's golden key. Swim out to Ranazjar Isle off the far northern tip and use the Gem of the Serpent on the Serpent Statue: Lord Kragaru (38) rises; kill him for the Book of the Ancients.
-  collect 6245 quest 1456.1 @33.2,10.5 map 1443 -- Underwater
+  tip The Slitherblade naga hold the north-west coast north of Azore's tower; Karnitol's satchel lies on the sea floor off it. Swim out to Ranazjar Isle off the far northern tip and use the Gem of the Serpent on the Serpent Statue: Lord Kragaru (38) rises; kill him for the Book of the Ancients.
   collect 15881 quest 6161.2 @27.9,7.7 map 1443 -- Rackmore's Golden Key, from the Slitherblade naga
+  collect 6245 quest 1456.1 @33.2,10.5 map 1443 only Dwarf,Gnome,Human,NightElf -- Underwater
   use 15766 quest 6027.1 @28.2,6.7 map 1443 -- Gem of the Serpent, on the Serpent Statue
   collect 15803 quest 6027            -- Book of the Ancients
 
 step Rackmore's Chest
   tip Rackmore's chest lies just south-east of the Serpent Statue.
-  turnin 6161                         -- Rackmore's Chest
+  turnin 6161 -- Rackmore's Chest
 
 step Azore Aldamort
   turnin 6027
 
 step Kormek's Hut
-  turnin 5501                         -- Bibbly F'utzbuckle
+  turnin 5501 only Dwarf,Gnome,Human,NightElf -- Bibbly F'utzbuckle
+
+step Fly to Stonetalon Peak
+  zone Desolace
+  goto 64.7,10.4 "Nijel's Point flight master"
+  fly "Stonetalon Peak"
+  zone Stonetalon Mountains
+
+step To Nijel's Point
+  zone Desolace
+  goto 66.2,9.6 "To Nijel's Point"
 
 step Nijel's Point
+  zone Desolace
   tip Follow the road north to Nijel's Point: Captain Pentigast stands at its south end, Kreldig Ungor in the middle, Brother Anton to the north.
-  turnin 93224                        -- Captain Pentigast
-  turnin 1466                         -- Kreldig Ungor
-  turnin 1455                         -- Kreldig Ungor
-  turnin 1456
-  accept 1457                         -- for Roetten Stonehammer in Ironforge: keep it
-  accept 1467                         -- for Roetten Stonehammer in Ironforge: keep it
-  turnin 261                          -- Brother Anton
-  accept 1052                         -- for Raleigh the Devout in Southshore: keep it
+  turnin 1466 only Dwarf,Gnome,Human,NightElf -- Kreldig Ungor
+  turnin 1456 only Dwarf,Gnome,Human,NightElf
+  accept 1457 only Dwarf,Gnome,Human,NightElf -- for Roetten Stonehammer in Ironforge: keep it
+  accept 1467 only Dwarf,Gnome,Human,NightElf -- for Roetten Stonehammer in Ironforge: keep it
+  turnin 261 only Dwarf,Gnome,Human,NightElf -- Brother Anton
+  accept 1052 only Dwarf,Gnome,Human,NightElf -- for Raleigh the Devout in Southshore: keep it
+
+step Into The Barrens
+  zone The Barrens
+  goto 39.4,29.7 "Into The Barrens"
+
+step To Ratchet
+  zone The Barrens
+  goto 62.7,36.2 "To Ratchet"
+
+step Gazlowe
+  getfp "Ratchet"
+  turnin 1178 only Dwarf,Gnome,Human,NightElf -- Upstairs
+  accept 1180 only Dwarf,Gnome,Human,NightElf
+
+step Wharfmaster Dizzywig
+  turnin 1111 only Dwarf,Gnome,Human,NightElf
 
 step Fly to Theramore
   zone Dustwallow Marsh

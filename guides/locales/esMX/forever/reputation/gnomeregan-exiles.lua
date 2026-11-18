@@ -104,7 +104,7 @@ return {
 	["{item:4306} drops from humanoids level 23 to 40: the Dragonmaw of the {zone:1437}, the Syndicate of Alterac and Arathi, Stranglethorn's trolls."] = "{item:4306} lo sueltan los humanoides de nivel 23 a 40: los Faucedraco de {zone:1437}, el Sindicato de Alterac y Arathi, los trols de Tuercespina.",
 
 	-- Step 17: A Donation of Mageweave
-	-- {item:4338} Mageweave Cloth · {object:147516} Dark Iron (no name in this language: may be words) · {zone:1418} Badlands · {zone:1427} Searing Gorge · {zone:1446} Tanaris · {zone:1444} Feralas
+	-- {item:4338} Mageweave Cloth · {object:147516} Dark Iron · {zone:1418} Badlands · {zone:1427} Searing Gorge · {zone:1446} Tanaris · {zone:1444} Feralas
 	["{item:4338} drops from humanoids level 35 to 50: the Shadowforge and {object:147516} dwarves of the {zone:1418} and {zone:1427}, the Dunemaul ogres of {zone:1446}, the Hatecrest naga of {zone:1444}."] = "{item:4338} lo sueltan los humanoides de nivel 35 a 50: los enanos Forjatiniebla y {object:147516} de {zone:1418} y {zone:1427}, los ogros Machacaduna de {zone:1446}, las nagas Crestafuria de {zone:1444}.",
 
 	-- Step 18: A Donation of Runecloth

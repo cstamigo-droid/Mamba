@@ -15,7 +15,7 @@ return {
 	["{npc:328} is the {area:87} mage trainer, upstairs in the Lion's Pride Inn."] = "{npc:328} es el instructor de magos de {area:87}, en el piso de arriba de la Posada Orgullo de León.",
 
 	-- Step 2: Dink (Ironforge)
-	-- {npc:7312} Dink · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {area:2257} Deeprun Tram · {object:171524} Tinker Town · {zone:1453} Stormwind
+	-- {npc:7312} Dink · {zone:1455} Ironforge · {object:32362} Mystic Ward · {area:2257} Deeprun Tram · {object:171524} Tinker Town · {zone:1453} Stormwind
 	["{npc:7312} teaches mages in {zone:1455}'s {object:32362}. Take the {area:2257} from {object:171524} to {zone:1453} afterwards."] = "{npc:7312} instruye a los magos en {object:32362}, en {zone:1455}. Después, toma el {area:2257} desde {object:171524} hasta {zone:1453}.",
 
 	-- Step 3: Jennea Cannon

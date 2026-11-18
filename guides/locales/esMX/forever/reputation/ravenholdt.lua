@@ -30,22 +30,29 @@ return {
 	["{npc:266216} is inside {area:275}, the Syndicate fortress east of {area:271}. Stealth past the guards in the courtyard."] = "{npc:266216} está dentro de {area:275}, la fortaleza del Sindicato al este de {area:271}. Pasa a los guardias del patio en sigilo.",
 
 	-- Step 4: Strahnbrad: Barton
-	-- {npc:266357} Barton · {area:280} Strahnbrad
-	["{npc:266357} hides in a house in {area:280}, among stealthed Syndicate. Pick his pocket for the report; Distract turns him around if you are under his level."] = "{npc:266357} se esconde en una casa de {area:280}, entre miembros del Sindicato en sigilo. Róbale el informe de los bolsillos; Distraer lo hace darse vuelta si estás por debajo de su nivel.",
-	-- {item:275482} Barton's Scouting Report · {npc:266357} Barton
-	["{item:275482}: pickpocket {npc:266357}"] = "{item:275482}: roba del bolsillo a {npc:266357}",
+	-- {area:280} Strahnbrad
+	-- was: ["{area:280}: Barton"] = "{area:280}: Barton"
+	["{area:280}: Barton"] = "{area:280}: Barton",
+	-- {area:280} Strahnbrad
+	-- was: ["{npc:266357} hides in a house in {area:280}, among stealthed Syndicate. Pick his pocket for the report; Distract turns him around if you are under his level."] = "{npc:266357} se esconde en una casa de {area:280}, entre miembros del Sindicato en sigilo. Róbale el informe de los bolsillos; Distraer lo hace darse vuelta si estás por debajo de su nivel."
+	["Barton hides in a house in {area:280}, among stealthed Syndicate. Pick his pocket for the report; Distract turns him around if you are under his level."] = "Barton se esconde en una casa en {area:280}, entre miembros del Syndicate en sigilo. Róbale el informe; Distraer lo hace voltearse si eres de nivel menor que el suyo.",
+	-- {item:275482} Barton's Scouting Report
+	-- was: ["{item:275482}: pickpocket {npc:266357}"] = "{item:275482}: roba del bolsillo a {npc:266357}"
+	["{item:275482}: pickpocket Barton"] = "{item:275482}: roba del bolsillo a Barton",
 
 	-- Step 5: Northfold Manor: a uniform
 	-- {area:313} Northfold Manor
 	["{area:313}: a uniform"] = "{area:313}: un uniforme",
-	-- {object:656157} Syndicate Footlocker (no name in this language: may be words) · {area:313} Northfold Manor · {quest:96783} A Way In · {item:275706} Syndicate Uniform
-	["The {object:656157} stands among the Syndicate camps of {area:313}, north of Stromgarde. Open it to finish {quest:96783} and take the {item:275706}."] = "El {object:656157} está entre los campamentos del Sindicato de {area:313}, al norte de Stromgarde. Ábrelo para completar {quest:96783} y toma el {item:275706}.",
+	-- {object:656157} Syndicate Footlocker · {area:313} Northfold Manor · {quest:96783} A Way In · {spell:1297705} Syndicate Uniform
+	-- was: ["The {object:656157} stands among the Syndicate camps of {area:313}, north of Stromgarde. Open it to finish {quest:96783} and take the {item:275706}."] = "El {object:656157} está entre los campamentos del Sindicato de {area:313}, al norte de Stromgarde. Ábrelo para completar {quest:96783} y toma el {item:275706}."
+	["The {object:656157} stands among the Syndicate camps of {area:313}, north of Stromgarde. Open it to finish {quest:96783} and take the {spell:1297705}."] = "{object:656157} está entre los campamentos del Syndicate de {area:313}, al norte de Stromgarde. Ábrelo para completar {quest:96783} y tomar {spell:1297705}.",
 
 	-- Step 6: Stromgarde: Anastasia Miller
 	-- {npc:266847} Anastasia Miller
 	["Stromgarde: {npc:266847}"] = "Stromgarde: {npc:266847}",
-	-- {item:275706} Syndicate Uniform · {npc:266847} Anastasia Miller
-	["Put on the {item:275706} and go into Stromgarde. {npc:266847} waits on a ledge just outside the castle; players reach her by jumping from the roof of the house beside the ledge. Her stash is upstairs in a house near the keep."] = "Ponte el {item:275706} y entra a Stromgarde. {npc:266847} espera en una cornisa justo afuera del castillo; los jugadores llegan saltando desde el techo de la casa junto a la cornisa. Su alijo está en el piso de arriba de una casa cerca de la torre del homenaje.",
+	-- {spell:1297705} Syndicate Uniform · {npc:266847} Anastasia Miller
+	-- was: ["Put on the {item:275706} and go into Stromgarde. {npc:266847} waits on a ledge just outside the castle; players reach her by jumping from the roof of the house beside the ledge. Her stash is upstairs in a house near the keep."] = "Ponte el {item:275706} y entra a Stromgarde. {npc:266847} espera en una cornisa justo afuera del castillo; los jugadores llegan saltando desde el techo de la casa junto a la cornisa. Su alijo está en el piso de arriba de una casa cerca de la torre del homenaje."
+	["Put on the {spell:1297705} and go into Stromgarde. {npc:266847} waits on a ledge just outside the castle; players reach her by jumping from the roof of the house beside the ledge. Her stash is upstairs in a house near the keep."] = "Ponte {spell:1297705} y entra a Stromgarde. {npc:266847} espera en una cornisa justo afuera del castillo; los jugadores llegan saltando desde el techo de la casa junto a la cornisa. Su alijo está en el piso de arriba de una casa cerca de la fortaleza.",
 	-- {item:275709} Stolen Funds
 	["{item:275709}, in Anastasia's Stash upstairs"] = "{item:275709}, en el alijo de Anastasia, arriba",
 
@@ -119,5 +126,9 @@ return {
 	["{npc:6707}: 50 per five boxes, handed in from his window"] = "{npc:6707}: 50 por cada cinco cajas, se entrega desde su ventana",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["Put on the {item:275706} and go into Stromgarde. {npc:266847} waits on a ledge just outside the castle; players reach her by jumping from the roof of the house beside the ledge. Her stash is upstairs in a house near the keep."] = "Ponte el {item:275706} y entra a Stromgarde. {npc:266847} espera en una cornisa justo afuera del castillo; los jugadores llegan saltando desde el techo de la casa junto a la cornisa. Su alijo está en el piso de arriba de una casa cerca de la torre del homenaje.",
+	-- ["The {object:656157} stands among the Syndicate camps of {area:313}, north of Stromgarde. Open it to finish {quest:96783} and take the {item:275706}."] = "El {object:656157} está entre los campamentos del Sindicato de {area:313}, al norte de Stromgarde. Ábrelo para completar {quest:96783} y toma el {item:275706}.",
 	-- ["{area:280}: Barton"] = "{area:280}: Barton",
+	-- ["{item:275482}: pickpocket {npc:266357}"] = "{item:275482}: roba del bolsillo a {npc:266357}",
+	-- ["{npc:266357} hides in a house in {area:280}, among stealthed Syndicate. Pick his pocket for the report; Distract turns him around if you are under his level."] = "{npc:266357} se esconde en una casa de {area:280}, entre miembros del Sindicato en sigilo. Róbale el informe de los bolsillos; Distraer lo hace darse vuelta si estás por debajo de su nivel.",
 }

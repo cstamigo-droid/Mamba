@@ -302,6 +302,14 @@ pub fn build_trainers(data: &Data, guides: Option<&Path>, recordings: &Recording
 	let mut unverified = Vec::new();
 	for &(cls, name, map) in CURATED {
 		let mut hits: Vec<V> = by_name.get(&name_key(name)).cloned().unwrap_or_default().into_iter().filter(|n| n.get("spawns").truthy() && n.get("spawns").get(&map.to_string()).truthy()).collect();
+		// Mamba (18-11): sin QuestieDB, forever-db pone a algunos en otro mapa (Lotheluum Starbreeze en
+		// 2665, no 2521): un nombre que solo tiene un PNJ con lugares vale en cualquier mapa.
+		if hits.is_empty() {
+			let all: Vec<V> = by_name.get(&name_key(name)).cloned().unwrap_or_default().into_iter().filter(|n| n.get("spawns").truthy()).collect();
+			if all.len() == 1 {
+				hits = all;
+			}
+		}
 		hits.sort_by(|a, b| a.get("id").num().partial_cmp(&b.get("id").num()).unwrap());
 		let Some(h) = hits.first() else {
 			unverified.push((cls.to_string(), name.to_string(), map));
@@ -488,6 +496,28 @@ pub fn run(data_dir: &Path, guides: Option<&Path>, recordings: &Path) -> Result<
 	let data = forge_guide::data::load_data(data_dir)?;
 	let recs = recordings::read_recordings(recordings)?;
 	let (t, report) = build_trainers(&data, guides, &recs);
+	// Mamba (18-11): los entrenadores de clase de ForeverTDB (autorizada 17-11; data/sources/forever-tdb/
+	// extract.json, `trainers`: id -> clases) que los datos tienen y la lista curada no encontró.
+	let extract = data_dir.join("..").join("sources").join("forever-tdb").join("extract.json");
+	if let Ok(text) = std::fs::read_to_string(&extract) {
+		let x = forge_guide::js::parse_json(&text)?;
+		let tr = x.get("trainers");
+		for (id, classes) in tr.entries() {
+			let n = data.npc(&V::Num(id.parse::<f64>().unwrap_or(0.0)));
+			let cls: Vec<V> = CLASS_FILES.iter().filter(|c| classes.items().iter().any(|k| k.as_str() == Some(**c))).map(|c| V::str(c)).collect();
+			// Un entrenador de clase enseña UNA clase; los maestros de armas (Hanashi, 2704) aparecen ahí con
+			// varias y no son entrenadores de clase (prueba engine_training, 18-11).
+			if t.has(&id) || !n.truthy() || !n.get("spawns").truthy() || cls.len() != 1 {
+				continue;
+			}
+			let o = Obj::new();
+			o.set("id", n.get("id"));
+			o.set("name", n.get("name"));
+			o.set("classes", V::from(cls));
+			o.set("sources", V::from(vec![V::str("curated")]));
+			t.set(&id, o);
+		}
+	}
 	let (lua, _, _) = class_trainers_lua(&data, &t);
 	Ok((trainers_json(&t), lua, report))
 }

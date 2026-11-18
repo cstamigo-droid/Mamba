@@ -32,37 +32,12 @@ step Shadowsong Shrine
   kill 6116 quest 5535.1              -- Highborne Apparition
   kill 6117 quest 5535.2              -- Highborne Lichling
 
-step Talrendis Point
-  zone Azshara
-  tip Just north-east of the shrine: Commander Truesong and Berdun Cliffbrew keep the Alliance camp at Talrendis Point.
-  accept 88807                        -- Commander Truesong: Slay the Spitelash
-  accept 89001                        -- Berdun Cliffbrew: Home on the Range
-
-step Mosshoof Runners
-  tip The Mosshoof Runners (45-47) graze the hills north of Talrendis Point, on the way to the satyrs.
-  collect 238463 quest 89001          -- Mosshoof Hide
-
 step Azshara: kill these as you meet them
   zone Azshara
   tip The Highborne ghosts haunt the ruins around the shrine; the Haldarr satyrs hold the camp just north of it. Sentinel Keldara Sunblade is held in the satyrs' camp: free her and walk her out.
   kill 6127 quest 5536.3              -- Haldarr Felsworn
   kill 6126 quest 5536.2              -- Haldarr Trickster
   kill 6125 quest 5536.1              -- Haldarr Satyr
-  accept 88857                        -- Sentinel Keldara Sunblade, in the camp
-  complete 88857                      -- Help her escape the camp
-
-step The western shore
-  tip The Spitelash Warriors (46-47) and Screamers (47-48) hold the western shore north-east of the satyrs.
-  kill 6190 quest 88807               -- Spitelash Warrior
-  kill 6193 quest 88807               -- Spitelash Screamer
-
-step Talrendis Point
-  tip Back south-west to Talrendis Point.
-  turnin 88807                        -- Commander Truesong
-  turnin 88857
-  accept 88809                        -- Commander Truesong: Preserving Eldarath, the relics drop from the naga of the top-up ahead
-  accept 92345                        -- Commander Truesong: Beneath Nordrassil, for Mathrengyl Bearwalker in Darnassus, keep it
-  turnin 89001                        -- Berdun Cliffbrew
 
 step Shadowsong Shrine
   turnin 5535                         -- Loh'atu
@@ -105,15 +80,6 @@ step Level 51.3 on the way north
   goto 46.5,54.5 map 1447 "Spitelash Myrmidon"
   level 51.3 grind 6196                -- grind on Spitelash Myrmidon
 
-step Lord Sarthiss
-  tip The Spitelash naga of these ruins drop Truesong's Eldarath Relics, top-up or not. Lord Sarthiss (52) stands in the ruins of Eldarath, south-west of the Myrmidons: pull him alone.
-  collect 280608 quest 88809.1        -- Eldarath Relic
-  collect 280610 quest 88809.2        -- Lord Sarthiss' Head
-
-step Ekkal
-  tip Ekkal camps by the road north to Kim'jael: his satyrs are in Kim'jael's camp.
-  accept 86746
-
 step Mosshoof Coursers
   zone Azshara
   only Priest
@@ -145,9 +111,6 @@ step Kim'jael
   turnin 3601
   accept 5534
   tip Ekkal's satyrs, rogues and hellcallers (51-53) are the Legashi around Kim'jael's camp; the Legashi Soulstealers, Hellraisers and Blackguards (53) further east are not part of it: stay west of them.
-  kill 6200 quest 86746.1
-  kill 6201 quest 86746.2
-  kill 6202 quest 86746.3
   level 50.65 grind 6196               -- grind on Spitelash Myrmidon
 
 step The Shattered Strand
@@ -155,10 +118,6 @@ step The Shattered Strand
 
 step Kim'jael
   turnin 5534
-
-step Ekkal
-  tip On the road back south, Ekkal takes the satyrs.
-  turnin 86746
 
 step Rubbing: Rune of Sael'hai
   collect 10566 quest 3449.4          -- Rune of Sael'hai
@@ -198,10 +157,6 @@ step Ravencrest Monument
   tip Swim to the small island off the southern tip of Azshara. If Pilot Xiggs Fuselighter isn't there, fire your Standard Issue Flare Gun to signal him, and wait for him to land.
   turnin 3449
   accept 3461
-
-step Talrendis Point
-  tip Back to Truesong at Talrendis Point before you hearth.
-  turnin 88809
 
 step To Ironforge
   zone Ironforge
@@ -261,7 +216,6 @@ step Orphan Matron Aria
   zone Alterac Mountains
   tip Ride north from Southshore into Alterac and west to the walls of Dalaran: Orphan Matron Aria stands outside them. Her quest goes to Lieutenant Connar in Nethergarde Keep, where this guide flies later.
   goto 21.6,73.2 "Orphan Matron Aria"
-  accept 96797
 
 step Western Plaguelands
   zone Western Plaguelands
@@ -369,7 +323,7 @@ step Cyrus Therepentous
   tip Open the Hoard of the Black Dragonflight from Searing Gorge for its Black Dragonflight Molt, then tell Cyrus you bring proof of your deeds: no drake to fight.
   accept 4022                         -- Below ground
   collect 10575 quest 4022.1          -- Black Dragonflight Molt, from the hoard
-  talk 9459 quest 4022.2 @95.1,31.6 map 1428
+  talk 9459 @95.1,31.6 map 1428
   turnin 4022
 
 step Cyrus Therepentous
@@ -411,8 +365,6 @@ step Fly to Nethergarde Keep
 
 step Ambassador Ardalan
   tip Ardalan is inside Nethergarde Keep.
-  turnin 96797                        -- Lieutenant Connar
-  accept 87295                        -- Bernie Heisten: Deflective Surface, the scales come from the basilisks ahead
   accept 2783 @67.6,19.3 map 1419
 
 step Swamp of Sorrows
@@ -448,7 +400,6 @@ step Blasted Lands: kill these as you meet them
   collect 8393 quest 2581             -- Scorpok Pincer
   collect 8393 quest 2583
   collect 8393 quest 2585
-  collect 280181 quest 87295.1        -- Redstone Basilisk Scale
 
 step Blasted Lands
   zone Blasted Lands
@@ -471,10 +422,6 @@ step The bloodmages
   turnin 2585
   note The bloodmages' second tier pays for the same parts with a buff item and no experience: skip it.
 
-step Bernie Heisten
-  tip Back to Bernie Heisten in Nethergarde Keep before you hearth.
-  turnin 87295
-
 step To Ironforge
   zone Ironforge
   tip Hearth back to Ironforge's inn.
@@ -496,7 +443,6 @@ step Loch Modan
 
 step Mountaineer Pebblebitty
   when group 3181
-  turnin 3181
   accept 3182
 
 step Fly to Ironforge
@@ -543,11 +489,6 @@ step Rut'theran Village
   accept 978                          -- The wildkin are in Winterspring: keep it
 
 step Portal to Darnassus
-  when onquest 3764,162,92345
-  zone Teldrassil
-  goto 55.9,89.3 "Portal to Darnassus"
-
-step Portal to Darnassus
   only Druid
   when !onquest 3764
   zone Teldrassil
@@ -558,13 +499,6 @@ step Darnassus
   tip The portal in Rut'theran Village leads up to Darnassus: Jenal waits in the Cenarion Enclave, in the north of the city.
   turnin 3764                         -- Jenal, in the Cenarion Enclave
   train class only Druid              -- Ironforge has no druid trainer
-
-step Mathrengyl Bearwalker
-  when onquest 92345
-  zone Darnassus
-  tip Mathrengyl Bearwalker is upstairs in the druids' building of the Cenarion Enclave: go in by its south door.
-  goto 35.8,11.6 "Mathrengyl Bearwalker"
-  turnin 92345                        -- Mathrengyl Bearwalker, upstairs
 
 step Gracina Spiritmight
   when onquest 162

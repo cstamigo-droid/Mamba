@@ -23,8 +23,6 @@ return {
 	["{npc:9528}, in the ruins just east of {npc:11554}"] = "{npc:9528}, en las ruinas justo al este de {npc:11554}",
 	-- {npc:9116} Eridan Bluewind
 	["{npc:9116}, inside"] = "{npc:9116}, adentro",
-	-- {npc:10920} Kelek Skykeeper · {quest:86577} A Sampling of Putrescence · {zone:1448} Felwood
-	["{npc:10920}: {quest:86577}, from the bears and wolves you meet in {zone:1448}"] = "{npc:10920}: {quest:86577}, de los osos y lobos que encuentres en {zone:1448}",
 
 	-- Step 4: Grazle
 	-- {npc:11554} Grazle · {area:2479} Emerald Sanctuary
@@ -71,12 +69,7 @@ return {
 	-- plural, as words: Tainted Oozes = {npc:7092} Tainted Ooze
 	["{item:11949}: Tainted Oozes slide about {area:1763}'s fel pools"] = "{item:11949}: los mocos corruptos se deslizan por las pozas viles de {area:1763}",
 
-	-- Step 12: Putrescent organs: kill these as you meet them
-	["Putrescent organs: kill these as you meet them"] = "Órganos putrefactos: mátalos a medida que los encuentres",
-	-- {zone:1448} Felwood · {npc:10920} Kelek Skykeeper · {area:1763} Jaedenar
-	["{zone:1448}'s Angerclaw bears and Felpaw wolves carry the putrescent organs {npc:10920} wants: the Bears and Wolves (47-48) of the south and the Maulers and Scavengers (49-50) along the road north of {area:1763}. Kill them as you ride between the stops."] = "Los osos Zarpira y los lobos Zarpavil de {zone:1448} llevan los órganos putrefactos que quiere {npc:10920}: los osos y lobos (47-48) del sur y los magulladores y carroñeros (49-50) a lo largo del camino al norte de {area:1763}. Mátalos mientras cabalgas entre las paradas.",
-
-	-- Step 14: Level 52.9
+	-- Step 13: Level 52.9
 	["Level 52.9"] = "Nivel 52.9",
 	-- {area:2479} Emerald Sanctuary · {area:1766} Shatter Scar Vale
 	-- plural, as words: Entropic Beasts = {npc:9878} Entropic Beast
@@ -84,7 +77,7 @@ return {
 	-- {npc:9878} Entropic Beast
 	["grind on {npc:9878}"] = "sube de nivel con {npc:9878}",
 
-	-- Step 15: Shatter Scar Vale
+	-- Step 14: Shatter Scar Vale
 	-- {npc:7136} Infernal Sentry
 	-- plural, as words: Entropic Beasts = {npc:9878} Entropic Beast
 	["Follow the road north to the cratered vale and walk to each crater, killing the Entropic Beasts and Horrors between them.\nCareful: an {npc:7136} (53, elite) stands among the craters: walk round it."] = "Sigue el camino al norte hasta la cañada de cráteres y camina hasta cada cráter, matando las bestias entrópicas y los horrores que hay entre ellos.\nCuidado: un {npc:7136} (53, élite) está entre los cráteres: rodéalo.",
@@ -92,28 +85,28 @@ return {
 	["Second crater"] = "Segundo cráter",
 	["Third crater"] = "Tercer cráter",
 
-	-- Step 16: Irontree Woods
+	-- Step 15: Irontree Woods
 	-- {area:1767} Irontree Woods · {area:2618} Jadefire Run · {item:11503} Blood Amber
 	["The Warpwood treants of {area:1767}, east of {area:2618}, carry the {item:11503}."] = "Los antárboles Combadera de {area:1767}, al este de {area:2618}, llevan {item:11503}.",
 	["Below ground"] = "Bajo tierra",
 
-	-- Step 17: Jadefire Run: kill these as you meet them
+	-- Step 16: Jadefire Run: kill these as you meet them
 	-- {area:2618} Jadefire Run
 	["{area:2618}: kill these as you meet them"] = "{area:2618}: mata a estos según te los encuentres",
 	-- {area:2618} Jadefire Run · {npc:10648} Xavaric · {quest:939} Flute of Xavaric · {item:11674} Jadefire Felbind
 	["{area:2618} is the satyr valley in the north-west, with {npc:10648} at its far end. He drops the {quest:939}; every Jadefire satyr can drop {item:11674}.\nCareful: {npc:10648} (55) stands at the valley's far end with Hellcallers (53-54) around him: clear them one at a time before you pull him."] = "{area:2618} es el valle de los sátiros en el noroeste, con {npc:10648} al fondo. Él suelta {quest:939}; cualquier sátiro Fuego de Jade puede soltar {item:11674}.\nCuidado: {npc:10648} (55) está al fondo del valle con invocadores infernales (53-54) a su alrededor: elimínalos de uno en uno antes de atraerlo.",
 
-	-- Step 18: Jaedenar again
+	-- Step 17: Jaedenar again
 	-- {area:1763} Jaedenar
 	["{area:1763} again"] = "{area:1763} otra vez",
 	-- {item:12922} Empty Canteen · {area:1763} Jaedenar
 	["Use the {item:12922} at the corrupted moonwell in the middle of {area:1763}."] = "Usa {item:12922} en el pozo de la luna corrupto del centro de {area:1763}.",
 
-	-- Step 19: The Emerald Sanctuary
+	-- Step 18: The Emerald Sanctuary
 	-- {area:1763} Jaedenar · {area:2479} Emerald Sanctuary · {zone:1448} Felwood
 	["Ride south-east from {area:1763} to the {area:2479}, the druids' camp by the road in southern {zone:1448}."] = "Cabalga al sureste desde {area:1763} hasta {area:2479}, el campamento de los druidas junto al camino en el sur de {zone:1448}.",
 
-	-- Step 20: The Emerald Sanctuary
+	-- Step 19: The Emerald Sanctuary
 	-- {zone:1457} Darnassus
 	["The vial is filled in {zone:1457}: keep it; inside"] = "El vial se llena en {zone:1457}: guárdalo; adentro",
 	-- {zone:1413} Barrens
@@ -121,19 +114,19 @@ return {
 	-- {npc:10924} Ivy Leafrunner · {npc:11079} Wynd Nightchaser · {zone:1452} Winterspring
 	["{npc:10924}: for {npc:11079} in {zone:1452}, keep it"] = "{npc:10924}: para {npc:11079} en {zone:1452}, guárdala",
 
-	-- Step 21: Nafien
+	-- Step 20: Nafien
 	-- {area:1769} Timbermaw Hold · {npc:15395} Nafien
 	["Ride north up the road from the Sanctuary, all the way to the cave mouth of {area:1769}; {npc:15395} guards it."] = "Cabalga al norte por el camino desde el Santuario, hasta llegar a la entrada de la cueva de {area:1769}; {npc:15395} la vigila.",
 
-	-- Step 22: Felpaw Village
+	-- Step 21: Felpaw Village
 	-- {area:1762} Felpaw Village · {quest:8470} Deadwood Ritual Totem · {npc:11558} Kernda · {area:1769} Timbermaw Hold
 	["The Deadwood furbolgs of {area:1762} fill the hills west of the cave. Keep killing them until one drops a {quest:8470}, about one kill in thirty, then right-click it: {npc:11558} in {area:1769} takes it once the Timbermaw are Neutral to you, now if they already are, or when the last guide passes the cave again at 58.\nCareful: Den Watchers are level 53-54 and the Avengers 54-55; they call nearby allies within 25 yd once below 50% health and run off for help below 15%."] = "Los fúrbolgs Muertobosque de {area:1762} llenan las colinas al oeste de la cueva. Sigue matándolos hasta que uno suelte un {quest:8470}, más o menos uno de cada treinta, luego haz clic derecho en él: {npc:11558}, en {area:1769}, lo acepta cuando los Fauces de Madera te sean neutrales, ahora si ya lo son, o cuando la última guía vuelva a pasar por la cueva a nivel 58.\nCuidado: Los vigías del cubil son de nivel 53-54 y los vengadores de 54-55; piden ayuda a los aliados a menos de 25 m cuando bajan del 50% de salud y huyen en busca de ayuda por debajo del 15%.",
 
-	-- Step 23: Nafien
+	-- Step 22: Nafien
 	-- {zone:1452} Winterspring
 	["Salfa stands at the {zone:1452} end of the tunnel: keep it"] = "Salfa está en el extremo de {zone:1452} del túnel: guárdala",
 
-	-- Step 25: Timbermaw Hold
+	-- Step 24: Timbermaw Hold
 	-- {npc:11558} Kernda
 	["Step into the cave: {npc:11558} stands just inside."] = "Entra a la cueva: {npc:11558} está justo en la entrada.",
 	-- {npc:11558} Kernda
@@ -145,6 +138,7 @@ return {
 	-- ["Follow the road north to the cratered vale and walk to each crater, killing the Entropic Beasts and Horrors between them."] = "Sigue el camino al norte hasta la cañada de cráteres y camina hasta cada cráter, matando las bestias entrópicas y los horrores que hay entre ellos.",
 	-- ["Keep her alive until she is out of the cave"] = "Mantenla con vida hasta que salga de la cueva",
 	-- ["Oozes"] = "Mocos",
+	-- ["Putrescent organs: kill these as you meet them"] = "Órganos putrefactos: mátalos a medida que los encuentres",
 	-- ["Ride east to the night elf camp at {area:1998}."] = "Cabalga al este hasta el campamento elfo de la noche en {area:1998}.",
 	-- ["Ride north out of {area:415} into {zone:1448}. {npc:11554} the furbolg stands by the road just south of the {area:2479}."] = "Cabalga al norte desde {area:415} hacia {zone:1448}. {npc:11554}, el fúrbolg, está junto al camino justo al sur de {area:2479}.",
 	-- ["Ride north to {area:1769} (or fly back to {area:1998} first) and through the tunnel into {zone:1452}; follow the road east to the goblin town of {area:2255}."] = "Cabalga al norte hasta {area:1769} (o vuela antes de vuelta a {area:1998}) y cruza el túnel hacia {zone:1452}; sigue el camino al este hasta el pueblo goblin de {area:2255}.",
@@ -160,9 +154,11 @@ return {
 	-- ["{area:1763} is the ruined temple north of the glen. Some of its cultists drop a {item:13140}, about one kill in thirty: it opens {npc:11018}'s cell in {area:1770}, the cave at the back. If it drops, clear the way out before you free her; if not, skip her quests."] = "{area:1763} es el templo en ruinas al norte de la cañada. Algunos de sus sectarios sueltan una {item:13140}, más o menos una de cada treinta muertes: abre la celda de {npc:11018} en {area:1770}, la cueva del fondo. Si cae, despeja la salida antes de liberarla; si no, omite sus misiones.",
 	-- ["{area:2618} is the satyr valley in the north-west, with {npc:10648} at its far end. He drops the {quest:939}; every Jadefire satyr can drop {item:11674}."] = "{area:2618} es el valle de los sátiros en el noroeste, con {npc:10648} al fondo. Él suelta {quest:939}; cualquier sátiro Fuego de Jade puede soltar {item:11674}.",
 	-- ["{item:13140}, a rare drop"] = "{item:13140}, botín raro",
+	-- ["{npc:10920}: {quest:86577}, from the bears and wolves you meet in {zone:1448}"] = "{npc:10920}: {quest:86577}, de los osos y lobos que encuentres en {zone:1448}",
 	-- ["{npc:11016}, in {area:1770}"] = "{npc:11016}, en {area:1770}",
 	-- ["{npc:11557}: thirty {quest:6031}, handed in when you pass through again at 57"] = "{npc:11557}: treinta {quest:6031}, se entregan cuando vuelvas a pasar a nivel 57",
 	-- ["{npc:11558}: the Timbermaw speak to you only from Neutral"] = "{npc:11558}: los Fauces de Madera solo te hablan a partir de Neutral",
 	-- ["{npc:15395} waits at the north end of {area:361}"] = "{npc:15395} espera en el extremo norte de {area:361}",
 	-- ["{quest:8470}, a rare drop"] = "{quest:8470}, botín raro",
+	-- ["{zone:1448}'s Angerclaw bears and Felpaw wolves carry the putrescent organs {npc:10920} wants: the Bears and Wolves (47-48) of the south and the Maulers and Scavengers (49-50) along the road north of {area:1763}. Kill them as you ride between the stops."] = "Los osos Zarpira y los lobos Zarpavil de {zone:1448} llevan los órganos putrefactos que quiere {npc:10920}: los osos y lobos (47-48) del sur y los magulladores y carroñeros (49-50) a lo largo del camino al norte de {area:1763}. Mátalos mientras cabalgas entre las paradas.",
 }

@@ -2,41 +2,19 @@
 guide forever/horde/30-40/04-dustwallow-marsh
 title Dustwallow Marsh & Desolace
 faction Horde
-levels 36-38
+levels 35-37
 zone Dustwallow Marsh
 next forever/horde/30-40/05-arathi-highlands
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
-# Added here: The Theramore Docks (1202), Parts of the Swarm (1184). Goblin Sponsorship (1178) and
-# Wharfmaster Dizzywig (1111) are handed in at Ratchet on the way to the Booty Bay boat, in 03.
-# Left out: Gizelton Caravan (5943), The Kolkar of Desolace (1362).
-# Carved Centaur Totems (93225) and Ghost-o-plasm Round Up (6134) are worked at 38 on the Maraudine
-# Scouts, Wranglers and Maulers (36-39) of the valley's eastern edge and on the Magrami Spectres
-# (38-39), each with a tip to keep away from the elites beside them (Khan Hratha and the Rock Worms,
-# 41-42; the Magram Necrokhans and Corpsefeeders, 45). The ghost-o-plasm comes last, after Mannoroc
-# Coven just north of the Valley of Bones (#2357).
+# Left out: Centaur Bounty (1366).
 
-# Dustwallow at 35-36, after Stranglethorn (the 2026-11-07 re-order), then a top-up to 36 if needed
-# and a short second Desolace visit for the zone's 37-40 quests at 36-38 (the 33-36 ones are in
-# forever/horde/30-40/02-thousand-needles). Where only the top of a camp is two over you (the
-# Maraudine Maulers, the spectres, the portal guardians, 38-39), the step says which to pull.
-#
-# Flow: Grom'gol (where the previous guide ends) -> zeppelin to Orgrimmar (Soothing Spices) -> fly to the Crossroads (Korran) -> fly to Camp Taurajo -> the Shady
-# Rest Inn -> Brackenwall Village (flight path) -> Reethe -> Witch Hill (Stinky) -> the Mirefin
-# murlocs -> Swamplight Manor -> the spiders and venomspitters -> Brackenwall -> Swamplight
-# Manor -> the Theramore docks -> Brackenwall -> fly to Ratchet (Stinky's Mebok;
-# Warriors: The Affray on Fray Island) -> fly to Shadowprey Village (Taiga's Hand of Iruxos, Drulzegar's
-# Other Fish to Fry) -> Ghost Walker Post (Gurda, Felgur) -> the Valley of Spears (Melizza) -> Hornizz ->
-# Ghost Walker Post -> Thunder Axe Fortress -> Sar'theris Strand (the Slitherblade, 34-36, at 37-38: they
-# were two over on the first visit at 33) -> Shadowprey (Taiga, Drulzegar) -> Mannoroc Coven -> the Valley of Bones -> Hornizz ->
-# hearth to Shadowprey -> fly to Orgrimmar (Belgrom, Hunter and Shaman training),
-# where the next guide takes the Undercity zeppelin.
-#
-# Class training: Hunters and Shamans in Orgrimmar at the end; Druids in Thunder Bluff on the
-# flight from Shadowprey to Orgrimmar; everyone else in the Undercity at the start of the next
-# guide.
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+# Added here: The Theramore Docks (1202), Parts of the Swarm (1184). Goblin Sponsorship (1178) and
 
 # ---------------------------------------------------------------- Orgrimmar and the Crossroads
 
@@ -44,83 +22,90 @@ step Zeppelin to Orgrimmar
   zone Stranglethorn Vale
   goto 31.4,29.9 "Zeppelin to Orgrimmar"
 
-step Orgrimmar
+step Fly to Crossroads
   zone Orgrimmar
-  goto 51.5,45.6 "The middle of Orgrimmar"
+  goto 45.3,63.8 "Orgrimmar flight master"
+  fly "Crossroads"
+  zone The Barrens
 
 step Orgrimmar
   zone Orgrimmar
   buy 3713 x3 nearest                 -- Soothing Spices, for "Swamp Eye" Jarl
+
+step Fly to Orgrimmar
+  zone The Barrens
+  fly "Orgrimmar"
+
+step Orgrimmar
+  zone Orgrimmar
   accept 1718 only Warrior            -- Sorek, Valley of Honor: for Fray Island, later in this guide (offered from level 30)
 
 step Fly to the Crossroads
   zone Orgrimmar
-  goto 45.3,63.7 "Orgrimmar flight master"
-  fly "Crossroads"
   zone The Barrens
+  zone Orgrimmar
+  goto 45.3,63.7 "Orgrimmar flight master"
 
 step Korran
   zone The Barrens
   tip Korran stands beside the Crossroads flight master.
-  turnin 1148                         -- Korran
-  accept 1184                         -- for Belgrom Rockmaul in Orgrimmar, at the end of this guide
+  turnin 1148 only Orc,Tauren,Troll,Undead -- Korran
+  accept 1184 only Orc,Tauren,Troll,Undead -- for Belgrom Rockmaul in Orgrimmar, at the end of this guide
 
 step Fly to Camp Taurajo
   zone The Barrens
   goto 51.5,30.4 "Crossroads flight master"
   fly "Camp Taurajo"
 
+step Grunt Logmar
+  when group 97250
+  turnin 97250 only Orc,Tauren,Troll,Undead
+
+step Level 36.05
+  when !group 97250
+  when level<36.05
+  tip If you skipped Wrongly Blamed, Justly Corrected, grind here to level 36.05 to stay on the route's plan.
+  goto 53.3,65.8 map 1413 "Darkmist Spider"
+  level 36.05 grind 4376                -- grind on Darkmist Spider
+
+step Fly to Camp Taurajo
+  zone The Barrens
+  goto 51.5,30.4 "Crossroads flight master"
+
 step Dustwallow Marsh
   zone Dustwallow Marsh
-  goto 29.7,47.6 "Shady Rest Inn"
+  goto 29.7,47.6 "Dustwallow Marsh"
+
+step To Shady Rest Inn
+  zone Dustwallow Marsh
+  goto 29.7,47.7 "To Shady Rest Inn"
 
 # ---------------------------------------------------------------- The Shady Rest Inn
 
 step Shady Rest Inn
   zone Dustwallow Marsh
   tip Head east from Camp Taurajo along the road into the marsh. The burned-out Shady Rest Inn stands beside it just past the border; the shield, the badge and the hoofprints are in and beside the ruin.
-  accept 1268
-  accept 1251
-  accept 1269
+  accept 1268 only Orc,Tauren,Troll,Undead
+  accept 1251 only Orc,Tauren,Troll,Undead
+  accept 1269 only Orc,Tauren,Troll,Undead
 
 # ---------------------------------------------------------------- Brackenwall Village
 
 step Dustwallow Marsh
   zone Dustwallow Marsh
-  goto 35.1,38.3 "Brackenwall Village"
+  goto 35.1,38.3 "Dustwallow Marsh"
 
 step Brackenwall Village
   zone Dustwallow Marsh
   tip Take the road north at the fork to the ogre village of Brackenwall.
-  accept 1177                         -- Mudcrush Durtfeet, at the south edge of the village where the road comes in
-  turnin 1269                         -- Krog
-  turnin 1251
-  accept 1321
-  turnin 1268
-  getfp "Brackenwall Village"
-  accept 1201                         -- Nazeer Bloodpike
-  turnin 1321                         -- Do'gol
-  accept 1322
-
-# ---------------------------------------------------------------- Witch Hill
-
-step Stinky Ignatz
-  zone Dustwallow Marsh
-  tip Head north to Witch Hill. Stinky stands at the foot of the hill; escort him while he gathers Bogbean Leaves just south of it.
-  accept 1270
-  complete 1270
-
-step Mirefin murlocs
-  tip The Mirefin murlocs crowd the coast east and north-east of Witch Hill; every kind drops heads.
-  collect 5847 quest 1177
-
-step Swamp Eye Jarl
-  tip Jarl lives in the Swamplight Manor south-east of Witch Hill.
-  accept 1238                         -- Loose Dirt, beside the manor
-  accept 1218                         -- "Swamp Eye" Jarl
-  buy 3713 x3 nearest                 -- Soothing Spices, if you did not buy them in Orgrimmar
-  turnin 1218
-  accept 1206
+  accept 1177 only Orc,Tauren,Troll,Undead -- Mudcrush Durtfeet, at the south edge of the village where the road comes in
+  turnin 1269 only Orc,Tauren,Troll,Undead -- Krog
+  turnin 1251 only Orc,Tauren,Troll,Undead
+  accept 1321 only Orc,Tauren,Troll,Undead
+  turnin 1268 only Orc,Tauren,Troll,Undead
+  turnin 1321 only Orc,Tauren,Troll,Undead -- Do'gol
+  accept 1322 only Orc,Tauren,Troll,Undead
+  accept 1201 only Orc,Tauren,Troll,Undead -- Nazeer Bloodpike
 
 # ---------------------------------------------------------------- Back west
 
@@ -131,62 +116,167 @@ step Brackenwall Village: kill these as you meet them
   tip Careful: Darkfang Lurkers (level 36-37) use Sneak to stealth while out of combat and cast Poison once fighting.
   tip Careful: Stealthed spiders in the same area will attack you on sight.
   tip Careful: Darkmist Lurkers move about stealthed and use poison once in combat. The spiders stand close together, so adds are common; pulling single targets from the outer edge cuts down on them.
-  collect 5959 quest 1322             -- Every Darkfang spider drops them: Lurkers, Spiders, Venomspitters and the Giant Darkfang Spiders
-  collect 5884 quest 1206
-  kill 4834 quest 1201
+  kill 4834 quest 1201 only Orc,Tauren,Troll,Undead
 
 step Brackenwall Village
-  turnin 1238
-  turnin 1201                         -- Nazeer Bloodpike
-  accept 1202
-  turnin 1322                         -- Do'gol
-  accept 1323
-  turnin 1323                         -- Krog
+  turnin 1201 only Orc,Tauren,Troll,Undead -- Nazeer Bloodpike
+  accept 1202 only Orc,Tauren,Troll,Undead
+
+step To Brackenwall Village
+  zone The Barrens
+  goto 53.7,69.8 "To Brackenwall Village"
+
+step To Camp Taurajo
+  zone The Barrens
+  goto 44.5,59.1 "To Camp Taurajo"
+
+step Fly to Brackenwall Village
+  zone The Barrens
+  goto 44.5,59.1 "Camp Taurajo flight master"
+  fly "Brackenwall Village"
+  zone Dustwallow Marsh
+
+# ---------------------------------------------------------------- Witch Hill
+
+step Stinky Ignatz
+  zone Dustwallow Marsh
+  tip Head north to Witch Hill. Stinky stands at the foot of the hill; escort him while he gathers Bogbean Leaves just south of it.
+  accept 1270 only Orc,Tauren,Troll,Undead
+  complete 1270 only Orc,Tauren,Troll,Undead
+
+step Mirefin murlocs
+  tip The Mirefin murlocs crowd the coast east and north-east of Witch Hill; every kind drops heads.
+  collect 5847 quest 1177 only Orc,Tauren,Troll,Undead
+
+step Swamp Eye Jarl
+  tip Jarl lives in the Swamplight Manor south-east of Witch Hill.
+  accept 1238 only Orc,Tauren,Troll,Undead -- Loose Dirt, beside the manor
+  accept 1218 only Orc,Tauren,Troll,Undead -- "Swamp Eye" Jarl
+  buy 3713 x3 nearest                 -- Soothing Spices, if you did not buy them in Orgrimmar
+
+step The Barrens
+  zone The Barrens
+  buy 3713 x3 nearest                 -- Soothing Spices, if you did not buy them in Orgrimmar
+
+step To Swamp Eye Jarl
+  zone Dustwallow Marsh
+  goto 55.4,26.3 "To Swamp Eye Jarl"
+
+step Swamp Eye Jarl
+  turnin 1218 only Orc,Tauren,Troll,Undead
+  accept 1206 only Orc,Tauren,Troll,Undead
+
+step The Quagmire: kill these as you meet them
+  zone Dustwallow Marsh
+  collect 5959 quest 1322 only Orc,Tauren,Troll,Undead -- Every Darkfang spider drops them: Lurkers, Spiders, Venomspitters and the Giant Darkfang Spiders
+  collect 5884 quest 1206 only Orc,Tauren,Troll,Undead
+
+step To Camp Taurajo
+  zone The Barrens
+  goto 44.5,59.1 "To Camp Taurajo"
+
+step Brackenwall Village
+  turnin 1238 only Orc,Tauren,Troll,Undead
+  turnin 1322 only Orc,Tauren,Troll,Undead -- Do'gol
+  accept 1323 only Orc,Tauren,Troll,Undead
+  turnin 1323 only Orc,Tauren,Troll,Undead -- Krog
 
 step Questioning Reethe
   zone Dustwallow Marsh
   tip On the way east, Ogron waits in the Quagmire east of the village. Follow him to Reethe and keep him alive through the fight that breaks out: Private Hallan and Theramore Skirmishers (36) join it.
-  accept 1273
-  complete 1273 @42.6,38.1 map 1445
+  accept 1273 only Orc,Tauren,Troll,Undead
+  complete 1273 @42.6,38.1 map 1445 only Orc,Tauren,Troll,Undead
 
 step Swamp Eye Jarl
   tip On east to the Swamplight Manor.
-  accept 1239                         -- Loose Dirt, now that Nazeer has read the report
-  turnin 1206
+  accept 1239 only Orc,Tauren,Troll,Undead -- Loose Dirt, now that Nazeer has read the report
+  turnin 1206 only Orc,Tauren,Troll,Undead
   accept 1203 optional                -- only if you carry a Moonsteel Broadsword (Blacksmithing or the Auction House)
   turnin 1203 optional
 
 step The Theramore Docks
-  tip South-east from the manor to Theramore Isle: the Captain's Footlocker lies on the sea floor off the docks on the isle's east side. Swim in and out and keep off the piers and the town: Theramore's guards are level 53-57, and a death here is a long run back from the spirit healer. Young Murk Threshers (40-41) circle in the water around the docks: grab the footlocker and swim straight out.
-  collect 5882 quest 1202.1 @71.5,51.2 map 1445 -- Underwater
+  tip South-east from the manor to Theramore Isle: the Captain's Footlocker lies on the sea floor off the docks on the isle's east side. Swim in and out and keep off the piers and the town: Theramore's guards are level 53-57.
+  collect 5882 quest 1202.1 @71.5,51.2 map 1445 only Orc,Tauren,Troll,Undead -- Underwater
+
+step Into The Barrens
+  zone The Barrens
+  goto 49.5,78.4 "Into The Barrens"
+
+step To Brackenwall Village
+  zone The Barrens
+  goto 53.7,73.8 "To Brackenwall Village"
 
 step Brackenwall Village
+  zone Dustwallow Marsh
   tip Head back west to Brackenwall with the head: Mudcrush Durtfeet stands at the south edge of the village where the road comes in, Nazeer Bloodpike and Krog in the village.
-  turnin 1177                         -- Mudcrush Durtfeet
-  turnin 1202                         -- Nazeer Bloodpike
-  turnin 1239                         -- Nazeer Bloodpike
-  accept 1240                         -- For Kin'weelay at Grom'gol, in forever/horde/40-50/01-stranglethorn-vale
-  turnin 1273                         -- Krog
+  turnin 1177 only Orc,Tauren,Troll,Undead -- Mudcrush Durtfeet
+  turnin 1202 only Orc,Tauren,Troll,Undead -- Nazeer Bloodpike
+  turnin 1239 only Orc,Tauren,Troll,Undead -- Nazeer Bloodpike
+  accept 1240 only Orc,Tauren,Troll,Undead -- For Kin'weelay at Grom'gol, in forever/horde/40-50/01-stranglethorn-vale
+  turnin 1273 only Orc,Tauren,Troll,Undead -- Krog
 
 step Level 36
   when level<36
   zone Dustwallow Marsh
   tip Desolace's last quests are 36-39. Still below 36 after Brackenwall's hand-ins? The Drywallow Crocolisks (35-36) along the river east of the village are the closest at your level: kill them until level 36.
   goto 44.5,24.8 map 1445 "Drywallow Crocolisks"
-  level 36 grind 4341                 -- grind on Drywallow Crocolisk
-
-# ---------------------------------------------------------------- Ratchet
 
 step Fly to Ratchet
+  only Orc,Troll,Tauren,Undead
   zone Dustwallow Marsh
   goto 35.6,31.8 "Brackenwall Village flight master"
   fly "Ratchet"
   zone The Barrens
 
+step Fly to Ratchet
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone Dustwallow Marsh
+  goto 35.6,31.8 "Brackenwall Village flight master"
+  fly "Ratchet"
+  zone The Barrens
+
+step Fly to Shadowprey Village
+  only Skyborne,Druid
+  zone Dustwallow Marsh
+  goto 35.6,31.8 "Brackenwall Village flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Skyborne,Shaman
+  zone Dustwallow Marsh
+  goto 35.6,31.8 "Brackenwall Village flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Skyborne,Rogue
+  zone Dustwallow Marsh
+  goto 35.6,31.8 "Brackenwall Village flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Skyborne,Hunter
+  zone Dustwallow Marsh
+  goto 35.6,31.8 "Brackenwall Village flight master"
+  fly "Shadowprey Village"
+
+# ---------------------------------------------------------------- Ratchet
+
 step Ratchet
+  only Orc,Troll,Tauren,Undead
   zone The Barrens
   tip Mebok Mizzyrix stands below Gazlowe's house by the flight master, towards the docks.
-  turnin 1270                         -- Mebok Mizzyrix
+  turnin 1270 only Orc,Tauren,Troll,Undead -- Mebok Mizzyrix
+
+step Ratchet
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone The Barrens
+  tip Mebok Mizzyrix stands below Gazlowe's house by the flight master, towards the docks.
+  turnin 1270 only Orc,Tauren,Troll,Undead -- Mebok Mizzyrix
+
+step To The Affray
+  only Warrior
+  zone The Barrens
+  goto 68.6,49.2 "To The Affray"
 
 step The Affray
   zone The Barrens
@@ -203,50 +293,107 @@ step Ratchet flight master
   tip Back north along the coast to Ratchet's flight master.
   goto 63.1,37.1 "Ratchet flight master"
 
+step To Shadowprey Village
+  only Orc,Troll,Tauren,Undead
+  zone Desolace
+  goto 24.1,68.2 "Shadowprey Village" only Undead,Warrior,Hunter,Shaman,Druid
+  goto 24.1,68.2 "Shadowprey Village" only Troll,Warrior,Paladin,Druid
+  goto 24.1,68.2 "Shadowprey Village" only Tauren,Warrior,Paladin,Rogue,Priest,Mage,Warlock
+  goto 24.1,68.2 "Shadowprey Village" only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  goto 24.1,68.2 "Shadowprey Village" only Orc,Warrior,Paladin,Priest,Druid
+
+step To Shadowprey Village
+  only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  zone Desolace
+  goto 24.1,68.2 "Shadowprey Village" only Undead,Warrior,Hunter,Shaman,Druid
+  goto 24.1,68.2 "Shadowprey Village" only Troll,Warrior,Paladin,Druid
+  goto 24.1,68.2 "Shadowprey Village" only Tauren,Warrior,Paladin,Rogue,Priest,Mage,Warlock
+  goto 24.1,68.2 "Shadowprey Village" only Skyborne,Warrior,Paladin,Priest,Mage,Warlock
+  goto 24.1,68.2 "Shadowprey Village" only Orc,Warrior,Paladin,Priest,Druid
+
 # ---------------------------------------------------------------- Desolace, the second visit
 
 step Fly to Shadowprey Village
+  only Orc,Tauren,Troll,Hunter
   zone The Barrens
-  tip Fly to Shadowprey Village from the flight master you are next to: Ratchet's, or Brackenwall's if you had no errand in Ratchet.
+  goto 63.1,37.1 "Ratchet flight master"
   fly "Shadowprey Village"
-  zone Desolace
+
+step Fly to Shadowprey Village
+  only Orc,Troll,Undead,Rogue
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Orc,Tauren,Troll,Shaman
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Orc,Troll,Undead,Mage
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Orc,Troll,Undead,Warlock
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Tauren,Druid
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Troll,Undead,Priest
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
+
+step Fly to Shadowprey Village
+  only Undead,Paladin
+  zone The Barrens
+  goto 63.1,37.1 "Ratchet flight master"
+  fly "Shadowprey Village"
 
 step Shadowprey Village
   zone Desolace
   tip Taiga Wisemane and Drulzegar Skraghook stand in the village.
   accept 5381                         -- Taiga Wisemane: the Hand of Iruxos, at Thunder Axe Fortress later on this visit
-  accept 6143                         -- Drulzegar Skraghook: the Slitherblade of Sar'theris Strand, on the way back from Thunder Axe Fortress
+  accept 6143 only Orc,Tauren,Troll,Undead -- Drulzegar Skraghook: the Slitherblade of Sar'theris Strand, on the way back from Thunder Axe Fortress
 
 step Ghost Walker Post
   zone Desolace
   tip East along the road to Ghost Walker Post; Gurda Wildmane stands beside Felgur Twocuts.
-  accept 93225                        -- Gurda Wildmane
-  accept 1366                         -- Felgur Twocuts: his Centaur Bounty, from the same Maraudine as Gurda's totems
+  accept 93225 only Orc,Tauren,Troll,Undead -- Gurda Wildmane
 
 step Valley of Spears
   zone Desolace
   tip West of the post, the Maraudine centaurs hold the Valley of Spears; every Maraudine can drop a Carved Centaur Totem and an ear for Felgur's Centaur Bounty. Stay with the Scouts and Wranglers (36-38) at the valley's eastern edge; the Maulers and Windchasers (38-39) a little further in are up to two over you at 37: pull them one at a time.
   tip Careful: Khan Hratha and the Rock Worms (41-42, elite) hold the valley's north-western end with the Khan Guards and Marauders (39-40), and the Magram's village in the south-east has Necromancers (42-43): keep east of the arrow.
-  collect 254432 x5 quest 93225.1 @33.0,54.0 map 1443
-  collect 6067 quest 1366
+  collect 254432 x5 quest 93225.1 @33,54 map 1443 era only Orc,Tauren,Troll,Undead
 
 step Melizza Brimbuzzle
   zone Desolace
   tip Melizza is held in the Maraudine camp at the valley's western end; free her and escort her out east of the valley.
   tip Careful: The scripted groups are linked and only appear during the escort, so you cannot clear them in advance or pull them one at a time. Clearing the normal centaurs on the path before you start does help.
-  accept 6132
-  complete 6132
+  accept 6132 only Orc,Tauren,Troll,Undead
+  complete 6132 only Orc,Tauren,Troll,Undead
 
 step Hornizz Brimbuzzle
   zone Desolace
   tip Hornizz waits at the goblin camp on the west side of the Kodo Graveyard.
-  turnin 6132
+  turnin 6132 only Orc,Tauren,Troll,Undead
   accept 6134                         -- Hornizz Brimbuzzle: the ghost-o-plasm, after Mannoroc Coven at the end of this visit
 
 step Ghost Walker Post
   zone Desolace
-  turnin 93225                        -- Gurda Wildmane
-  turnin 1366                         -- Felgur Twocuts
+  turnin 93225 only Orc,Tauren,Troll,Undead -- Gurda Wildmane
 
 step Thunder Axe Fortress
   zone Desolace
@@ -257,22 +404,25 @@ step Thunder Axe Fortress
 step Sar'theris Strand
   zone Desolace
   tip West from the fortress to the coast at Sar'theris Strand: the Slitherblade Myrmidons, Naga and Sorceresses hold the beach. Pull them one at a time; the Sea Witches and Oracles (34-36) cast from range.
-  kill 4714 quest 6143.1
-  kill 4711 quest 6143.2
-  kill 4712 quest 6143.3
+  kill 4711 quest 6143.2 only Orc,Tauren,Troll,Undead -- Slitherblade Naga walks around Sar'theris Strand: look inside the circle on the map
+  kill 4712 quest 6143.3 only Orc,Tauren,Troll,Undead -- Underwater
+  kill 4714 quest 6143.1 only Orc,Tauren,Troll,Undead -- Slitherblade Myrmidon walks around Sar'theris Strand: look inside the circle on the map
+
+step Aka'rai
+  turnin 97265 only Orc,Tauren,Troll,Undead
 
 step Shadowprey Village
   zone Desolace
   tip South down the coast to Shadowprey: Taiga takes the box and sends you to Mannoroc Coven with it; Drulzegar takes the naga.
   turnin 5381                         -- Taiga Wisemane
   accept 5581
-  turnin 6143                         -- Drulzegar Skraghook
+  turnin 6143 only Orc,Tauren,Troll,Undead -- Drulzegar Skraghook
 
 step Portals of the Legion
   zone Desolace
   tip Head east to Mannoroc Coven. With the Hand of Iruxos from Taiga in your bags, open a demon portal's ring: a Demon Portal Guardian (38-39) comes out; kill it to close that portal. Six portals. Careful: Infernals, Doomguards and Burning Blade Summoners walk close by many portals and may join in; kill nearby mobs first or drag the guardian away, for example toward the coven's central lake.
   goto 52.0,78.0 "Mannoroc Coven"
-  complete 5581
+  kill 11937 quest 5581.1
 
 step The Valley of Bones
   zone Desolace
@@ -288,42 +438,29 @@ step Hornizz Brimbuzzle
 
 step Shadowprey
   zone Desolace
-  tip Hearth to Shadowprey: your hearthstone is still bound there.
   turnin 5581                         -- Taiga Wisemane
 
-# ---------------------------------------------------------------- Orgrimmar
-
-step Thunder Bluff
+step Fly to Orgrimmar
   only Druid
-  zone Thunder Bluff
-  tip Fly from Shadowprey Village to Thunder Bluff and train with Turak Runetotem on Elder Rise; fly on to Orgrimmar from there.
-  fly "Thunder Bluff"
-  train class
+  zone Desolace
+  goto 21.6,74.0 "Shadowprey Village flight master"
+  fly "Orgrimmar"
 
 step Fly to Orgrimmar
   only !Druid
   zone Desolace
   goto 21.6,74.0 "Shadowprey Village flight master"
   fly "Orgrimmar"
-  zone Orgrimmar
-
-step Back to Orgrimmar
-  only Druid
-  zone Thunder Bluff
-  goto 46.7,49.9 "Thunder Bluff flight master"
-  fly "Orgrimmar"
-  zone Orgrimmar
 
 step Belgrom Rockmaul
+  when onquest 1184
   zone Orgrimmar
   tip Belgrom Rockmaul stands in the Valley of Honor.
-  turnin 1184                         -- Belgrom Rockmaul
+  turnin 1184 only Orc,Tauren,Troll,Undead -- Belgrom Rockmaul
 
-step Nogg
-  when complete 2841
-  zone Orgrimmar
-  tip Nogg's workshop is in the Valley of Honor beside Belgrom: hand in Rig Wars if you ran Gnomeregan.
-  turnin 2841                         -- Nogg
+step Class trainer
+  only Warrior,Paladin,Rogue,Priest,Mage,Warlock,Druid
+  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock,Druid
 
 step Orgrimmar trainers
   only Hunter,Shaman

@@ -12,7 +12,7 @@ return {
 	["Master of Alterac Valley: a Legacy Point at Exalted"] = "Maestro del Valle de Alterac: un Punto de legado en Exaltado",
 
 	-- Step 1: Lieutenant Rotimer
-	-- {zone:1459} Alterac Valley · {zone:1455} Ironforge · {npc:13843} Lieutenant Rotimer · {object:32372} Great Forge (no name in this language: may be words)
+	-- {zone:1459} Alterac Valley · {zone:1455} Ironforge · {npc:13843} Lieutenant Rotimer · {object:32372} Great Forge
 	["{zone:1459} is a 40 against 40 battle for level 51 and up, and the fastest of the four battleground reputations: it has about 2,000 reputation of one-time quests, and a full win pays several hundred. The same one-time quests also pay 1,870 {zone:1455} reputation. {npc:13843} recruits outside the {object:32372}. Forever's Legacy Diplomat perk adds up to 10% to every number in this guide."] = "{zone:1459} es una batalla de 40 contra 40 para nivel 51 o más, y la más rápida de las cuatro reputaciones de campo de batalla: tiene unas 2.000 de reputación en misiones únicas, y una victoria completa paga varios cientos. Esas mismas misiones únicas también pagan 1.870 de reputación con {zone:1455}. {npc:13843} recluta afuera de la {object:32372}. La ventaja Diplomático del Legado de Forever suma hasta un 10% a cada número de esta guía.",
 
 	-- Step 2: Lieutenant Haggerdin

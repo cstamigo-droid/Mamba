@@ -31,19 +31,19 @@ return {
 	["{npc:376}: take her {quest:94817} letter"] = "{npc:376}: toma su carta de {quest:94817}",
 
 	-- Step 4: Confounding Flash: High Priestess Mims
-	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {npc:11406} High Priest Rohan · {quest:94817} Confounding Flash
+	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward · {npc:11406} High Priest Rohan · {quest:94817} Confounding Flash
 	["At 10, go to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362} (north-west of the city), right beside {npc:11406}: she gives {quest:94817} and takes it back at once. No letter needed. {quest:94817} confuses up to five enemies around you for 3 seconds (any damage wakes them) on a 2-minute cooldown: time to step back and heal, or to run."] = "A nivel 10, ve con {npc:258785} en {object:32386}, {object:32362} de {zone:1455} (al noroeste de la ciudad), justo al lado de {npc:11406}: te da {quest:94817} y la recibe enseguida. No hace falta carta. {quest:94817} confunde hasta a cinco enemigos a tu alrededor durante 3 segundos (cualquier daño los despierta) con 2 minutos de reutilización: tiempo para retroceder y curarte, o para huir.",
 
 	-- Step 5: Confounding Flash: Maxan Anvol's letter
 	-- {quest:94824} Confounding Flash · {npc:1226} Maxan Anvol
 	["{quest:94824}: {npc:1226}'s letter"] = "{quest:94824}: la carta de {npc:1226}",
-	-- {area:131} Kharanos · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {quest:94824} Confounding Flash
+	-- {area:131} Kharanos · {zone:1455} Ironforge · {object:32362} Mystic Ward · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {quest:94824} Confounding Flash
 	["Follow the road up from {area:131} into {zone:1455} and to the {object:32362}: {npc:258785} in the {object:32386} takes the letter and teaches {quest:94824}."] = "Sigue el camino de subida desde {area:131} hasta {zone:1455} y hasta {object:32362}: {npc:258785} en {object:32386} recibe la carta y enseña {quest:94824}.",
 
 	-- Step 6: Confounding Flash: Josetta's letter
 	-- {quest:94822} Confounding Flash
 	["{quest:94822}: Josetta's letter"] = "{quest:94822}: la carta de Josetta",
-	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District
+	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward · {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District
 	["Hand the letter to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}: the {area:2257} from {zone:1453}'s {object:28027}."] = "Entrégale la carta a {npc:258785} en {object:32386}, {object:32362} de {zone:1455}: {area:2257} desde {object:28027} de {zone:1453}.",
 
 	-- Step 7: Confounding Flash: Laurena's letter
@@ -53,19 +53,19 @@ return {
 	-- Step 8: Confounding Flash: a letter from another trainer
 	-- {quest:94823} Confounding Flash
 	["{quest:94823}: a letter from another trainer"] = "{quest:94823}: una carta de otro instructor",
-	-- {quest:94823} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words)
+	-- {quest:94823} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward
 	["Any {quest:94823} letter goes to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}."] = "Cualquier carta de {quest:94823} va para {npc:258785} en {object:32386}, {object:32362} de {zone:1455}.",
 
 	-- Step 9: Confounding Flash: a letter from another trainer
 	-- {quest:94825} Confounding Flash
 	["{quest:94825}: a letter from another trainer"] = "{quest:94825}: una carta de otro instructor",
-	-- {quest:94825} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words)
+	-- {quest:94825} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward
 	["Any {quest:94825} letter goes to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}."] = "Cualquier carta de {quest:94825} va para {npc:258785} en {object:32386}, {object:32362} de {zone:1455}.",
 
 	-- Step 10: Confounding Flash: a letter from another trainer
 	-- {quest:94826} Confounding Flash
 	["{quest:94826}: a letter from another trainer"] = "{quest:94826}: una carta de otro instructor",
-	-- {quest:94826} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words)
+	-- {quest:94826} Confounding Flash · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward
 	["Any {quest:94826} letter goes to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}."] = "Cualquier carta de {quest:94826} va para {npc:258785} en {object:32386}, {object:32362} de {zone:1455}.",
 
 	-- Step 11: Contingency Plan: High Priestess Laurena
@@ -75,19 +75,19 @@ return {
 	["{npc:376}: take her {quest:94818} letter"] = "{npc:376}: toma su carta de {quest:94818}",
 
 	-- Step 12: Contingency Plan: High Priestess Mims
-	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {quest:94818} Contingency Plan · {spell:139} Renew · {spell:17} Power Word: Shield
+	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {quest:94818} Contingency Plan · {spell:139} Renew · {spell:17} Power Word: Shield
 	["At 20, {npc:258785} in the {object:32386} teaches {quest:94818} with a quest she gives and takes back at once. {quest:94818} wards a friend for 30 seconds: if they drop below 35% health, they get a shield and a heal over time at once (it stacks with {spell:139} and {spell:17}). 5-minute cooldown."] = "A nivel 20, {npc:258785} en {object:32386} enseña {quest:94818} con una misión que te da y recibe enseguida. {quest:94818} protege a un aliado durante 30 segundos: si baja del 35 % de salud, recibe al instante un escudo y una curación con el tiempo (se acumula con {spell:139} y {spell:17}). 5 minutos de reutilización.",
 
 	-- Step 13: Contingency Plan: Laurena's letter
 	-- {quest:94819} Contingency Plan
 	["{quest:94819}: Laurena's letter"] = "{quest:94819}: la carta de Laurena",
-	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District
+	-- {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward · {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District
 	["Hand Laurena's letter to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}: the {area:2257} from {zone:1453}'s {object:28027}."] = "Entrégale la carta de Laurena a {npc:258785} en {object:32386}, {object:32362} de {zone:1455}: {area:2257} desde {object:28027} de {zone:1453}.",
 
 	-- Step 14: Contingency Plan: a letter from another trainer
 	-- {quest:94820} Contingency Plan
 	["{quest:94820}: a letter from another trainer"] = "{quest:94820}: una carta de otro instructor",
-	-- {quest:94820} Contingency Plan · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries (no name in this language: may be words) · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words)
+	-- {quest:94820} Contingency Plan · {npc:258785} High Priestess Mims · {object:32386} Hall of Mysteries · {zone:1455} Ironforge · {object:32362} Mystic Ward
 	["Any {quest:94820} letter goes to {npc:258785} in the {object:32386}, {zone:1455}'s {object:32362}."] = "Cualquier carta de {quest:94820} va para {npc:258785} en {object:32386}, {object:32362} de {zone:1455}.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.

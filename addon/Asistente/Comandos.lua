@@ -59,3 +59,22 @@ SLASH_ASISSERVICIOS2 = "/serv"
 SlashCmdList.ASISSERVICIOS = function(arg)
 	abrirServicios(arg)
 end
+
+-- /equipo y /clase (18-11): los módulos Asistente_Equipo y Asistente_Clase siguen instalados desde la
+-- versión anterior del Asistente; sin estos comandos quedaban sin forma de abrirse.
+local function abrirModulo(addon, modulo, texto)
+	A.Cargar(addon, function() -- si no está instalado, A.Cargar lo dice
+		local M = A.modulos[modulo]
+		if M and M.Comando then M.Comando(texto or "") end
+	end)
+end
+
+SLASH_ASISEQUIPO1 = "/equipo"
+SlashCmdList.ASISEQUIPO = function(arg)
+	abrirModulo("Asistente_Equipo", "equipo", arg)
+end
+
+SLASH_ASISCLASE1 = "/clase"
+SlashCmdList.ASISCLASE = function(arg)
+	abrirModulo("Asistente_Clase", "clase", arg)
+end

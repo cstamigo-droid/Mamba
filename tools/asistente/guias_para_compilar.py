@@ -37,9 +37,10 @@ def arreglar(dest: Path, salida: Path) -> int:
         i = int(m["l"]) - 1
         if not (0 <= i < len(lineas)):
             continue
-        nunca = re.match(r"^`turnin` for quest (\d+) that is never accepted", m["m"])
+        nunca = re.match(r"^`(?:turnin|collect)` for quest (\d+) that is never accepted", m["m"])
         exp = re.match(r'^`next` points to unknown guide "polestar-experimental/', m["m"])
-        if nunca and re.match(rf"^\s*turnin {nunca[1]}\b", lineas[i]):
+        if nunca and (re.match(rf"^\s*turnin {nunca[1]}\b", lineas[i])
+                      or re.match(rf"^\s*collect .*\bquest {nunca[1]}\b", lineas[i])):
             del lineas[i]
             ini = max(k for k in range(i + 1) if k < len(lineas) and lineas[k].startswith("step ")) if any(lineas[k].startswith("step ") for k in range(min(i + 1, len(lineas)))) else None
             if ini is not None:
@@ -82,7 +83,51 @@ def main() -> int:
             g.unlink()
             quitadas += 1
     print(f"compilar: {len(gen)} guías de la ruta; {cambiadas} reemplazadas por la versión filtrada; {quitadas} quitadas")
+    vacias(dest)
     return 0
+
+
+def vacias(dest: Path) -> None:
+    """Una guía que en Polestar tenía misiones y aquí quedó sin ninguna (todas sin fuente, p. ej.
+    Shen'dralas) sería puro viaje en la ruta: sale, y cada `next` que la nombraba pasa a su `next`
+    (revisión wow-leveo 18-11)."""
+    import re
+    mision = re.compile(r"^\s*(accept|turnin)\s+\d+", re.M)
+    ids, siguiente, sin = {}, {}, set()
+    for g in dest.rglob("*.guide"):
+        t = g.read_text(encoding="utf-8")
+        m = re.search(r"^guide (\S+)", t, re.M)
+        if not m:
+            continue
+        gid = m[1]
+        ids[gid] = g
+        siguiente[gid] = re.findall(r"^next (\S+)", t, re.M)  # una por facción, a veces
+        orig = RAIZ / "guides" / g.relative_to(dest)
+        if not mision.search(t) and orig.is_file() and mision.search(orig.read_text(encoding="utf-8")):
+            sin.add(gid)
+    def destino_para(gid: str, quien: str):
+        """El `next` de `gid` que sigue la facción de `quien` (forever/horde/… o forever/alliance/…),
+        saltando las otras guías vacías."""
+        lado = next((f for f in ("/horde/", "/alliance/") if f in quien + "/"), None)
+        visto = set()
+        while gid in sin and gid not in visto:
+            visto.add(gid)
+            ops = siguiente.get(gid) or []
+            gid = next((o for o in ops if lado and lado in o + "/"), next((o for o in ops if "/horde/" not in o and "/alliance/" not in o), ops[0] if ops else None))
+        return gid
+
+    for gid in sorted(sin):
+        for otro, g in ids.items():
+            if otro in sin:
+                continue
+            t = g.read_text(encoding="utf-8")
+            destino = destino_para(gid, otro)
+            nuevo = re.sub(rf"^next {re.escape(gid)}[ 	]*$", f"next {destino}" if destino else "", t, flags=re.M)
+            if nuevo != t:
+                g.write_text(nuevo, encoding="utf-8", newline=chr(10))
+                print(f"compilar: {otro}: next {gid} -> {destino or '(ninguna)'}")
+        ids[gid].unlink()
+        print(f"compilar: guía sin misiones quitada: {gid}")
 
 
 if __name__ == "__main__":

@@ -62,8 +62,9 @@ return {
 
 	-- Step 11: Class trainer
 	["Class trainer"] = "Instructor de clase",
-	-- {npc:6018} Ur'kyo · {object:172961} Valley of Spirits · {quest:5654} Hex of Weakness
-	["Train while you are in the city: Druids and Paladins have no trainer here. Troll Priests: train with {npc:6018} in the {object:172961}, who takes {quest:5654}."] = "Entrena mientras estás en la ciudad: los druidas y los paladines no tienen instructor aquí. Sacerdotes trols: entrena con {npc:6018} en {object:172961}, quien recibe {quest:5654}.",
+	-- {npc:6018} Ur'kyo · {object:172961} Valley of Spirits
+	-- was: ["Train while you are in the city: Druids and Paladins have no trainer here. Troll Priests: train with {npc:6018} in the {object:172961}, who takes {quest:5654}."] = "Entrena mientras estás en la ciudad: los druidas y los paladines no tienen instructor aquí. Sacerdotes trols: entrena con {npc:6018} en {object:172961}, quien recibe {quest:5654}."
+	["Train while you are in the city: Druids and Paladins have no trainer here. Troll Priests: train with {npc:6018} in the {object:172961}, who takes Hex of Weakness."] = "Entrena mientras estás en la ciudad: los druidas y paladines no tienen instructor aquí. Sacerdotes trols: entrena con {npc:6018} en el {object:172961}, que enseña Hex of Weakness.",
 
 	-- Step 12: Sayoc
 	-- {spell:197} Two-Handed Axes · {npc:11868} Sayoc · {object:172958} Valley of Honor
@@ -84,9 +85,10 @@ return {
 	["{npc:11046}: Camping 101, from Brakk's campfire in {zone:1411}"] = "{npc:11046}: Campamento 101, de la fogata de Brakk en {zone:1411}",
 
 	-- Step 18: Valley of Wisdom
-	-- {npc:268684} Thra · {npc:268682} Migi · {object:172957} Valley of Wisdom
+	-- {npc:268684} Thra · {object:172957} Valley of Wisdom
 	-- plural, as words: Smooth Boulders = {item:277952} Smooth Boulder
-	["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor.",
+	-- was: ["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor."
+	["{npc:268684} and Migi sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them."] = "{npc:268684} y Migi están detrás de Grommash Hold en {object:172957}; las Rocas lisas están a su alrededor.",
 
 	-- Step 19: Thrall
 	-- {npc:4949} Thrall · {quest:98024} Journey to the Crossroads · {quest:93739} Exploring the Horde · {quest:95350} Welcome to Azeroth
@@ -265,47 +267,83 @@ return {
 	["Zeppelin to {zone:1454}"] = "Zepelín a {zone:1454}",
 
 	-- Step 52: Orgrimmar
-	-- {zone:1454} Orgrimmar · {object:172982} Valley of Strength
-	["{zone:1454}'s {object:172982}"] = "{object:172982} de {zone:1454}",
+	-- {zone:1454} Orgrimmar
+	["{zone:1454}'s main gate"] = "La puerta principal de {zone:1454}",
 
-	-- Step 53: Valley of Strength
+	-- Step 53: Fly to The Sepulcher
+	-- {area:228} The Sepulcher
+	["Fly to {area:228}"] = "Vuela a {area:228}",
+	-- {zone:1458} Undercity
+	["{zone:1458} flight master"] = "Maestro de vuelo de {zone:1458}",
+
+	-- Step 54: Boat to Steamwheedle Port
+	-- {area:977} Steamwheedle Port
+	["Boat to {area:977}"] = "Barco a {area:977}",
+
+	-- Step 55: Into Tirisfal Glades
+	-- {zone:1420} Tirisfal Glades
+	["Into {zone:1420}"] = "Entra a {zone:1420}",
+
+	-- Step 63: Into Thousand Needles
+	-- {zone:1441} Thousand Needles
+	["Into {zone:1441}"] = "Entra en {zone:1441}",
+
+	-- Step 64: Into Barrens
+	-- {zone:1413} Barrens
+	["Into {zone:1413}"] = "Hacia {zone:1413}",
+
+	-- Step 65: To Camp Taurajo
+	-- {area:378} Camp Taurajo
+	["To {area:378}"] = "Hacia {area:378}",
+
+	-- Step 66: Fly to Orgrimmar
+	-- {area:1637} Orgrimmar
+	["Fly to {area:1637}"] = "Vuela a {area:1637}",
+	-- {area:378} Camp Taurajo
+	["{area:378} flight master"] = "Maestro de vuelo de {area:378}",
+
+	-- Step 67: Valley of Strength
 	-- {npc:268701} Thatog · {object:172982} Valley of Strength
 	["Walk in through the main gate. {npc:268701} stands in the {object:172982}."] = "Entra por la puerta principal. {npc:268701} está en {object:172982}.",
 
-	-- Step 56: Neeru Fireblade
-	-- {area:2437} Ragefire Chasm · {object:172960} Cleft of Shadow · {object:172982} Valley of Strength · {npc:3216} Neeru Fireblade
-	["For your {area:2437} run: the {object:172960} is the canyon under the {object:172982}; {npc:3216} stands at its far end, next to the {area:2437} portal."] = "Para tu recorrido por {area:2437}: {object:172960} es el cañón bajo {object:172982}; {npc:3216} está al fondo, junto al portal de {area:2437}.",
+	-- Step 68: To Booty Bay
+	-- {area:35} Booty Bay
+	["To {area:35}"] = "Hacia {area:35}",
 
-	-- Step 57: Ragefire Chasm
-	-- {area:2437} Ragefire Chasm · {object:172960} Cleft of Shadow · {npc:3216} Neeru Fireblade · {npc:11520} Taragaman the Hungerer · {npc:11518} Jergosh the Invoker · {npc:4949} Thrall
-	["{area:2437} is a dungeon for a group of five, about levels 13 to 18, and a full run takes 30 to 45 minutes. Its portal is in the {object:172960}, beside {npc:3216}.\nInside: past Oggleflint and his troggs, {npc:11520} waits in the lava cave and drops his heart. {npc:11518} and Bazzalan, further in, are for {npc:4949}'s Hidden Enemies, which this route leaves out."] = "{area:2437} es una mazmorra para un grupo de cinco, de nivel 13 a 18 más o menos, y un recorrido completo dura de 30 a 45 minutos. Su portal está en {object:172960}, junto a {npc:3216}.\nAdentro: pasando a Oggleflint y sus troggs, {npc:11520} espera en la cueva de lava y suelta su corazón. {npc:11518} y Bazzalan, más adentro, son para “Hidden Enemies” de {npc:4949}, que esta ruta deja fuera.",
+	-- Step 69: Boat to Ratchet
+	-- {area:392} Ratchet
+	["Boat to {area:392}"] = "Barco a {area:392}",
 
-	-- Step 58: Neeru Fireblade
-	-- {npc:3216} Neeru Fireblade
-	["Back out through the portal: {npc:3216} stands beside it."] = "Sal de vuelta por el portal: {npc:3216} está a su lado.",
+	-- Step 72: To Orgrimmar
+	-- {zone:1454} Orgrimmar
+	-- was: ["To {area:1637}"] = "A {area:1637}"
+	["To {zone:1454}"] = "A {zone:1454}",
 
-	-- Step 62: Sayoc
+	-- Step 91: Sayoc
 	-- {spell:197} Two-Handed Axes · {npc:11868} Sayoc · {object:172958} Valley of Honor
 	["While you're here: learn {spell:197} from {npc:11868} ({object:172958}, 10 silver); two-handers level a Paladin fastest."] = "Ya que estás aquí: aprende {spell:197} con {npc:11868} ({object:172958}, 10 de plata); las armas de dos manos suben de nivel más rápido a un paladín.",
 
-	-- Step 64: Valley of Wisdom
-	-- {npc:268684} Thra · {npc:268682} Migi · {object:172957} Valley of Wisdom · {area:379} Far Watch Post
+	-- Step 93: Valley of Wisdom
+	-- {npc:268684} Thra · {object:172957} Valley of Wisdom · {area:379} Far Watch Post
 	-- plural, as words: Smooth Boulders = {item:277952} Smooth Boulder
-	["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them. The next guide walks from here to {area:379} and the Crossroads."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor. La siguiente guía camina desde aquí hasta {area:379} y el Cruce.",
+	-- was: ["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them. The next guide walks from here to {area:379} and the Crossroads."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor. La siguiente guía camina desde aquí hasta {area:379} y el Cruce."
+	["{npc:268684} and Migi sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them. The next guide walks from here to {area:379} and the Crossroads."] = "{npc:268684} y Migi están detrás de Grommash Hold, en el {object:172957}; las Smooth Boulders están a su alrededor. La siguiente guía camina desde aquí hasta {area:379} y el Cruce.",
 
-	-- Step 65: Zor Lonetree
+	-- Step 94: Zor Lonetree
 	-- {npc:4047} Zor Lonetree · {npc:4049} Seereth Stonebreak
 	["{npc:4047}: {npc:4049}, on the road into Stonetalon in the next guide"] = "{npc:4047}: {npc:4049}, en el camino hacia Stonetalon, en la siguiente guía",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
 	-- ["At the {area:2362}"] = "En el {area:2362}",
 	-- ["Back north-west up the road to the {area:228}."] = "De vuelta al noroeste por el camino hasta {area:228}.",
+	-- ["Back out through the portal: {npc:3216} stands beside it."] = "Sal de vuelta por el portal: {npc:3216} está a su lado.",
 	-- ["Cast {spell:18960}; {npc:11802} is in {area:2361}. The Shrine Baubles lie on the bed of {area:656} and fade within minutes: swim one straight to the {area:2362} on the north-west shore, use it there and speak to {npc:11799}."] = "Lanza {spell:18960}; {npc:11802} está en {area:2361}. Los Adornos de altar ({item:15877}) están en el fondo de {area:656} y desaparecen en minutos: nada con uno directo a {area:2362} en la orilla noroeste, úsalo allí y habla con {npc:11799}.",
 	-- ["Fly to {area:1638}: {npc:3033} trains you on {area:1639}. Skyborne: fly back to {zone:1454} for the zeppelin afterwards."] = "Vuela a {area:1638}: {npc:3033} te entrena en {area:1639}. Cielonatos: después vuelve volando a {zone:1454} para tomar el zepelín.",
 	-- ["Follow the lake shore south from the murlocs: the {object:1593} lies at the ferry landing, on the way to {area:233}."] = "Sigue la orilla del lago al sur desde los múrlocs: {object:1593} está en el embarcadero, de camino a {area:233}.",
 	-- ["Follow the lake shore south-east and swim out to {area:172}. Rot Hide gnolls cover the island; every type drops ichor. Stay out of {area:235} on its north side unless you go for the optional niche: the gnolls there are level 18-22."] = "Sigue la orilla del lago al sureste y nada hasta {area:172}. Los gnolls Putrepellejo cubren la isla; todos los tipos sueltan icor. No entres en {area:235}, en el lado norte, salvo que vayas por la opción extra: los gnolls de allí son de nivel 18-22.",
 	-- ["Follow the road north out of Silverpine into {zone:1420} and east to the zeppelin towers outside the {area:153}. Take the zeppelin to {zone:1454}."] = "Sigue el camino al norte, fuera de Bosque de Argénteos, hacia {zone:1420} y al este hasta las torres de zepelín afuera de {area:153}. Toma el zepelín a {zone:1454}.",
 	-- ["Follow the road north out of Silverpine into {zone:1420} and on to {area:159}: {npc:246152} trains Paladins there. The zeppelin towers are a short walk south down the road."] = "Sigue el camino al norte, fuera de Bosque de Argénteos, hacia {zone:1420} y hasta {area:159}: {npc:246152} entrena a los paladines allí. Las torres de zepelín están a poca distancia al sur por el camino.",
+	-- ["For your {area:2437} run: the {object:172960} is the canyon under the {object:172982}; {npc:3216} stands at its far end, next to the {area:2437} portal."] = "Para tu recorrido por {area:2437}: {object:172960} es el cañón bajo {object:172982}; {npc:3216} está al fondo, junto al portal de {area:2437}.",
 	-- ["From the {area:380}, follow the road north-east to {area:1637} and walk in by the main gate. {npc:3310}, the wind rider master, stands on the tower in the {object:172982}."] = "Desde {area:380}, sigue el camino al noreste hasta {area:1637} y entra por la puerta principal. {npc:3310}, el maestro de jinetes del viento, está en la torre de {object:172982}.",
 	-- ["Hearth to the {area:228}"] = "Usa tu piedra de hogar para ir a {area:228}",
 	-- ["Into Silverpine"] = "Hacia Bosque de Argénteos",
@@ -330,12 +368,14 @@ return {
 	-- ["The {object:1593} lies at the ferry landing on the lake shore east of the {area:228}."] = "{object:1593} está en el embarcadero de la orilla del lago, al este de {area:228}.",
 	-- ["The {object:177790} lies on the coast west of the {area:240}. It holds the {item:15882} for Trial of the Sea Lion."] = "{object:177790} está en la costa al oeste de {area:240}. Contiene {item:15882} para La prueba del león marino.",
 	-- ["To {area:1637}"] = "A {area:1637}",
+	-- ["Train while you are in the city: Druids and Paladins have no trainer here. Troll Priests: train with {npc:6018} in the {object:172961}, who takes {quest:5654}."] = "Entrena mientras estás en la ciudad: los druidas y los paladines no tienen instructor aquí. Sacerdotes trols: entrena con {npc:6018} en {object:172961}, quien recibe {quest:5654}.",
 	-- ["Worgs and murlocs"] = "Huargos y múrlocs",
 	-- ["Zeppelin to {zone:1420}"] = "Zepelín a {zone:1420}",
 	-- ["Zeppelin tower"] = "Torre del zepelín",
 	-- ["grind on {npc:1909} at {area:1338}, {zone:1421}"] = "farmea {npc:1909} en {area:1338}, {zone:1421}",
 	-- ["{area:1338} shore"] = "Orilla de {area:1338}",
 	-- ["{area:233} comes later, down the lake shore"] = "{area:233} viene después, bajando por la orilla del lago",
+	-- ["{area:2437} is a dungeon for a group of five, about levels 13 to 18, and a full run takes 30 to 45 minutes. Its portal is in the {object:172960}, beside {npc:3216}.\nInside: past Oggleflint and his troggs, {npc:11520} waits in the lava cave and drops his heart. {npc:11518} and Bazzalan, further in, are for {npc:4949}'s Hidden Enemies, which this route leaves out."] = "{area:2437} es una mazmorra para un grupo de cinco, de nivel 13 a 18 más o menos, y un recorrido completo dura de 30 a 45 minutos. Su portal está en {object:172960}, junto a {npc:3216}.\nAdentro: pasando a Oggleflint y sus troggs, {npc:11520} espera en la cueva de lava y suelta su corazón. {npc:11518} y Bazzalan, más adentro, son para “Hidden Enemies” de {npc:4949}, que esta ruta deja fuera.",
 	-- ["{item:15877}, from a {object:177785} in the lake"] = "{item:15877}, de un {object:177785} en el lago",
 	-- ["{item:3317}: a rare drop from the gnolls"] = "{item:3317}: botín raro de los gnolls",
 	-- ["{npc:11066}, the enchanting trainer, works in the Drag."] = "{npc:11066}, el instructor de encantamiento, trabaja en la calle comercial de la ciudad.",
@@ -343,6 +383,8 @@ return {
 	-- ["{npc:11799}, at the {area:2362}"] = "{npc:11799}, en {area:2362}",
 	-- ["{npc:1938}: take it if he offers it; it may follow his {quest:98298} series, which the route does not run"] = "{npc:1938}: acéptala si te la ofrece; puede seguir a su serie {quest:98298}, que la ruta no hace",
 	-- ["{npc:2121}: {quest:516}, on the south loop"] = "{npc:2121}: {quest:516}, en el circuito sur",
+	-- ["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor.",
+	-- ["{npc:268684} and {npc:268682} sit behind Grommash Hold in the {object:172957}; the Smooth Boulders lie around them. The next guide walks from here to {area:379} and the Crossroads."] = "{npc:268684} y {npc:268682} están detrás de la fortaleza de Thrall en {object:172957}; las Rocas lisas están a su alrededor. La siguiente guía camina desde aquí hasta {area:379} y el Cruce.",
 	-- ["{npc:3365}, the leatherworking trainer, works in the {object:172958}."] = "{npc:3365}, el instructor de peletería, trabaja en {object:172958}.",
 	-- ["{npc:3404}, the herbalism trainer, keeps her shop in the Drag."] = "{npc:3404}, la instructora de herboristería, tiene su tienda en la calle comercial de la ciudad.",
 	-- ["{npc:4551}: keep {item:16210}, Podrig takes it on the ride through the {area:228} at 22"] = "{npc:4551}: guarda {item:16210}, Podrig lo recibe en el viaje por {area:228} a nivel 22",
@@ -352,4 +394,5 @@ return {
 	-- ["{object:1599}, just east of the keep"] = "{object:1599}, justo al este de la fortaleza",
 	-- ["{quest:6127}: {area:384}, next guide"] = "{quest:6127}: {area:384}, siguiente guía",
 	-- ["{zone:1454} class quests"] = "Misiones de clase en {zone:1454}",
+	-- ["{zone:1454}'s {object:172982}"] = "{object:172982} de {zone:1454}",
 }

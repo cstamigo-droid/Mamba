@@ -2,9 +2,17 @@
 guide forever/alliance/07-thousand-needles
 title Duskwood
 faction Alliance
-levels 29-31
+levels 29-30
 zone Duskwood
 next forever/alliance/30-40/01-hillsbrad-foothills
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
+
+step To Darkshire
+  zone Duskwood
+  goto 74.8,44.2 "To Darkshire"
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
@@ -15,128 +23,110 @@ next forever/alliance/30-40/01-hillsbrad-foothills
 
 step Duskwood
   zone Duskwood
-  goto 74.8,44.2 "Darkshire"
+  goto 74.8,44.2 "Duskwood"
 
 step Darkshire
   zone Duskwood
   sethome "Darkshire" npc 6790            -- Innkeeper Trelayne, Scarlet Raven Tavern
-  turnin 1243                             -- Watcher Backus, at the north entrance of town; walks around Darkshire: look inside the circle on the map
-  accept 1244
-  turnin 57                               -- Commander Althea Ebonlocke
-  accept 58
-
-step Councilman Millstipe
-  when dungeon "The Stockade"
-  when complete 377
-  zone Duskwood
-  tip Crime and Punishment, from your Stockade run: Councilman Millstipe is in the town hall, beside Commander Althea.
-  turnin 377                              -- Councilman Millstipe
-
-# ---------------------------------------------------------------- Worgen
-
-step Calor
-  when !onquest 173
-  when !turnedin 173
-  zone Duskwood
-  tip You missed this on the route's earlier visit here: it comes first now. It is quick and opens the quests after it.
-  accept 173                              -- Calor, by the town hall
+  turnin 1243 only Dwarf,Gnome,Human,NightElf -- Watcher Backus, at the north entrance of town; walks around Darkshire: look inside the circle on the map
+  accept 1244 only Dwarf,Gnome,Human,NightElf
+  turnin 57 only Dwarf,Gnome,Human,NightElf -- Commander Althea Ebonlocke
+  accept 58 only Dwarf,Gnome,Human,NightElf
 
 step Nightbane Shadow Weavers
   tip The worgen hold the woods of Brightwood, west of Darkshire and north of the road. Pull them one at a time.
-  kill 533 quest 173                      -- Nightbane Shadow Weaver
+  kill 533 quest 173 only Dwarf,Gnome,Human,NightElf -- Nightbane Shadow Weaver
 
 step Calor
-  turnin 173
-  accept 221
+  turnin 173 only Dwarf,Gnome,Human,NightElf
+  accept 221 only Dwarf,Gnome,Human,NightElf
 
 step Nightbane Dark Runners
   tip The Dark Runners prowl the woods south of the road, west of Darkshire.
-  kill 205 quest 221                      -- Nightbane Dark Runner
+  kill 205 quest 221 only Dwarf,Gnome,Human,NightElf -- Nightbane Dark Runner
 
 step Calor
-  turnin 221
-  accept 222
+  turnin 221 only Dwarf,Gnome,Human,NightElf
+  accept 222 only Dwarf,Gnome,Human,NightElf
 
 step The Insane Ghoul
   tip The Insane Ghoul hides in the small crypt by the Tranquil Gardens Cemetery, south of Darkshire. Calor's Nightbane Vile Fangs and Tainted Ones (level 29-31) roam the woods around it: they come at the end of this guide, a level later.
-  collect 1946 quest 177                  -- Mary's Looking Glass; inside
+  collect 1946 quest 177 only Dwarf,Gnome,Human,NightElf -- Mary's Looking Glass; inside
 
 step Darkshire
-  turnin 177                              -- Viktori Prism'Antras, inside
-  accept 181
+  turnin 177 only Dwarf,Gnome,Human,NightElf -- Viktori Prism'Antras, inside
+  accept 181 only Dwarf,Gnome,Human,NightElf
   vendor nearest
 
 step Vul'Gol Ogre Mound: kill these as you meet them
   zone Duskwood
   tip Head south-west from Darkshire to the ogre mound. Abercrombie's Crate sits in the camp at its entrance; Splinter Fist ogres guard it. Zzarc' Vul is inside the ogre mound's cave: go in by the cave mouth on the mound's west side.
-  accept 96138 optional                   -- Only if a Lost Watcher dropped Merrick's Bow: right-click it
-  kill 212 x8 quest 96138.1 optional      -- Splinter Fist Warrior
-  kill 892 x4 quest 96138.2 optional      -- Splinter Fist Taskmaster
-  collect 1968 quest 181.1 @38.0,80.0 map 1431 -- Below ground
-  collect 1349 quest 134 @33.4,76.3       -- Abercrombie's Crate
+  collect 1349 quest 134 @33.4,76.3 only Dwarf,Gnome,Human,NightElf -- Abercrombie's Crate
 
 step Defias Strongbox
   tip The Defias camp lies in the south-west of Duskwood, south of Raven Hill near the Westfall border. The strongbox stands among the tents.
-  collect 5947 quest 1244 @23.9,72.1      -- Defias Docket; inside
+  collect 5947 quest 1244 @23.9,72.1 only Dwarf,Gnome,Human,NightElf -- Defias Docket; inside
 
 step Abercrombie
-  turnin 134
-  accept 160
+  turnin 134 only Dwarf,Gnome,Human,NightElf
+  accept 160 only Dwarf,Gnome,Human,NightElf
 
 step Raven Hill Cemetery: kill these as you meet them
   zone Duskwood
   tip The Plague Spreaders walk the northern half of the Raven Hill Cemetery. Mor'Ladim, an elite, wanders the graves: keep away from him.
   tip Skeletal Raiders, Healers and Warders hold the west part of the cemetery, just east of Sven's camp.
   tip Careful: The skeletons in the catacombs are packed close together, so you can easily pull extra mobs.
-  kill 604 quest 58                       -- Plague Spreader
-  kill 785 quest 323                      -- Skeletal Warder
-  kill 1110 quest 323                     -- Skeletal Raider
-  kill 787 quest 323                      -- Skeletal Healer
+  kill 604 quest 58 only Dwarf,Gnome,Human,NightElf -- Plague Spreader
+  kill 785 quest 323 only Dwarf,Gnome,Human,NightElf -- Skeletal Warder
+  kill 1110 quest 323 only Dwarf,Gnome,Human,NightElf -- Skeletal Raider
+  kill 787 quest 323 only Dwarf,Gnome,Human,NightElf -- Skeletal Healer
 
 step The Weathered Grave
   tip The grave stands among the skeletons at the cemetery's north-west corner, on the way to Sven. Its quest and the next are talk-only, to Sirra Von'Indi and Commander Althea in Darkshire: level 35 quests, but no fight.
-  accept 225 optional                         -- A Weathered Grave
+  accept 225 optional only Dwarf,Gnome,Human,NightElf -- A Weathered Grave
 
 step Sven's Camp
-  turnin 323                              -- Sven Yorgen
-  accept 269                              -- For Bishop Farthing in Stormwind, in the next guide
+  turnin 323 only Dwarf,Gnome,Human,NightElf -- Sven Yorgen
+  accept 269 only Dwarf,Gnome,Human,NightElf -- For Bishop Farthing in Stormwind, in the next guide
+
+step To Sentinel Hill
+  zone Westfall
+  goto 56.6,52.7 "To Sentinel Hill"
+
+step Fly to Darkshire
+  zone Westfall
+  goto 56.6,52.7 "Sentinel Hill flight master"
+  fly "Darkshire"
+  zone Duskwood
 
 step Back to Darkshire
   tip Hearth back to Darkshire (bound at the start of this guide): Sven's camp is at the far west of Duskwood.
-  turnin 160                              -- Lord Ello Ebonlocke, in the town hall
-  accept 251
-  turnin 251                              -- Sirra Von'Indi, in the house behind the town hall
-  turnin 225 optional
-  accept 227 optional
-  turnin 96138 optional                   -- Sirra Von'Indi
-  accept 401
-  turnin 401                              -- Wait a moment, then speak with her again
-  accept 252
-  turnin 252                              -- Lord Ello Ebonlocke
-  turnin 227 optional                         -- Commander Althea Ebonlocke
-  turnin 58                               -- Commander Althea Ebonlocke
-  turnin 1244                             -- Watcher Backus walks around Darkshire: look inside the circle on the map
-  accept 1245                             -- For Elling Trias in Stormwind, in the next guide
+  turnin 160 only Dwarf,Gnome,Human,NightElf -- Lord Ello Ebonlocke, in the town hall
+  accept 251 only Dwarf,Gnome,Human,NightElf
+  turnin 251 only Dwarf,Gnome,Human,NightElf -- Sirra Von'Indi, in the house behind the town hall
+  accept 401 only Dwarf,Gnome,Human,NightElf
+  turnin 401 only Dwarf,Gnome,Human,NightElf -- Wait a moment, then speak with her again
+  accept 252 only Dwarf,Gnome,Human,NightElf
+  turnin 225 optional only Dwarf,Gnome,Human,NightElf
+  accept 227 optional only Dwarf,Gnome,Human,NightElf
+  turnin 252 only Dwarf,Gnome,Human,NightElf -- Lord Ello Ebonlocke
+  turnin 227 optional only Dwarf,Gnome,Human,NightElf -- Commander Althea Ebonlocke
+  turnin 1244 only Dwarf,Gnome,Human,NightElf -- Watcher Backus walks around Darkshire: look inside the circle on the map
+  accept 1245 only Dwarf,Gnome,Human,NightElf -- For Elling Trias in Stormwind, in the next guide
+  turnin 58 only Dwarf,Gnome,Human,NightElf -- Commander Althea Ebonlocke
 
 step Nightbane Vile Fangs and Tainted Ones
-  tip The strongest worgen roam the woods south of Darkshire, west and south of the Tranquil Gardens Cemetery.
-  tip Careful: Curse of Blood lasts 10 minutes and adds 13 to each hit of physical damage you take.
-  tip Careful: Some worgen outside the cave stand in groups, including one camp of four. To avoid adds, pull them one at a time from the raised ground next to the cave entrance.
   tip Careful: Gutspill, a level 32 abomination, walks these woods: let it pass.
-  kill 206 quest 222                      -- Nightbane Vile Fang
-  kill 920 quest 222                      -- Nightbane Tainted One
+  kill 206 quest 222 only Dwarf,Gnome,Human,NightElf -- Nightbane Vile Fang
+  kill 920 quest 222 only Dwarf,Gnome,Human,NightElf -- Nightbane Tainted One
 
 step Calor and Jonathan Carevin
-  turnin 222                              -- Calor
-  accept 223
-  turnin 223                              -- Jonathan Carevin, by Elaine Carevin's house; inside
-
-step Viktori Prism'Antras
-  tip Viktori's house stands at the east end of town, on the way to the flight master.
-  turnin 181                          -- Inside
+  turnin 222 only Dwarf,Gnome,Human,NightElf -- Calor
+  accept 223 only Dwarf,Gnome,Human,NightElf
+  turnin 223 only Dwarf,Gnome,Human,NightElf -- Jonathan Carevin, by Elaine Carevin's house; inside
 
 step Fly to Menethil Harbor
   zone Duskwood
-  goto 77.6,44.4 "Darkshire flight master"
-  fly "Menethil Harbor"
   zone Wetlands
+  zone Duskwood
+  goto 77.6,44.4 "Darkshire flight master"

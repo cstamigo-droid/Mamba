@@ -31,10 +31,12 @@ return {
 	["{item:13334}, 200g"] = "{item:13334}, 200 o",
 	-- {item:18791} Purple Skeletal Warhorse
 	["{item:18791}, 200g"] = "{item:18791}, 200 o",
-	-- {npc:265653} Ochre Skeletal Warhorse
-	-- plural, as words: Purple Skeletal Horses = {item:265840} Purple Skeletal Horse
-	["The new Forever Green, Dark and Purple Skeletal Horses and the {npc:265653} (level 60) have no known source yet."] = "Los nuevos Caballos esqueléticos verde, oscuro y púrpura de Forever y {npc:265653} (nivel 60) aún no tienen fuente conocida.",
+	-- {spell:1295387} Ochre Skeletal Warhorse
+	-- plural, as words: Purple Skeletal Horses = {spell:1277336} Purple Skeletal Horse
+	-- was: ["The new Forever Green, Dark and Purple Skeletal Horses and the {npc:265653} (level 60) have no known source yet."] = "Los nuevos Caballos esqueléticos verde, oscuro y púrpura de Forever y {npc:265653} (nivel 60) aún no tienen fuente conocida."
+	["The new Forever Green, Dark and Purple Skeletal Horses and the {spell:1295387} (level 60) have no known source yet."] = "Los nuevos Forever Green, Dark and Purple Skeletal Horses y {spell:1295387} (nivel 60) aún no tienen una fuente conocida.",
 
 	-- No longer in the guide (its English changed or it went away): reuse or delete.
+	-- ["The new Forever Green, Dark and Purple Skeletal Horses and the {npc:265653} (level 60) have no known source yet."] = "Los nuevos Caballos esqueléticos verde, oscuro y púrpura de Forever y {npc:265653} (nivel 60) aún no tienen fuente conocida.",
 	-- ["{npc:4773} and {npc:4731}'s stable are in {area:159}, {zone:1420}. At 60 {npc:4773} teaches Journeyman {skill:762} (1,000g per Blizzard's designers); Blizzard says learning riding grants a mount. The Forever client sells each skeletal warhorse for 200g at level 60."] = "{npc:4773} y el establo de {npc:4731} están en {area:159}, {zone:1420}. A nivel 60, {npc:4773} enseña {skill:762} de oficial (1,000 o según los diseñadores de Blizzard); Blizzard dice que aprender equitación otorga una montura. El cliente de Forever vende cada caballo de guerra esquelético por 200 o a nivel 60.",
 }

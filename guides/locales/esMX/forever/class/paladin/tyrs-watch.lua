@@ -55,8 +55,9 @@ return {
 	["{npc:246378} leads the order from inside the keep; {npc:246393} stands beside it. {quest:91317} need level 9."] = "{npc:246378} dirige la orden desde dentro del bastión; {npc:246393} está a su lado. {quest:91317} necesita nivel 9.",
 
 	-- Step 9: Shadowvale
-	-- {quest:91317} The Tarnished · {area:16881} Shadowvale · {area:16616} Whispering Forest · {npc:259431} Rudolph Gelhardt
-	["{quest:91317} (level 8-9) hold the ruined village of {area:16881} in the {area:16616}, south-west of the keep. Commander {npc:259431} (level 10) stands on the upper floor of a house, with Drudges below him: clear the ground floor first."] = "{quest:91317} (nivel 8-9) ocupan la aldea en ruinas de {area:16881}, en {area:16616}, al suroeste del bastión. El comandante {npc:259431} (nivel 10) está en el piso de arriba de una casa, con peones abajo: despeja primero la planta baja.",
+	-- {quest:91317} The Tarnished · {area:16881} Shadowvale · {area:16616} Whispering Forest
+	-- was: ["{quest:91317} (level 8-9) hold the ruined village of {area:16881} in the {area:16616}, south-west of the keep. Commander {npc:259431} (level 10) stands on the upper floor of a house, with Drudges below him: clear the ground floor first."] = "{quest:91317} (nivel 8-9) ocupan la aldea en ruinas de {area:16881}, en {area:16616}, al suroeste del bastión. El comandante {npc:259431} (nivel 10) está en el piso de arriba de una casa, con peones abajo: despeja primero la planta baja."
+	["{quest:91317} (level 8-9) hold the ruined village of {area:16881} in the {area:16616}, south-west of the keep. Commander Rudolph Gelhardt (level 10) stands on the upper floor of a house, with Drudges below him: clear the ground floor first."] = "{quest:91317} (nivel 8-9) controlan la aldea en ruinas de {area:16881} en {area:16616}, al suroeste de la fortaleza. Commander Rudolph Gelhardt (nivel 10) está en el piso superior de una casa, con Drudges debajo de él: limpia primero la planta baja.",
 	-- plural, as words: Tarnished Drudges = {npc:259434} Tarnished Drudge
 	["Tarnished Drudges x8"] = "Peones Deslustrados x8",
 	-- plural, as words: Tarnished Zealots = {npc:259433} Tarnished Zealot
@@ -65,16 +66,15 @@ return {
 	-- Step 10: The crypt under Shadowvale
 	-- {area:16881} Shadowvale
 	["The crypt under {area:16881}"] = "La cripta debajo de {area:16881}",
-	-- {item:246213} Sturdy Lumber · {npc:260396} Whispering Horror
-	-- plural, as words: Lumber Piles = {object:554626} Lumber Pile
-	["The cellar is under the village, not on the surface: the way down is inside a burned-out house, where the arrow points. Twelve Lumber Piles (stacked beams) lie in the cellar, each good for one {item:246213}. {npc:260396}, an elite (level 11-13), sits at the far end: leave it alone."] = "El sótano está debajo de la aldea, no en la superficie: la bajada está dentro de una casa quemada, donde señala la flecha. Doce pilas de madera (vigas apiladas) están en el sótano, cada una sirve para una {item:246213}. {npc:260396}, un élite (nivel 11-13), está al fondo: déjalo en paz.",
-	-- plural, as words: Lumber Piles = {object:554626} Lumber Pile
+	-- {item:246213} Sturdy Lumber
+	-- was: ["The cellar is under the village, not on the surface: the way down is inside a burned-out house, where the arrow points. Twelve Lumber Piles (stacked beams) lie in the cellar, each good for one {item:246213}. {npc:260396}, an elite (level 11-13), sits at the far end: leave it alone."] = "El sótano está debajo de la aldea, no en la superficie: la bajada está dentro de una casa quemada, donde señala la flecha. Doce pilas de madera (vigas apiladas) están en el sótano, cada una sirve para una {item:246213}. {npc:260396}, un élite (nivel 11-13), está al fondo: déjalo en paz."
+	["The cellar is under the village, not on the surface: the way down is inside a burned-out house, where the arrow points. Twelve Lumber Piles (stacked beams) lie in the cellar, each good for one {item:246213}. Whispering Horror, an elite (level 11-13), sits at the far end: leave it alone."] = "El sótano está debajo de la aldea, no en la superficie: la bajada está dentro de una casa quemada, donde señala la flecha. Doce Lumber Piles (vigas apiladas) están en el sótano, cada una sirve para obtener {item:246213}. Whispering Horror, un élite (nivel 11-13), está al fondo: déjalo en paz.",
 	["Lumber Piles, in the cellar: the way down is here"] = "Pilas de madera, en el sótano: la bajada está aquí",
 
 	-- Step 11: Hilda the Breaker's bones
 	-- {npc:246389} Hilda the Breaker
 	["{npc:246389}'s bones"] = "Los huesos de {npc:246389}",
-	-- plural, as words: Shadowvale Lurchers = {npc:260428} Shadowvale Lurcher · Faintly Glowing Bones = {item:286259} Faintly Glowing Bone
+	-- plural, as words: Faintly Glowing Bones = {item:286259} Faintly Glowing Bone
 	["The Shadowvale Lurchers and Mystics (level 8-10) in the crypt drop the Faintly Glowing Bones: about one in two from Lurchers, more from one kind of Mystic, less from the other."] = "Los tambaleantes y místicos de Valle Umbrío (nivel 8-10) de la cripta sueltan los Huesos con un leve brillo: más o menos uno de cada dos los tambaleantes, más un tipo de místico y menos el otro.",
 	-- plural, as words: Faintly Glowing Bones = {item:286259} Faintly Glowing Bone
 	["Faintly Glowing Bones x6"] = "Huesos con un leve brillo x6",
@@ -87,8 +87,9 @@ return {
 
 	-- Step 13: Back to the keep
 	["Back to the keep"] = "De vuelta al fuerte",
-	-- {npc:246378} Danitha Morr · {npc:259431} Rudolph Gelhardt
-	["{npc:246378} hands you {npc:259431}'s head for Sylvanas: keep it in your bags, it is what you hand in."] = "{npc:246378} te da la cabeza de {npc:259431} para Sylvanas: guárdala en tus bolsas, es lo que entregas.",
+	-- {npc:246378} Danitha Morr
+	-- was: ["{npc:246378} hands you {npc:259431}'s head for Sylvanas: keep it in your bags, it is what you hand in."] = "{npc:246378} te da la cabeza de {npc:259431} para Sylvanas: guárdala en tus bolsas, es lo que entregas."
+	["{npc:246378} hands you Rudolph Gelhardt's head for Sylvanas: keep it in your bags, it is what you hand in."] = "{npc:246378} te da la cabeza de Rudolph Gelhardt para Sylvanas: guárdala en tus bolsas, es lo que debes entregar.",
 
 	-- Step 14: Hilda the Breaker
 	-- {npc:246389} Hilda the Breaker · {npc:259190} Ephram Barbaro
@@ -123,7 +124,6 @@ return {
 
 	-- Step 21: Deathguard Falgan
 	-- {area:812} Venomweb Vale · {item:6866} Symbol of Life
-	-- plural, as words: Scarlet Crusaders = {npc:238286} Scarlet Crusader
 	["{area:812} is at the far east end of the glades, a long walk. Falgan lies dead among the Scarlet Crusaders there: target his body and use the {item:6866}, then talk to him at once, as he does not stay alive long. If he is already up (another player), just talk to him; if he died again, raise him again."] = "{area:812} está en el extremo este de los claros, una caminata larga. Falgan yace muerto entre los cruzados Escarlata de ahí: selecciona su cuerpo y usa {item:6866}, luego háblale enseguida, porque no se queda vivo mucho tiempo. Si ya está levantado (por otro jugador), solo háblale; si volvió a morir, revívelo otra vez.",
 
 	-- Step 22: The Scarlet attack plans
@@ -145,16 +145,19 @@ return {
 	-- ["Tarnished Zealots"] = "Zelotes mancillados",
 	-- ["The Scarlet Crusaders camped around {area:812} carry the attack plans."] = "Los Cruzados Escarlata acampados alrededor de {area:812} llevan los planes de ataque.",
 	-- ["The Vile Fin murlocs lurk on the bluffs along the road east of the keep and in the camps around the lake to the west."] = "Los múrlocs Anca Vil acechan en los acantilados a lo largo del camino al este del fuerte y en los campamentos alrededor del lago, al oeste.",
+	-- ["The cellar is under the village, not on the surface: the way down is inside a burned-out house, where the arrow points. Twelve Lumber Piles (stacked beams) lie in the cellar, each good for one {item:246213}. {npc:260396}, an elite (level 11-13), sits at the far end: leave it alone."] = "El sótano está debajo de la aldea, no en la superficie: la bajada está dentro de una casa quemada, donde señala la flecha. Doce pilas de madera (vigas apiladas) están en el sótano, cada una sirve para una {item:246213}. {npc:260396}, un élite (nivel 11-13), está al fondo: déjalo en paz.",
 	-- ["Tyr's Watch and {spell:7328}"] = "Tyr's Watch y {spell:7328}",
 	-- ["Vile Fin Attackers"] = "Atacantes Anca Vil",
 	-- ["Vile Fin Seers"] = "Videntes Anca Vil",
 	-- ["{area:16602} stands on the bluffs north-west of the {area:156}. {npc:246349} waits at the gate."] = "{area:16602} se alza en los acantilados al noroeste de {area:156}. {npc:246349} espera en la puerta.",
 	-- ["{area:812} is at the far east end of the glades. Use the {item:6866} on {npc:257663}, then speak to him. If you lose the symbol, {npc:246378} gives you another."] = "{area:812} está en el extremo este de los claros. Usa {item:6866} en {npc:257663} y luego habla con él. Si pierdes el símbolo, {npc:246378} te da otro.",
 	-- ["{npc:246152}, who trains Paladins in {area:159}, sends you to the order's keep on the west coast."] = "{npc:246152}, quien instruye a los paladines en {area:159}, te envía al fuerte de la orden en la costa oeste.",
+	-- ["{npc:246378} hands you {npc:259431}'s head for Sylvanas: keep it in your bags, it is what you hand in."] = "{npc:246378} te da la cabeza de {npc:259431} para Sylvanas: guárdala en tus bolsas, es lo que entregas.",
 	-- ["{npc:246378} leads the order from inside the keep; {npc:246393} stands beside it."] = "{npc:246378} dirige la orden desde el interior del fuerte; {npc:246393} está a su lado.",
 	-- ["{npc:246378} offers the first Lesson in Divinity at level 12."] = "{npc:246378} ofrece la primera misión «Una lección de divinidad» a nivel 12.",
 	-- ["{npc:257648} needs 10 {item:2589}. Scarlet Zealots and Scarlet Friars drop it about three times in ten; bring it along if you already carry some."] = "{npc:257648} necesita 10 de {item:2589}. Los Zelotes Escarlata y los Frailes Escarlata lo sueltan unas tres veces de cada diez; tráelo si ya llevas algo.",
 	-- ["{object:181686}, in the root cellar"] = "{object:181686}, en el sótano",
 	-- ["{object:554626}, in the root cellar"] = "{object:554626}, en el sótano",
+	-- ["{quest:91317} (level 8-9) hold the ruined village of {area:16881} in the {area:16616}, south-west of the keep. Commander {npc:259431} (level 10) stands on the upper floor of a house, with Drudges below him: clear the ground floor first."] = "{quest:91317} (nivel 8-9) ocupan la aldea en ruinas de {area:16881}, en {area:16616}, al suroeste del bastión. El comandante {npc:259431} (nivel 10) está en el piso de arriba de una casa, con peones abajo: despeja primero la planta baja.",
 	-- ["{quest:91317} hold the ruined village of {area:16881} in the {area:16616}, south-west of the keep. The {item:246213} is piled in the root cellar of one of its houses; Commander {npc:259431} walks among his Tarnished."] = "{quest:91317} ocupan la aldea en ruinas de {area:16881}, en {area:16616}, al suroeste del fuerte. {item:246213} está apilada en el sótano de una de sus casas; el comandante {npc:259431} camina entre sus mancillados.",
 }

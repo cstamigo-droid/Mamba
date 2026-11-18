@@ -3,19 +3,19 @@ guide forever/alliance/nightelf/01-teldrassil
 title Teldrassil
 faction Alliance
 race NightElf
-levels 1-13
+levels 1-12
 zone Teldrassil
 next forever/alliance/nightelf/02-darkshore
 
 # Forge's route search orders the quests of this guide and its guide writer writes the steps.
 # Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
 # into this file.
+# Left out: Camping 101: Alchemy (97938), Camping 101: First Aid (97942), Camping 101: Herbalism (97944), Camping 101: Leatherworking (97946), Camping 101: Skinning (97949), Crown of the Earth (928), The Great Outdoors (96606), The Oracle Tree (98398), Crown of the Earth (935).
+
+# Forge's route search orders the quests of this guide and its guide writer writes the steps.
+# Fixes go into data/route-fixes.json, data/guide-fixes.json or forever-db/corrections, never
+# into this file.
 # Added here: Grove of the Ancients (952); Bounty: Gnarlpine Furbolg (490), Tumors (923), The Temple
-# of the Moon (2519), Tears of the Moon (2518), Sathrah's Sacrifice (2520), Eyes of the Sentinels
-# (98067) and Mist (938), with an early Darnassus visit on the west loop.
-# Also added: Tallonkai's second Twisted Hatred (98403), a group quest (Xethorr the Wicked is a level 12 elite), its
-# webwoods and Xethorr on the walk from Dolanaar to the Oracle Glade; Shayla's bounty (490) is handed in on the walk south
-# from the glade to Ursal, which is shorter for everyone (306 yd less without the webwoods).
 
 # ---------------------------------------------------------------- Shadowglen
 
@@ -30,9 +30,24 @@ step Aldrassil
 step Shadowglen: kill these as you meet them
   zone Teldrassil
   tip Young Nightsabers and Young Thistle Boars (level 1-2) roam around Aldrassil: start with them. The Gnarlpine Totems stand in the woods west of the tree, where the Grells (2-3) roam: take them once the beasts are done.
-  kill 2031 quest 456.1
   kill 1984 quest 456.2
+  kill 2031 quest 456.1
   collect 279082 quest 97977.1
+
+step Back at Aldrassil
+  turnin 456                                  -- Conservator Ilthalaine
+  accept 3116 only Warrior                    -- Conservator Ilthalaine: Simple Sigil
+  accept 3117 only Hunter                     -- Conservator Ilthalaine: a sigil for Ayanna Everstride
+  accept 3118 only Rogue                      -- Conservator Ilthalaine: Encrypted Sigil
+  accept 3119 only Priest                     -- Conservator Ilthalaine: Hallowed Sigil
+  accept 3120 only Druid                      -- Conservator Ilthalaine: Verdant Sigil
+  accept 457                                  -- Conservator Ilthalaine
+  accept 97979                                -- Shanda: in at the tree's front entrance and up the ramp; upstairs
+  turnin 3116 only Warrior                    -- Alyissia, the warrior trainer; inside
+  turnin 3118 only Rogue                      -- Frahun Shadewhisper, the rogue trainer
+  turnin 3117 only Hunter                     -- Ayanna Everstride, the hunter trainer
+  turnin 3119 only Priest                     -- Shanda, the priest trainer: in at the tree's front entrance and up the ramp
+  turnin 3120 only Druid                      -- Mardant Strongoak, the druid trainer at Aldrassil
 
 step The grells west of the tree
   zone Teldrassil
@@ -42,46 +57,40 @@ step The grells west of the tree
 step Back at Aldrassil
   turnin 459                                  -- Tarindrella
   turnin 97977
-  turnin 456                                  -- Conservator Ilthalaine
-  accept 457                                  -- Conservator Ilthalaine
-  accept 3116 only Warrior                    -- Conservator Ilthalaine: Simple Sigil
-  accept 3117 only Hunter                     -- Conservator Ilthalaine: a sigil for Ayanna Everstride
-  accept 3118 only Rogue                      -- Conservator Ilthalaine: Encrypted Sigil
-  accept 3119 only Priest                     -- Conservator Ilthalaine: Hallowed Sigil
-  accept 3120 only Druid                      -- Conservator Ilthalaine: Verdant Sigil
   accept 916                                  -- Gilshalan Windwalker, on the tree's ramp
-  accept 97979                                -- Shanda: in at the tree's front entrance and up the ramp; upstairs
   complete 97979
   note "The Goddess Provides: cast Elune's Light and Shadowmeld, then hand it back to Shanda"
-  turnin 97979
+  turnin 97979                        -- Upstairs
   accept 4495                                 -- Dirania Silvershine, east of the tree
+
+step Thistle Boar on the way
+  along until q457
+  kill 1985 quest 457.2 -- Thistle Boar along the way to Aldrassil
 
 step North to Shadowthread Cave
   tip Mangy Nightsabers and Thistle Boars roam north of Aldrassil, on the way to the cave. Githyiss the Vile sits deep inside. Iverron waits in the trees west of the cave mouth.
   kill 2032 quest 457.1
-  kill 1985 quest 457.2
   collect 5166 quest 916.1                    -- Webwood Spiders; below ground
   turnin 4495                                 -- Iverron
   accept 3519
 
 step Aldrassil
+  label q457
   tip The trainers stand upstairs inside Aldrassil, along the ramp that winds up the tree: Alyissia and Frahun Shadewhisper on the first level, Shanda above them, Ayanna Everstride and Mardant Strongoak at the top. The arrow cannot tell the levels apart.
   turnin 916                                  -- Gilshalan Windwalker
   accept 917
   turnin 457                                  -- Conservator Ilthalaine
   turnin 3519                                 -- Dirania Silvershine
   accept 3521
-  turnin 3116 only Warrior                    -- Alyissia, the warrior trainer; inside
-  turnin 3117 only Hunter                     -- Ayanna Everstride, the hunter trainer
-  turnin 3118 only Rogue                      -- Frahun Shadewhisper, the rogue trainer
-  turnin 3119 only Priest                     -- Shanda, the priest trainer: in at the tree's front entrance and up the ramp
-  turnin 3120 only Druid                      -- Mardant Strongoak, the druid trainer at Aldrassil
   train class
+
+step Moonpetal Lily on the way
+  along until q3521
+  collect 10641 quest 3521.2 -- Moonpetal Lily along the way to Aldrassil
 
 step Webwood Egg and the antidote
   tip The Webwood Eggs lie at the back of Shadowthread Cave: take the central path, then left where it splits, up to the high ledge. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.
   collect 10639 quest 3521.1                  -- Grells
-  collect 10641 quest 3521.2
 
 # Shadowthread Cave's mouth: where the walk in from Aldrassil first steps
 # onto the cave's indoor floor in the client's geometry (the navigation grid,
@@ -94,15 +103,15 @@ step Shadowglen
   collect 277190 optional -- Fang of Githyiss; below ground
   accept 97236 optional
   collect 10640 quest 3521.3                  -- Webwood Spiders; below ground
-  collect 10641 quest 3521.2
 
 step Aldrassil
+  label q3521
   turnin 97236 optional
   turnin 917                                  -- Gilshalan Windwalker
   accept 920
-  turnin 3521                                 -- Dirania Silvershine
   turnin 920                                  -- Tenaron Stormgrip, at the top of the tree
   accept 921
+  turnin 3521                                 -- Dirania Silvershine
 
 step The moonwell
   tip The moonwell sits north of Aldrassil.
@@ -112,7 +121,6 @@ step The moonwell
 step Tenaron Stormgrip
   tip Back to the top of Aldrassil. The Lost Journal lies beside him.
   turnin 921                          -- Upstairs
-  accept 928
   accept 96630                                -- Lost Journal, upstairs
   accept 5622 only Priest                     -- Shanda, the priest trainer, on the second level of Aldrassil on the way down: Laurna Morninglight in Dolanaar takes it
 
@@ -132,108 +140,46 @@ step Zenn Foulhoof
   accept 488
 
 step Dolanaar
-  turnin 96630                                -- Lyreena Duskblade, by the campfire
-  accept 96606                                -- Lyreena Duskblade
-
-step The Great Outdoors
-  tip With a profession learned, Lyreena also offers its Camping 101, which its trainer takes: alchemy and herbalism beside Zarrin, First Aid with Byancie in the inn, skinning and leatherworking at the Maneweavers' camp on the road west.
-  complete 96606 @57.7,56.7                   -- /sit by Lyreena's campfire until you get Boosted Rest
-  turnin 96606
-  accept 96634
-
-step Camping 101: Alchemy
-  when skill Alchemy 1
-  when !knows 1230564
-  tip Cyndra Kindwhisper takes it once your Alchemy skill is 20: gather or craft until then, the guide carries on meanwhile.
-  accept 97938                                -- Lyreena Duskblade: for Cyndra Kindwhisper, beside Zarrin
-
-step Camping 101: Herbalism
-  when skill Herbalism 1
-  when !knows 1229705
-  tip Malorne Bladeleaf takes it once your Herbalism skill is 20: gather or craft until then, the guide carries on meanwhile.
-  accept 97944                                -- Lyreena Duskblade: for Malorne Bladeleaf, beside Zarrin
-
-step Camping 101: First Aid
-  when skill "First Aid" 1
-  when !knows 1230117
-  tip Byancie takes it once your First Aid skill is 20: gather or craft until then, the guide carries on meanwhile.
-  accept 97942                                -- Lyreena Duskblade: for Byancie in the inn
-
-step Camping 101: Skinning
-  when skill Skinning 1
-  when !knows 1229517
-  tip Radnaal Maneweaver takes it once your Skinning skill is 20: gather or craft until then, the guide carries on meanwhile.
-  accept 97949                                -- Lyreena Duskblade: for Radnaal Maneweaver, by the road west
-
-step Camping 101: Leatherworking
-  when skill Leatherworking 1
-  when !knows 1229432
-  tip Nadyia Maneweaver takes it once your Leatherworking skill is 20: gather or craft until then, the guide carries on meanwhile.
-  accept 97946                                -- Lyreena Duskblade: for Nadyia Maneweaver, by the road west
-
-step Zarrin
-  train Cooking npc 6286                      -- Zarrin, south of the inn: Camping 101 asks you to learn it
-  complete 96634 @57.1,61.3
-  turnin 96634                                -- Zarrin
-  accept 4161                                 -- Zarrin
-
-step Cyndra Kindwhisper
-  when onquest 97938
-  when complete 97938
-  complete 97938 @57.64,60.8                  -- talk to the trainer
-  turnin 97938                                -- Cyndra Kindwhisper, beside Zarrin
-
-step Malorne Bladeleaf
-  when onquest 97944
-  when complete 97944
-  complete 97944 @57.72,60.64                 -- talk to the trainer
-  turnin 97944                                -- Malorne Bladeleaf, beside Zarrin
-
-step Byancie
-  when onquest 97942
-  when complete 97942
-  complete 97942 @55.29,56.82                 -- talk to the trainer
-  turnin 97942                                -- Byancie, in the inn
-
-step Dolanaar
-  turnin 928                                  -- Corithras Moonrage, south of the inn
-  accept 929
-  sethome "Dolanaar" npc 6736                 -- Innkeeper Keldamyr
-  turnin 2159                                 -- Innkeeper Keldamyr
-  accept 99046                                -- Sentinel Kyra Starsong
-  train class
-  accept 997                                  -- Syral Bladeleaf
-  accept 475                                  -- Athridas Bearmantle
-  accept 87288                                -- Aldia, upstairs
-  accept 2438                         -- Upstairs
-  accept 932                                  -- Tallonkai Swiftroot, upstairs
   accept 98391                                -- Laurna Morninglight, inside
   turnin 5622 only Priest                     -- Laurna Morninglight
   accept 5621 only Priest                     -- Laurna Morninglight: heal Sentinel Shaya by Lake Al'Ameth
-
-step Dolanaar
+  accept 2438                         -- Upstairs
+  accept 932                                  -- Tallonkai Swiftroot, upstairs
+  accept 475                                  -- Athridas Bearmantle
+  accept 87288                                -- Aldia, upstairs
+  accept 997                                  -- Syral Bladeleaf
   tip Moon Priestess Amara patrols the road west of the village: if she isn't at the arrow, follow the road until you meet her.
   accept 487                                  -- Moon Priestess Amara, on the road west of the village
+  accept 99046                                -- Sentinel Kyra Starsong
+  train class
+  accept 929
+  sethome "Dolanaar" npc 6736                 -- Innkeeper Keldamyr
+  turnin 2159                                 -- Innkeeper Keldamyr
+  turnin 96630                                -- Lyreena Duskblade, by the campfire
+
+step Zarrin
+  train Cooking npc 6286                      -- Zarrin, south of the inn: Camping 101 asks you to learn it
+  accept 4161                                 -- Zarrin
 
 # ---------------------------------------------------------------- East: Zenn's items, Starbreeze and Lake Al'Ameth
 
 step Teldrassil: kill these as you meet them
   zone Teldrassil
   tip Nightsabers, Strigid Owls and Webwood Lurkers roam all around Dolanaar and along the road east; the lurkers also drop the recipe's spider legs. The moonwell is at the west edge of Starbreeze Village.
-  collect 3409 quest 488.1                    -- Nightsaber Fang
-  collect 280087 quest 87288.1                -- Nightsabers
   collect 3411 quest 488.2                    -- Strigid Owl Feather
   collect 3412 quest 488.3                    -- Webwood Spider Silk
   collect 5465 quest 4161.1                   -- Webwood Lurkers
+  collect 3409 quest 488.1                    -- Nightsaber Fang
+  collect 280087 quest 87288.1                -- Nightsabers
 
 step Zenn Foulhoof
   tip Zenn sits by the road just east of Dolanaar, between Dolanaar and Starbreeze Village.
   turnin 488                                  -- Zenn Foulhoof
 
 step Starbreeze Village
+  tip Gaerolas Talvethren stands upstairs in a house in the village, east of the moonwell: go up inside, the arrow cannot tell the floors apart. Tallonkai's Dresser is in the house on the hill at the east end of the village.
   use 5619 quest 929.1 @63.4,58.1 map 1438
   collect 5639 quest 929.1 @63.4,58.1         -- Use the Jade Phial at the moonwell
-  tip Gaerolas Talvethren stands upstairs in a house in the village, east of the moonwell: go up inside, the arrow cannot tell the floors apart. Tallonkai's Dresser is in the house on the hill at the east end of the village.
   turnin 475                                  -- Gaerolas Talvethren
   accept 476
   collect 8048 quest 2438.1 @68.0,59.6        -- Tallonkai's Dresser; inside
@@ -249,12 +195,19 @@ step Lake Al'Ameth
   accept 922                                  -- Denalan: Rellian Greenspyre in Darnassus takes it
   turnin 919
 
+step To Rut'theran Village
+  only Priest
+  zone Teldrassil
+  goto 58.4,93.9 "To Rut'theran Village"
+
 step Sentinel Shaya
+  zone Teldrassil
   only Priest
   tip Sentinel Shaya kneels wounded on the rocks at the north edge of Lake Al'Ameth, on the walk back to Dolanaar, with no quest mark over her. Cast Lesser Heal (Rank 2) on her, then Power Word: Fortitude: Rank 1 of Lesser Heal does not count. She runs off once both land and is back in about 5 minutes.
   kill 12429 quest 5621.1 "Heal and fortify Sentinel Shaya"
 
 step Dolanaar
+  zone Teldrassil
   turnin 4161                                 -- Zarrin
   turnin 929                                  -- Corithras Moonrage
   accept 933
@@ -286,25 +239,13 @@ step The road to Darnassus
   tip Gnarlpine Ambushers hide along the road west of Fel Rock.
   kill 2152 quest 487.1
 
-step Radnaal Maneweaver
-  when onquest 97949
-  when complete 97949
-  complete 97949 @42.09,49.96                 -- talk to the trainer
-  turnin 97949                                -- Radnaal Maneweaver, camped beside the road before Shayla
-
-step Nadyia Maneweaver
-  when onquest 97946
-  when complete 97946
-  complete 97946 @41.88,49.44                 -- talk to the trainer
-  turnin 97946                                -- Nadyia Maneweaver, beside Radnaal
-
-step Sentinel Shayla Nightbreeze
-  tip West along the road toward the city. Shayla walks this stretch of road, from the arrow south-west to the bend at about 38,54 and back: if she isn't at the arrow, follow the road south-west. Every Gnarlpine furbolg drops fangs: the ambushers on this road, the barrow's and Gnarlpine Hold's all count.
-  accept 490
+step To Cenarion Enclave
+  zone Darnassus
+  goto 38.2,21.6 "To Cenarion Enclave"
 
 step Darnassus
   zone Darnassus
-  tip Into the city through the gate. Rellian Greenspyre is just south of the Cenarion Enclave at the north end, Sister Aquinne in the west, Priestess A'moora and Sentinel Dalia Sunblade in the Temple of the Moon at the south end. On the way back out, use Dalia's Lunar Pendant at the bank and at the city gate; the other two owls wait for your last visit.
+  tip Arch Druid Fandral Staghelm is in the Cenarion Enclave at the north end of the city, Rellian Greenspyre just south of it. Lariia, Tyrande Whisperwind, Priestess A'moora and Sentinel Dalia Sunblade are in the Temple of the Moon at the south end. Into the city through the gate. Rellian Greenspyre is just south of the Cenarion Enclave at the north end, Sister Aquinne in the west, Priestess A'moora and Sentinel Dalia Sunblade in the Temple of the Moon at the south end. On the way back out, use Dalia's Lunar Pendant at the bank and at the city gate; the other two owls wait for your last visit.
   turnin 922                                  -- Rellian Greenspyre
   accept 923
   turnin 98391                                -- Sister Aquinne
@@ -312,7 +253,28 @@ step Darnassus
   turnin 2519                                 -- Priestess A'moora, in the Temple of the Moon
   accept 2518
   accept 98067                                -- Sentinel Dalia Sunblade, beside her
+
+step Cenarion Enclave
+  zone Darnassus
+  accept 98046
+
+step Cenarion Enclave
+  only Druid
+  zone Darnassus
+  goto 35.8,11.6 "Cenarion Enclave"
+
+step Cenarion Enclave
+  zone Darnassus
+  use 279378 quest 98067.1 @33.39,16.77       -- the tunnel mouth below Cenarion Hold, on the way south
+
+step Darnassus
+  zone Darnassus
   use 279378 quest 98067.2 @41.04,43.55       -- Lunar Pendant: the bank, on the way out
+
+step Darnassus
+  zone Darnassus
+  tip Follow the road west into Darnassus and use the Lunar Pendant at the inn on the Craftsmen's Terrace and at the tunnel mouth below Cenarion Hold for the last two owls.
+  use 279378 quest 98067.3 @66.46,15.35       -- Lunar Pendant: the inn on the Craftsmen's Terrace
   use 279378 quest 98067.4 @89.14,34.76       -- the city gate
 
 # Players' recordings: the barrow's mouth near 44.3,57.9, on its north-east side (18 people walked
@@ -323,9 +285,7 @@ step Ban'ethil Barrow Den's entrance
 
 step Ban'ethil Barrow Den
   zone Teldrassil
-  tip The barrow is south of the road. Sentinel Lynessa Duskblossom is held inside, Oben Rageclaw sleeps in its depths, and the four relic chests sit in the lower rooms. Its furbolgs drop Shayla's fangs.
   tip Careful: the barrow's Gnarlpine Defenders, Augurs and Shamans (7-9) stand in threes in the narrow tunnels: pull each group back toward the entrance before you go deeper.
-  collect 5220 quest 490.1                    -- Gnarlpine Fang: any Gnarlpine furbolg
   collect 3405 quest 483.1            -- Below ground
   accept 2541                                 -- Oben Rageclaw, below ground
   collect 3406 quest 483.2            -- Below ground
@@ -340,7 +300,7 @@ step Rageclaw
   tip Rageclaw (level 10), Oben's soulless body, walks around Ban'ethil Hollow in the den: kill him, then use Oben's Voodoo Charm.
   kill 7318 quest 2561.1                      -- Rageclaw, in the den; walks around Ban'ethil Hollow: look inside the circle on the map
   use 8149 quest 2561.1 @45.5,58.6 map 1438
-  turnin 2561
+  turnin 2561                         -- Below ground
 
 step Escaping Ban'ethil
   tip Escort Sentinel Lynessa Duskblossom out of the barrow; Sentinel Kyra Starsong in Dolanaar takes the report.
@@ -354,10 +314,8 @@ step The Pools of Arlithrien
   collect 5645 quest 933.1 @42.4,67.1         -- Use the Tourmaline Phial at the moonwell
 
 step Gnarlpine Hold
-  tip South of the pools. The Strange Fruited Plant grows by the Hold; the furbolgs around it drop the rest of the fangs.
   tip Careful: the Gnarlpine Avengers (9-10) and Augurs here stand close together and many players died at the Hold: pull them one at a time.
   accept 930                                  -- Strange Fruited Plant
-  collect 5220 quest 490.1                    -- Gnarlpine Fang: any Gnarlpine furbolg
 
 # ---------------------------------------------------------------- Back to Dolanaar
 
@@ -366,7 +324,6 @@ step Dolanaar
   turnin 487                                  -- Moon Priestess Amara
   turnin 932                                  -- Tallonkai Swiftroot, upstairs
   turnin 483                                  -- Athridas Bearmantle
-  accept 486
   turnin 99053                                -- Sentinel Kyra Starsong
   turnin 933                                  -- Corithras Moonrage
   accept 7383
@@ -389,7 +346,7 @@ step Dolanaar
 
 step Tallonkai Swiftroot
   when group 98403
-  accept 98403                                -- Tallonkai Swiftroot: Twisted Hatred's Befouled Webwoods and the elite Xethorr's moss, on the walk to the Oracle Glade
+  accept 98403                                -- Tallonkai Swiftroot: Twisted Hatred's Befouled Webwoods and the elite Xethorr's moss, on the walk to the Oracle Glade; upstairs
 
 step Befouled Webwoods
   when group 98403
@@ -400,7 +357,6 @@ step Befouled Webwoods
   collect 281023 quest 98403.2                -- Mature Fel Moss: Xethorr the Wicked
 
 step The Wellspring River
-  tip West from the webwoods to the Wellspring River, then north along it to the glade: the timberlings along its banks drop the Mossy Tumors.
   tip Careful: Xethorr the Wicked, a level 12 elite, prowls the east edge of the Befouled Webwoods north-west of Dolanaar: if you are alone, keep clear of the webwoods and go round him.
   collect 5170 quest 923.1                    -- Mossy Tumor: timberlings
 
@@ -443,111 +399,55 @@ step Witchmother Arysa
 
 step Sentinel Arynia again
   turnin 98392
-  accept 98398
-  turnin 98398                                -- Oracle Tree Bark, just west of the moonwell
   accept 940 object 673378                    -- the same Oracle Tree Bark: Fandral in Darnassus takes it
-
-step Sentinel Shayla Nightbreeze
-  tip South from the glade to the road: Shayla walks the road west of Dolanaar, from where the path down from the glade meets it south-west to the bend at about 38,54 and back.
-  turnin 490
 
 step Dolanaar
   tip East along the road to Dolanaar.
   turnin 99047                                -- Byancie, inside
   accept 99050
   buy 3371 x1 npc 3614                        -- Empty Vial from Narret Shadowgrove, beside Byancie
-  accept 5629 only Priest                     -- Laurna Morninglight: Priestess Alathea in Darnassus takes it
   train class
   buy 159 x1 npc 6736                         -- Refreshing Spring Water from Innkeeper Keldamyr, for Byancie
-  accept 6063 only Hunter                     -- Dazalar
   turnin 7383                                 -- Corithras Moonrage
-  accept 935                                  -- Fandral in Darnassus takes it
-  accept 5925 only Druid                      -- Kal: Mathrengyl Bearwalker in Darnassus takes it
-  accept 1684 only Warrior                    -- Kyra Windblade, the warrior trainer: Elanaria in Darnassus takes it
 
 step Tallonkai Swiftroot
+  zone Teldrassil
   when complete 98403
   tip Back upstairs to Tallonkai Swiftroot with the webwoods done and Xethorr's moss.
   turnin 98403                                -- Tallonkai Swiftroot, upstairs
 
+step Back to Lake Al'Ameth
+  only Warrior
+  zone Teldrassil
+  goto 60.9,68.5 "To Lake Al'Ameth"
+
 step Lake Al'Ameth
+  zone Teldrassil
   tip South-east of Dolanaar, to Denalan. Lasher Sproutlings wander around him on the shore.
   turnin 930                                  -- Denalan
   turnin 931
-  turnin 2399 direct
+  accept 2399                                 -- Sprouted Frond, beside him
+  turnin 2399
   collect 286017 quest 99050.1                -- Dewy Lasher Frond
-
-step Ursal the Mauler
-  tip South-west from Lake Al'Ameth, past the Pools of Arlithrien: Ursal prowls the far south of the island.
-  tip Careful: Gnarlpine of roughly level 9-11 crowd the camp and sit close together, so it is easy to pull several at once. Take them on singly before you engage Ursal.
-  kill 2039 quest 486.1
-
-step Dolanaar again
-  tip North-east from Ursal's den, back to Dolanaar. Byancie takes a Refreshing Spring Water with the fronds and the vial: if you drank yours, buy another from Innkeeper Keldamyr in this inn before you hand in.
-  turnin 486                                  -- Athridas Bearmantle
-  turnin 99050                                -- Byancie, inside
-  accept 99073
-
-step Taming the Beast
-  only Hunter
-  tip Each of Dazalar's quests hands you a Taming Rod: use it on the beast he names, then bring the rod back to him in Dolanaar. Webwood Lurkers creep around the village, Nightsaber Stalkers and Strigid Screechers roam the woods south of it.
-  kill 1998 quest 6063.1 "Tame Webwood Lurker" -- Webwood Lurker: tame it with the Taming Rod
-  turnin 6063                                 -- Dazalar
-  accept 6101
-  kill 2043 quest 6101.1 "Tame Nightsaber Stalker" -- Nightsaber Stalker: tame it with the Taming Rod
-  turnin 6101
-  accept 6102
-  kill 1996 quest 6102.1 "Tame Strigid Screecher" -- Strigid Screecher: tame it with the Taming Rod
-  turnin 6102                                 -- Tame Beast
-  accept 6103                                 -- Jocaste in Darnassus takes it
-
-step Sentinel Eralya Leafshadow
-  tip Take the road north-west from Dolanaar again; she still lies beside it, on the way to Darnassus.
-  turnin 99073
-
-step Into Darnassus
-  only Warrior
-  zone Darnassus
-  accept 6344                                 -- Mydrannul, on the Craftsmen's Terrace just inside the city
 
 step Darnassus
   only Warrior
   zone Darnassus
-  goto 57.3,34.6 "Elanaria"
-
-# ---------------------------------------------------------------- Darnassus and Rut'theran
-
-step Elanaria
-  only Warrior
-  zone Darnassus
-  tip Elanaria stands on the Warrior's Terrace, just inside the city.
-  turnin 1684                                 -- Elanaria
-  accept 1683
-
-step Vorlus Vilehoof
-  only Warrior
-  zone Teldrassil
-  tip Back out of the city gate and east along the road: Vorlus Vilehoof stands south of it, by Ban'ethil Hollow. Bring his horn back to Elanaria.
-  collect 6805 quest 1683.1 @47.2,63.6        -- Horn of Vorlus
+  goto 57.3,34.6 "Darnassus"
 
 step Back to Darnassus
   only Warrior
   zone Darnassus
-  goto 70.7,45.4 "Elanaria"
+  goto 70.7,45.4 "Darnassus"
+
+step Into Darnassus
+  zone Darnassus
+  goto 70.7,45.4 "Into Darnassus"
 
 step Darnassus
   zone Darnassus
-  tip Follow the road west into Darnassus and use the Lunar Pendant at the inn on the Craftsmen's Terrace and at the tunnel mouth below Cenarion Hold for the last two owls. Mydrannul stands on the Craftsmen's Terrace just inside the city. Arch Druid Fandral Staghelm is in the Cenarion Enclave at the north end of the city, Rellian Greenspyre just south of it; Lariia, Tyrande Whisperwind, Priestess A'moora and Sentinel Dalia Sunblade are in the Temple of the Moon at the south end.
-  turnin 1683 only Warrior                    -- Elanaria, on the Warrior's Terrace: Defensive Stance
+  tip Mydrannul stands on the Craftsmen's Terrace just inside the city.
   accept 6344 only !Warrior                   -- Mydrannul
-  use 279378 quest 98067.3 @66.46,15.35       -- Lunar Pendant: the inn on the Craftsmen's Terrace
-
-step Warrior trainer
-  only Warrior
-  zone Darnassus
-  when level>=12
-  tip Level 12 spells while you're on the Warrior's Terrace: the warrior trainers stand beside Elanaria.
-  train class only Warrior
 
 # Fandral and Mathrengyl stand upstairs in the druids' building of the Cenarion Enclave, and the
 # walking maps have no way up inside it: the arrow led onto a ledge outside, behind the wall (#1338).
@@ -557,35 +457,99 @@ step Cenarion Enclave
   zone Darnassus
   goto 35.8,11.6 "Cenarion Enclave"
 
+step Mydrannul
+  only Warrior
+  accept 6344 only Warrior -- Mydrannul, on the Craftsmen's Terrace just inside the city
 step Darnassus
   zone Darnassus
-  turnin 935                                  -- Arch Druid Fandral Staghelm, in the Cenarion Enclave
   turnin 940
   accept 952
+  turnin 923                                  -- Rellian Greenspyre
 
-step Cenarion Enclave
+step Ilyenia Moonfire
+  only Hunter
   zone Darnassus
-  accept 98046
-  turnin 6103 only Hunter                     -- Jocaste, in the Cenarion Enclave: Beast Training
+  when money>=10s
+  when !skill "Staves" 1
+  tip While you're here: learn Staves from Ilyenia Moonfire (Warrior's Terrace, 10 silver); a Hunter's melee weapon is mostly its stats, and two-handers carry the most.
+  train 11866                         -- Ilyenia Moonfire
 
-step Cenarion Enclave trainers
-  only Hunter,Rogue,Druid
+step Ilyenia Moonfire
+  only Priest
+  zone Darnassus
+  when money>=10s
+  when !skill "Staves" 1
+  tip While you're here: learn Staves from Ilyenia Moonfire (Warrior's Terrace, 10 silver); a staff carries more spell stats than a one-hander while you level.
+  train 11866                         -- Ilyenia Moonfire
+
+# ---------------------------------------------------------------- Darnassus and Rut'theran
+
+step Elanaria
+  only Warrior
+  zone Darnassus
+  tip Elanaria stands on the Warrior's Terrace, just inside the city.
+  accept 1683
+
+step To Rut'theran Village
+  only Warrior
+  zone Teldrassil
+  goto 58.4,93.9 "To Rut'theran Village"
+
+step Laurna Morninglight
+  only Priest
+  zone Teldrassil
+  accept 5629 only Priest                     -- Laurna Morninglight: Priestess Alathea in Darnassus takes it
+
+step Dazalar
+  only Hunter
+  accept 6063 only Hunter                     -- Dazalar
+
+step Kal
+  only Druid
+  accept 5925 only Druid                      -- Kal: Mathrengyl Bearwalker in Darnassus takes it
+
+step Moon Priestess Amara
+  only Warrior
+  accept 1684 only Warrior                    -- Kyra Windblade, the warrior trainer: Elanaria in Darnassus takes it
+
+step Into Darnassus
+  only Warrior
+  zone Darnassus
+  goto 57.3,34.6 "Into Darnassus"
+
+step Elanaria
+  only Warrior
+  zone Darnassus
+  turnin 1684 only Warrior -- Elanaria
+step Vorlus Vilehoof
+  only Warrior
+  zone Teldrassil
+  tip Back out of the city gate and east along the road: Vorlus Vilehoof stands south of it, by Ban'ethil Hollow. Bring his horn back to Elanaria.
+  collect 6805 quest 1683.1 @47.2,63.6        -- Horn of Vorlus
+
+step Back to Tradesmen's Terrace
+  only Warrior
+  zone Darnassus
+  goto 47.9,56.7 "To Tradesmen's Terrace"
+
+step Class trainer
+  only Warrior,Hunter,Rogue,Druid
+  zone Darnassus
+  train class only Warrior,Hunter,Rogue,Druid
+
+step Elanaria
+  only Warrior
+  turnin 1683 only Warrior -- Elanaria, on the Warrior's Terrace: Defensive Stance
+
+step Priest trainer
+  only Priest
   zone Darnassus
   when level>=12
-  tip Level 12 spells while you're in the Cenarion Enclave: the hunter, rogue and druid trainers all stand in it.
-  train class only Hunter,Rogue,Druid
-
-step Cenarion Enclave
-  only Druid
-  zone Darnassus
-  goto 35.8,11.6 "Cenarion Enclave"
+  tip Level 12 spells while you're in the Temple of the Moon: the priest trainers stand beside Priestess Alathea.
+  train class only Priest
 
 step Cenarion Enclave
   zone Darnassus
-  turnin 5925 only Druid                      -- Mathrengyl Bearwalker, in the Cenarion Enclave
-  accept 5921 only Druid
-  use 279378 quest 98067.1 @33.39,16.77       -- the tunnel mouth below Cenarion Hold, on the way south
-  turnin 923                                  -- Rellian Greenspyre
   turnin 98046                                -- Lariia, in the Temple of the Moon
   accept 98065
   turnin 98065                                -- Tyrande Whisperwind, above Lariia
@@ -595,13 +559,6 @@ step Cenarion Enclave
   turnin 2520                                 -- Priestess A'moora
   turnin 98067                                -- Sentinel Dalia Sunblade
   turnin 5629 only Priest                     -- Priestess Alathea, in the Temple of the Moon: Starshards
-
-step Priest trainer
-  only Priest
-  zone Darnassus
-  when level>=12
-  tip Level 12 spells while you're in the Temple of the Moon: the priest trainers stand beside Priestess Alathea.
-  train class only Priest
 
 step Ilyenia Moonfire
   only Hunter
@@ -631,26 +588,58 @@ step Rut'theran Village
   getfp "Rut'theran Village" npc 3838         -- Vesprystus
   turnin 6341
   accept 6342
-  fly "Auberdine"                             -- talk to Vesprystus again: free with Flight to Auberdine
+
+step Fly to Rut'theran Village
+  zone Darkshore
+  fly "Rut'theran Village"
+
+step Dolanaar again
+  zone Teldrassil
+  tip Byancie takes a Refreshing Spring Water with the fronds and the vial: if you drank yours, buy another from Innkeeper Keldamyr in this inn before you hand in.
+  turnin 99050                                -- Byancie, inside
+
+step Taming the Beast
+  only Hunter
+  tip Each of Dazalar's quests hands you a Taming Rod: use it on the beast he names, then bring the rod back to him in Dolanaar. Webwood Lurkers creep around the village, Nightsaber Stalkers and Strigid Screechers roam the woods south of it.
+  kill 1998 quest 6063.1 "Tame Webwood Lurker" -- Webwood Lurker: tame it with the Taming Rod
+  turnin 6063                                 -- Dazalar
+  accept 6101
+  kill 2043 quest 6101.1 "Tame Nightsaber Stalker" -- Nightsaber Stalker: tame it with the Taming Rod
+  turnin 6101
+  accept 6102
+  kill 1996 quest 6102.1 "Tame Strigid Screecher" -- Strigid Screecher: tame it with the Taming Rod
+  turnin 6102                                 -- Tame Beast
+  accept 6103                                 -- Jocaste in Darnassus takes it
+  turnin 6103 only Hunter -- Jocaste, in the Cenarion Enclave: Beast Training
+
+step Fly to Auberdine
+  zone Teldrassil
+  goto 58.4,93.9 "Rut'theran Village flight master"
+  fly "Auberdine"
 
 step Auberdine
   zone Darkshore
-  tip Learn the flight path from Caylais Moonfeather where you land. Laird's fish stall is just north of her, by the docks.
+  tip The boat docks west of the village. The flight master stands on the hill south of the inn; the quest givers are spread along the main street. Wizbang Cranktoggle stands upstairs in the inn: take the stairs inside, the arrow cannot tell the floors apart.
   turnin 6342                                 -- Laird
   accept 6343                                 -- Return to Nessa
-  tip The boat docks west of the village. The flight master stands on the hill south of the inn; the quest givers are spread along the main street.
   accept 3524                                 -- Gwennyth Bly'Leggonde
-  accept 98025                                -- The WANTED poster outside the inn
-  accept 4811                                 -- Sentinel Glynda Nal'Shea
   accept 983                                  -- Wizbang Cranktoggle, upstairs in the inn: take the stairs inside, the arrow cannot tell the floors apart
   getfp "Auberdine"
+  accept 98025                                -- The WANTED poster outside the inn
+  accept 4811                                 -- Sentinel Glynda Nal'Shea
+  accept 954                                  -- Thundris Windweaver, north end of the village
 # ---------------------------------------------------------------- Auberdine
+
+step Fly to Rut'theran Village
+  only !Druid
+  zone Darkshore
+  goto 36.4,45.6 "Auberdine flight master"
+  fly "Rut'theran Village"
 
 step Return to Nessa
   only !Druid
   zone Teldrassil
   tip Fly back to Rut'theran Village from Caylais Moonfeather, hand Laird's Response to Nessa on the dock, then fly back to Auberdine.
-  fly "Rut'theran Village"
   turnin 6343                                 -- Nessa Shadowsong
   fly "Auberdine"
 
@@ -660,67 +649,11 @@ step The Long Wash
   zone Darkshore
   tip Tide Crawlers scuttle along the shore below the village; Buzzbox 827 stands on the beach just south of the docks. Darkshore Threshers swim in the shallows. The Beached Sea Creature lies on the shore just south of the village.
   collect 12242 quest 3524 @36.4,50.9 map 1439 -- Sea Creature Bones
-  collect 5385 quest 983 @35.6,47.1           -- Crawler Legs: the Tide Crawlers
-  turnin 983                                  -- Buzzbox 827
 
 step Auberdine
   zone Darkshore
   turnin 3524                                 -- Gwennyth Bly'Leggonde
   accept 4681
-  accept 954                                  -- Thundris Windweaver, north end of the village
   accept 958
   accept 984                                  -- Terenthis
   accept 2118                                 -- Tharnariun Treetender
-
-step Gubber Blump
-  zone Darkshore
-  when skill Fishing 1
-  tip Fishers only: Gubber Blump stands on the pier. His Darkshore Grouper is fished from the pier itself.
-  accept 1141 optional                        -- Gubber Blump, on the pier
-
-step Moonglade
-  only Druid
-  zone Darkshore
-  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Learn Moonglade's flight path from Sindrayl, south of the lake, for later trips. Then Silva Fil'naveth in Nighthaven flies Druids straight to Rut'theran Village from her gossip: hers is no flight path to learn. Dendrite stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
-  zone Moonglade
-  turnin 5921                                 -- Dendrite Starblaze
-  accept 5929
-  complete 5929 @39.1,27.5                    -- Speak with the Great Bear Spirit
-  turnin 5929
-  accept 5931
-  getfp "Moonglade"
-  fly "Rut'theran Village"
-
-step Back to Darnassus
-  only Druid
-  zone Darnassus
-  tip Nessa stands on the Rut'theran dock where you land. Then take the portal up to Mathrengyl in the Cenarion Enclave.
-  turnin 6343                                 -- Nessa Shadowsong
-
-step Cenarion Enclave
-  only Druid
-  zone Darnassus
-  goto 35.8,11.6 "Cenarion Enclave"
-
-step Back to Darnassus
-  only Druid
-  zone Darnassus
-  turnin 5931                                 -- Mathrengyl Bearwalker
-  accept 6001
-
-step The Moonkin Stone
-  only Druid
-  zone Darkshore
-  tip Go back down to Rut'theran Village and fly to Auberdine. The Moonkin Stone stands in the hills just east of the village: use the Cenarion Moondust there, defeat Lunaclaw and speak to the Lunaclaw Spirit.
-  fly "Auberdine"
-  use 15208 @43.5,46.0                        -- Cenarion Moondust
-  complete 6001
-
-step Body and Heart
-  only Druid
-  zone Darnassus
-  tip Fly to Rut'theran Village once more and take the portal up to Mathrengyl, then fly back to Auberdine.
-  fly "Rut'theran Village"
-  goto 35.8,11.6 "Cenarion Enclave"
-  turnin 6001                                 -- Mathrengyl Bearwalker: Bear Form
-  fly "Auberdine"

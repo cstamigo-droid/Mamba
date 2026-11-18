@@ -38,8 +38,8 @@ step Thousand Needles
 step Mirage Raceway
   zone Thousand Needles
   tip The Mirage Raceway lies on the Shimmering Flats in south-east Thousand Needles: Fizzle Brassbolts is in the gnomes' camp beside the track, Zamek by the goblin camp.
-  turnin 2769
-  turnin 1137                         -- Fizzle Brassbolts: News for Fizzle, from Martek in the Badlands
+  turnin 2769 only Dwarf,Gnome,Human,NightElf
+  turnin 1137 only Dwarf,Gnome,Human,NightElf -- Fizzle Brassbolts: News for Fizzle, from Martek in the Badlands
 
 
 step Tanaris
@@ -51,7 +51,7 @@ step Tanaris
 step Gadgetzan
   zone Tanaris
   tip Ride south-east off the Shimmering Flats into Tanaris. Gadgetzan is just inside the border.
-  turnin 2864                         -- Tran'rek, north side of town
+  turnin 2864 only Dwarf,Gnome,Human,NightElf -- Tran'rek, north side of town
   accept 3362                         -- Tran'rek: keep it, the Thistleshrub Valley waits for the Un'Goro guide's Gadgetzan landing
   accept 992                          -- Senior Surveyor Fizzledowser
   getfp "Gadgetzan" npc 7823          -- Bera Stonehammer
@@ -78,8 +78,7 @@ step Steamwheedle Port
   accept 2875 object 142122           -- The Wanted poster beside him
   accept 2781 object 142122           -- The same poster: Caliph comes much later, after Gadgetzan
   accept 8366                         -- Security Chief Bilgewhizzle, inside
-  accept 97530                        -- Security Chief Bilgewhizzle: Dunemaul Dues, the bangles come from the ogres on your way south
-  turnin 2872                         -- Stoley, in the port's tavern; inside
+  turnin 2872 only Dwarf,Gnome,Human,NightElf -- Stoley, in the port's tavern; inside
   accept 2873
 
 step Noonshade Ruins: kill these as you meet them
@@ -128,7 +127,7 @@ step Noonshade Ruins
 
 step Gadgetzan
   when has 8483 x5
-  turnin 1878 direct -- Spigot Operator Luglunket
+  turnin 1878 -- Spigot Operator Luglunket
 
 step Chief Engineer Bilgewhizzle
   turnin 1691                         -- Chief Engineer Bilgewhizzle
@@ -183,27 +182,13 @@ step The Broken Pillar
   turnin 3161
 
 step Rhapsody's Kalimdor Kocktail
-  collect 6257 quest 1452.1 @43.5,40.6 map 1446
-
-step Dunemaul Compound
-  tip Ride south-west to the ogre compound and keep to its south end; the compound's quest waits for the Un'Goro guide.
-  tip Why the grind to 47: Tooga waits at the edge of the Thistleshrub Valley (mobs of 48-50). Grind it on the Dunemaul Ogres (45-46) at the compound's south end, the safer camp, not on the Brutes and Enforcers (46-48) inside.
-  collect 278186 quest 97530          -- Brilliantly Polished Bangle, from any Dunemaul ogre
-  level 47.06 grind 5471               -- grind on Dunemaul Ogre, at the compound's south end
+  collect 6257 quest 1452.1 @43.5,40.6 map 1446 only Dwarf,Gnome,Human,NightElf
 
 step Tooga's escort
   tip The little turtle Tooga hides at the north end of the Thistleshrub Valley: take him from the edge and leave the Thistleshrubs (48-50) alone. Lead him home to his wife Torta, by the water just east of Steamwheedle Port: he walks slowly and the desert's beasts go for him, so keep him alive.
   accept 1560                         -- Tooga
   complete 1560
   turnin 1560                         -- Torta
-  accept 97540                        -- Tooga, beside her: Oasis
-  turnin 97540
-
-step Steamwheedle Port
-  tip From Torta, Steamwheedle Port is just west along the shore.
-  turnin 97530                        -- Security Chief Bilgewhizzle, inside
-
-# ---------------------------------------------------------------- The south
 
 step Caliph Scorpidsting
   tip Ride south-east to Waterspring Field. Caliph stands in the middle of the southern Wastewander camp: clear around him first.
@@ -316,8 +301,6 @@ step Aerie Peak
   getfp "Aerie Peak"
   accept 2989                         -- Gryphon Master Talonaxe, beside the flight master
   accept 2877                         -- Fraggar Thundermantle, inside
-  accept 86620                        -- Gryphon Master Talonaxe: Fledgling Rescue, the eggs in the hills just east of Aerie Peak
-  accept 86616                        -- Farseer Maret Firetend, just east of the aviary: Repurposed Totems, from the Altar of Zul's Soothsayers
 
 step The Hinterlands
   when onquest 1452
@@ -325,5 +308,5 @@ step The Hinterlands
   goto 26.9,48.6 "Rhapsody Shindigger"
 
 step Rhapsody Shindigger
-  turnin 1452
+  turnin 1452 only Dwarf,Gnome,Human,NightElf
   accept 1469

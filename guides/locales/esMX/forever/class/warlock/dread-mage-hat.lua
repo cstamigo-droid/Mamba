@@ -19,7 +19,7 @@ return {
 	["{area:1098} stands in the north-east of {zone:1431}, north of {area:42}. The {object:321} is a small white flower low in the grass of the fenced garden beside Stalvan's house: hard to see, so sweep the garden with your mouse. Fetid Corpses (level 29) wander the grounds and come quickly: at 25, send your voidwalker at the nearest one, grab the flower and leave. {npc:315} (32) is inside the house; leave him alone."] = "{area:1098} está en el noreste de {zone:1431}, al norte de {area:42}. {object:321} es una florecita blanca, baja en la hierba del jardín cercado junto a la casa de Stalvan: cuesta verla, así que recorre el jardín con el mouse. Los cadáveres fétidos (nivel 29) deambulan por el terreno y llegan rápido: a nivel 25, manda a tu abisario contra el más cercano, agarra la flor y vete. {npc:315} (32) está dentro de la casa; déjalo en paz.",
 
 	-- Step 3: Musquash Root
-	-- {area:836} Dun Algaz · {object:147516} Dark Iron (no name in this language: may be words) · {area:146} Stonewrought Dam
+	-- {area:836} Dun Algaz · {object:147516} Dark Iron · {area:146} Stonewrought Dam
 	["The root grows at the water's edge in the pool below the small falls east of {area:836}, beside the {object:147516} cave below the {area:146}: a tall, spiky wooden root, not at the foot of the dam itself."] = "La raíz crece en la orilla de la poza debajo de la pequeña cascada al este de {area:836}, junto a la cueva de {object:147516} debajo de {area:146}: una raíz de madera alta y espinosa, no al pie de la presa.",
 
 	-- Step 4: A Noble Brew

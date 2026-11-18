@@ -27,6 +27,8 @@ return {
 	["Forever pays these old quests in full at any level. The {area:363} is the best of them: about 1,400 {faction:76} and 1,400 Darkspear reputation in 25 minutes. {npc:3143} waits in the Den, the big hut; {npc:10176} stands outside it."] = "Forever paga estas misiones viejas completas a cualquier nivel. {area:363} es el mejor de ellos: unos 1.400 de reputación con {faction:76} y 1.400 con Lanza Negra en 25 minutos. {npc:3143} espera en La Guarida, la choza grande; {npc:10176} está afuera.",
 	-- {npc:3144} Eitrigg · {faction:76} Orgrimmar · {quest:787} The New Horde
 	["{npc:3144}, in {faction:76}: {quest:787}, +50"] = "{npc:3144}, en {faction:76}: {quest:787}, +50",
+	-- {npc:10176} Kaltunk
+	["{npc:10176}: Your Place in the World, +50"] = "{npc:10176}: Your Place in the World, +50",
 	-- {npc:5765} Ruzan · {quest:792} Vile Familiars
 	["{npc:5765}: {quest:792}, warlocks only"] = "{npc:5765}: {quest:792}, solo brujos",
 
@@ -85,6 +87,7 @@ return {
 	["The coast and the road"] = "La costa y el camino",
 	-- {quest:97223} Bloodtalon Matriarch · {area:362} Razor Hill
 	["Makrura and surf crawlers walk the beaches east and south of Sen'jin. The {quest:97223} is east of the village. The Ridgeshade spiders are along the road south of {area:362} and north-east of the Den."] = "Los makrura y los reptadores de la marea recorren las playas al este y al sur de Sen'jin. {quest:97223} está al este de la aldea. Las arañas Sombracresta están a lo largo del camino al sur de {area:362} y al noreste de La Guarida.",
+	["Bloodtalon Matriarch Eggs"] = "Bloodtalon Matriarch Eggs",
 
 	-- Step 12: Sen'jin Village: hand in
 	-- {area:367} Sen'jin Village
@@ -205,8 +208,9 @@ return {
 
 	-- Step 34: Around the Crossroads
 	["Around the Crossroads"] = "Alrededor del Cruce",
-	-- {npc:267307} Chol'aruk · {area:1699} Thorn Hill · {npc:10668} Beaten Corpse · {area:378} Camp Taurajo
-	["The Razormane camps and the supply crates are north-east of the town; {npc:267307}, an elite boar, sits deep in the {area:1699} cave there. The Witchwing harpies nest far to the north-west. The {npc:10668} lies north-east of {area:378}, in the south: right-click it. Raptors and plainstriders are everywhere."] = "Los campamentos Crines de Acero y las cajas de suministros están al noreste del pueblo; {npc:267307}, un jabalí élite, está en lo más hondo de la cueva de {area:1699}, allí. Las arpías Alabruja anidan lejos, al noroeste. El {npc:10668} yace al noreste de {area:378}, en el sur: haz clic derecho en él. Hay raptores y zancudos por todas partes.",
+	-- {area:1699} Thorn Hill · {npc:10668} Beaten Corpse · {area:378} Camp Taurajo
+	-- was: ["The Razormane camps and the supply crates are north-east of the town; {npc:267307}, an elite boar, sits deep in the {area:1699} cave there. The Witchwing harpies nest far to the north-west. The {npc:10668} lies north-east of {area:378}, in the south: right-click it. Raptors and plainstriders are everywhere."] = "Los campamentos Crines de Acero y las cajas de suministros están al noreste del pueblo; {npc:267307}, un jabalí élite, está en lo más hondo de la cueva de {area:1699}, allí. Las arpías Alabruja anidan lejos, al noroeste. El {npc:10668} yace al noreste de {area:378}, en el sur: haz clic derecho en él. Hay raptores y zancudos por todas partes."
+	["The Razormane camps and the supply crates are north-east of the town; Chol'aruk, an elite boar, sits deep in the {area:1699} cave there. The Witchwing harpies nest far to the north-west. The {npc:10668} lies north-east of {area:378}, in the south: right-click it. Raptors and plainstriders are everywhere."] = "Los campamentos Razormane y las cajas de suministros están al noreste del pueblo; Chol'aruk, un jabalí élite, está en lo profundo de la cueva de {area:1699}, allí. Las arpías Witchwing anidan lejos, al noroeste. {npc:10668} está al noreste de {area:378}, en el sur: haz clic derecho en él. Hay raptores y zancudos de llanura por todas partes.",
 	-- {npc:10668} Beaten Corpse
 	["{npc:10668}: right-click it"] = "{npc:10668}: haz clic derecho en él",
 
@@ -228,9 +232,10 @@ return {
 	-- Step 38: Prowlers, Serena Bloodfeather and Echeyakee
 	-- {npc:3452} Serena Bloodfeather · {quest:881} Echeyakee
 	["Prowlers, {npc:3452} and {quest:881}"] = "Merodeadores, {npc:3452} y {quest:881}",
-	-- {quest:876} Serena Bloodfeather · {npc:3338} Sergra Darkthorn · {item:10327} Horn of Echeyakee · {object:147524} Echeyakee's Lair
+	-- {quest:876} Serena Bloodfeather · {npc:3338} Sergra Darkthorn · {item:10327} Horn of Echeyakee · {object:164651} Echeyakee's Lair
 	-- plural, as words: Savannah Prowlers = {npc:3425} Savannah Prowler
-	["Savannah Prowlers lie west and north of the Crossroads. {quest:876} leads the Witchwing harpies in the far north-west. Then {npc:3338} gives you the {item:10327}: blow it beside the kodo bones at {object:147524}, north of the town, and kill the white lion."] = "Los merodeadores de la sabana están al oeste y al norte del Cruce. {quest:876} dirige a las arpías Alabruja del extremo noroeste. Luego {npc:3338} te da el {item:10327}: sóplalo junto a los huesos de kodo de {object:147524}, al norte del pueblo, y mata al león blanco.",
+	-- was: ["Savannah Prowlers lie west and north of the Crossroads. {quest:876} leads the Witchwing harpies in the far north-west. Then {npc:3338} gives you the {item:10327}: blow it beside the kodo bones at {object:147524}, north of the town, and kill the white lion."] = "Los merodeadores de la sabana están al oeste y al norte del Cruce. {quest:876} dirige a las arpías Alabruja del extremo noroeste. Luego {npc:3338} te da el {item:10327}: sóplalo junto a los huesos de kodo de {object:147524}, al norte del pueblo, y mata al león blanco."
+	["Savannah Prowlers lie west and north of the Crossroads. {quest:876} leads the Witchwing harpies in the far north-west. Then {npc:3338} gives you the {item:10327}: blow it beside the kodo bones at {object:164651}, north of the town, and kill the white lion."] = "Los Savannah Prowlers están al oeste y al norte de Crossroads. {quest:876} dirige a las arpías Witchwing en el extremo noroeste. Luego {npc:3338} te da {item:10327}: sóplalo junto a los huesos de kodo en {object:164651}, al norte del pueblo, y mata al león blanco.",
 
 	-- Step 39: Chen's Empty Keg (optional hub)
 	-- {quest:819} Chen's Empty Keg
@@ -385,6 +390,8 @@ return {
 	-- ["Keep handing in {quest:7832} until {faction:76} is Exalted. {item:14047}: Dark Adepts and Shadowmages (level 58-60) in {zone:1423}, or the Auction House."] = "Sigue entregando {quest:7832} hasta ser Exaltado con {faction:76}. {item:14047}: Adeptos oscuros y Magos oscuros (nivel 58-60) en {zone:1423}, o la casa de subastas.",
 	-- ["Keep handing in {quest:7832}, 20 {item:14047} at a time. {item:14047}: Dark Adepts and Shadowmages (level 58-60) in {zone:1423}, or the Auction House."] = "Sigue entregando {quest:7832}, 20 {item:14047} cada vez. {item:14047}: Adeptos oscuros y Magos oscuros (nivel 58-60) en {zone:1423}, o la casa de subastas.",
 	-- ["Kolkar centaur (level 30-33) drop it here. The Auction House works too."] = "Los Centauros Kolkar (nivel 30-33) lo sueltan aquí. También sirve la casa de subastas.",
+	-- ["Savannah Prowlers lie west and north of the Crossroads. {quest:876} leads the Witchwing harpies in the far north-west. Then {npc:3338} gives you the {item:10327}: blow it beside the kodo bones at {object:147524}, north of the town, and kill the white lion."] = "Los merodeadores de la sabana están al oeste y al norte del Cruce. {quest:876} dirige a las arpías Alabruja del extremo noroeste. Luego {npc:3338} te da el {item:10327}: sóplalo junto a los huesos de kodo de {object:147524}, al norte del pueblo, y mata al león blanco.",
+	-- ["The Razormane camps and the supply crates are north-east of the town; {npc:267307}, an elite boar, sits deep in the {area:1699} cave there. The Witchwing harpies nest far to the north-west. The {npc:10668} lies north-east of {area:378}, in the south: right-click it. Raptors and plainstriders are everywhere."] = "Los campamentos Crines de Acero y las cajas de suministros están al noreste del pueblo; {npc:267307}, un jabalí élite, está en lo más hondo de la cueva de {area:1699}, allí. Las arpías Alabruja anidan lejos, al noroeste. El {npc:10668} yace al noreste de {area:378}, en el sur: haz clic derecho en él. Hay raptores y zancudos por todas partes.",
 	-- ["Venture Co. Enforcers at the {area:381} (level 16-17) drop it here. The Auction House works too."] = "Los Déspotas de Ventura y Cía. de {area:381} (nivel 16-17) lo sueltan aquí. También sirve la casa de subastas.",
 	-- ["{npc:14726} takes cloth for {faction:76} in {faction:76}. The first donations of Wool, Silk, Mageweave and {item:14047} (60 cloth each) are done once and give the most reputation per cloth; after them, {quest:7832} repeats until Exalted. Exalted with another race's city lets you buy that race's mounts. Forever's Legacy Diplomat perk increases reputation gains."] = "{npc:14726} acepta paño para {faction:76} en {faction:76}. Las primeras donaciones de Paño de lana, Paño de seda, Paño de tejido mágico y {item:14047} (60 paños cada una) se hacen una sola vez y dan la mayor reputación por paño; después, {quest:7832} se repite hasta Exaltado. Ser Exaltado con la ciudad de otra raza te permite comprar las monturas de esa raza. La ventaja Diplomático del Legado de Forever aumenta la reputación obtenida.",
 	-- ["{npc:14726}: {item:14047} delivered"] = "{npc:14726}: {item:14047} entregado",

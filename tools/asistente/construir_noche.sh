@@ -58,7 +58,15 @@ paso "compilar forge" cargo build --release --locked -p forge --manifest-path "$
 log "forge: $("$F" version 2>&1 | head -1)"
 
 # 1. Fuentes autorizadas por Cristian (16-11): tablas del juego (wago.tools), pfQuest (MIT),
-#    CMaNGOS classic-db (GPL-3.0) y WoWDBDefs. NO: eglink, forever-vo, webxp, QuestieDB.
+#    CMaNGOS classic-db (GPL-3.0) y WoWDBDefs. NO: eglink, forever-vo, QuestieDB.
+#    webxp: autorizada por Cristian el 18-11 ("Autorizar e instalar") SOLO como dato de XP por misión
+#    (data/sources/webxp/quest-xp.json, que forge build lee si existe). Provisional: se reemplaza por la
+#    XP calculada con ForeverTDB + la tabla QuestXP del cliente (pendiente con dueño).
+#    QuestieDB como CONSULTA DE HECHOS: Cristian, 18-11, "Aceptar todo". Cubre las 21 guías escritas a
+#    mano por Polestar (GPL-3) que lo citan y 8 filas (forever-db/corrections 79980, 91899, 91900,
+#    PNJ 270513, objeto 5359; data/codex/journal-quests.json, 3 filas). La construcción sigue con
+#    --no-questie (no se lee QuestieDB). Pendiente con dueño: reemplazar esos hechos por ForeverTDB.
+#    También aceptadas el 18-11: ForeverLevelingBiS (MIT), wowsims (MIT) y Freedoom (licencia tipo BSD).
 paso "fuentes" "$F" data sources --only wago,builders,pfquest,cmangos,wowdbdefs
 # ForeverTDB (autorizada por Cristian el 17-11, GPL-2.0, solo como hechos, nunca va en un zip): el paso
 # de profesiones de forge build exige sus listas de entrenador. La arma tools/asistente/tdb_a_sqlite.py.

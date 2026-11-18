@@ -24,7 +24,7 @@ return {
 	["{area:392} is a neutral goblin port on the {zone:1413} coast: the boat from {area:35} docks there. {npc:6251} stands on the hill above the town, behind the engineers' hut, by his little tower; {npc:6266} and two acolytes are with him. He sends you to {npc:6294} in {zone:1455}."] = "{area:392} es un puerto goblin neutral en la costa de {zone:1413}: ahí atraca el barco de {area:35}. {npc:6251} está en la colina sobre el pueblo, detrás de la choza de los ingenieros, junto a su torrecita; {npc:6266} y dos acólitos están con él. Te manda con {npc:6294} en {zone:1455}.",
 
 	-- Step 4: Krom Stoutarm
-	-- {npc:6294} Krom Stoutarm · {object:32356} Hall of Explorers (no name in this language: may be words) · {quest:1758} Tome of the Cabal · {area:287} Hillsbrad · {zone:1441} Thousand Needles
+	-- {npc:6294} Krom Stoutarm · {object:32356} Hall of Explorers · {quest:1758} Tome of the Cabal · {area:287} Hillsbrad · {zone:1441} Thousand Needles
 	["{npc:6294} is in the library of the {object:32356}. He wants two lost pieces of the {quest:1758}: one on the {area:287} coast, one in {zone:1441}."] = "{npc:6294} está en la biblioteca de {object:32356}. Quiere dos partes perdidas de {quest:1758}: una en la costa de {area:287} y otra en {zone:1441}.",
 
 	-- Step 5: Moldy Tome

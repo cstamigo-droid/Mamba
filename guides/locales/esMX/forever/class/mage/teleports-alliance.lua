@@ -17,7 +17,7 @@ return {
 	["{item:17031}, 10s each"] = "{item:17031}, 10 p cada una",
 
 	-- Step 2: Teleport: Ironforge
-	-- {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District · {zone:1455} Ironforge · {npc:2489} Milstaff Stormeye · {object:32362} Mystic Ward (no name in this language: may be words) · {spell:3562} Teleport: Ironforge
+	-- {area:2257} Deeprun Tram · {zone:1453} Stormwind · {object:28027} Dwarven District · {zone:1455} Ironforge · {npc:2489} Milstaff Stormeye · {object:32362} Mystic Ward · {spell:3562} Teleport: Ironforge
 	["Take the {area:2257} from {zone:1453}'s {object:28027} to {zone:1455}. {npc:2489}, the portal trainer, stands with the mage trainers in the {object:32362} at the back of the city: {spell:3562}, 20 silver."] = "Toma {area:2257} desde {object:28027} de {zone:1453} hasta {zone:1455}. {npc:2489}, el instructor de portales, está con los instructores de magos en {object:32362}, al fondo de la ciudad: {spell:3562}, 20 de plata.",
 
 	-- Step 3: Teleport: Darnassus
@@ -27,7 +27,7 @@ return {
 	-- Step 4: Portals to Stormwind and Ironforge
 	-- {zone:1453} Stormwind · {zone:1455} Ironforge
 	["Portals to {zone:1453} and {zone:1455}"] = "Portales a {zone:1453} y {zone:1455}",
-	-- {item:17032} Rune of Portals · {npc:2485} Larimaine Purdue · {spell:10059} Portal: Stormwind · {npc:2489} Milstaff Stormeye · {zone:1455} Ironforge · {object:32362} Mystic Ward (no name in this language: may be words) · {spell:11416} Portal: Ironforge
+	-- {item:17032} Rune of Portals · {npc:2485} Larimaine Purdue · {spell:10059} Portal: Stormwind · {npc:2489} Milstaff Stormeye · {zone:1455} Ironforge · {object:32362} Mystic Ward · {spell:11416} Portal: Ironforge
 	["At 40 the portal trainers teach the portals: a gateway your whole group can step through, for 1 gold 50 silver each. Each portal burns one {item:17032} (20 silver at any reagent vendor). {npc:2485} has {spell:10059} at the top of the Wizard's Sanctum; then the tram to {npc:2489} in {zone:1455}'s {object:32362} for {spell:11416}."] = "A nivel 40, los instructores de portales enseñan los portales: una entrada que todo tu grupo puede cruzar, por 1 de oro 50 de plata cada uno. Cada portal gasta una {item:17032} (20 de plata en cualquier vendedor de componentes). {npc:2485} tiene {spell:10059} en lo alto del Santuario del Mago; luego el tranvía hasta {npc:2489}, en {object:32362} de {zone:1455}, para {spell:11416}.",
 	-- {item:17032} Rune of Portals
 	["{item:17032}, 20s each"] = "{item:17032}, 20 p cada una",

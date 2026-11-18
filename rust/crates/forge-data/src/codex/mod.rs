@@ -397,6 +397,10 @@ fn load_rep_gate_table(file: &Path) -> Result<V, String> {
 	let raw = parse_json(&std::fs::read_to_string(file).map_err(|e| e.to_string())?)?;
 	let is_int = |v: &V| v.is_num() && forge_guide::js::is_integer(v.num());
 	for g in raw.get("gates").items() {
+		// Mamba (18-11): las filas que se apoyan en QuestieDB quedan fuera.
+		if stringify(&g, None).to_lowercase().contains("questie") {
+			continue;
+		}
 		let npcs = g.get("npcs");
 		let quest = g.get("quest");
 		let wh = if npcs.is_arr() && !npcs.is_empty() && npcs.items().iter().all(is_int) { !quest.truthy() } else { is_int(&quest) && !npcs.truthy() };
@@ -495,7 +499,21 @@ pub fn load_inputs(opts: &Options, log: &dyn Fn(&str)) -> Result<Inputs, String>
 	let texts = guide_texts(&guides);
 	let lib = opts.root.join("data").join("codex");
 	let read = |f: &str| std::fs::read_to_string(lib.join(f)).map_err(|e| format!("{}: {e}", lib.join(f).display()));
-	let entrance_table = if lib.join("entrances.json").exists() { instances::load_entrance_table(&read("entrances.json")?)? } else { V::obj() };
+	// Mamba (18-11): sin QuestieDB, ni siquiera como cita. Las entradas que lo citan quedan fuera (el Codex
+	// vuelve al punto de cadáver del cliente para esas instancias).
+	let entrance_table = if lib.join("entrances.json").exists() {
+		let raw = parse_json(&read("entrances.json")?)?;
+		let kept = V::arr();
+		for e in raw.get("entrances").items() {
+			if !stringify(&e, None).to_lowercase().contains("questie") {
+				kept.push(e.clone());
+			}
+		}
+		raw.set("entrances", kept);
+		instances::load_entrance_table(&stringify(&raw, None))?
+	} else {
+		V::obj()
+	};
 	let levels_table = if lib.join("levels.json").exists() { journal::load_levels_table(&read("levels.json")?)? } else { V::obj() };
 	let att = parse_json(&read("attunements.json")?)?;
 	let attunement_table = Obj::new();
@@ -580,7 +598,7 @@ fn sources_meta(inputs: &Inputs) -> V {
 	let ne = inputs.entrance_table.len();
 	if ne > 0 && inputs.atlasloot.is_none() {
 		out.push(source(
-			"Curated instance entrances (data/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, the web quest database (Forever pages), Polestar Recorder sessions",
+			"Curated instance entrances (data/codex/entrances.json, Mamba: the rows citing QuestieDB left out): warcraft.wiki.gg, the web quest database (Forever pages), Polestar Recorder sessions",
 			V::str(&format!("{ne} entrances")),
 			V::str("Facts only (coordinates), each entry with its source"),
 		));
@@ -588,7 +606,7 @@ fn sources_meta(inputs: &Inputs) -> V {
 	let nr = inputs.rep_table.len();
 	if nr > 0 {
 		out.push(source(
-			"Curated reputation gates (data/codex/repgates.json): warcraft.wiki.gg, the web quest database's Classic reputation guides, QuestieDB",
+			"Curated reputation gates (data/codex/repgates.json, Mamba: the rows citing QuestieDB left out): warcraft.wiki.gg, the web quest database's Classic reputation guides",
 			V::str(&format!("{nr} items")),
 			V::str("Facts only (standings), each row with its source"),
 		));

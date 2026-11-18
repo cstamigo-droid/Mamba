@@ -22,12 +22,10 @@ con Boats to and from the island
 # Gordunni (44-46) are done on the guide's own loop again.
 
 step Into The Barrens
-  when !turnedin 93394
   zone The Barrens
   goto 49.5,78.4 "Into The Barrens"
 
 step Thalanaar flight master
-  when !turnedin 93394
   zone Feralas
   goto 89.5,45.9 "Thalanaar flight master"
   getfp "Thalanaar"
@@ -95,7 +93,7 @@ step Gordunni ogres
 step Feral Scar Vale
   tip Ride north into the yeti valley. Every Feral Scar yeti can drop a thick hide; Bloodroar the Stalker (level 48) prowls the middle.
   collect 8973 quest 2821             -- Thick Yeti Hide
-  collect 6259 quest 1452.3 @57.5,56.5 map 1444 -- Groddoc Liver
+  collect 6259 quest 1452.3 @57.5,56.5 map 1444 only Dwarf,Gnome,Human,NightElf -- Groddoc Liver
 
 step Isle of Dread
   tip The Isle of Dread is the island just south of Sardor Isle: swim over. Hatecrest Serpent Guards and Sorceresses hold it; Lord Shalzaru (level 47) waits in the cave at its south end. Pull his guards first.
@@ -117,16 +115,9 @@ step Feathermoon Stronghold
   note Pratt's next order, Improved Quality, wants Rage Scar hides from yetis of 46-49: skip it.
 
 step Fly to Thalanaar
-  when taxi "Thalanaar"
   zone Feralas
   goto 30.3,43.3 "Feathermoon flight master"
   fly "Thalanaar"
-
-step Back to the coast
-  when !taxi "Thalanaar"
-  zone Feralas
-  tip You came into Feralas from Shen'dralas, so Thalanaar's flight path is still to learn: take the boat back to the coast and ride east along the road; you pick up the flight path when this guide ends at Thalanaar.
-  goto 43.3,42.7 "The Forgotten Coast"
 
 step Feralas
   zone Feralas
@@ -172,7 +163,7 @@ step Ironfur bears
   zone Feralas
   tip Ride north out of Feral Scar Vale: the Ironfur Bears (41-42) at the foot of the High Wilderness drop Rhapsody's last liver.
   tip Careful: Ironfur Patriarchs (48-49) and the Rage Scar yetis (46-49) roam the hills further north: stay at their edge.
-  collect 6258 quest 1452.2 @53.2,47.3 map 1444
+  collect 6258 quest 1452.2 @53.2,47.3 map 1444 only Dwarf,Gnome,Human,NightElf
 
 step Feathermoon Stronghold
   tip Ginro Hearthkindle stands upstairs in his building: go up inside, the arrow cannot tell the floors apart.
@@ -200,9 +191,3 @@ step Thalanaar
   when onquest 4281
   tip Ride north-east to the night elf outpost on the Thousand Needles border.
   turnin 4281                         -- Falfindel Waywarder walks around Thalanaar: look inside the circle on the map
-
-step Thalanaar flight master
-  when !taxi "Thalanaar"
-  zone Feralas
-  goto 89.5,45.9 "Thalanaar flight master"
-  getfp "Thalanaar"
