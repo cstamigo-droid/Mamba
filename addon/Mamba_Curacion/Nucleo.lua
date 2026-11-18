@@ -1,0 +1,127 @@
+-- Mamba_Curacion: núcleo. Ajustes, perfiles de clic por clase y especialización (K18) y las curas que se
+-- pueden poner en cada clic. Cada clic lo hace el jugador (permitido): Mamba solo pone el hechizo en el botón.
+-- Licencia: GPL-3.0-only.
+local _, M = ...
+_G.MambaCuracion = M
+
+-- Hechizos que tiene sentido poner en un clic, por clase (id de rango 1; el juego lanza el rango más alto que
+-- sabes al usar el nombre). Sacados del libro de hechizos del cliente (wago esMX), no de una guía.
+M.CURAS = {
+	DRUID = { 774, 8936, 5185, 18562, 2782, 8946, 2893, 20484, 29166, 1126 },
+	PRIEST = { 2050, 2054, 2061, 139, 17, 527, 528, 552, 596, 2006, 1243 },
+	SHAMAN = { 331, 8004, 1064, 526, 2870, 2008 },
+	PALADIN = { 635, 19750, 4987, 1152, 633, 1022, 7328, 19740 },
+	MAGE = { 475, 1459 },
+	HUNTER = { 136 },
+	WARLOCK = {}, ROGUE = {}, WARRIOR = {},
+}
+-- Primer perfil sugerido (el jugador lo cambia): clave del clic -> id o "target" / "menu".
+M.SUGERIDO = {
+	DRUID = { ["1"] = 774, ["2"] = 8936, ["shift-1"] = 5185, ["ctrl-1"] = 2782, ["ctrl-2"] = 8946, ["3"] = 18562,
+		["4"] = 774, ["5"] = 8936, ["alt-1"] = "target", ["alt-2"] = "menu" },
+	PRIEST = { ["1"] = 2061, ["2"] = 139, ["shift-1"] = 2054, ["shift-2"] = 17, ["ctrl-1"] = 527, ["ctrl-2"] = 528,
+		["4"] = 139, ["5"] = 17, ["alt-1"] = "target", ["alt-2"] = "menu" },
+	SHAMAN = { ["1"] = 8004, ["2"] = 1064, ["shift-1"] = 331, ["ctrl-1"] = 526, ["ctrl-2"] = 2870, ["alt-1"] = "target", ["alt-2"] = "menu" },
+	PALADIN = { ["1"] = 19750, ["2"] = 635, ["ctrl-1"] = 4987, ["ctrl-2"] = 1152, ["shift-2"] = 633, ["alt-1"] = "target", ["alt-2"] = "menu" },
+}
+M.CLICS = { -- clave, texto
+	{ "1", "Clic izquierdo" }, { "2", "Clic derecho" }, { "3", "Clic de la rueda" },
+	{ "4", "Rueda arriba" }, { "5", "Rueda abajo" },
+	{ "shift-1", "Mayús + clic izquierdo" }, { "shift-2", "Mayús + clic derecho" },
+	{ "ctrl-1", "Ctrl + clic izquierdo" }, { "ctrl-2", "Ctrl + clic derecho" },
+	{ "alt-1", "Alt + clic izquierdo" }, { "alt-2", "Alt + clic derecho" },
+	{ "shift-4", "Mayús + rueda arriba" }, { "shift-5", "Mayús + rueda abajo" },
+}
+-- Lo que tu clase puede limpiar (para marcar en el marco solo eso, K16).
+M.LIMPIA = {
+	DRUID = { Curse = true, Poison = true }, PRIEST = { Magic = true, Disease = true }, SHAMAN = { Poison = true, Disease = true },
+	PALADIN = { Magic = true, Poison = true, Disease = true }, MAGE = { Curse = true },
+}
+
+M.DEFECTO = { mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
+
+function M.DB()
+	MambaCuraDB = MambaCuraDB or {}
+	local d = MambaCuraDB
+	for k, v in pairs(M.DEFECTO) do if d[k] == nil then d[k] = v end end
+	d.perfiles = d.perfiles or {}
+	d.diag = d.diag or {}
+	return d
+end
+
+function M.Falla(donde, err)
+	local d = M.DB().diag
+	d.fallas = d.fallas or {}
+	if #d.fallas < 30 then d.fallas[#d.fallas + 1] = (date and date("%d-%m %H:%M") or "") .. " " .. donde .. ": " .. tostring(err) end
+	if geterrorhandler then geterrorhandler()(err) end
+end
+function M.Proteger(donde, fn, ...)
+	local ok, a, b, c = pcall(fn, ...)
+	if not ok then M.Falla(donde, a); return nil end
+	return a, b, c
+end
+function M.Escuchar(f, ev)
+	local ok = pcall(f.RegisterEvent, f, ev)
+	if not ok then
+		local d = M.DB().diag
+		d.eventosNo = d.eventosNo or {}
+		d.eventosNo[ev] = true
+	end
+	return ok
+end
+
+function M.Clase() return UnitClass and select(2, UnitClass("player")) or "WARRIOR" end
+-- Especialización activa (doble especialización desde el 40, K18): 1 o 2.
+function M.Spec()
+	local f = (C_SpecializationInfo and C_SpecializationInfo.GetActiveSpecGroup) or GetActiveTalentGroup
+	local ok, n = pcall(f or function() return 1 end)
+	return (ok and n) or 1
+end
+
+-- El perfil de clics de esta clase y especialización (se crea con el sugerido la primera vez).
+function M.Perfil()
+	local d, clase, spec = M.DB(), M.Clase(), M.Spec()
+	d.perfiles[clase] = d.perfiles[clase] or {}
+	local p = d.perfiles[clase][spec]
+	if not p then
+		p = {}
+		for k, v in pairs(M.SUGERIDO[clase] or { ["1"] = "target", ["2"] = "menu" }) do p[k] = v end
+		d.perfiles[clase][spec] = p
+	end
+	return p
+end
+
+function M.Conoce(id)
+	if type(id) ~= "number" then return true end
+	if IsPlayerSpell and IsPlayerSpell(id) then return true end
+	if IsSpellKnown and IsSpellKnown(id) then return true end
+	local n = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+	return n ~= nil and GetSpellInfo ~= nil and GetSpellInfo(n) ~= nil
+end
+
+function M.NombreAccion(v)
+	if v == "target" then return "Elegir de objetivo" elseif v == "menu" then return "Menú del jugador" end
+	if type(v) == "number" then return (C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(v)) or ("hechizo " .. v) end
+	return "Nada"
+end
+
+-- Atributos seguros de un clic: prefijo ("shift-") y botón ("1") -> { [atributo] = valor }
+function M.Atributos(perfil)
+	local out = {}
+	for clave, v in pairs(perfil) do
+		local pre, boton = clave:match("^(.-)(%d)$")
+		if v == "target" then
+			out[pre .. "type" .. boton] = "target"
+		elseif v == "menu" then
+			out[pre .. "type" .. boton] = "togglemenu"
+		elseif type(v) == "number" and M.Conoce(v) then
+			out[pre .. "type" .. boton] = "spell"
+			out[pre .. "spell" .. boton] = M.NombreAccion(v)
+		end
+	end
+	return out
+end
+
+local oyentes = {}
+function M.AlCambiar(fn) oyentes[#oyentes + 1] = fn end
+function M.Cambio() for _, fn in ipairs(oyentes) do pcall(fn) end end
