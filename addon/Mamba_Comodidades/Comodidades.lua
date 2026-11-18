@@ -35,8 +35,8 @@ C.LISTA = {
 
 -- Grupos de sonidos que se pueden silenciar. Los números son archivos de sonido del cliente.
 C.SONIDOS = {
-	{ clave = "trenes", titulo = "El tren de /tren",
-		ayuda = "El ruido de tren que hacen los jugadores con el gesto /tren, de todas las razas.",
+	{ clave = "trenes", titulo = "Sonido de tren",
+		ayuda = "El ruido de tren que hacen los jugadores con el gesto del tren, de todas las razas.",
 		ids = { 539802, 539881, 540271, 540275, 540535, 540734, 540870, 540947, 1316209, 1304872, 541157, 541239,
 			542818, 542896, 543085, 543093, 542526, 542600, 7744921, 7744513 } },
 	{ clave = "fallido", titulo = "Hechizo fallido",
