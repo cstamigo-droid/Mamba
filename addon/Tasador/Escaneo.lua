@@ -331,7 +331,7 @@ function T.Escanear()
 	else
 		QueryAuctionItems("", nil, nil, 0, nil, nil, true)
 	end
-	T.Decir("Escaneando la subasta... (solo leo precios, no compro ni vendo nada)")
+	T.Decir("Escaneando la subasta... te aviso cuando termine.")
 	return true
 end
 
