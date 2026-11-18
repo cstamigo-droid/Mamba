@@ -333,6 +333,22 @@ function M.Pasos(e, r)
 	return pasos
 end
 
+---------------------------------------------------------------- para el cuadro del objeto (fila E8)
+-- ¿Este objeto lo necesita tu plan? -> nil | { clase = "vital" | "plan", texto }
+-- Hoy: la bolsa recomendada de tu plan. "VITAL para subir una profesión" llega con la sección Profesiones
+-- (necesita las recetas). La ventana de Mamba lo muestra en el bloque "Mamba" del cuadro del objeto.
+function M.MaterialDelPlan(itemID)
+	if not itemID then return nil end
+	local ok, e = pcall(M.Estado)
+	if not ok then return nil end
+	local b = M.Bolsas(e)
+	if b.recomendada and b.recomendada.id == itemID then
+		return { clase = "plan", texto = "Es la bolsa de tu plan: te da " .. b.recomendada.casillas .. " casillas." }
+	end
+	if M.MaterialVital then return M.MaterialVital(e, itemID) end
+	return nil
+end
+
 ---------------------------------------------------------------- dinero: cómo juntarlo
 -- Ideas para juntar oro según lo que el personaje TIENE (no números inventados: el ritmo lo mide el Medidor).
 function M.ComoJuntar(e)
