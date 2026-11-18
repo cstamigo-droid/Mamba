@@ -546,6 +546,10 @@ L.eval('function(src) local f = assert(loadstring(src, "@Alerta.lua")); f("Tasad
 L.execute('EVENTOS_DESCONOCIDOS = GUARDA_DESC; Fire("PLAYER_LOGIN")')
 check(Cz.HayDeteccion(), "K105: engancha con MambaAPI.AlVerEnemigo del Tasador")
 check(C.DB().cercanosSola is True, "K105: abrir sola viene encendido")
+# en plena pelea NO se abre sola (revisión wow-addon-lua, tanda 4)
+L.execute('EN_COMBATE = true; COMBATE = true; UNIDADES.nameplate9 = { name = "Brujo", lvl = 40, fac = "Alliance", cl = "Brujo", tok = "WARLOCK" }; Fire("NAME_PLATE_UNIT_ADDED", "nameplate9")')
+check(not VC or not VC.visible, "K105: en combate la ventana de cercanos no se abre sola")
+L.execute('EN_COMBATE = false; COMBATE = false; AVISOS_PANTALLA = 0; SONIDOS = 0; UNIDADES.nameplate9 = nil')
 G.RELOJ = 200
 L.execute('UNIDADES.nameplate1 = { name = "Pícaro", lvl = 41, fac = "Alliance", cl = "Pícaro", tok = "ROGUE", gremio = "Los Rojos" }; TIMERS = {}; Fire("NAME_PLATE_UNIT_ADDED", "nameplate1")')
 check(VC.visible and VC.abiertaSola, "K105: aparece un enemigo y la ventana se abre sola")

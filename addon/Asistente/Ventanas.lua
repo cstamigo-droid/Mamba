@@ -47,9 +47,11 @@ local function guardar(nombre, f)
 	db()[nombre] = { x = math.floor(x + 0.5), y = math.floor(y + 0.5), escala = viejo and viejo.escala or nil }
 end
 
+local pendientes = {} -- reponer que llegó en combate: se hace al salir (revisión wow-addon-lua, tanda 4)
 local function reponer(nombre, f)
 	local l = db()[nombre]
 	if not l then return false end
+	if enCombate() then pendientes[nombre] = f; return false end
 	if l.escala and f.SetScale then f:SetScale(l.escala) end
 	if not (l.x and l.y) then return false end -- solo el tamaño guardado
 	f:ClearAllPoints()
@@ -67,7 +69,7 @@ function V.Movible(marco, nombre, asa, opciones)
 	opciones = opciones or {}
 	marco:SetClampedToScreen(true)
 	marco:SetMovable(true)
-	local reg = { marco = marco, nombre = nombre, original = nil, etiqueta = opciones.etiqueta or opciones.titulo or nombre } -- titulo: sinónimo de etiqueta
+	local reg = { marco = marco, nombre = nombre, original = nil, yaArrastra = opciones.yaArrastra and true or false, etiqueta = opciones.etiqueta or opciones.titulo or nombre } -- titulo: sinónimo de etiqueta
 	if marco.GetNumPoints and (marco:GetNumPoints() or 0) > 0 and marco:GetPoint(1) then reg.original = { marco:GetPoint(1) } end
 	V.marcos[nombre] = reg
 	if not opciones.yaArrastra and not opciones.sinAsa then
@@ -150,7 +152,7 @@ local function capa(r)
 			local a = me.arrastre
 			local nx, ny = GetCursorPosition()
 			nx, ny = nx / s, ny / s
-			local pw, ph = UIParent:GetWidth() / 2 / f:GetScale() * UIParent:GetScale(), UIParent:GetHeight() / 2 / f:GetScale() * UIParent:GetScale()
+			local pw, ph = UIParent:GetWidth() / 2 / f:GetScale(), UIParent:GetHeight() / 2 / f:GetScale()
 			f:ClearAllPoints()
 			f:SetPoint("CENTER", UIParent, "CENTER", (a.x0 + nx - a.cx) - pw, (a.y0 + ny - a.cy) - ph)
 		end)
@@ -176,9 +178,12 @@ end
 function V.ModoMover(si)
 	if si and enCombate() then return false, "Estás en combate: el modo «Mover elementos» se abre fuera de combate." end
 	V.moviendo = si and true or false
+	V.BotonTerminar(V.moviendo)
 	for _, r in pairs(V.marcos) do
 		local c = capa(r)
-		if V.moviendo then
+		-- las ventanas que ya se arrastran solas (la de Mamba, de Polestar) no llevan recuadro: si lo
+		-- llevaran, el recuadro tapa la ventana y sus botones (revisión wow-addon-lua, tanda 4)
+		if V.moviendo and not r.yaArrastra then
 			c:ClearAllPoints()
 			c:SetAllPoints(r.marco)
 			c.nombre:SetText(r.etiqueta .. "\n|cff9ba2b9arrastra · rueda: tamaño|r")
@@ -195,9 +200,35 @@ end
 -- Para los módulos que muestran algo escondido solo mientras se mueve (el medidor, los avisos...).
 function V.AlModoMover(fn) V.alMover = V.alMover or {}; table.insert(V.alMover, fn) end
 
+-- Un botón «Terminar» siempre encima de todo, que también se cierra con Escape: nunca se queda atrapado en el modo.
+function V.BotonTerminar(ver)
+	local b = V.terminar
+	if not b and ver then
+		b = CreateFrame("Button", "MambaMoverTerminar", UIParent, "UIPanelButtonTemplate")
+		b:SetFrameStrata("FULLSCREEN_DIALOG")
+		b:SetSize(260, 30)
+		b:SetPoint("TOP", UIParent, "TOP", 0, -60)
+		b:SetText("Listo: terminar de mover")
+		b:SetScript("OnClick", function() V.ModoMover(false) end)
+		b:SetScript("OnHide", function() if V.moviendo then V.ModoMover(false) end end)
+		if UISpecialFrames then table.insert(UISpecialFrames, "MambaMoverTerminar") end
+		V.terminar = b
+	end
+	if b then if ver then b:Show() else b:Hide() end end
+end
+
 local salir = CreateFrame("Frame")
 salir:RegisterEvent("PLAYER_REGEN_DISABLED")
-salir:SetScript("OnEvent", function() if V.moviendo then V.ModoMover(false) end end)
+salir:RegisterEvent("PLAYER_REGEN_ENABLED")
+salir:SetScript("OnEvent", function(_, ev)
+	if ev == "PLAYER_REGEN_DISABLED" then
+		if V.moviendo then V.ModoMover(false) end
+		return
+	end
+	local lista = pendientes
+	pendientes = {}
+	for nombre, f in pairs(lista) do pcall(reponer, nombre, f) end
+end)
 
 -- El candado también vale para la ventana de Mamba (Polestar): sus asas llaman a ns.StartDrag.
 local function candadoPolestar()

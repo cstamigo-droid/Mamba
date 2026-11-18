@@ -489,6 +489,37 @@ check(r[5] is not None and abs(r[5] - 1.05) < 0.001, f"la rueda cambia el tamañ
 check(r[6] is True, "si empieza un combate, se sale solo del modo Mover")
 check(G.REGISTRADAS["MambaGrupoMover"] is not None, "la entrada «Mover» está al pie del riel")
 
+# 10g) revisión wow-addon-lua (tanda 4): nunca atrapado en el modo Mover; reponer no mueve en combate
+MOV2 = L.eval("""function()
+  local W = Asistente.Ventanas
+  local v = CreateFrame("Frame", "MambaPruebaVentana", UIParent)
+  MambaAPI.Movible(v, "pruebaVentana", { yaArrastra = true, etiqueta = "Ventana que ya se arrastra" })
+  COMBATE = false
+  MambaAPI.ModoMover(true)
+  local tapada = false
+  for _, f2 in ipairs(TODOS) do
+    if f2.nombre and type(f2.nombre) == "table" and tostring(f2.nombre.text or ""):find("Ventana que ya se arrastra", 1, true) and f2:IsShown() then tapada = true end
+  end
+  local boton = MambaMoverTerminar and MambaMoverTerminar:IsShown()
+  if MambaMoverTerminar then MambaMoverTerminar:Hide() end
+  local salio = not W.moviendo
+  -- reponer en combate: queda pendiente y se hace al salir
+  local m = CreateFrame("Frame", "MambaPruebaAncla", UIParent)
+  MambaAPI.Movible(m, "pruebaAncla", { sinAsa = true })
+  local k = (UnitName("player") or "?") .. "-" .. (GetRealmName and GetRealmName() or ""); AsistenteDB.lugares[k] = AsistenteDB.lugares[k] or {}; AsistenteDB.lugares[k].pruebaAncla = { x = 10, y = 20 }
+  COMBATE = true
+  m:Hide(); m.point = nil; m:Show()
+  local movidoEnCombate = m.point ~= nil
+  COMBATE = false
+  Fire("PLAYER_REGEN_ENABLED")
+  local movidoDespues = m.point ~= nil
+  return tapada, boton and true or false, salio, movidoEnCombate, movidoDespues
+end""")
+r = MOV2()
+check(r[0] is False, "una ventana que ya se arrastra sola no lleva recuadro encima (no tapa sus botones)")
+check(r[1] is True and r[2] is True, "botón «Listo: terminar de mover» encima de todo; al cerrarlo (o con Escape) sale del modo")
+check(r[3] is False and r[4] is True, "en combate no se repone el lugar; se hace al salir del combate")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

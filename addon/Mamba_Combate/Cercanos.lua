@@ -352,7 +352,8 @@ local pendiente = false
 function Cz.Pedir(sola)
 	local d = M.DB()
 	local reciencerrada = Cz.cerradaEn and ahora() - Cz.cerradaEn < 60
-	if sola and d.cercanosSola and not Cz.Silenciada() and not reciencerrada and (not v or not v:IsShown()) and Cz.vista == "cerca" then
+	-- en plena pelea no se abre sola: taparía la vista (revisión wow-addon-lua, tanda 4)
+	if sola and d.cercanosSola and not M.EnCombate() and not Cz.Silenciada() and not reciencerrada and (not v or not v:IsShown()) and Cz.vista == "cerca" then
 		Cz.Abrir(true)
 		return
 	end
