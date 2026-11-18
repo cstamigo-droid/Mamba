@@ -252,10 +252,10 @@ function N.Lineas()
 end
 
 ---------------------------------------------------------------- texto de la puntuación (K62)
--- "★★★ · ≈10 min · solo" (el ≈ dice que es estimación; sin minutos, no se inventan).
+-- "gran mejora · ≈10 min · solo" (el ≈ dice que es estimación; sin minutos, no se inventan).
 function N.Puntuacion(l)
 	local i = l.impacto or 1
-	local estrellas = i >= 4 and "★★★" or i >= 2 and "★★" or "★"
+	local estrellas = i >= 4 and "gran mejora" or i >= 2 and "mejora" or "poca mejora" -- sin ★: la letra del juego no la trae (cuadro vacío, visto en el juego 18-11)
 	local partes = { estrellas }
 	if l.minutos then partes[#partes + 1] = "≈" .. l.minutos .. " min" end
 	partes[#partes + 1] = l.grupo and "en grupo" or "solo"

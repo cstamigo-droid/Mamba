@@ -224,7 +224,7 @@ end
 function LL.Resumen(r)
 	local t = {}
 	for _, x in ipairs(r and r.tramos or {}) do t[#t + 1] = x.texto .. " " .. LL.Tiempo(x.seg, x.estimado) end
-	return table.concat(t, " → ")
+	return table.concat(t, " › ") -- "›": la letra del juego no trae "→" (cuadro vacío)
 end
 
 ---------------------------------------------------------------- planificar

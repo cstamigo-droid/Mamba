@@ -239,7 +239,7 @@ local function filasOport(V, t, lista, tipo, max)
 			n = n + 1
 			local id = tonumber(tostring(o.link):match("item:(%d+)"))
 			V:Fila({ icono = id, item = o.link, celdas = {
-				{ tostring(o.link):gsub("[%[%]]", ""), o.tipo == "vendedor" and "subasta → vendedor" or "comprar para revender" },
+				{ tostring(o.link):gsub("[%[%]]", ""), o.tipo == "vendedor" and "subasta › vendedor" or "comprar para revender" },
 				{ o.unidades .. " a " .. A.Monedas(o.comprarHasta), "o menos, cada uno" },
 				{ A.Monedas(o.venta), o.tipo == "vendedor" and "lo paga el vendedor" or (floor(o.ventasDia or 0) .. " se venden al día") },
 				{ "|cff6bd999+" .. A.Monedas(o.ganancia) .. "|r", o.pct and A.Pct(o.pct * 100, 0) or "" },

@@ -223,7 +223,7 @@ Polestar.Engine = { GetGuide = function() return { title = "Mulgore 1-12", steps
   GetLiveStep = function() return 1 end, StepNumber = function(i) return i end, StepTotal = function() return 2 end }
 Polestar.UI = Polestar.UI or {}; Polestar.UI.PlainGoalText = function(g) return g.text end''')
 pasos = list(M.Pasos(M.Estado(), G.MambaPlanPJ.respuestas).values())
-check(pasos[0].tipo == "Ahora" and pasos[0].titulo == "Entrega 2 misiones en Orgrimmar  →  Vuela a Molino Tarren",
+check(pasos[0].tipo == "Ahora" and pasos[0].titulo == "Entrega 2 misiones en Orgrimmar  ›  Vuela a Molino Tarren",
       "Ahora: el próximo paso de la guía, sin lo ya hecho: %s" % pasos[0].titulo)
 check("Mulgore 1-12 · paso 1 de 2" in pasos[0].detalle, "guía y número de paso")
 check(any(p.clave == "meta:entrenar40" or p.clave == "meta:montura40" for p in pasos), "al 39: entrenar y montura del 40 en Ahora")

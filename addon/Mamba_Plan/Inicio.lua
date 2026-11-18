@@ -220,7 +220,7 @@ local function pasoRol(cuerpo, ancho, e)
 				filas[#filas + 1] = t
 				local x = 110
 				for _, r in ipairs(roles) do
-					local b = P.Boton(cuerpo, ROL[r][1] .. (borrador[cual] == r and "  ✓" or ""), function()
+					local b = P.Boton(cuerpo, ROL[r][1] .. (borrador[cual] == r and " (elegido)" or ""), function()
 						borrador[cual] = r
 						if borrador.rol == borrador.rol2 then for _, o in ipairs(roles) do if o ~= r then borrador[cual == "rol" and "rol2" or "rol"] = o; break end end end
 						dibujar()
@@ -244,7 +244,7 @@ local function pasoRol(cuerpo, ancho, e)
 	local x = 110
 	for ia, ar in ipairs(e.talentos or {}) do
 		if ar.nombre and ar.nombre ~= "" then
-			local b = P.Boton(cuerpo, ar.nombre .. (borrador.spec == ar.nombre and "  ✓" or ""), function()
+			local b = P.Boton(cuerpo, ar.nombre .. (borrador.spec == ar.nombre and " (elegido)" or ""), function()
 				borrador.spec = (borrador.spec ~= ar.nombre) and ar.nombre or nil
 				borrador.arbol = borrador.spec and ia or nil
 				dibujar()

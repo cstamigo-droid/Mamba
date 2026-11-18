@@ -44,7 +44,7 @@ function Capa.Observar(unidad)
 	Capa.actual = { zona = zona, clave = clave, cuando = ahora(), mapa = mapa }
 	local cambio = antes ~= nil and antes.clave ~= clave and antes.mapa == mapa
 	if cambio and A.Ajuste("capa", "avisar") then
-		A.Decir(("cambiaste de capa: %s → %s"):format(antes.zona, zona))
+		A.Decir(("cambiaste de capa: %s › %s"):format(antes.zona, zona))
 		if UIErrorsFrame and UIErrorsFrame.AddMessage then UIErrorsFrame:AddMessage("Capa " .. zona, 1, 0.82, 0) end
 	end
 	Capa.Pintar()

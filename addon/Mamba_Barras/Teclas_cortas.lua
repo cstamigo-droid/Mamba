@@ -9,7 +9,7 @@ local CORTO = {
 	MOUSEWHEELUP = "RuA", MOUSEWHEELDOWN = "RuB", BUTTON3 = "R3", BUTTON4 = "R4", BUTTON5 = "R5",
 	SPACE = "Esp", BACKSPACE = "Ret", ESCAPE = "Esc", ENTER = "Ent", INSERT = "Ins", DELETE = "Supr",
 	HOME = "Ini", END = "Fin", PAGEUP = "RPg", PAGEDOWN = "AvPg", CAPSLOCK = "Mayús", TAB = "Tab",
-	UP = "↑", DOWN = "↓", LEFT = "←", RIGHT = "→",
+	UP = "Arr", DOWN = "Ab", LEFT = "Izq", RIGHT = "Der",
 }
 
 function L:ToShortKey(key)

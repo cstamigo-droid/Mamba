@@ -61,12 +61,12 @@ test('K56: las líneas de Mi plan entran al panel de la guía, en su flujo, orde
 	assert.equal(out.padre, true, 'Polestar la apila en su flujo (parche P9)');
 	assert.equal(out.rotulo, 'Mamba · tu plan');
 	assert.ok(!out.claves.includes('guia'), 'el paso de la guía no se repite: la guía ya es el panel');
-	assert.equal(out.claves[0], 'montura40', 'la montura (★★★, a 2 min + viaje) va primero');
+	assert.equal(out.claves[0], 'montura40', 'la montura (gran mejora, a 2 min + viaje) va primero');
 	assert.ok(out.claves.indexOf('mazmorra:zf') > out.claves.indexOf('llenas'), 'la mazmorra (en grupo, ≈100 min) va después de vender');
 	assert.ok(out.claves.includes('llenas'), 'bolsas casi llenas: vender o guardar');
 	assert.equal(out.textos.length, 4, 'cuatro a la vista; el resto en Mi plan');
 	assert.equal(out.botones[0], 'Llévame', 'la línea con lugar trae Llévame');
-	assert.match(out.subs[0], /★★★ · ≈\d+ min · solo · Equitación/, 'la puntuación y el cómo, debajo');
+	assert.match(out.subs[0], /gran mejora · ≈\d+ min · solo · Equitación/, 'la puntuación y el cómo, debajo');
 });
 
 test('K61: Llévame pone la flecha de Polestar; la línea de profesión abre su guía', () => {
