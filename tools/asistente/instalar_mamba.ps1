@@ -9,14 +9,18 @@
 # Mueve (no borra) al respaldo las carpetas Polestar_* que el paquete ya no trae (Alianza, otros idiomas,
 # Experimental, Nav_EK, Nav_Kalimdor). No toca los addons de terceros que el paquete trae con versión
 # igual o más vieja que la instalada (ForeverCore, SkillUpForever, WhatsTraining, ForeverLootSparkles).
-param([switch]$Simular)
+# La tarea Mamba_Actualizar (actualizar_mamba.py, 18-11) lo llama con su paquete y su carpeta de respaldo:
+#   -Paquete <carpeta armada> -Respaldo <carpeta nueva> [-AddOns <carpeta de prueba> -WTF <carpeta de prueba>]
+# Sin esos parámetros hace lo mismo que antes.
+param([switch]$Simular, [string]$Paquete = 'D:\rust\mamba_instalar', [string]$AddOns = '', [string]$WTF = '',
+      [string]$Respaldo = '', [switch]$IgnorarJuego)
 $ErrorActionPreference = 'Stop'
-$Paquete = 'D:\rust\mamba_instalar'
 $Wow = 'C:\Program Files (x86)\World of Warcraft\_forever_'
-$AddOns = Join-Path $Wow 'Interface\AddOns'
-$WTF = Join-Path $Wow 'WTF'
+if (-not $AddOns) { $AddOns = Join-Path $Wow 'Interface\AddOns' }
+if (-not $WTF) { $WTF = Join-Path $Wow 'WTF' }
 $Fecha = Get-Date -Format 'yyyy-MM-dd_HHmm'
-$Respaldo = "D:\rust\respaldos\mamba_$Fecha"
+if (-not $Respaldo) { $Respaldo = "D:\rust\respaldos\mamba_$Fecha" }
+if (-not (Test-Path (Join-Path $Paquete 'Polestar\Polestar.toc'))) { Write-Output "NO SE INSTALA: el paquete $Paquete no trae Polestar."; exit 1 }
 $Terceros = @('ForeverCore', 'SkillUpForever', 'WhatsTraining', 'ForeverLootSparkles')
 
 function Version($toc) {
@@ -35,7 +39,12 @@ function Comparar($a, $b) {  # -1, 0, 1 por números
 }
 
 $wowAbierto = tasklist /FI "IMAGENAME eq Wow.exe" /NH | Select-String -Pattern 'Wow.exe'
-if ($wowAbierto) { Write-Output 'NO SE INSTALA: Wow.exe está abierto. Cierra el juego y vuelve a correr.'; exit 2 }
+# -IgnorarJuego solo vale para una carpeta AddOns de PRUEBA (ensayos de la tarea), nunca para la del juego.
+$ignorar = [bool]($IgnorarJuego -and ($AddOns -ne (Join-Path $Wow 'Interface\AddOns')) -and ($WTF -ne (Join-Path $Wow 'WTF')))
+if ($ignorar) { $wowAbierto = $null }
+# La simulación solo LEE: con el juego abierto sigue (y lo dice), para poder ensayar mientras se juega.
+if ($wowAbierto -and -not $Simular) { Write-Output 'NO SE INSTALA: Wow.exe está abierto. Cierra el juego y vuelve a correr.'; exit 2 }
+if ($wowAbierto) { Write-Output 'Wow.exe abierto: la simulacion sigue porque no cambia nada.' }
 
 $nuevas = Get-ChildItem $Paquete -Directory | Select-Object -ExpandProperty Name
 $copiar = @(); $saltar = @()
@@ -52,6 +61,9 @@ Write-Output "Respaldo: $Respaldo (las carpetas que se reemplazan, las movidas y
 Write-Output ("Copiar ({0}): {1}" -f $copiar.Count, ($copiar -join ', '))
 Write-Output ("No se tocan (la instalada es igual o más nueva): {0}" -f ($saltar -join '; '))
 Write-Output ("Mover al respaldo ({0}): {1}" -f $mover.Count, ($mover -join ', '))
+# Para la tarea: listas en una línea, sin acentos.
+Write-Output ("LISTA_COPIAR: {0}" -f ($copiar -join '|'))
+Write-Output ("LISTA_MOVER: {0}" -f ($mover -join '|'))
 if ($Simular) { Write-Output 'SIMULACIÓN: no se cambió nada.'; exit 0 }
 
 # Respaldo de lo que se toca (AddOns pesa ~5 GB por el audio de Spoken: no se copia entero) y WTF entero.
@@ -87,7 +99,7 @@ robocopy "$Respaldo\WTF" "$WTF" /MIR /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null
 "@ | Set-Content -Encoding utf8 "$Respaldo\VOLVER_ATRAS.ps1"
 
 # Justo antes de copiar, otra vez.
-if (tasklist /FI "IMAGENAME eq Wow.exe" /NH | Select-String -Pattern 'Wow.exe') { throw 'Wow.exe se abrió durante el respaldo: no se copia nada.' }
+if (-not $ignorar -and (tasklist /FI "IMAGENAME eq Wow.exe" /NH | Select-String -Pattern 'Wow.exe')) { throw 'Wow.exe se abrió durante el respaldo: no se copia nada.' }
 foreach ($n in $mover) { Move-Item (Join-Path $AddOns $n) "$Respaldo\movidas\$n" -ErrorAction Stop }
 foreach ($n in $copiar) {
     robocopy (Join-Path $Paquete $n) (Join-Path $AddOns $n) /MIR /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null

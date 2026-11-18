@@ -6,20 +6,28 @@ automático, y que si falla nosotros metamos mano"). SIN Claude: lo lanza el Pro
         prueba de punta a punta sobre una carpeta de instalación de PRUEBA (los avisos dicen [PRUEBA])
     ... --forzar-fallo ETAPA     la etapa ETAPA falla a propósito (probar la alerta y que nada quede tocado)
     ... --sin-construir          salta la construcción (probar instalar con lo ya construido)
+    ... --simular                ENSAYO: hace todo menos copiar; instalar_mamba.ps1 corre con -Simular contra el AddOns
+                                 de verdad (solo lo lee) y deja el diff contra lo instalado en diff_vX.txt
+
+Construye e instala por el MISMO camino que Mamba 1.0 (18-11 10:52): construir_noche.sh + compilar_addon.sh
+(vía seguir_polestar.sh --construir), armar_instalar.py (ALCANCE: Horda, esMX y esES), control_zip.py --estricto e
+instalar_mamba.ps1 (respaldo de lo que cambia + WTF y VOLVER_ATRAS.ps1). Las carpetas que ALCANCE apaga no se instalan.
 
 Etapas, cada una con su criterio de éxito MEDIDO POR EFECTO (no por el código de salida):
-  recuperar   si una corrida anterior murió a mitad de instalar (diario de instalación o carpetas *.mamba_vieja),
-              vuelve a poner lo viejo, lo comprueba y avisa. Va ANTES de leer la versión instalada.
+  recuperar   si una corrida anterior murió a mitad de instalar (marca instalando.json, o el diario y las carpetas
+              *.mamba_vieja del instalador anterior), vuelve a poner lo viejo con VOLVER_ATRAS.ps1 y avisa.
   versiones   última publicada (GitHub) contra la INSTALADA (Polestar.toc). Igual o más nueva → nada, sin aviso.
   fusion      seguir_polestar.sh --preparar vX: la etiqueta dentro de fusion/vX, registro LISTO y 0 pruebas falladas.
-              Si vX ya está construida en la copia (marca con el commit), se reusa y no se rehace.
-  construir   seguir_polestar.sh --construir (con caché, ~1,5 h): estado LISTO escrito DESPUÉS de empezar y guías
-              regeneradas. Con forge o el juego ocupados: ESPERA (no es un fallo; la próxima corrida reintenta).
+              Si vX ya está construida en la copia sobre el asistente de hoy (marca con el commit), se reusa.
+  construir   seguir_polestar.sh --construir (~1,5 h): estado LISTO escrito DESPUÉS de empezar, compilar.log LISTO y
+              guías regeneradas. Con forge o el juego ocupados: ESPERA (no es un fallo; la próxima corrida reintenta).
   controles   incluidos.py revisar: 0 errores.
-  respaldo    (recién con el juego cerrado) zip de las carpetas que se van a cambiar o quitar; se relee y se cuenta.
-  instalar    diario en disco → por carpeta: copia al lado, compara sha256 con la fuente, mira que el juego siga
-              cerrado y cambia. Quita las carpetas de Polestar que la versión nueva eliminó. Comprueba TODO antes de
-              borrar las copias viejas. Si algo falla, vuelve atrás carpeta por carpeta (sigue aunque una falle).
+  armar       armar_instalar.py → paquete propio de la tarea (no D:/rust/mamba_instalar, que usan las sesiones).
+  control_zip control_zip.py --estricto con el manifiesto de esta construcción: "0 rechazos".
+  simular     instalar_mamba.ps1 -Simular: qué copia y qué mueve; diff carpeta por carpeta contra lo instalado.
+  instalar    (juego cerrado) instalar_mamba.ps1 con un respaldo propio; después se comprueba cada carpeta copiada
+              contra el paquete (sha256), las movidas fuera y Polestar.toc con X-Mamba y la versión nueva. Si algo
+              no cuadra se corre VOLVER_ATRAS.ps1 y se comprueba que lo instalado quedó como antes.
 Avisos por Telegram (notificador de OLIMPO): "Mamba actualizada a vX" o "falló en <etapa>, registro en <ruta>".
 Un mismo fallo se avisa una vez (y otra vez a las 24 h si sigue); un aviso que Telegram no aceptó se reintenta en la
 corrida siguiente. Lo que necesita juicio (funciones nuevas, estética) NO frena: queda en polestar_versiones/vX.md.
@@ -36,7 +44,6 @@ import re
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
@@ -49,11 +56,11 @@ OLIMPO_ALERTAS = Path(r"C:\Users\<usuario>\OneDrive\Escritorio\OLIMPO\ALERTAS")
 CONSTRUCCION_ESTADO = Path("D:/rust/noche/ESTADO.txt")
 COMPILAR_LOG = Path("D:/rust/noche/compilar.log")
 CERROJO = Path("D:/rust/actualizar/EN_CURSO")  # uno solo para la tarea y las pruebas: comparten Mamba-fusion
-# Qué se instala: las carpetas de Mamba y los addons incluidos, siempre; las de Polestar que ya están instaladas
-# (se respeta lo que el jugador eligió: un idioma o una apariencia que no instaló no se le agrega) y las que la
-# versión nueva trae y la instalada no tenía (Polestar_Arcade llegó en 0.4.1).
-SIEMPRE = re.compile(r"^(Asistente.*|Tasador|Medidor|SkillUpForever|ForeverCore|WhatsTraining|ForeverLootSparkles)$")
-VIEJA, NUEVA = ".mamba_vieja", ".mamba_nueva"
+# La marca "vX ya construida" describe la copia Mamba-fusion, no una instalación: una sola para tarea y ensayos.
+CONSTRUIDAS = Path("D:/rust/actualizar")
+POWERSHELL = r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+RESPALDOS = Path("D:/rust/respaldos")
+VIEJA, NUEVA = ".mamba_vieja", ".mamba_nueva"  # del instalador anterior (solo para recuperar restos)
 
 
 class Espera(Exception):
@@ -76,10 +83,15 @@ class Corrida:
         self.dir = Path(a.estado or ("D:/rust/actualizar_prueba" if a.prueba else "D:/rust/actualizar"))
         self.dir.mkdir(parents=True, exist_ok=True)
         self.log = self.dir / f"registro_{dt.datetime.now():%Y-%m-%d_%H%M}.log"
-        self.diario = self.addons / "Mamba_instalando.json"  # en la MISMA carpeta: viaja con lo que describe
+        self.diario = self.addons / "Mamba_instalando.json"  # diario del instalador anterior (restos)
+        self.marca_inst = self.dir / "instalando.json"  # instalar_mamba.ps1 en curso: su respaldo y VOLVER_ATRAS
+        self.paquete = self.dir / "paquete"
+        self.manifiesto = self.dir / "manifiesto_paquete.json"
+        self.wtf = Path(a.wtf) if a.wtf else None
         self.etapa = "inicio"
         self.tag = None
         self.instalada = None
+        self.desde = None
 
     # ------------------------------------------------------------------ utilidades
     def anota(self, texto):
@@ -88,9 +100,9 @@ class Corrida:
         with open(self.log, "a", encoding="utf-8") as f:
             f.write(linea + "\n")
 
-    def corre(self, args):
+    def corre(self, args, env=None):
         self.anota("$ " + " ".join(str(x) for x in args))
-        r = subprocess.run(args, capture_output=True)
+        r = subprocess.run(args, capture_output=True, env=env)
         salida = (r.stdout + r.stderr).decode("utf-8", errors="replace")
         with open(self.log, "a", encoding="utf-8") as f:
             f.write(salida + "\n")
@@ -193,8 +205,17 @@ class Corrida:
         self.etapa = "recuperar"
         viejas = sorted(self.addons.glob("*" + VIEJA))
         nuevas = sorted(self.addons.glob("*" + NUEVA))
-        if not (viejas or nuevas or self.diario.exists()):
+        cortada = self.marca_inst.exists()
+        if not (viejas or nuevas or self.diario.exists() or cortada):
             return
+        if self.a.simular:  # el ensayo no cambia nada: solo lo dice
+            raise Fallo("hay una instalación cortada por recuperar; el ensayo no la toca (lo hace la corrida normal)")
+        if self.juego_abierto():
+            raise Espera("hay una instalación cortada para recuperar, pero el juego está abierto")
+        if cortada:
+            self.recuperar_cortada()
+            if not (viejas or nuevas or self.diario.exists()):
+                return
         if self.juego_abierto():
             raise Espera("hay una instalación cortada para recuperar, pero el juego está abierto")
         try:
@@ -252,6 +273,26 @@ class Corrida:
         self.avisar("Mamba: una actualización se había cortado a mitad de instalar. Volví a poner la versión "
                     "anterior completa. La próxima corrida intenta de nuevo.")
 
+    def recuperar_cortada(self):
+        """instalar_mamba.ps1 murió a mitad (corte de luz): VOLVER_ATRAS.ps1 de SU respaldo deja todo como antes."""
+        try:
+            m = json.loads(self.marca_inst.read_text(encoding="utf-8"))
+        except Exception:
+            m = {}
+        volver = Path(m.get("respaldo", "")) / "VOLVER_ATRAS.ps1" if m.get("respaldo") else None
+        if not (volver and volver.exists()):
+            # murió antes de escribir VOLVER_ATRAS: el respaldo va ANTES de copiar, así que no se copió nada
+            self.anota("instalación cortada antes de copiar (sin VOLVER_ATRAS): no hay nada que deshacer")
+            self.marca_inst.unlink(missing_ok=True)
+            return
+        self.anota(f"RECUPERANDO una instalación cortada con {volver}")
+        rc, salida = self.corre([POWERSHELL, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(volver)])
+        if rc != 0 or "Listo" not in salida:
+            raise Fallo(f"no pude volver atrás la instalación cortada ({volver}, salida {rc})")
+        self.marca_inst.unlink(missing_ok=True)
+        self.avisar("Mamba: una actualización se había cortado a mitad de instalar. Volví a poner la versión "
+                    f"anterior con {volver}. La próxima corrida intenta de nuevo.")
+
     def versiones(self):
         self.etapa = "versiones"
         sys.path.insert(0, str(AQUI / "generador"))
@@ -280,15 +321,22 @@ class Corrida:
         return ultima if v.numeros(ultima) > v.numeros(self.instalada) else None
 
     def marca_construida(self):
-        return self.dir / f"construida_{self.tag}.json"
+        return CONSTRUIDAS / f"construida_{self.tag}.json"
 
     def ya_construida(self):
+        """Misma copia, limpia, y hecha sobre el asistente de HOY: si asistente avanzó (otra instalación a mano), se
+        reconstruye; si no, reinstalaría una construcción vieja sin lo nuevo."""
         mc = self.marca_construida()
         if not mc.exists():
             return False
         head = subprocess.run(["git", "-C", str(FUSION), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
         limpio = not subprocess.run(["git", "-C", str(FUSION), "status", "--porcelain"], capture_output=True, text=True).stdout.strip()
-        return json.loads(mc.read_text(encoding="utf-8")).get("commit") == head and limpio
+        sobre_hoy = subprocess.run(["git", "-C", str(FUSION), "merge-base", "--is-ancestor", "asistente", "HEAD"]).returncode == 0
+        d = json.loads(mc.read_text(encoding="utf-8"))
+        if d.get("commit") == head and limpio and sobre_hoy and d.get("desde"):
+            self.desde = d["desde"]
+            return True
+        return False
 
     def fusion(self):
         self.etapa = "fusion"
@@ -317,7 +365,11 @@ class Corrida:
         if self.juego_abierto():
             raise Espera("el juego está abierto: forge lee el cliente y el lanzador podría actualizarlo a mitad")
         inicio = dt.datetime.now().timestamp()
-        _, salida = self.corre([BASH, str(AQUI / "seguir_polestar.sh"), "--construir"])
+        self.desde = dt.datetime.now().replace(microsecond=0).isoformat()  # armar_instalar: generados de ESTA construcción
+        env = dict(os.environ)
+        if self.a.ignorar_juego:  # solo en ensayos: forge solo LEE el cliente (construir_noche.sh, MAMBA_JUEGO_ABIERTO_OK)
+            env["MAMBA_JUEGO_ABIERTO_OK"] = "1"
+        _, salida = self.corre([BASH, str(AQUI / "seguir_polestar.sh"), "--construir"], env=env)
         if "ESTADO: OCUPADO" in salida:
             raise Espera("forge u otra corrida ocupados")
         est = CONSTRUCCION_ESTADO.read_text(encoding="utf-8", errors="replace") if CONSTRUCCION_ESTADO.exists() else ""
@@ -337,118 +389,141 @@ class Corrida:
         if not re.search(r"addons incluidos, 0 errores", salida):
             raise Fallo("un addon incluido no coincide con su huella: " + salida.strip()[-200:])
 
-    def carpetas(self):
-        """-> (a instalar, a quitar). A quitar: carpetas de Polestar instaladas que la versión nueva ya no trae."""
-        fuente = FUSION / "addon"
-        r = subprocess.run(["git", "-C", str(REPO), "ls-tree", "--name-only", f"v{self.instalada}:addon"], capture_output=True, text=True)
-        if r.returncode != 0:
-            raise Fallo(f"no pude leer las carpetas de la versión instalada v{self.instalada} en git: {r.stderr.strip()}")
-        antes = set(r.stdout.split())
-        nuevas = {p.name for p in fuente.iterdir() if p.is_dir() and any(p.glob("*.toc"))}
-        instalar = sorted(d for d in nuevas if SIEMPRE.match(d) or (self.addons / d).is_dir() or d not in antes)
-        quitar = sorted(d for d in antes - nuevas if d.startswith("Polestar") and (self.addons / d).is_dir())
-        if "Polestar" not in instalar:
-            raise Fallo("la lista de carpetas a instalar no trae Polestar")
-        return instalar, quitar
-
-    def respaldo(self, carpetas):
-        self.etapa = "respaldo"
-        self.forzar("respaldo")
-        dest = (self.dir if self.a.prueba else WOW / "respaldos") / f"Mamba_antes_de_{self.tag}_{dt.datetime.now():%Y-%m-%d_%H%M}.zip"
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        n = 0
-        with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:
-            for c in carpetas:
-                if (self.addons / c).is_dir():
-                    for p in (self.addons / c).rglob("*"):
-                        if p.is_file():
-                            z.write(p, p.relative_to(self.addons).as_posix())
-                            n += 1
-        with zipfile.ZipFile(dest) as z:
-            malo, total = z.testzip(), len(z.namelist())
-        if malo or total != n or n == 0:
-            raise Fallo(f"el respaldo {dest} no se puede releer bien ({total} de {n} archivos, dañado={malo})")
-        self.anota(f"respaldo: {dest} ({n} archivos)")
-        # se guardan solo los 5 respaldos más nuevos de Mamba (cada uno ~40 MB)
-        for viejo in sorted(dest.parent.glob("Mamba_antes_de_*.zip"), key=lambda p: p.stat().st_mtime)[:-5]:
-            viejo.unlink(missing_ok=True)
-        return dest
-
-    def instalar(self, instalar, quitar):
-        self.etapa = "instalar"
-        diario = {"tag": self.tag, "desde": self.instalada, "instalar": instalar, "quitar": quitar, "fase": "cambiando",
-                  "agregadas": [c for c in instalar if not (self.addons / c).exists()], "inicio": dt.datetime.now().isoformat()}
-        self.escribir_diario(diario)
-        hechas = []  # (carpeta, había vieja)
+    def armar(self):
+        """El mismo armado que la 1.0: ALCANCE (Horda, esMX y esES) y el manifiesto de esta construcción."""
+        self.etapa = "armar"
+        self.forzar("armar")
+        args = [sys.executable, "-I", str(FUSION / "tools/asistente/armar_instalar.py"),
+                "--dest", str(self.paquete), "--manifiesto", str(self.manifiesto)]
+        if self.desde:
+            args += ["--desde", self.desde]
+        rc, salida = self.corre(args)
+        m = re.search(r"^(\d+) carpetas en el armado", salida, re.M)
+        if rc != 0 or not m or not (self.paquete / "Polestar" / "Polestar.toc").exists() or not self.manifiesto.exists():
+            raise Fallo(f"el armado no quedó (salida {rc}): " + salida.strip()[-200:])
+        # ALCANCE por efecto: ninguna carpeta apagada entró al paquete
+        sys.path.insert(0, str(FUSION / "tools/asistente"))
         try:
-            for c in instalar + quitar:
-                if self.juego_abierto():
-                    raise Espera("el juego se abrió en medio de la instalación: se volvió atrás y se reintenta después")
-                dst, nueva, vieja = self.addons / c, self.addons / (c + NUEVA), self.addons / (c + VIEJA)
-                if nueva.exists():
-                    shutil.rmtree(nueva)
-                if c in instalar:
-                    src = FUSION / "addon" / c
-                    shutil.copytree(src, nueva)
-                    if huellas(nueva) != huellas(src):
-                        raise Fallo(f"la copia de {c} no coincide con la fuente")
-                habia = dst.exists()
-                if habia:
-                    dst.rename(vieja)
-                hechas.append((c, habia))
-                if c in instalar:
-                    nueva.rename(dst)
-                self.forzar("instalar")  # cae DESPUÉS de cambiar una carpeta: prueba la vuelta atrás
-            # comprobación de TODO antes de borrar lo viejo
-            for c in instalar:
-                if huellas(self.addons / c) != huellas(FUSION / "addon" / c):
-                    raise Fallo(f"{c} instalada no coincide con la fuente")
-            for c in quitar:
+            import armar_instalar as ai  # noqa: E402
+            apagadas = {k for k, v in ai.ALCANCE.items() if not v}
+        finally:
+            sys.path.pop(0)
+        dentro = sorted(apagadas & {p.name for p in self.paquete.iterdir() if p.is_dir()})
+        if dentro:
+            raise Fallo("el paquete trae carpetas que ALCANCE apaga: " + ", ".join(dentro))
+        self.anota(f"paquete: {m.group(1)} carpetas en {self.paquete}; apagadas por ALCANCE: {len(apagadas)}")
+
+    def control_zip(self):
+        self.etapa = "control_zip"
+        self.forzar("control_zip")
+        rc, salida = self.corre([sys.executable, "-I", str(FUSION / "tools/asistente/control_zip.py"), str(self.paquete),
+                                 "--manifiesto", str(self.manifiesto), "--estricto"])
+        if rc != 0 or not re.search(r"^0 rechazos", salida, re.M):
+            rech = [l for l in salida.splitlines() if l.startswith("RECHAZO")]
+            raise Fallo(f"control_zip --estricto rechazó {len(rech)} archivos (p. ej. {rech[:2]})")
+
+    def ps1(self, *extra):
+        args = [POWERSHELL, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                str(FUSION / "tools/asistente/instalar_mamba.ps1"), "-Paquete", str(self.paquete), "-AddOns", str(self.addons)]
+        if self.wtf:
+            args += ["-WTF", str(self.wtf)]
+        if self.a.ignorar_juego:  # el .ps1 lo acepta solo con AddOns y WTF de prueba
+            args += ["-IgnorarJuego"]
+        return self.corre(args + list(extra))
+
+    @staticmethod
+    def lista(salida, nombre):
+        m = re.search(rf"^{nombre}: ?(.*)$", salida, re.M)
+        if not m:
+            raise Fallo(f"instalar_mamba.ps1 no dijo {nombre}")
+        return [x for x in m.group(1).strip().split("|") if x]
+
+    def simular(self):
+        """instalar_mamba.ps1 -Simular (solo lee) y el diff carpeta por carpeta contra lo instalado."""
+        self.etapa = "simular"
+        rc, salida = self.ps1("-Simular")
+        if rc != 0 or "SIMULACI" not in salida:
+            raise Fallo(f"instalar_mamba.ps1 -Simular no terminó (salida {rc}): " + salida.strip()[-200:])
+        copiar, mover = self.lista(salida, "LISTA_COPIAR"), self.lista(salida, "LISTA_MOVER")
+        if "Polestar" not in copiar:
+            raise Fallo("la simulación no copiaría Polestar")
+        filas, iguales = [], 0
+        for c in copiar:
+            nueva = huellas(self.paquete / c)
+            vieja = huellas(self.addons / c) if (self.addons / c).is_dir() else None
+            if vieja is None:
+                filas.append(f"NUEVA     {c} ({len(nueva)} archivos)")
+            elif nueva == vieja:
+                iguales += 1
+                filas.append(f"igual     {c}")
+            else:
+                cambian = sorted(k for k in nueva if k in vieja and nueva[k] != vieja[k])
+                filas.append(f"CAMBIA    {c}: {len(cambian)} archivos cambian, {len(set(nueva) - set(vieja))} nuevos, "
+                             f"{len(set(vieja) - set(nueva))} se van")
+                filas += [f"            ~ {k}" for k in cambian[:15]]
+        filas += [f"SE MUEVE  {c} (al respaldo)" for c in mover]
+        tocs = {}
+        for lado, raiz in (("instalada", self.addons), ("paquete", self.paquete)):
+            t = raiz / "Polestar" / "Polestar.toc"
+            texto = t.read_text(encoding="utf-8", errors="replace") if t.exists() else ""
+            v = re.search(r"^## Version:\s*(\S+)", texto, re.M)
+            tocs[lado] = f"{v.group(1) if v else '?'}{' con X-Mamba' if 'X-Mamba' in texto else ' SIN X-Mamba'}"
+        resumen = (f"Polestar instalada {tocs['instalada']} -> paquete {tocs['paquete']}. Copiaría {len(copiar)} carpetas "
+                   f"({len(copiar) - iguales} cambian o son nuevas, {iguales} iguales) y movería {len(mover)} al respaldo.")
+        diff = self.dir / f"diff_{self.tag}.txt"
+        diff.write_text(resumen + "\n\n" + "\n".join(filas) + "\n\n--- instalar_mamba.ps1 -Simular ---\n" + salida,
+                        encoding="utf-8")
+        self.anota(resumen + f" Diff: {diff}")
+        return copiar, mover, resumen
+
+    def instalar(self, copiar, mover):
+        self.etapa = "instalar"
+        base = self.dir / "respaldos" if self.a.prueba else RESPALDOS
+        respaldo = base / f"mamba_auto_{self.tag}_{dt.datetime.now():%Y-%m-%d_%H%M%S}"
+        antes = self.instaladas(copiar + mover)
+        self.marca_inst.write_text(json.dumps({"tag": self.tag, "respaldo": str(respaldo),
+                                               "inicio": dt.datetime.now().isoformat()}), encoding="utf-8")
+        if self.juego_abierto():  # justo antes de copiar (instalar_mamba.ps1 lo vuelve a mirar dos veces)
+            self.marca_inst.unlink(missing_ok=True)
+            raise Espera("el juego está abierto: se instala en la próxima corrida con el juego cerrado")
+        rc, salida = self.ps1("-Respaldo", str(respaldo))
+        try:
+            if "NO SE INSTALA: Wow.exe" in salida or "durante el respaldo" in salida:
+                if self.instaladas(copiar + mover) != antes:
+                    raise Fallo("el juego se abrió y lo instalado cambió igual")
+                raise Espera("el juego se abrió justo antes de copiar: no se copió nada")
+            if rc != 0 or "INSTALADO." not in salida:
+                raise Fallo(f"instalar_mamba.ps1 no terminó (salida {rc}): " + salida.strip()[-200:])
+            self.forzar("instalar")  # cae DESPUÉS de copiar: prueba la vuelta atrás con VOLVER_ATRAS.ps1
+            for c in copiar:
+                if huellas(self.addons / c) != huellas(self.paquete / c):
+                    raise Fallo(f"{c} instalada no coincide con el paquete")
+            for c in mover:
                 if (self.addons / c).exists():
-                    raise Fallo(f"{c} debía quitarse y sigue ahí")
+                    raise Fallo(f"{c} debía ir al respaldo y sigue en AddOns")
             toc = (self.addons / "Polestar" / "Polestar.toc").read_text(encoding="utf-8", errors="replace")
             if "X-Mamba" not in toc:
-                raise Fallo("después de instalar, Polestar.toc no tiene la marca X-Mamba (¿falló el parche P4?)")
+                raise Fallo("después de instalar, Polestar.toc no tiene la marca X-Mamba")
             if not re.search(rf"^## Version:\s*{re.escape(self.tag.lstrip('v'))}(\s|$)", toc, re.M):
                 raise Fallo("después de instalar, Polestar.toc no dice la versión nueva")
-        except Exception:
-            self.volver_atras(hechas)
+        except Espera:
+            self.marca_inst.unlink(missing_ok=True)
             raise
-        # Todo comprobado: desde aquí solo se avanza. Si la corrida muere borrando lo viejo, «recuperar» lo termina
-        # (no vuelve atrás: eso mezclaría versiones).
-        diario["fase"] = "limpiando"
-        self.escribir_diario(diario)
-        self.forzar("limpiar")
-        restos = []
-        for c, habia in hechas:
-            if habia:
-                try:
-                    shutil.rmtree(self.addons / (c + VIEJA))
-                except Exception as e:  # instalada y comprobada: no es un fallo; el diario queda y se termina después
-                    restos.append(f"{c}: {e}")
-        if restos:
-            self.anota("quedan copias viejas por borrar (se terminan en la próxima corrida): " + "; ".join(restos[:5]))
-        else:
-            self.diario.unlink(missing_ok=True)
-
-    def volver_atras(self, hechas):
-        self.anota(f"VUELTA ATRÁS de {len(hechas)} carpetas")
-        errores = []
-        for c, habia in reversed(hechas):
-            dst, vieja = self.addons / c, self.addons / (c + VIEJA)
-            try:
-                if dst.exists():
-                    shutil.rmtree(dst)
-                if habia:
-                    vieja.rename(dst)
-            except Exception as e:  # se sigue con las demás; lo que quede lo arregla «recuperar» la próxima vez
-                errores.append(f"{c}: {e}")
-        for p in self.addons.glob("*" + NUEVA):
-            shutil.rmtree(p, ignore_errors=True)
-        if errores:
-            self.anota("la vuelta atrás no pudo con: " + "; ".join(errores))
-        else:
-            self.diario.unlink(missing_ok=True)
+        except Exception as e:
+            volver = respaldo / "VOLVER_ATRAS.ps1"
+            if volver.exists() and self.instaladas(copiar + mover) != antes:
+                self.anota(f"VUELTA ATRÁS con {volver}")
+                rcv, sv = self.corre([POWERSHELL, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(volver)])
+                if rcv != 0 or "Listo" not in sv:
+                    raise Fallo(f"{e}; y VOLVER_ATRAS.ps1 también falló (salida {rcv}): queda marcada para recuperar") from e
+            self.marca_inst.unlink(missing_ok=True)
+            raise
+        self.marca_inst.unlink(missing_ok=True)
+        # se guardan solo los 5 respaldos automáticos más nuevos (cada uno ~120 MB con la WTF)
+        for viejo in sorted(respaldo.parent.glob("mamba_auto_*"), key=lambda p: p.stat().st_mtime)[:-5]:
+            shutil.rmtree(viejo, ignore_errors=True)
+        self.anota(f"instalada {self.tag}: {len(copiar)} carpetas comprobadas; respaldo y VOLVER_ATRAS en {respaldo}")
+        return respaldo
 
     def instaladas(self, carpetas):
         return {c: huellas(self.addons / c) for c in carpetas if (self.addons / c).is_dir()}
@@ -465,27 +540,32 @@ class Corrida:
                 self.anota("AL DÍA: nada que hacer")
                 return 0
             if self.ya_construida():
-                self.anota(f"{self.tag} ya está fusionada y construida en la copia: se reusa")
+                self.anota(f"{self.tag} ya está fusionada y construida en la copia sobre el asistente de hoy: se reusa")
             else:
                 self.fusion()
                 self.construir()
                 if not self.a.sin_construir:
                     head = subprocess.run(["git", "-C", str(FUSION), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
-                    self.marca_construida().write_text(json.dumps({"commit": head}), encoding="utf-8")
+                    self.marca_construida().write_text(json.dumps({"commit": head, "desde": self.desde}), encoding="utf-8")
             self.controles()
+            self.armar()
+            self.control_zip()
+            copiar, mover, resumen = self.simular()
+            if self.a.simular:
+                self.estado(f"ENSAYO OK ({self.tag}): {resumen}")
+                self.anota("ENSAYO OK: no se copió nada")
+                return 0
             if self.juego_abierto():
                 self.etapa = "instalar"
                 raise Espera("el juego está abierto: se instala en la próxima corrida con el juego cerrado")
-            instalar, quitar = self.carpetas()
-            antes = self.instaladas(instalar + quitar)
-            self.respaldo(instalar + quitar)
-            self.instalar(instalar, quitar)
+            antes = self.instaladas(copiar + mover)
+            respaldo = self.instalar(copiar, mover)
             (self.dir / f"instalada_{self.tag}").write_text(dt.datetime.now().isoformat(), encoding="utf-8")
             self.estado(f"ACTUALIZADA a {self.tag}")
-            self.avisar(f"Mamba actualizada a {self.tag} ({len(instalar)} carpetas"
-                        + (f", {len(quitar)} quitadas porque Polestar ya no las trae" if quitar else "")
-                        + f"). Lo nuevo de Polestar y la revisión de estética quedan para mirar con calma en "
-                          f"polestar_versiones/{self.tag}.md.", clave=f"exito_{self.tag}")
+            self.avisar(f"Mamba actualizada a {self.tag} ({len(copiar)} carpetas"
+                        + (f", {len(mover)} movidas al respaldo" if mover else "")
+                        + f"). Si algo anda mal, con el juego cerrado: {respaldo}\\VOLVER_ATRAS.ps1. Lo nuevo de Polestar "
+                          f"queda para mirar con calma en polestar_versiones/{self.tag}.md.", clave=f"exito_{self.tag}")
             return 0
         except Espera as e:
             self.estado(f"EN ESPERA ({self.tag}): {e}")
@@ -514,13 +594,20 @@ def main():
     p.add_argument("--estado", help="carpeta de registros y estado")
     p.add_argument("--version", help="tratar esta etiqueta como la última publicada (pruebas)")
     p.add_argument("--prueba", action="store_true", help="avisos marcados [PRUEBA]; respaldo en la carpeta de estado")
-    p.add_argument("--forzar-fallo", choices=["fusion", "construir", "controles", "respaldo", "instalar", "limpiar"])
+    p.add_argument("--forzar-fallo", choices=["fusion", "construir", "controles", "armar", "control_zip", "instalar"])
     p.add_argument("--sin-construir", action="store_true")
     p.add_argument("--sin-aviso", action="store_true", help="no mandar Telegram (solo registro)")
-    p.add_argument("--ignorar-juego", action="store_true", help="solo con --prueba: instalar aunque el juego esté abierto")
+    p.add_argument("--ignorar-juego", action="store_true",
+                   help="solo en pruebas: construir (forge solo lee el cliente) e instalar en la carpeta de prueba con el juego abierto")
+    p.add_argument("--simular", action="store_true", help="ensayo: todo menos copiar (instalar_mamba.ps1 -Simular)")
+    p.add_argument("--wtf", help="carpeta WTF de prueba (obligatoria con --addons de prueba sin --simular)")
     a = p.parse_args()
-    if (a.ignorar_juego or a.forzar_fallo or a.sin_construir) and not (a.prueba and a.addons):
-        p.error("--ignorar-juego, --forzar-fallo y --sin-construir solo valen con --prueba y una carpeta --addons de prueba")
+    if (a.ignorar_juego or a.forzar_fallo or a.sin_construir) and not (a.prueba and (a.addons or a.simular)):
+        p.error("--ignorar-juego, --forzar-fallo y --sin-construir solo valen con --prueba y (--simular o una carpeta --addons de prueba)")
+    if a.prueba and not a.simular and not (a.addons and a.wtf):
+        p.error("--prueba sin --simular necesita --addons y --wtf de prueba (VOLVER_ATRAS.ps1 restaura la WTF)")
+    if a.forzar_fallo == "instalar" and a.simular:
+        p.error("--forzar-fallo instalar necesita instalar de verdad en una carpeta de prueba (sin --simular)")
     CERROJO.parent.mkdir(parents=True, exist_ok=True)
     if CERROJO.exists():  # de una corrida que murió (corte de luz): su proceso ya no existe, o pasaron 8 h
         m = re.search(r"pid (\d+)", CERROJO.read_text(encoding="utf-8", errors="replace"))
