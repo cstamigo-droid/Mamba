@@ -35,6 +35,7 @@ end
 -- El botón de la fila: lo que más acerca a cumplirla (K61).
 function N.Accion(l)
 	if l.tramo then return nil end -- un tramo del viaje en curso: se lee, no se hace
+	if l.llevar then return "Llévame", function() pcall(l.llevar) end end
 	if l.lugar or (l.destino and N.PuedeLlevar()) then return "Llévame", function() N.Llevame(l) end end
 	if l.guia then return "Guía", function() N.AbrirGuiaDe(l) end end
 	if l.ver == "macro" then return "Crear", function() verAlgo(l) end end
@@ -46,7 +47,9 @@ local function menuDe(r)
 	local w = W()
 	if not (l and w and w.ShowMenu) or l.tramo then return end
 	local items = {}
-	if l.lugar or (l.destino and N.PuedeLlevar()) then items[#items + 1] = { text = "Llévame", icon = "icon-goto", onClick = function() N.Llevame(l) end } end
+	if l.llevar then items[#items + 1] = { text = "Llévame", icon = "icon-goto", onClick = function() pcall(l.llevar) end } end
+	if l.abrir then items[#items + 1] = { text = "Ver la lista de compra", icon = "search", onClick = function() pcall(l.abrir) end } end
+	if not l.llevar and (l.lugar or (l.destino and N.PuedeLlevar())) then items[#items + 1] = { text = "Llévame", icon = "icon-goto", onClick = function() N.Llevame(l) end } end
 	if l.guia then items[#items + 1] = { text = "Abrir la guía en otra pestaña", icon = "plus", onClick = function() N.AbrirGuiaDe(l) end } end
 	if l.ver then items[#items + 1] = { text = l.ver == "macro" and "Crear la macro" or "Ver en Mamba", icon = "search", onClick = function() verAlgo(l) end } end
 	items[#items + 1] = { separator = true }

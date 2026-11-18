@@ -237,3 +237,26 @@ test('revisión: la montura sale una vez, "todavía no" antes del nivel, Llévam
 	assert.equal(out.pedido, "Zul'Farrak", 'por su nombre, al motor de Ir a…');
 	assert.equal(out.fallas, 0);
 });
+
+test('profesiones: MambaProfesiones.Recomendaciones entra con su cómo, su Llévame al farmeo y su guía', () => {
+	const [out] = run(`
+		local llevo
+		MambaProfesiones = { Recomendaciones = function() return {
+			{ texto = "Sube Cocina de 190 a 225", como = "Cocina 40 Huevo de raptor · Cima del Trueno", impacto = "+35 puntos de Cocina",
+			  puntos = 35, minutos = 18.4, oro = 0, solo = true, estrellas = "Conviene mucho", razon = 3.8,
+			  llevame = function() llevo = true end, abrir = function() end } } end }
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local p
+		for _, l in ipairs(N.lineas) do if l.tipo == "profesion" then p = l end end
+		local txt, fn = N.Accion(p)
+		fn()
+		emit({ titulo = p.titulo, como = p.como, min = p.minutos, imp = p.impacto, guia = p.guia and p.guia.id, txt = txt, llevo = llevo })`);
+	assert.equal(out.titulo, 'Sube Cocina de 190 a 225');
+	assert.match(out.como, /Cima del Trueno/);
+	assert.equal(out.min, 18);
+	assert.equal(out.imp, 4);
+	assert.equal(out.guia, 'forever/professions/cooking');
+	assert.equal(out.txt, 'Llévame');
+	assert.equal(out.llevo, true, 'Llévame usa el de Profesiones (flecha al farmeo y medición)');
+});

@@ -166,6 +166,29 @@ local function lineaLlenas(e)
 		ver = "vender", destino = "reparar", puedeYa = true, grupo = false }
 end
 
+-- Subir una profesión: MambaProfesiones.Recomendaciones (Mamba_Profesiones, bc0c332dd) ya viene ordenada por
+-- impacto ÷ costo, con su cómo (el próximo paso de SkillUp, con PNJ y zona), sus minutos y su Llévame al farmeo.
+local IMPACTO_ESTRELLAS = { ["Conviene mucho"] = 4, ["Conviene"] = 2, ["Conviene poco"] = 1 }
+local function lineasProfesion(maximo)
+	local P = _G.MambaProfesiones
+	local out = {}
+	if not (P and P.Recomendaciones) then return out end
+	local ok, recs = pcall(P.Recomendaciones)
+	if not ok or type(recs) ~= "table" then return out end
+	for i = 1, math.min(maximo, #recs) do
+		local r = recs[i]
+		if type(r) == "table" and r.texto then
+			local nombre = tostring(r.texto):match("^Sube (.-) de %d")
+			out[#out + 1] = { clave = "prof:" .. tostring(nombre or r.texto), tipo = "profesion", verbo = "craft",
+				impacto = IMPACTO_ESTRELLAS[r.estrellas] or 1, porque = r.impacto, minutos = tonumber(r.minutos) and math.floor(r.minutos + 0.5) or nil,
+				titulo = r.texto, como = r.como, grupo = r.solo == false, puedeYa = true,
+				llevar = type(r.llevame) == "function" and r.llevame or nil, abrir = type(r.abrir) == "function" and r.abrir or nil,
+				guia = nombre and N.GUIA_PROFESION[nombre] and { tipo = "prof", id = N.GUIA_PROFESION[nombre], nombre = nombre } or nil }
+		end
+	end
+	return out
+end
+
 -- Farmear de camino: lo que dice Mi plan › Dinero cuando tienes una profesión de recolección.
 local function lineasFarmeo(M, e)
 	local out = {}
@@ -209,6 +232,7 @@ function N.Lineas()
 	end
 	for _, p in ipairs(pasos or {}) do add(aLinea(p, e)) end
 	add(lineaLlenas(e))
+	for _, l in ipairs(lineasProfesion(2)) do add(l) end
 	for _, l in ipairs(lineasFarmeo(M, e)) do add(l) end
 	if N.PJ().soloSolo then
 		for i = #out, 1, -1 do if out[i].grupo then table.remove(out, i) end end

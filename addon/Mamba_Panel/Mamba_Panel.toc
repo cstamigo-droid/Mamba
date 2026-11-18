@@ -5,7 +5,7 @@
 ## Version: 0.1.0
 ## X-License: GPL-3.0-only
 ## SavedVariablesPerCharacter: MambaPanelPJ
-## OptionalDeps: Polestar, Polestar_Guides, Asistente, Mamba_Plan
+## OptionalDeps: Polestar, Polestar_Guides, Asistente, Mamba_Plan, Mamba_Profesiones
 ## Category: Mamba
 ## Category-esMX: Mamba
 ## Category-esES: Mamba
