@@ -86,8 +86,16 @@ function M.TextoReparto(e, reparto)
 end
 
 local function nombreArbol(e, i)
-	local t = e.talentos and e.talentos[i]
-	return (t and t.nombre and t.nombre ~= "") and t.nombre or ("árbol " .. tostring(i))
+	-- spec de una build: la ventana da su nombre en español (MambaAPI.Clase().NombreSpec, desde 24689ff05);
+	-- si es un número, el nombre del árbol que da el juego; si no, tal cual
+	local C = M.Fuentes.Clase()
+	if C and C.NombreSpec and i ~= nil then
+		local ok, n = pcall(C.NombreSpec, e.clase, i)
+		if ok and type(n) == "string" and n ~= "" then return n end
+	end
+	local t = type(i) == "number" and e.talentos and e.talentos[i]
+	if t and t.nombre and t.nombre ~= "" then return t.nombre end
+	return type(i) == "number" and ("árbol " .. i) or tostring(i)
 end
 
 -- Las builds para elegir, ya en grupos y en orden, con UNA recomendada (la de tu rol y tu meta).
