@@ -80,9 +80,10 @@ function T.PrecioSubasta(link, itemID)
 		if a then return a, ad end
 		return nil, nil, aviso or (T.PrecioPropio and T.PrecioPropio(itemID) and SUFIJO) or nil
 	end
-	local p, pd
-	if T.PrecioPropio then p, pd = T.PrecioPropio(itemID, T.DiaHoy and T.DiaHoy()) end
-	if p and (not a or (pd and ad and pd < ad)) then return p, pd end -- Auctionator sin edad: gana Auctionator
+	local p, pd, cant
+	if T.PrecioPropio then p, pd, cant = T.PrecioPropio(itemID, T.DiaHoy and T.DiaHoy()) end
+	-- 4.º valor: cuántas había a la venta (solo lo sabe el escaneo propio; Auctionator no lo dice)
+	if p and (not a or (pd and ad and pd < ad)) then return p, pd, nil, cant end -- Auctionator sin edad: gana Auctionator
 	return a, ad
 end
 
@@ -189,7 +190,7 @@ function T.InfoDe(link, ligado)
 	-- Para el precio y los sufijos sirve más el link que trae el sufijo (el que se pasó), si lo tiene.
 	if T.Sufijo(link) ~= 0 then real = link end
 	local id = T.ItemID(real)
-	local subasta, dias, avisoPrecio = T.PrecioSubasta(real, id)
+	local subasta, dias, avisoPrecio, disponible = T.PrecioSubasta(real, id)
 	return {
 		id = id, link = real, nombre = nombre,
 		calidad = calidad, nivelObj = nivelObj, nivelMin = nivelMin or 0, equipLoc = equipLoc,
@@ -197,7 +198,7 @@ function T.InfoDe(link, ligado)
 		pila = pila or 1, ligado = ligado and true or false,
 		reactivo = reactivo and true or false,
 		herramienta = T.EsHerramienta(id, clase, subclase),
-		subasta = subasta, diasSubasta = dias, avisoPrecio = avisoPrecio,
+		subasta = subasta, diasSubasta = dias, avisoPrecio = avisoPrecio, disponible = disponible,
 	}
 end
 

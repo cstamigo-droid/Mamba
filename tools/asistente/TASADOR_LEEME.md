@@ -119,7 +119,7 @@ Pedido de Cristian (17-11): que el addon mire la subasta y diga **cómo ganar or
 - Si la subasta se comparte con la Alianza.
 
 ### Pruebas
-`tools/asistente/pruebas/test_comercio.py`: 134 pruebas con Lua 5.1, más `test_escaneo.py` (37) y `test_tasador.py` (118). Incluye:
+`tools/asistente/pruebas/test_comercio.py`: 138 pruebas con Lua 5.1, más `test_escaneo.py` (37) y `test_tasador.py` (118). Incluye:
 - la simulación de subastas que desaparecen (ventas, cancelaciones, republicar a otro precio y dueño desconocido);
 - la prueba de que nada compra ni publica sin tu clic, con su control positivo.
 

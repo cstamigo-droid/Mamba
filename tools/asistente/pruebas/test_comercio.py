@@ -522,6 +522,23 @@ falso = "local x = 1\nC_AuctionHouse.StartCommoditiesPurchase(2447, 20) -- compr
 falso = "\n".join(l.split("--")[0] for l in falso.splitlines())
 check(any(re.search(r"\b" + p + r"\b", falso) for p in PROHIBIDAS), "control: la búsqueda estática encuentra una compra")
 
+# Hallazgo de wow-economia (equipo de revisión, 18-11): "Subastar" con una sola publicación
+L, T = nuevo()
+base = {"calidad": 1, "clase": 7, "liga": 0, "vendedor": 10, "subasta": 1000, "pila": 20, "cantidad": 20}
+r = T.Evaluar(tabla(L, dict(base, disponible=1)), T.Ajustes())
+check(r.accion == T.ACCION.REVISAR and "Solo había 1" in r.motivo, "con 1 a la venta: 'Revisa la subasta' y dice cuántas")
+r = T.Evaluar(tabla(L, dict(base, disponible=5)), T.Ajustes())
+check(r.accion == T.ACCION.SUBASTA and "si se vende" in r.motivo and "depósito" in r.motivo, "con 5 a la venta: subastar, avisando que el depósito se pierde si caduca")
+r = T.Evaluar(tabla(L, dict(base, diasSubasta=2, disponible=5)), T.Ajustes())
+check(r.aviso is not None and "hace 2 días" in r.aviso, "precio de hace 2 días: lo avisa")
+G = L.globals()
+hoy = T.DiaHoy()
+G.TasadorDB.precios = tabla(L, {"2447": {"h": {str(hoy): 1000}, "l": {str(hoy): 1000}, "a": {str(hoy): 1}}})
+G.TasadorDB.ultimoEscaneo = hoy
+L.execute('ITEMS[2447] = { name = "Peacebloom", q = 1, sell = 10, cls = 7, sub = 9, stack = 20 }')
+info = T.InfoDe("|Hitem:2447::::::::|h[x]|h", False)
+check(info.disponible == 1 and info.subasta == 1000, "el cuadro del objeto sabe cuántas había a la venta (escaneo propio)")
+
 # subasta ANTIGUA con las trampas puestas
 L, T = nuevo()
 G = L.globals()

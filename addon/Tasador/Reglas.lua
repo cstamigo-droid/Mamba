@@ -9,7 +9,7 @@ T.DEFAULTS = {
 	comision = 0.05,      -- comisión de la casa de subastas (5 %: NO VERIFICADO en Forever, por eso es ajustable)
 	margen = 1.5,         -- la subasta neta tiene que pagar al menos 1,5 veces lo del vendedor
 	minimoCobre = 2000,   -- y al menos 20 de plata más POR MONTÓN (por el tiempo y el depósito)
-	diasViejo = 7,        -- un precio de subasta de más de 7 días se marca como viejo
+	diasViejo = 1,        -- un precio de subasta de más de 1 día se marca con su edad (los precios de Forever cambian rápido)
 	-- Comerciante (Comercio.lua). Lo marcado NO VERIFICADO es un supuesto ajustable, no un dato de Forever.
 	depositoPct = 0.15,   -- depósito = 15 % de lo que paga el vendedor por unidad y por 12 h (MODELO, NO VERIFICADO)
 	depositoMin = 100,    -- mínimo por publicación: 1 plata (ORO.md: Timesaver, hasta el 17-11; el cambio a 1 cobre
@@ -142,7 +142,7 @@ function T.Evaluar(info, ajustes)
 		if tonumber(info.cantidad) then pila = math.max(1, math.min(pila, tonumber(info.cantidad))) end
 		if neto >= vendedor * ajustes.margen and (neto - vendedor) * pila >= ajustes.minimoCobre then
 			r.accion = T.ACCION.SUBASTA
-			r.motivo = "En subasta te quedan " .. T.Dinero(neto) .. " (el vendedor da " .. T.Dinero(vendedor) .. ")."
+			r.motivo = "En subasta te quedan " .. T.Dinero(neto) .. " si se vende (el vendedor da " .. T.Dinero(vendedor) .. "; si caduca, pierdes el depósito)."
 		elseif vendedor > 0 then
 			r.accion = T.ACCION.VENDEDOR
 			if neto < vendedor then
@@ -159,6 +159,12 @@ function T.Evaluar(info, ajustes)
 		end
 		if material and r.accion ~= T.ACCION.SUBASTA and neto >= vendedor then
 			r.accion, r.motivo = T.ACCION.GUARDAR, "Material de profesión y la subasta no paga mucho: úsalo."
+		end
+		-- Una o dos publicaciones no son "el mercado": con menos de 3 a la venta no se manda a subastar.
+		local hay = tonumber(info.disponible)
+		if r.accion == T.ACCION.SUBASTA and hay and hay < (T.MIN_DISPONIBLE or 3) then
+			r.accion = T.ACCION.REVISAR
+			r.motivo = "Solo había " .. hay .. " a la venta a " .. T.Dinero(info.subasta) .. ": eso no es el precio del mercado. Revisa la subasta."
 		end
 		return r
 	end

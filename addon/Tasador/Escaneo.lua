@@ -111,7 +111,8 @@ function T.PrecioPropio(itemID, hoyDia)
 		if n and (not ultimo or n > ultimo) then ultimo = n end
 	end
 	if not ultimo then return nil end
-	return e.l[tostring(ultimo)], hoyDia and (hoyDia - ultimo) or nil
+	local cant = type(e.a) == "table" and tonumber(e.a[tostring(ultimo)]) or nil
+	return e.l[tostring(ultimo)], hoyDia and (hoyDia - ultimo) or nil, cant
 end
 
 -- La base de precios que usa /tasador baratos y /tasador hierbas. REGLA ÚNICA (ARQUITECTURA §7): la más
