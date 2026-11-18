@@ -305,6 +305,8 @@ test('K103: avisos de lugar, subasta (con Publicar), espacio y botín; cada tipo
 		UnitExists = function() return true end
 		UnitIsDead = function() return true end
 		UnitName = function(u) if u == "target" then return "Kodo de las llanuras" end return "Hope" end
+		UnitGUID = function(u) if u == "target" then return "Creature-0-1-2-3-4-5" end end
+		GetLootSourceInfo = function() return "Creature-0-1-2-3-4-5", 1 end
 		stub.fire("LOOT_READY")
 		N.Refrescar(true)
 		local bot
@@ -314,7 +316,16 @@ test('K103: avisos de lugar, subasta (con Publicar), espacio y botín; cada tipo
 		local quedan = 0
 		local mont2
 		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then quedan = quedan + 1 end; if l.clave == "montura40" then mont2 = l end end
-		emit({ lugar = lugar, sub = sub.titulo, txt = txt, pub = PUBLICADO(), nSub = nSub, esp = esp and esp.titulo, llenas = hayLlenas,
+		-- y se vuelve a encender
+		N.Silenciar("subasta", false); N.Refrescar(true)
+		local vuelven = 0
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then vuelven = vuelven + 1 end end
+		-- un botín que no es del objetivo no nombra al bicho
+		GetLootSourceInfo = function() return "Creature-otro", 1 end
+		N.botin = {}; stub.fire("LOOT_READY"); N.Refrescar(true)
+		local otro
+		for _, l in ipairs(N.lineas) do if l.aviso == "botin" then otro = l.titulo end end
+		emit({ vuelven = vuelven, otro = otro, lugar = lugar, sub = sub.titulo, txt = txt, pub = PUBLICADO(), nSub = nSub, esp = esp and esp.titulo, llenas = hayLlenas,
 			bot = bot and bot.titulo, quedan = quedan, mont2 = mont2.titulo, fallas = MambaPanelPJ.diag.fallas and #MambaPanelPJ.diag.fallas or 0 })`);
 	assert.match(out.lugar, /^Ya que estás en Mulgore: Montura al 40/, 'la línea con lugar en tu mapa se vuelve aviso');
 	assert.equal(out.sub, 'Ya que estás en la subasta: vende Paño de seda a 9 p', 'lo que más deja primero');
@@ -325,6 +336,8 @@ test('K103: avisos de lugar, subasta (con Publicar), espacio y botín; cada tipo
 	assert.equal(out.llenas, false, 'el aviso de espacio reemplaza la línea genérica');
 	assert.equal(out.bot, 'Kodo de las llanuras da Carne de kodo: se vende a 1 o en la subasta');
 	assert.equal(out.quedan, 0, 'silenciado por tipo');
+	assert.equal(out.vuelven, 2, 'y se vuelve a encender');
+	assert.match(out.otro, /^Lo que matas aquí da Carne de kodo/, 'si el botín no es del objetivo, no se nombra al bicho');
 	assert.match(out.mont2, /^Montura al 40/, 'sin el aviso de lugar, la línea vuelve a la normal');
 	assert.equal(out.fallas, 0);
 });

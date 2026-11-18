@@ -108,7 +108,9 @@ local function boton(b)
 	g:SetScript("OnClick", function(self) N.Guiame(self.psPunto, self.psNombre, self.psKey) end)
 	g:SetScript("OnEnter", function(self)
 		W.Color(self.Label, "text")
-		W.Tooltip(self, "ANCHOR_LEFT", "Guíame", { { self.psNombre and ("A " .. self.psNombre) or "Al paso que falta", Theme.Color("textDim") } })
+		local lineas = { { self.psNombre and ("A " .. self.psNombre) or "Al paso que falta", Theme.Color("textDim") } }
+		if self.psFalta then lineas[#lineas + 1] = { self.psFalta, Theme.Color("textMuted") } end
+		W.Tooltip(self, "ANCHOR_LEFT", "Guíame", lineas)
 	end)
 	g:SetScript("OnLeave", function(self) W.Color(self.Label, "accent"); W.HideTooltip(self) end)
 	b.MambaGuiame = g
@@ -124,16 +126,20 @@ local function mision(b, q, key, state, target, tlabel, fin)
 	local punto, nombre, texto, conKey = pendiente(q, key, state, target, tlabel, fin)
 	-- la línea de datos
 	if texto and b.Meta then
+		-- en la misma línea de datos, sin crecer: Polestar ya midió la tarjeta (lo completo, en el cuadro de «Guíame»)
 		local antes = b.Meta:GetText() or ""
+		if b.Meta.SetWordWrap then b.Meta:SetWordWrap(false) end
+		if b.Meta.SetMaxLines then b.Meta:SetMaxLines(1) end
 		b.Meta:SetText(antes ~= "" and (antes .. DOT .. texto) or texto)
 	end
 	-- «Guíame»
 	local g = boton(b)
 	local puede = valido(punto) or conKey ~= nil
 	if puede and state ~= "done" then
-		g.psPunto, g.psNombre, g.psKey = punto, nombre, conKey
+		g.psPunto, g.psNombre, g.psKey, g.psFalta = punto, nombre, conKey, texto
 		g:ClearAllPoints()
-		g:SetPoint("TOPRIGHT", b, "TOPRIGHT", -14, -40)
+		-- a la altura de la línea de datos (-44), debajo de las marcas de estado de Polestar (línea del título)
+		g:SetPoint("TOPRIGHT", b, "TOPRIGHT", -14, -44)
 		g:Show()
 		if b.Meta then b.Meta:SetWidth(max(80, b:GetWidth() - 28 - 76)) end
 	else

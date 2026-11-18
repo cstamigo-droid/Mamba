@@ -133,7 +133,15 @@ end
 local CARO = 5000
 function N.Saqueo()
 	if N.Silenciado("botin") or not (GetNumLootItems and GetLootSlotLink) then return end
-	local bicho = UnitName and UnitExists and UnitExists("target") and UnitIsDead and UnitIsDead("target") and UnitName("target") or nil
+	-- el bicho se nombra solo si el botín es de verdad del objetivo (GetLootSourceInfo); si no, no se nombra
+	local bicho
+	local guid = UnitGUID and UnitGUID("target")
+	if guid and GetLootSourceInfo and UnitIsDead and UnitIsDead("target") then
+		for i = 1, GetNumLootItems() do
+			local ok, fuente = pcall(GetLootSourceInfo, i)
+			if ok and fuente == guid then bicho = UnitName("target"); break end
+		end
+	end
 	local M, A = _G.MambaPlan, _G.MambaAPI
 	for i = 1, GetNumLootItems() do
 		local link = GetLootSlotLink(i)

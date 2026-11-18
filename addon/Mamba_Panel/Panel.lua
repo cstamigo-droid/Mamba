@@ -107,11 +107,18 @@ local function construir(GF, body, PAD, UP_TOGGLE)
 	cab:SetScript("OnClick", function(_, boton)
 		if boton == "RightButton" then
 			local pj = N.PJ()
-			w.ShowMenu(cab, {
+			local items = {
 				{ text = "Solo lo que puedo hacer solo", checked = pj.soloSolo and true or false,
 					onClick = function() pj.soloSolo = not pj.soloSolo; N.Refrescar(true) end },
 				{ text = "Abrir Mi plan", icon = "search", onClick = function() local M = _G.MambaPlan; if M and M.AbrirPlan then pcall(M.AbrirPlan, "ahora") end end },
-			})
+				{ separator = true },
+			}
+			-- K103: cada tipo de aviso se enciende y se apaga aquí (también deshace «No avisar más de esto»)
+			for _, tipo in ipairs({ "lugar", "subasta", "espacio", "botin" }) do
+				items[#items + 1] = { text = "Avisar: " .. (N.TIPOS_AVISO[tipo] or tipo), checked = not N.Silenciado(tipo),
+					onClick = function() N.Silenciar(tipo, N.Silenciado(tipo) == false); N.Refrescar(true) end }
+			end
+			w.ShowMenu(cab, items)
 			return
 		end
 		N.PJ().abierto = not N.PJ().abierto
