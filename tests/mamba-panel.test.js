@@ -183,7 +183,7 @@ test('K58 en el panel: Llévame usa el motor de Ir a… y el viaje en curso se v
 		MambaAPI.Llevame = function(d) pedido = d; return true end
 		MambaAPI.TiempoTexto = function(seg, est) return (est and "≈ " or "") .. math.floor(seg / 60) .. ":" .. string.format("%02d", seg % 60) end
 		MambaAPI.RutaActual = function() return { nombre = "Mulgore", total = 278, estimado = true, tramos = {
-			{ tipo = "piedra", texto = "Piedra de hogar a Cima del Trueno", seg = 10, medido = 10 },
+			{ tipo = "piedra", texto = "Piedra de hogar a Cima del Trueno", seg = 10, medido = true, estimado = false },
 			{ tipo = "vuelo", texto = "Vuela a Bloodhoof", seg = 200, estimado = true },
 			{ tipo = "caminar", texto = "Caminar 382 yd", seg = 68, estimado = true } } } end
 		E.SetGuide(LEV)

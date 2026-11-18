@@ -229,7 +229,7 @@ function N.LineasViaje()
 		local verbo = "goto"
 		for k, v in pairs(VERBO_TRAMO) do if tipo:find(k, 1, true) then verbo = v end end
 		out[#out + 1] = { clave = "viaje:" .. i, tramo = true, verbo = verbo, puedeYa = true,
-			titulo = t.texto or tipo, sub = tiempo(t.medido or t.seg, not t.medido and t.estimado) or "" }
+			titulo = t.texto or tipo, sub = tiempo(t.seg, t.estimado) or "" }
 	end
 	return out
 end
