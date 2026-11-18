@@ -276,6 +276,16 @@ ns.UI.GuideFrame.Part(function(GF)
 		return stack(frame, y, h)
 	end
 
+	-- Mamba (PARCHES.md P9): the lines of Mamba_Panel in the live window's flow, a part ("mamba") like Along the
+	-- way: UI.MambaLineas lays out its own rows (filled beforehand) and answers its frame and height.
+	local function mamba(y, width, shown)
+		local fn = GF.live and UI.MambaLineas
+		if not fn then return y end
+		local ok, f, h = pcall(fn, GF, body, width, shown and not compact() or false, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
+		if ok and f and type(h) == "number" and h > 0 then return place("mamba", f, y, h, width) end
+		return y
+	end
+
 	-- The window's scale on the screen: its own, or a copy's as the live
 	-- window's (ui.scale on the game's UI scale), whatever its host draws it at.
 	local function screenScale()
@@ -430,6 +440,7 @@ ns.UI.GuideFrame.Part(function(GF)
 		local list = GF.live and UI.StepList and UI.StepList.Place(body, state == "steps")
 		if list then
 			for _, f in ipairs({ card, after, along, GF.here, upnext, UI.JourneyPanel and UI.JourneyPanel.frame }) do f:Hide() end
+			mamba(y, width, false) -- Mamba (PARCHES.md P9)
 			local outer = (showStrip and SH or 0) + NAV_H + PROG_H
 			local kept = UI.StepList.height or F:GetHeight()
 			local limit = max(outer + GF.MIN_BODY_H, roomAbove() or math.huge)
@@ -457,10 +468,12 @@ ns.UI.GuideFrame.Part(function(GF)
 			if GF.here:IsShown() then y = place("here", GF.here, y, GF.LayoutHere(width), width) end
 			if after:IsShown() then y = place("after", after, y, layoutAfter(width), width) end
 			if along:IsShown() then y = place("along", along, y, layoutAlong(width), width) end
+			y = mamba(y, width, true) -- Mamba (PARCHES.md P9)
 			if upnext:IsShown() then y = place("upnext", upnext, y, layoutUpnext(width), width) end
 		else
 			y = stack(empty, y, layoutEmpty(width))
 			y = stackJourney(y, width)
+			y = mamba(y, width, true) -- Mamba (PARCHES.md P9)
 		end
 		if GF.party.psText and not isCompact and state == "steps" and not list then
 			GF.party:Show()

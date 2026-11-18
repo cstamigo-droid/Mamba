@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: Mamba: panel de la guía
+## Notes: Lo que recomienda Mi plan, dentro del panel de la guía (entrenar, montura, profesión, bolsa, vender, mazmorra), ordenado por lo que más rinde, cada línea con su cómo y su «Llévame». Otra guía o una recomendación con pasos se abre en una pestaña nueva del mismo panel.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariablesPerCharacter: MambaPanelPJ
+## OptionalDeps: Polestar, Polestar_Guides, Asistente, Mamba_Plan
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Lineas.lua
+Pestanas.lua
+Panel.lua

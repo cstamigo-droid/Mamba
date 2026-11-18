@@ -45,7 +45,7 @@ ns.UI.GuideFrame.Part(function(GF)
 				if E.SelectTab and not self.psActive then E.SelectTab(i) end
 				UI.ShowPicker()
 			end },
-			{ text = L["Close tab"], icon = "close", onClick = function() E.CloseTab(i) end },
+			{ text = L["Close tab"], icon = "close", disabled = self.psFijo, onClick = function() E.CloseTab(i) end }, -- Mamba (PARCHES.md P10)
 			{ text = L["Move left"], icon = "chevron-left", disabled = i <= 1, onClick = function() E.MoveTab(i, i - 1) end },
 			{ text = L["Move right"], icon = "chevron-right", disabled = i >= #tabs, onClick = function() E.MoveTab(i, i + 1) end },
 		}
@@ -133,7 +133,7 @@ ns.UI.GuideFrame.Part(function(GF)
 			local E = Engine()
 			if not E then return end
 			if button == "RightButton" then return tabMenu(self) end
-			if button == "MiddleButton" and E.CloseTab then return E.CloseTab(self.psIndex) end
+			if button == "MiddleButton" and E.CloseTab and not self.psFijo then return E.CloseTab(self.psIndex) end -- Mamba (PARCHES.md P10)
 			if E.SelectTab and not self.psActive then E.SelectTab(self.psIndex) end
 		end)
 		b:SetScript("OnEnter", function(self)
@@ -184,6 +184,9 @@ ns.UI.GuideFrame.Part(function(GF)
 		activeW, otherW = min(TAB_MAX_W, activeW), min(TAB_MAX_W, otherW)
 		local G = ns.Guides
 		local x = 1
+		-- Mamba (PARCHES.md P10): the first leveling tab stays put (no close) while another tab is open.
+		local fijo
+		for i = 1, n do if n >= 2 and not fijo and (tabs[i].category or "Leveling") == "Leveling" then fijo = i end end
 		for i = 1, n do
 			local t = tabs[i]
 			local b = tabButton(i)
@@ -208,6 +211,8 @@ ns.UI.GuideFrame.Part(function(GF)
 			W.Color(b.Icon, b.psActive and "accent" or "textMuted")
 			b.Selected:SetShown(b.psActive)
 			b.Bar:SetShown(b.psActive)
+			b.psFijo = i == fijo or nil -- Mamba (PARCHES.md P10)
+			b.Close:SetShown(not b.psFijo)
 			GF.PaintTab(b)
 			local w = b.psActive and activeW or otherW
 			-- A lone tab takes the room its title and range need, up to the strip,
