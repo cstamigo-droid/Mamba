@@ -30,8 +30,26 @@ paso "niveles de zona" "$F" data maps build
 paso "codex" "$F" data codex
 # 3. Mapas a pie de nuestra grilla (formato 3, sin --leffe) y los nombres de subzona.
 paso "mapas a pie" "$F" nav pack --dir "$OUT\\grid" --layers "$RAIZ/data/local/nav-layers"
-paso "subzonas" "$F" data subzones
+# Subzonas: NO se rehacen. forge exige la misma build del cliente que los datos (70532, tablas de
+# wago) y su tabla fija está en 70888 (18-11 03:02). Quedan las que trae Polestar, sin cambios.
 # 4. Nombres por idioma sin QuestieDB ni DingDB, y las guías compiladas.
 paso "nombres" "$F" data names --no-questie
-paso "compilar guías" "$F" guide compile
+# guides/ trae las guías de Polestar sin los filtros de Mamba: se compila una copia con las de la ruta
+# y el resto en su versión filtrada (la que aprobó forge build), con piernas horneadas en NUESTRA grilla.
+# professions.json/travel.json los escribe forge build: se ponen solo mientras compila (18-11).
+C='D:\rust\guias-compilar'
+paso "guías para compilar" python -I "$RAIZ/tools/asistente/guias_para_compilar.py" 'D:\rust\guias-mamba' "$C"
+puestos=()
+for n in professions.json travel.json; do
+	[ -f "data/forever/$n" ] || { cp "/d/rust/forge-out/data/forever/$n" "data/forever/$n"; puestos+=("data/forever/$n"); }
+done
+trap 'rm -f "${puestos[@]}"' EXIT
+for vuelta in 1 2 3; do
+	paso "hornear piernas ($vuelta)" "$F" guide bake --guides "$C" --grid "$OUT\\grid" --threads 8
+	if "$F" guide compile --guides "$C" --force > /d/rust/noche/compilar_guias.txt 2>&1; then
+		echo "[$(date '+%H:%M:%S')] --- compilar guías OK" | tee -a "$LOG"; break
+	fi
+	[ $vuelta = 3 ] && { echo "FALLÓ en «compilar guías». Ver /d/rust/noche/compilar_guias.txt" | tee -a "$LOG"; exit 1; }
+	paso "arreglos de compilar ($vuelta)" python -I "$RAIZ/tools/asistente/guias_para_compilar.py" --arreglar "$C" 'D:\rust\noche\compilar_guias.txt'
+done
 echo "[$(date '+%H:%M:%S')] LISTO" | tee -a "$LOG"
