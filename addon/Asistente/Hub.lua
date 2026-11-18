@@ -250,7 +250,8 @@ local function filaEnter(self)
 			if d.tipExtra then for _, l in ipairs(d.tipExtra) do GameTooltip:AddLine(l, 0.76, 0.79, 0.87, true) end end
 			GameTooltip:Show()
 		elseif id then
-			W().ItemTip(self, id, d.tipExtra)
+			local extra = d.tipExtra
+			W().ItemTip(self, id, extra and function(tip) for _, l in ipairs(extra) do tip:AddLine(l, 0.76, 0.79, 0.87, true) end end or nil)
 		end
 	elseif d.tip then
 		pcall(d.tip, self)

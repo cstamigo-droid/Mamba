@@ -1871,6 +1871,9 @@ local function renderSection(s)
 	end
 	-- No tabs until the section sets its own (its render may).
 	W.ShellTabs(win, nil)
+	-- Mamba: el título de la sección por defecto (su nombre); antes quedaba el de la sección anterior si la
+	-- nueva no ponía el suyo ("Mejorar mi equipo" en Mi plan).
+	W.ShellTitle(win, s.label or s.key, "")
 	s.render()
 	-- Under the tab row when the section set one, else under the header.
 	local f = s.psFrame

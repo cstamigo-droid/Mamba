@@ -150,5 +150,6 @@ end
 
 SLASH_ASISTENTECAPA1 = "/capa"
 SLASH_ASISTENTECAPA2 = "/layer"
-SlashCmdList = SlashCmdList or {}
+-- (no reasignar SlashCmdList: reescribir esa global la contamina y el /run del juego quedaba bloqueado,
+-- "Asistente intentó SetAllowDangerousScripts()", 18-11)
 SlashCmdList.ASISTENTECAPA = Capa.Comando

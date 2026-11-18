@@ -204,6 +204,23 @@ n0 = len(GUIAS)
 check(IR() is True, "hay un botón «Ir» visible en Mejorar")
 check(len(GUIAS) == n0 + 1, f"«Ir» pone la flecha a la entrada ({GUIAS[-1:]})")
 
+# 3b) pasar el ratón por una fila con líneas extra (cuadro del objeto) no da error (Widgets.lua:554, 18-11)
+PASAR = L.eval("""function()
+  local n = 0
+  for _, f in ipairs(TODOS) do
+    local d = rawget(f, "psDatos")
+    if type(d) == "table" and d.tipExtra and f:IsVisible() and f.scripts.OnEnter then f.scripts.OnEnter(f); n = n + 1 end
+  end
+  return n
+end""")
+e0 = len(lista(G.ERRORES))
+check(PASAR() > 0, "hay filas con cuadro del objeto")
+check(len(lista(G.ERRORES)) == e0, f"pasar el ratón no da error ({lista(G.ERRORES)[-1:] if len(lista(G.ERRORES)) > e0 else ''})")
+import re as _re
+for _f in (ADDON).glob("Asistente*/*.lua"):
+    _t = _f.read_text(encoding="utf-8", errors="replace")
+    check(not _re.search(r"^\s*SlashCmdList\s*=", _t, _re.M), f"{_f.name}: no reasigna SlashCmdList (contamina el /run del juego)")
+
 # 4) todas las pestañas de Equipo
 for key in ("llevas", "mazmorras", "60", "jcj", "rol", "fuentes"):
     G.ON_TAB(key)

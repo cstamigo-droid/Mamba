@@ -551,7 +551,9 @@ local function setGameTip(owner, kind, id, extra, place)
 		place(tip)
 	end
 	if kind == "item" then tip:SetHyperlink("item:" .. id) else tip:SetSpellByID(id) end
-	if extra then extra(tip) end
+	-- Mamba: extra puede llegar como lista de líneas (no solo como función): antes eso tiraba un error en cada pasada del ratón
+	if type(extra) == "function" then extra(tip)
+	elseif type(extra) == "table" then for _, l in ipairs(extra) do tip:AddLine(tostring(l), 0.76, 0.79, 0.87, true) end end
 	tip:Show()
 	gameTip = { owner = owner, kind = kind, id = id, extra = extra, place = place }
 end
