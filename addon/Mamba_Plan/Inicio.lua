@@ -70,23 +70,95 @@ end
 
 local dibujar -- adelante
 
-local function buildsDe(e, rol)
-	local out = {}
+local USO_TEXTO = { subir = "para subir de nivel", mazmorra = "mazmorras al 60", jcj = "JcJ al 60", banda = "bandas al 60" }
+local ROL_TEXTO = { sanar = "sanar", tanque = "tanque", danio = "daño" }
+
+-- "puntos: Equilibrio 41 · Feral 0 · Restauración 10", con los nombres de los árboles que da el juego.
+function M.TextoReparto(e, reparto)
+	local n = {}
+	for x in tostring(reparto or ""):gmatch("%d+") do n[#n + 1] = x end
+	local partes = {}
+	for i, x in ipairs(n) do
+		local nombre = e.talentos and e.talentos[i] and e.talentos[i].nombre
+		partes[#partes + 1] = ((nombre and nombre ~= "") and nombre or ("árbol " .. i)) .. " " .. x
+	end
+	return #partes > 0 and ("puntos: " .. table.concat(partes, " · ")) or ""
+end
+
+local function nombreArbol(e, i)
+	local t = e.talentos and e.talentos[i]
+	return (t and t.nombre and t.nombre ~= "") and t.nombre or ("árbol " .. tostring(i))
+end
+
+-- Las builds para elegir, ya en grupos y en orden, con UNA recomendada (la de tu rol y tu meta).
+-- -> { { grupo = "...", lista = { { clave, nombre, linea, tag, ayuda } } } }
+local function buildsDe(e, r)
+	r = r or {}
+	local grupos = {}
+	-- 1) la que tienes ahora
+	local pts = {}
+	for i, t in ipairs(e.talentos or {}) do pts[i] = t.puntos or 0 end
+	local suma = 0
+	for _, x in ipairs(pts) do suma = suma + x end
+	if suma > 0 then
+		grupos[#grupos + 1] = { grupo = "La que tienes", lista = { { clave = "ahora", nombre = "La que tengo ahora",
+			linea = M.TextoReparto(e, table.concat(pts, "/")), tag = "" } } }
+	end
+	-- 2) las del addon (Asistente_Clase), en "Para subir de nivel" y "Al 60"
 	local C = M.Fuentes.Clase()
+	local subir, al60 = {}, {}
+	local estilo = r.estilo or "jce"
+	local meta = e.nivel < 60 and "subir" or (M.USO_DE_ESTILO[estilo] or "mazmorra")
+	local recomendada
 	if C and C.Builds then
-		local ok, lista = pcall(C.Builds, e.clase, rol)
+		local ok, lista = pcall(C.Builds, e.clase)
 		for _, b in ipairs(ok and lista or {}) do
-			out[#out + 1] = { clave = "clase:" .. tostring(b.clave), nombre = b.nombre or b.clave, linea = b.reparto or "",
-				tag = "recomendada", ayuda = { b.nombre or "", { b.fuente or "" } } }
+			local f = type(b.fuente) == "table" and b.fuente or {}
+			local item = { clave = "clase:" .. tostring(b.clave),
+				nombre = nombreArbol(e, b.spec) .. " · " .. (USO_TEXTO[b.uso] or b.uso or "") .. " · " .. (ROL_TEXTO[b.rol] or ""),
+				linea = M.TextoReparto(e, b.reparto), tag = "", rol = b.rol, uso = b.uso,
+				ayuda = { nombreArbol(e, b.spec), { b.nota or "", (f.nombre or "") .. (f.autor and (", " .. f.autor) or ""), f.fecha or "", f.url or "" } } }
+			if not recomendada and b.rol == r.rol and b.uso == meta then recomendada = item end
+			if b.uso == "subir" then subir[#subir + 1] = item else al60[#al60 + 1] = item end
+		end
+		-- sin una exacta: la de tu rol para tu meta más cercana
+		if not recomendada then
+			for _, l in ipairs({ subir, al60 }) do for _, it in ipairs(l) do if not recomendada and it.rol == r.rol then recomendada = it end end end
 		end
 	end
+	if recomendada then
+		recomendada.tag = "recomendada"
+		recomendada.porque = ("Es la de %s %s: lo que elegiste en el paso 1."):format(ROL_TEXTO[recomendada.rol] or "", USO_TEXTO[recomendada.uso] or "")
+		recomendada.linea = recomendada.porque .. "  " .. recomendada.linea
+	end
+	local function primeroRecomendada(l)
+		table.sort(l, function(a, b)
+			if (a == recomendada) ~= (b == recomendada) then return a == recomendada end
+			if (a.rol == r.rol) ~= (b.rol == r.rol) then return a.rol == r.rol end
+			return a.nombre < b.nombre
+		end)
+	end
+	primeroRecomendada(subir)
+	primeroRecomendada(al60)
+	if #subir > 0 then grupos[#grupos + 1] = { grupo = "Para subir de nivel", lista = subir } end
+	if #al60 > 0 then grupos[#grupos + 1] = { grupo = "Al 60", lista = al60 } end
+	-- 3) de jugadores conocidos, las de tu rol primero
+	local palabras = { sanar = { "sana", "cura" }, tanque = { "tanque" }, danio = { "daño" } }
+	local function esDeRol(b)
+		for _, p in ipairs(palabras[r.rol or ""] or {}) do if b.uso:lower():find(p, 1, true) then return true end end
+		return false
+	end
+	local conocidas = {}
 	for i, b in ipairs(M.CONOCIDAS or {}) do
 		if b.clase == e.clase then
-			out[#out + 1] = { clave = "conocida:" .. i, nombre = b.uso .. " · " .. b.autor, linea = b.reparto .. " · " .. b.destaca,
-				tag = "conocida", ayuda = { b.autor, { b.destaca, "Talentos clave: " .. b.clave, b.url, b.fecha } } }
+			conocidas[#conocidas + 1] = { clave = "conocida:" .. i, nombre = b.uso .. " · " .. b.autor,
+				linea = M.TextoReparto(e, b.reparto) .. " · " .. b.destaca, tag = "de un jugador conocido", deRol = esDeRol(b),
+				ayuda = { b.autor, { b.destaca, "Talentos clave: " .. b.clave, b.url, b.fecha } } }
 		end
 	end
-	return out
+	table.sort(conocidas, function(a, b) if a.deRol ~= b.deRol then return a.deRol end return a.nombre < b.nombre end)
+	if #conocidas > 0 then grupos[#grupos + 1] = { grupo = "De jugadores conocidos", lista = conocidas } end
+	return grupos, recomendada
 end
 M.BuildsDe = buildsDe
 
@@ -173,6 +245,7 @@ local function pasoRol(cuerpo, ancho, e)
 			filas[#filas + 1] = b
 		end
 	end
+	return y + 34
 end
 
 -- Varias a la vez, cada una principal o de segundo: un clic la suma como principal, otro la pasa a
@@ -201,26 +274,38 @@ local function pasoEstilo(cuerpo, ancho)
 	borrador.estilo = nil
 	for _, s in ipairs(ESTILO) do if ES[s[1]] == 1 and not borrador.estilo then borrador.estilo = s[1] end end
 	if not borrador.estilo then for _, s in ipairs(ESTILO) do if ES[s[1]] and not borrador.estilo then borrador.estilo = s[1] end end end
+	return y + 60
+end
+
+local function subtitulo(cuerpo, texto, y)
+	local t = P.Texto(cuerpo, "label", "accent")
+	t:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y)
+	t:SetText(texto)
+	filas[#filas + 1] = t
 end
 
 local function paso2(cuerpo, ancho, e)
 	local y = 0
-	titulo(cuerpo, "Build", y); y = y + 24
-	local lista = buildsDe(e, borrador.rol)
-	if #lista == 0 then
+	local grupos, rec = buildsDe(e, borrador)
+	if #grupos == 0 then
 		local t = P.Texto(cuerpo, "body", "textDim")
 		t:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y)
 		t:SetWidth(ancho)
 		t:SetText("Todavía no hay builds para tu clase en Mamba. Sigue sin elegir: el plan usa tu rol.")
 		filas[#filas + 1] = t
-		return
+		return y + 20
 	end
-	for i, b in ipairs(lista) do
-		if i > 7 then break end
-		local f = tarjeta(cuerpo, ancho, b.nombre .. "  ·  " .. b.tag, b.linea, borrador.build == b.clave,
-			function() borrador.build = b.clave; dibujar() end, b.ayuda)
-		f:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y); y = y + 50
+	if not borrador.build and rec then borrador.build = rec.clave end
+	for _, g in ipairs(grupos) do
+		subtitulo(cuerpo, g.grupo, y); y = y + 20
+		for _, b in ipairs(g.lista) do
+			local f = tarjeta(cuerpo, ancho, b.nombre .. ((b.tag ~= "") and ("  ·  " .. b.tag) or ""), b.linea,
+				borrador.build == b.clave, function() borrador.build = b.clave; dibujar() end, b.ayuda)
+			f:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y); y = y + 50
+		end
+		y = y + 6
 	end
+	return y
 end
 
 local function paso3(cuerpo, ancho, e)
@@ -231,20 +316,30 @@ local function paso3(cuerpo, ancho, e)
 	end
 	titulo(cuerpo, #tiene > 0 and ("Tienes " .. table.concat(tiene, " y ") .. ". Elige tu pareja:") or "Elige tu pareja de profesiones:", y)
 	y = y + 26
-	for _, rec in ipairs(M.ProfesionesRecomendadas(e, borrador)) do
-		local clave = table.concat(rec.par, " + ")
+	local USO = { subir = "para subir de nivel", mazmorra = "para mazmorras", jcj = "para JcJ", oro = "para ganar oro", ya = "las que tienes" }
+	local lista = M.ProfesionesRecomendadas(e, borrador)
+	-- UNA recomendada: la de tu meta principal (paso 2); si no hay, la primera
+	local principal = M.USO_DE_ESTILO[borrador.estilo or "jce"] or "mazmorra"
+	local rec
+	for _, x in ipairs(lista) do if x.uso == principal then rec = x end end
+	rec = rec or lista[1]
+	if not borrador.profesiones and rec then borrador.profesiones = table.concat(rec.par, " + ") end
+	for _, x in ipairs(lista) do
+		local clave = table.concat(x.par, " + ")
 		local costo = {}
-		for _, p in ipairs(rec.par) do
-			local c = M.CostoProfesion(e, p)
-			if c and c.rangosOro > 0 then costo[#costo + 1] = p .. ": instructores " .. M.Dinero(c.rangosOro) end
+		for _, pr in ipairs(x.par) do
+			local c = M.CostoProfesion(e, pr)
+			if c and c.rangosOro > 0 then costo[#costo + 1] = pr .. ": instructores " .. M.Dinero(c.rangosOro) end
 		end
-		local linea = rec.porque .. (rec.raza and ("  Tu raza: " .. rec.raza) or "")
+		local porque = x == rec and ("Recomendada " .. (USO[x.uso] or "") .. ", tu meta principal: ") or ((USO[x.uso] or "") .. ": ")
+		local linea = porque .. x.porque .. (x.raza and ("  Tu raza: " .. x.raza) or "")
 		local ayuda = { clave, {} }
-		for _, fte in ipairs(rec.fuentes) do table.insert(ayuda[2], fte) end
+		for _, fte in ipairs(x.fuentes) do table.insert(ayuda[2], fte) end
 		if #costo > 0 then table.insert(ayuda[2], table.concat(costo, " · ")) end
-		if rec.tiene > 0 then table.insert(ayuda[2], "Ya tienes " .. rec.tiene .. " de las dos.") end
-		local f = tarjeta(cuerpo, ancho, clave .. (rec.tiene == #rec.par and "  ·  ya las tienes" or ""), linea,
-			borrador.profesiones == clave, function() borrador.profesiones = clave; dibujar() end, ayuda)
+		if x.tiene > 0 then table.insert(ayuda[2], "Ya tienes " .. x.tiene .. " de las dos.") end
+		local etiqueta = (x == rec and "  ·  recomendada" or "") .. (x.tiene == #x.par and "  ·  ya las tienes" or "")
+		local f = tarjeta(cuerpo, ancho, clave .. etiqueta, linea, borrador.profesiones == clave,
+			function() borrador.profesiones = clave; dibujar() end, ayuda)
 		f:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y); y = y + 50
 	end
 	local nota = P.Texto(cuerpo, "note", "textMuted")
@@ -252,6 +347,7 @@ local function paso3(cuerpo, ancho, e)
 	nota:SetWidth(ancho)
 	nota:SetText("Pasa el ratón por una opción: de dónde sale el consejo y lo que cuestan los instructores.")
 	filas[#filas + 1] = nota
+	return y + 30
 end
 
 function dibujar()
@@ -263,10 +359,17 @@ function dibujar()
 		or pagina == 2 and "Para qué juegas" or pagina == 3 and "Tu build" or "Tus profesiones")
 	v.sub:SetText(("%s %s, nivel %d. Mamba arma tu plan con esto; lo cambias cuando quieras."):format(
 		(e.claseNombre or ""), (e.razaNombre or ""):lower(), e.nivel))
-	if pagina == 1 then pasoRol(v.cuerpoF, ancho, e)
-	elseif pagina == 2 then pasoEstilo(v.cuerpoF, ancho)
-	elseif pagina == 3 then paso2(v.cuerpoF, ancho, e)
-	else paso3(v.cuerpoF, ancho, e) end
+	local alto
+	if pagina == 1 then alto = pasoRol(v.cuerpoF, ancho, e)
+	elseif pagina == 2 then alto = pasoEstilo(v.cuerpoF, ancho)
+	elseif pagina == 3 then alto = paso2(v.cuerpoF, ancho, e)
+	else alto = paso3(v.cuerpoF, ancho, e) end
+	if v.sf then
+		local _, _, W = P.Polestar()
+		v.cuerpoF:SetHeight(math.max(1, alto or 400))
+		if W and W.SetScrollContent then W.SetScrollContent(v.sf, (alto or 400) + 8, v.sf:GetHeight()) end
+		if W and W.ScrollTo then W.ScrollTo(v.sf, 0) end
+	end
 	v.paso:SetText(("Paso %d de %d"):format(pagina, PASOS))
 	v.atras:SetShown(pagina > 1)
 	if v.siguiente.Label then v.siguiente.Label:SetText(pagina < PASOS and "Siguiente" or "Listo")
@@ -288,9 +391,18 @@ local function crear()
 	v.sub = P.Texto(v, "body", "textDim")
 	v.sub:SetPoint("TOPLEFT", v, "TOPLEFT", m, -(top + 4))
 	v.sub:SetPoint("RIGHT", v, "RIGHT", -m, 0)
-	v.cuerpoF = CreateFrame("Frame", nil, v)
-	v.cuerpoF:SetPoint("TOPLEFT", v, "TOPLEFT", m, -(top + 30))
-	v.cuerpoF:SetPoint("BOTTOMRIGHT", v, "BOTTOMRIGHT", -m, 56)
+	local _, _, W = P.Polestar()
+	if W and W.Scroll then
+		v.sf = W.Scroll(v)
+		v.sf:SetPoint("TOPLEFT", v, "TOPLEFT", m, -(top + 30))
+		v.sf:SetPoint("BOTTOMRIGHT", v, "BOTTOMRIGHT", -m + 8, 56)
+		v.cuerpoF = v.sf.Child
+		v.cuerpoF:SetWidth(ANCHO - 2 * m - 10)
+	else
+		v.cuerpoF = CreateFrame("Frame", nil, v)
+		v.cuerpoF:SetPoint("TOPLEFT", v, "TOPLEFT", m, -(top + 30))
+		v.cuerpoF:SetPoint("BOTTOMRIGHT", v, "BOTTOMRIGHT", -m, 56)
+	end
 	v.atras = P.Boton(v, "Atrás", function() pagina = math.max(1, pagina - 1); dibujar() end)
 	v.atras:SetPoint("BOTTOMLEFT", v, "BOTTOMLEFT", m, 14)
 	v.siguiente = P.Boton(v, "Siguiente", function()

@@ -185,6 +185,36 @@ check(G2.MambaPlanPJ.respondido and not G2.MambaPlanInicio.visible, "los 4 pasos
 check(G2.MambaPlanPJ.respuestas.estilos is not None, "las metas de juego se guardan (varias)")
 check(not list(G2.ERRORES.values()), "asistente de 4 pasos sin errores: %s" % list(G2.ERRORES.values())[:2])
 
+# ---------- 8c. Paso "Tu build" (captura de Cristian, 18-11): sin claves internas, UNA recomendada, puntos con nombre ----------
+L.execute('''MambaAPI = { Clase = function() return { Builds = function(clase) return {
+  { clave = "balance_fdb", rol = "danio", uso = "mazmorra", spec = 1, reparto = "41/0/10", fuente = { nombre = "ForeverDB", fecha = "2026-11-16" } },
+  { clave = "gato_fdb", rol = "danio", uso = "mazmorra", spec = 2, reparto = "0/41/10", fuente = { nombre = "ForeverDB" } },
+  { clave = "feral_subir_fdb", rol = "danio", uso = "subir", spec = 2, reparto = "0/35/16", fuente = { nombre = "ForeverDB" } },
+  { clave = "balance_subir_fdb", rol = "danio", uso = "subir", spec = 1, reparto = "35/0/16", fuente = { nombre = "ForeverDB" } },
+  { clave = "resto_lepre", rol = "sanar", uso = "mazmorra", spec = 3, reparto = "11/0/40", fuente = { nombre = "Leprestore" } },
+} end } end }''')
+grupos, rec = M.BuildsDe(M.Estado(), L.eval('{ rol = "danio", estilo = "jce" }'))
+gl = list(grupos.values())
+nombres = [b.nombre for g in gl for b in g.lista.values()]
+lineas = [b.linea for g in gl for b in g.lista.values()]
+check(not any("_fdb" in n or "_lepre" in n for n in nombres), "sin claves internas: %s" % nombres[:5])
+check(sum(1 for g in gl for b in g.lista.values() if b.tag == "recomendada") == 1, "UNA sola recomendada")
+check(rec is not None and rec.uso == "subir" and rec.rol == "danio", "nivel 39 + daño: la recomendada es para subir")
+check(gl[0].grupo == "La que tienes" and "puntos: Equilibrio 19" in gl[0].lista[1].linea, "primero: la que tengo ahora, con puntos por árbol")
+check([g.grupo for g in gl][1:3] == ["Para subir de nivel", "Al 60"], "agrupadas: subir y al 60")
+check(any("puntos: Equilibrio 41 · Combate feral 0 · Restauración 10" in l for l in lineas), "41/0/10 con nombres de árbol")
+check(any("Equilibrio · mazmorras al 60" in n for n in nombres), "nombre en español: Equilibrio · mazmorras al 60")
+check("Es la de daño para subir de nivel" in rec.linea, "la recomendada dice por qué")
+L2.execute('''MambaAPI = { Clase = function() return { Builds = function() return {
+  { clave = "balance_fdb", rol = "danio", uso = "mazmorra", spec = 1, reparto = "41/0/10", fuente = { nombre = "ForeverDB" } } } end } end }
+MambaPlanPJ.respondido = nil
+MambaPlan.AbrirInicio(); local v = MambaPlanInicio; for i = 1, 4 do v.siguiente.scripts.OnClick(v.siguiente) end''')
+check(not list(G2.ERRORES.values()) and G2.MambaPlanPJ.respuestas.build is not None and G2.MambaPlanPJ.respuestas.profesiones is not None,
+      "con builds: los 4 pasos sin errores, y la recomendada queda elegida si no tocas nada")
+if len(gl) > 3:
+    con = list(gl[3].lista.values())
+    check(gl[3].grupo == "De jugadores conocidos" and all(c.tag == "de un jugador conocido" for c in con), "conocidas con autor, aparte")
+
 # ---------- 9. Prueba estática ----------
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")
