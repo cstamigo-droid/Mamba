@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: Mamba: mapa y minimapa
+## Notes: Coordenadas, tamaño del mapa, botones del minimapa, nodos de hierbas y vetas en el mapa y el minimapa, y la ruta de recolección más corta. Se ajusta en el menú de Polestar › Interfaz › Mapa.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariables: MambaMapaDB
+## OptionalDeps: Polestar, Asistente, Mamba_Profesiones
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Interfaz.lua
+Nucleo.lua
+Piezas.lua
+DatosNodos.lua
+Capa.lua
+Seccion.lua
