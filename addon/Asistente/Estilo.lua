@@ -158,6 +158,8 @@ function A.CrearVentana(nombre, titulo, ancho, alto)
 		f.titulo:SetPoint("RIGHT", f.cerrar, "LEFT", -8, 0)
 		f.cuerpo, f.margen, f.polestar = CABEZA, MARGEN, true
 		P.CloseOnEscape(nombre)
+		-- lugar por personaje, candado y «Restablecer posiciones» (Ventanas.lua)
+		if A.Ventanas then A.Ventanas.Movible(f, nombre, nil, { yaArrastra = true }) end
 		if P.Gamepad and P.Gamepad.Register then P.Gamepad.Register(f, { unasked = function() return f.abiertaSola end }) end
 	else
 		f = A.CrearMarcoBajo("Frame", nombre, UIParent, "BasicFrameTemplateWithInset")

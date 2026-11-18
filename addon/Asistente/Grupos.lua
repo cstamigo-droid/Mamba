@@ -101,3 +101,12 @@ function API.Bolsas()
 	return ok and l or nil
 end
 
+-- Ventanas que se mueven a donde uno quiera (Ventanas.lua): lugar por personaje, dentro de la pantalla, candado
+-- y «Restablecer posiciones» de Ajustes › Mamba › Ventanas.
+--   API.Movible(marco, nombre, asa)  -- asa: de dónde se arrastra (nil: el marco entero)
+--   API.AlRestablecer(fn)            -- para quien guarda sus lugares por su cuenta (barras)
+--   API.VentanasFijas() -> true si el jugador las fijó
+function API.Movible(marco, nombre, asa, opciones) return A.Ventanas and A.Ventanas.Movible(marco, nombre, asa, opciones) end
+function API.AlRestablecer(fn) if A.Ventanas then A.Ventanas.AlRestablecer(fn) end end
+function API.VentanasFijas() return A.Ventanas and A.Ventanas.Fijas() or false end
+

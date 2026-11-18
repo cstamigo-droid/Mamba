@@ -354,6 +354,34 @@ if G.TIP_HOOK is not None:
 else:
     check(False, "el Tasador instaló su gancho del cuadro (TIP_HOOK)")
 
+# 10c) ventanas movibles: lugar por personaje, candado y «Restablecer posiciones»
+VENT = L.eval("""function()
+  local V = Asistente.Ventanas
+  local f = CreateFrame("Frame", "MambaPruebaVentana", UIParent)
+  f.GetLeft = function() return 500 end; f.GetBottom = function() return 300 end
+  f.GetWidth = function() return 200 end; f.GetHeight = function() return 100 end
+  f.GetEffectiveScale = function() return 1 end
+  UIParent.GetEffectiveScale = function() return 1 end
+  UIParent.GetWidth = function() return 1920 end; UIParent.GetHeight = function() return 1080 end
+  local ok1 = MambaAPI.Movible(f, "prueba")
+  f:Hide()
+  local guardado = AsistenteDB.lugares[V.Personaje()]
+  -- arrastrar y soltar: el onStop de DragWindow guarda (aquí, directo)
+  local hay = V.marcos.prueba ~= nil
+  V.Fijar(true)
+  local llamado = false
+  local orig = Polestar.StartDrag
+  local fijada = MambaAPI.VentanasFijas()
+  V.Fijar(false)
+  V.Restablecer()
+  local vacio = next(AsistenteDB.lugares[V.Personaje()]) == nil
+  return ok1, hay, fijada, vacio
+end""")
+r = VENT()
+check(r[0] is True and r[1] is True, "MambaAPI.Movible registra la ventana")
+check(r[2] is True, "el candado fija las ventanas (VentanasFijas)")
+check(r[3] is True, "«Restablecer posiciones» borra los lugares de este personaje")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

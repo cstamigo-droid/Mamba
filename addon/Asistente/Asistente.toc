@@ -13,6 +13,7 @@
 
 Nucleo.lua
 Estilo.lua
+Ventanas.lua
 Ventana.lua
 Comandos.lua
 Capa.lua
