@@ -58,7 +58,7 @@ end
 
 ---------------------------------------------------------------- el cartel
 local cartel
-local function mostrar(texto, rojo)
+local function mostrar(texto, rojo, control)
 	if not M.DB().avisos then return end
 	if not cartel then
 		cartel = CreateFrame("Frame", "MambaAviso", UIParent)
@@ -71,7 +71,8 @@ local function mostrar(texto, rojo)
 	cartel.texto:SetText(M.Piezas.Color(rojo and "dudoso" or "titulo", texto))
 	cartel.hasta = (GetTime and GetTime() or 0) + 3
 	cartel:Show()
-	if M.DB().sonido and PlaySound then pcall(PlaySound, 8959) end
+	local d = M.DB()
+	if PlaySound and ((control and d.sonido) or d.sonidoTodos) then pcall(PlaySound, 8959) end
 	Av.ultimo = texto
 end
 Av.Mostrar = mostrar
@@ -86,32 +87,43 @@ function Av.Control()
 	local s = Av.Salidas(tipo)
 	local nombres = {}
 	for _, id in ipairs(s) do nombres[#nombres + 1] = M.NombreHechizo(id) end
-	mostrar(txt .. (#nombres > 0 and (": usa " .. table.concat(nombres, " o ")) or ""), true)
+	mostrar(txt .. (#nombres > 0 and (": usa " .. table.concat(nombres, " o ")) or ""), true, true)
 end
 
+local ultimoLanzado = {}
 function Av.Lanzado(unidad, id)
 	if M.Secreto(id) or not Av.CONTROLES[id] then return end
+	local t = GetTime and GetTime() or 0
+	local tipo = Av.CONTROLES[id]
+	if t - (ultimoLanzado[tipo] or -99) < 3 then return end -- uno cada 3 s por tipo de control
+	ultimoLanzado[tipo] = t
 	if not (UnitCanAttack and UnitCanAttack("player", unidad)) then return end
 	local quien = UnitName(unidad)
 	if M.Secreto(quien) then quien = "Un enemigo" end
 	mostrar(("%s usó %s"):format(quien or "Un enemigo", M.NombreHechizo(id)), true)
 end
 
-local ultimoMana, ultimoAmenaza = 0, 0
+local avisoManaHecho, manaMuyBajo, amenazaArmada, ultimoAmenaza = false, false, true, -99
 function Av.Revisar()
 	local d = M.DB()
 	local t = GetTime and GetTime() or 0
 	if cartel and cartel.hasta and t > cartel.hasta then cartel:Hide() end
-	if not M.EnCombate() then return end
+	if not M.EnCombate() then avisoManaHecho, manaMuyBajo = false, false; return end
 	local pct = M.Pct(UnitPower("player", 0), UnitPowerMax("player", 0))
-	if pct and pct < (d.avisoMana or 25) and t - ultimoMana > 20 and (UnitPowerMax("player", 0) or 0) > 0 then
-		ultimoMana = t
+	-- maná: una vez por pelea, y otra solo si baja del 10 %
+	local toca = pct and d.avisoManaSi and ((not avisoManaHecho and pct < (d.avisoMana or 25)) or (not manaMuyBajo and pct < 10))
+	if toca then
+		avisoManaHecho = true
+		if pct < 10 then manaMuyBajo = true end
 		local id = Av.MANA[M.Clase()]
 		mostrar(("Maná bajo (%d %%)"):format(pct) .. ((id and M.Conoce(id)) and (": usa " .. M.NombreHechizo(id)) or ": bebe al terminar"))
 	end
 	local peligro, ap
 	if M.Amenaza then peligro, ap = M.Amenaza.Peligro() end
-	if peligro and t - ultimoAmenaza > 6 then
+	-- amenaza: al cruzar el límite; se vuelve a armar al bajar del 80 % o a los 30 s
+	if ap and (ap < 80 or t - ultimoAmenaza > 30) then amenazaArmada = true end
+	if peligro and d.avisoAmenazaSi and amenazaArmada then
+		amenazaArmada = false
 		ultimoAmenaza = t
 		mostrar(("Amenaza %d %%: vas a quitarle el objetivo al tanque"):format(ap), true)
 	end

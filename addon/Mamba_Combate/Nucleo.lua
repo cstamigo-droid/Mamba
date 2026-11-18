@@ -7,7 +7,7 @@ _G.MambaCombate = M
 M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
-	avisoMana = 25, avisoAmenaza = 90,
+	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
 }
 
 function M.DB()
@@ -73,6 +73,16 @@ function M.Conoce(id)
 	if IsSpellKnown and IsSpellKnown(id) then return true end
 	local n = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
 	return n ~= nil and GetSpellInfo ~= nil and GetSpellInfo(n) ~= nil
+end
+
+-- Botones de "Cómo jugar" y "Dos formas de jugar" (K61): el libro de hechizos y el instructor (Servicios de Mamba).
+function M.AbrirLibro()
+	if M.EnCombate() then return end
+	if ToggleSpellBook then pcall(ToggleSpellBook, BOOKTYPE_SPELL or "spell") end
+end
+function M.BuscarInstructor()
+	local api = _G.MambaAPI
+	if api and api.Abrir then pcall(api.Abrir, "MambaServicios") end
 end
 
 local oyentes = {}

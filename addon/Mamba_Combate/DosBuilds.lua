@@ -156,15 +156,15 @@ end
 function M.FilasDosBuilds()
 	local nivel = UnitLevel and UnitLevel("player") or 1
 	local rol1, rol2 = B.Roles()
-	local cab = { titulo = ("Dos builds: %s y %s"):format(ROL_TXT[rol1] or rol1, ROL_TXT[rol2] or rol2),
-		linea1 = "La doble especialización se abre al nivel 40 con tu instructor (costo ≈ 50 o según Wowhead: NO VERIFICADO, míralo ahí).",
+	local cab = { titulo = ("Dos formas de jugar: %s y %s"):format(ROL_TXT[rol1] or rol1, ROL_TXT[rol2] or rol2),
+		linea1 = "Desde el nivel 40 tu instructor de clase te deja tener dos juegos de talentos y cambiar entre ellos (costo aproximado 50 o: confírmalo con él).",
 		linea2 = "Tus roles salen de Mi plan (puedes cambiarlos en «Cambiar mis respuestas»)." }
 	local out = {}
 	for i, rol in ipairs({ rol1, rol2 }) do
 		local b = build(rol, i == 1 and "subir" or "mazmorra")
-		out[#out + 1] = { tipo = i == 1 and "Principal" or "Secundaria", titulo = "Para " .. (ROL_TXT[rol] or rol) .. ": " .. ((b and (b.nombre or b.clave)) or "sin build cargada aún"),
+		out[#out + 1] = { tipo = i == 1 and "Principal" or "Secundaria", titulo = "Para " .. (ROL_TXT[rol] or rol) .. ": " .. ((b and (b.nombre or b.clave)) or "sin plan de talentos cargado aún"),
 			detalle = b and b.fuente and ("Fuente: " .. tostring(type(b.fuente) == "table" and (b.fuente[1] or "") or b.fuente)) or nil,
-			acciones = { { "Ver talentos", function() local api = _G.MambaAPI; if api and api.Abrir then pcall(api.Abrir, "MambaClase", "talentos") end end } } }
+			acciones = { { "Ver talentos", function() local api = _G.MambaAPI; if api and api.Abrir then pcall(api.Abrir, "MambaClase", "talentos") end end }, { "Buscar instructor", M.BuscarInstructor } } }
 	end
 	local xph = B.XPHora()
 	local api = _G.MambaAPI
@@ -176,7 +176,7 @@ function M.FilasDosBuilds()
 	for i, x in ipairs(est) do
 		out[#out + 1] = { tipo = i == 1 and "MEJOR" or ("#" .. i), titulo = x.titulo,
 			detalle = ("%s · oro: %s · segundo rol desde el nivel %d"):format(
-				x.horas and (("%.0f h hasta el 60 (tu XP/h medida)"):format(x.horas)) or "horas hasta el 60: sin datos aún (juega con el Medidor encendido)",
+				x.horas and (("%.0f h hasta el 60 (con tu experiencia por hora medida)"):format(x.horas)) or "horas hasta el 60: sin datos aún (se mide solo mientras juegas)",
 				M.Dinero and M.Dinero(x.oro) or (math.floor(x.oro / 10000) .. " o"), x.segundoDesde),
 			conf = x.como .. ((i == 1 and est[2]) and B.Porque(x, est[2]) or "") }
 	end
@@ -188,7 +188,7 @@ function M.FilasDosBuilds()
 		cuenta[x.sirve] = (cuenta[x.sirve] or 0) + 1
 		if x.sirve ~= "dos" and x.sirve ~= "vacia" then nada[#nada + 1] = x.ranura .. " (" .. TXT[x.sirve] .. ")" end
 	end
-	out[#out + 1] = { tipo = "Equipo", titulo = ("%d piezas sirven para las dos builds"):format(cuenta.dos or 0),
+	out[#out + 1] = { tipo = "Equipo", titulo = ("%d piezas sirven para las dos formas de jugar"):format(cuenta.dos or 0),
 		detalle = #nada > 0 and ("Para cambiar de rol con lo mínimo, busca primero: " .. table.concat(nada, ", ")) or "Todo lo que llevas sirve para las dos.",
 		conf = "Las piezas con «daño y curación», intelecto o espíritu sirven a Equilibrio y a Restauración a la vez.",
 		acciones = { { "Ver en Equipo", function() if api and api.Abrir then pcall(api.Abrir, "MambaEquipo", "mejorar") end end } } }

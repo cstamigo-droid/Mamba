@@ -14,7 +14,7 @@ local _, M = ...
 local R = {}
 M.Rotacion = R
 
-R.MODOS = { { "solo", "Solo" }, { "varios", "Varios" }, { "mazmorra", "Mazmorra" }, { "jcj", "JcJ" }, { "jefe", "Jefe largo" } }
+R.MODOS = { { "solo", "Solo" }, { "varios", "Varios" }, { "mazmorra", "Mazmorra" }, { "jcj", "Contra jugadores" }, { "jefe", "Jefe largo" } }
 local NOMBRE_MODO = {}
 for _, m in ipairs(R.MODOS) do NOMBRE_MODO[m[1]] = m[2] end
 NOMBRE_MODO.emergencia = "Emergencia"

@@ -7,7 +7,7 @@ local sub = "jugar"
 local paneles, listas = {}, {}
 local verSpec, verCaso = nil, nil
 
-local CASOS = { { "solo", "Subir solo" }, { "varios", "Contra varios" }, { "mazmorra", "Mazmorra" }, { "jcj", "JcJ" },
+local CASOS = { { "solo", "Subir solo" }, { "varios", "Contra varios" }, { "mazmorra", "Mazmorra" }, { "jcj", "Contra jugadores" },
 	{ "jefe", "Jefe largo" }, { "emergencia", "Emergencia" } }
 local function db() return M.DB() end
 local function icono(id) return ("|T%s:18:18:0:0|t "):format(tostring(M.Icono(id))) end
@@ -26,7 +26,7 @@ function M.FilasJugar()
 	for _, c in ipairs(CASOS) do if casos[c[1]] then filtros[#filtros + 1] = { "c:" .. c[1], c[2], c[1] == caso } end end
 	local cab = { titulo = "Cómo jugar: " .. (s.nombre or ""), filtros = filtros,
 		linea1 = "Prioridad de arriba hacia abajo: haz el primero que puedas. Solo salen los hechizos que ya tienes.",
-		linea2 = "Fuentes: " .. ((d.fuentes and d.fuentes[1] and d.fuentes[1][1]) or "—") .. (d.fuentes and #d.fuentes > 1 and (" y " .. (#d.fuentes - 1) .. " más") or "") .. ". Forever cambió algunos hechizos: si algo no cuadra, dilo.",
+		linea2 = "Fuentes: " .. ((d.fuentes and d.fuentes[1] and d.fuentes[1][1]) or "—") .. (d.fuentes and #d.fuentes > 1 and (" y " .. (#d.fuentes - 1) .. " más") or "") .. ".",
 		alFiltro = function(k)
 			local a, b = k:match("^(%a):(.+)$")
 			if a == "s" then verSpec = b elseif a == "c" then verCaso = b end
@@ -37,10 +37,13 @@ function M.FilasJugar()
 	for i, p in ipairs(c and c.pasos or {}) do
 		local sabe = M.Conoce(p.h)
 		local tecla = sabe and R.Tecla(p.h)
+		local acc
+		if sabe and not tecla then acc = { { "Abrir libro de hechizos", M.AbrirLibro } }
+		elseif not sabe then acc = { { "Buscar instructor", M.BuscarInstructor } } end
 		out[#out + 1] = { tipo = tostring(i) .. "." .. (sabe and "" or "\naún no"), titulo = icono(p.h) .. M.Texto(p.cuando),
-			detalle = sabe and (tecla and ("Tecla: " .. tecla) or "No está en tus barras: arrástralo desde el libro de hechizos.")
-				or (M.NombreHechizo(p.h) .. ": todavía no lo tienes (lo aprendes con tu instructor o con talentos)."),
-		}
+			detalle = sabe and (tecla and ("Tecla: " .. tecla) or "No está en tus barras: arrástralo desde el libro de hechizos a una barra.")
+				or (M.NombreHechizo(p.h) .. ": todavía no lo tienes. Se aprende con tu instructor de clase al nivel que pide, o con talentos."),
+			acciones = acc }
 	end
 	if c and c.nota and c.nota ~= "" then out[#out + 1] = { tipo = "Ojo", titulo = M.Texto(c.nota) } end
 	if M.Clase() == "DRUID" then
@@ -108,7 +111,7 @@ end
 
 local function dibujarModo(p, ancho)
 	local d = db()
-	local y = titulo(p, "Modo de pelea", "El modo cambia solo: en grupo o mazmorra, Mazmorra; contra un jugador o en campo de batalla, JcJ; con 3 o más enemigos, Varios. También se cambia con un clic sobre el recuadro de la sugerencia.")
+	local y = titulo(p, "Modo de pelea", "El modo cambia solo: en grupo o mazmorra, Mazmorra; contra un jugador o en campo de batalla, Contra jugadores; con 3 o más enemigos, Varios. También se cambia con un clic en el rótulo de arriba del recuadro de la sugerencia.")
 	local modos = { { value = "auto", text = "Automático" } }
 	for _, m in ipairs(R.MODOS) do modos[#modos + 1] = { value = m[1], text = m[2] } end
 	local specs = { { value = "auto", text = "Automática (tus talentos y tu forma)" } }
@@ -116,7 +119,7 @@ local function dibujarModo(p, ancho)
 	local function I(et, ay, k) return P.Interruptor(p, et, ay, function() return d[k] end, function(v) d[k] = v; M.Cambio() end) end
 	colocar(p, {
 		P.Desplegable(p, "Modo", nil, modos, function() return d.modo end, function(v) d.modo = v; M.Cambio() end),
-		P.Desplegable(p, "Rol", "Sanar muestra los marcos de curación; tanque y daño, la amenaza. Druida: cambia solo con la forma.",
+		P.Desplegable(p, "Rol", "Daño: matar. Tanque: recibir los golpes y cuidar al grupo. Sanar: curar. Sanar muestra los marcos de curación; tanque y daño, la amenaza. Druida: cambia solo con la forma.",
 			{ { value = "auto", text = "Automático" }, { value = "daño", text = "Daño" }, { value = "tanque", text = "Tanque" }, { value = "sanar", text = "Sanar" } },
 			function() return d.rol end, function(v) d.rol = v; M.Cambio() end),
 		P.Desplegable(p, "Especialización", nil, specs, function() return d.spec or "auto" end, function(v) d.spec = (v ~= "auto") and v or nil; M.Cambio() end),
@@ -130,10 +133,13 @@ local function dibujarAvisos(p, ancho)
 	local y = titulo(p, "Avisos y barras de combate", "Todo se mueve arrastrándolo y vuelve a su lugar con «Restablecer posiciones» en Ajustes › Mamba › Ventanas.")
 	local function I(et, ay, k) return P.Interruptor(p, et, ay, function() return d[k] end, function(v) d[k] = v; M.Cambio() end) end
 	colocar(p, {
-		I("Avisos en pantalla", "Te controlaron (y qué usar para salir), un enemigo usó un control, maná bajo, amenaza alta.", "avisos"),
-		I("Con sonido", nil, "sonido"),
+		I("Avisos en pantalla", "Te controlaron (y qué usar para salir, si tu clase tiene algo), un enemigo usó un control, maná bajo, amenaza alta.", "avisos"),
+		I("Sonido cuando te controlan", nil, "sonido"),
+		I("Sonido en todos los avisos", nil, "sonidoTodos"),
+		I("Aviso de amenaza alta", nil, "avisoAmenazaSi"),
+		I("Aviso de maná bajo", nil, "avisoManaSi"),
 		I("Temporizador del disparo y del golpe", "Cazador: la barra se pone roja el último medio segundo; ahí no te muevas.", "disparo"),
-		I("Barra de lanzamiento con latencia y enfriamiento global", nil, "lanzamiento"),
+		I("Barra de lanzamiento", "Con tu retraso de conexión en rojo al final y la espera entre hechizos debajo.", "lanzamiento"),
 		I("Números de enfriamiento en los botones", "La opción del juego; la respetan las barras de Mamba.", "numerosCD"),
 		I("Amenaza del grupo", "Solo en grupo.", "amenaza"),
 		I("Placas de nombre de Mamba", "Color por amenaza, élite o raro, y lanzamientos interrumpibles.", "placas"),
@@ -173,7 +179,7 @@ reg:SetScript("OnEvent", function()
 		clave = "combate", titulo = "Combate", orden = 4,
 		items = function()
 			return { { key = "jugar", label = "Cómo jugar", icon = "record" }, { key = "modo", label = "Modo de pelea", icon = "icon-level" },
-				{ key = "medidor", label = "Medidor", icon = "icon-level" }, { key = "builds", label = "Dos builds", icon = "record" },
+				{ key = "medidor", label = "Medidor", icon = "icon-level" }, { key = "builds", label = "Dos formas de jugar", icon = "record" },
 				{ key = "avisos", label = "Avisos y barras", icon = "compact" } }
 		end,
 		activo = function() return sub end,

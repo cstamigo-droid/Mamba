@@ -54,13 +54,13 @@ local function filasTuyas()
 		if s and s.nav then acc[#acc + 1] = { "Llévame", function() api().Navigate(e.skillLineID, 1) end } end
 		acc[#acc + 1] = { "Lista de compra", function() profElegida = e.skillLineID; ir("compra") end }
 		acc[#acc + 1] = { "Abrir recetas", function() api().OpenRecipes(e.skillLineID) end }
-		out[#out + 1] = { tipo = M.Lista.Estrellas(costoMin and puntos / math.max(1, costoMin) * 2 or nil) .. "\n" .. e.name,
+		out[#out + 1] = { tipo = M.Lista.Estrellas(costoMin and puntos / math.max(1, costoMin) or nil) .. "\n" .. e.name,
 			titulo = ("%s %d de %d · te faltan %d puntos para %s"):format(e.name, e.rank or 0, e.maxRank or 0, puntos, e.title or "el tope"),
-			detalle = "Ahora: " .. det, conf = conf, acciones = acc, orden = costoMin and puntos / math.max(1, costoMin) or 0 }
+			detalle = "Ahora: " .. det .. (costoMin and ("\n≈ " .. M.Minutos(costoMin) .. " de esfuerzo · lo haces solo") or ""), conf = conf, acciones = acc, orden = costoMin and puntos / math.max(1, costoMin) or 0 }
 	end
 	table.sort(out, function(a, b) return a.orden > b.orden end)
 	return out, { titulo = "Tus profesiones", linea1 = "El camino más barato de cada una (SkillUp Forever) con lo que cuesta en oro y en tiempo.",
-		linea2 = "«Conviene mucho» = muchos puntos de habilidad por minuto de esfuerzo." }
+		linea2 = "Van primero las que dan más puntos de habilidad por minuto de esfuerzo (el oro cuenta como el tiempo que te cuesta juntarlo). Todo se hace solo." }
 end
 
 local function filasCompra()
@@ -71,7 +71,7 @@ local function filasCompra()
 	local filtros = {}
 	for _, e in ipairs(lista) do filtros[#filtros + 1] = { "p" .. e.skillLineID, e.name, e.skillLineID == profElegida } end
 	filtros[#filtros + 1] = { "todo", "Todo", filtro == "todo" }
-	filtros[#filtros + 1] = { "15", "Tengo 15 min", filtro == "15" }
+	for _, m in ipairs({ 15, 30, 60 }) do filtros[#filtros + 1] = { tostring(m), "Tengo " .. m .. " min", filtro == tostring(m) } end
 	local cab = { titulo = "Lista de compra y farmeo", filtros = filtros,
 		alFiltro = function(k)
 			local n = tonumber((k or ""):match("^p(%d+)$"))
@@ -85,13 +85,14 @@ local function filasCompra()
 	cab.linea2 = "Mamba elige por oro + tiempo: " .. valorTexto(lc) .. ". Cuenta lo que tienes en bolsas, banco y otros personajes."
 	local out = {}
 	for _, f in ipairs(lc) do
-		if f.falta > 0 and (filtro ~= "15" or (f.elige == "comprar") or (f.farmear and f.farmear.minutos <= 15)) then
+		local tope = tonumber(filtro)
+		if f.falta > 0 and (not tope or (f.elige == "comprar") or (f.farmear and f.farmear.minutos + (f.farmear.viaje or 0) <= tope)) then
 			local partes = {}
 			if f.comprar then
 				partes[#partes + 1] = ("Comprar: %d × %s = %s%s"):format(f.falta, M.Dinero(f.comprar.unidad), M.Dinero(f.comprar.total),
 					f.comprar.de == "vendedor" and " (vendedor)" or " (subasta)")
 			else
-				partes[#partes + 1] = "Comprar: sin precio aún (escanea la subasta)"
+				partes[#partes + 1] = "Comprar: sin precio aún. Abre la subasta y pulsa Escanear."
 			end
 			local fa = f.farmear
 			if fa then
@@ -101,7 +102,7 @@ local function filasCompra()
 					M.Zona(fo.mapa), como, tostring(fo.pct), fo.medido and "" or "≈ ", math.floor(fo.porHora + 0.5))
 				if fa.viaje then partes[#partes] = partes[#partes] .. " · viaje " .. M.Minutos(fa.viaje) end
 			else
-				partes[#partes + 1] = "Farmear: sin un lugar a tu alcance"
+				partes[#partes + 1] = "Farmear: no hay un lugar a tu alcance (te falta la profesión de recolección o el nivel): cómpralo o pídelo a otro jugador."
 			end
 			local elige = f.elige == "comprar" and "COMPRAR" or (f.elige == "farmear" and "FARMEAR" or "sin datos aún")
 			local acc = {}
@@ -109,7 +110,7 @@ local function filasCompra()
 				M.Medir.Empezar(f.id, fa.forma.mapa)
 				M.Llevame(fa.forma.mapa, fa.forma.x, fa.forma.y, M.NombreObjeto(f.id))
 			end } end
-			if f.comprar then acc[#acc + 1] = { "Ir a la subasta", abrirSubasta } end
+			acc[#acc + 1] = { "Ir a la subasta", abrirSubasta }
 			if fa and fa.forma.tipo == "nodo" and _G.MambaMapa then acc[#acc + 1] = { "Ver ruta", function() _G.MambaMapa.MostrarRuta(fa.forma.mapa, f.id) end } end
 			out[#out + 1] = { tipo = elige, titulo = ("%s: te faltan %d (tienes %d de %d)"):format(f.nombre, f.falta, f.tiene or 0, f.necesita or 0),
 				detalle = table.concat(partes, "\n"),
@@ -175,7 +176,7 @@ local function filasFarmeo()
 		local sig = lugares[i + 1]
 		local quien = (l.nombre ~= "" and (l.nombre .. " (nivel " .. l.nivel[1] .. "-" .. l.nivel[2] .. ")")) or "los nodos de la zona"
 		out[#out + 1] = { tipo = i == 1 and "MEJOR" or ("#" .. i), titulo = M.Zona(l.mapa) .. ": " .. quien,
-			detalle = ("%s%d de %s por hora · %s"):format(l.medido and "" or "≈ ", math.floor(l.porHora + 0.5), M.NombreObjeto(l.item),
+			detalle = ("%s%d de %s por hora · %s · lo haces solo"):format(l.medido and "" or "≈ ", math.floor(l.porHora + 0.5), M.NombreObjeto(l.item),
 				l.oroHora and ((l.medido and "" or "≈ ") .. M.Dinero(l.oroHora) .. " por hora") or "sin precio aún"),
 			conf = (i == 1 and sig and sig.oroHora and l.oroHora) and ("La siguiente: " .. M.Zona(sig.mapa) .. ", ≈ " .. M.Dinero(sig.oroHora) .. " por hora") or nil,
 			acciones = {
@@ -206,7 +207,7 @@ function M.Recomendaciones(filtro)
 			local primero
 			for _, f in ipairs(lc) do if f.falta > 0 and f.farmear and f.elige == "farmear" then primero = f; break end end
 			local costoMin = minutos + t.mixtoOro / math.max(1, lc.valorHora) * 60
-			local razon = puntos / math.max(1, costoMin) * 2
+			local razon = puntos / math.max(1, costoMin)
 			local r = { texto = ("Sube %s de %d a %d"):format(e.name, e.rank or 0, e.maxRank or 0),
 				como = s and (s.text .. (s.detail and (" · " .. s.detail) or "")) or "Abre tus recetas",
 				impacto = ("+%d puntos de %s"):format(puntos, e.name), puntos = puntos, minutos = minutos, oro = t.mixtoOro,
@@ -216,7 +217,8 @@ function M.Recomendaciones(filtro)
 					M.Llevame(primero.farmear.forma.mapa, primero.farmear.forma.x, primero.farmear.forma.y, primero.nombre)
 				end or (s and s.nav and function() api().Navigate(e.skillLineID, 1) end) or nil,
 				abrir = function() profElegida = e.skillLineID; M.Abrir("compra") end }
-			if (not filtro.minutos or minutos <= filtro.minutos) then out[#out + 1] = r end
+			-- todo lo de profesiones se hace solo: el filtro "con grupo" no deja nada
+			if (not filtro.minutos or minutos <= filtro.minutos) and not filtro.grupo then out[#out + 1] = r end
 		end
 	end
 	table.sort(out, function(a, b) return a.razon > b.razon end)
