@@ -64,19 +64,39 @@ local function tenirMarca(f, clara)
 end
 
 -- Dónde está cada pieza del encabezado, en coordenadas de la barra lateral (x a la derecha, y hacia abajo).
+-- Primero con la posición REAL en pantalla (GetLeft/GetTop de cada pieza contra la barra): así no importa a
+-- qué marco esté anclada cada una. Si la ventana todavía no tiene posición, con las anclas de W.Shell.
+local function enPantalla(side, r)
+	local sl, st, l, t = side:GetLeft(), side:GetTop(), r:GetLeft(), r:GetTop()
+	if not (sl and st and l and t) then return nil end
+	if sl == 0 and st == 0 and l == 0 and t == 0 then return nil end -- aún sin posición
+	return l - sl, st - t
+end
+
 function S.Geometria(f)
-	local wm, tag, marca = rawget(f, "Wordmark"), rawget(f, "Tagline"), rawget(f, "MambaMarca")
-	if not (wm and tag and marca) then return nil end
-	local _, _, _, wx, wy = wm:GetPoint(1)
-	local _, _, _, tx, ty = tag:GetPoint(1)
-	if not (wx and tx) then return nil end
+	local side, wm, tag, marca = rawget(f, "Sidebar"), rawget(f, "Wordmark"), rawget(f, "Tagline"), rawget(f, "MambaMarca")
+	if not (side and wm and tag and marca) then return nil end
 	local _, tam = marca:GetFont()
-	local g = {
-		ink = { l = wx + INK_L, r = wx + INK_R, t = -wy + INK_T, b = -wy + INK_B },
-		tag = { l = tx, t = -ty, r = tx + (tag:GetStringWidth() or 120) },
-		mamba = { l = tx, t = -ty + 16, r = tx + (marca:GetStringWidth() or 40), h = tam or 12 },
+	tam = tam or 12
+	local tw, mw = tag:GetStringWidth() or 120, marca:GetStringWidth() or 40
+	local wx, wy = enPantalla(side, wm)
+	local tx, ty = enPantalla(side, tag)
+	local mx, my = enPantalla(side, marca)
+	local fuente = "pantalla"
+	if not (wx and tx and mx) then
+		fuente = "anclas"
+		local _, _, _, ax, ay = wm:GetPoint(1)
+		local _, _, _, bx, by = tag:GetPoint(1)
+		if not (ax and bx) then return nil end
+		wx, wy, tx, ty = ax, -ay, bx, -by
+		mx, my = tx, ty + 16
+	end
+	return {
+		fuente = fuente,
+		ink = { l = wx + INK_L, r = wx + INK_R, t = wy + INK_T, b = wy + INK_B },
+		tag = { l = tx, t = ty, r = tx + tw },
+		mamba = { l = mx, t = my, r = mx + mw, h = tam },
 	}
-	return g
 end
 
 -- La huella: un contorno redondeado alrededor de POLESTAR (sube por la derecha, cruza arriba, baja por la
@@ -206,9 +226,37 @@ do
 end
 S.DISCOS = DISCOS
 
+-- Diagnóstico para leer fuera del juego (AsistenteDB.diag.serpiente): si se montó, por qué no, la geometría,
+-- si cargaron las texturas, si gira, cuántos cuadros dibujó, la última pose y el primer error. La coordinadora
+-- (18-11) la abrió en el juego y no la vio: con esto se sabe en qué paso se cae.
+local function D()
+	if type(AsistenteDB) ~= "table" then return S.diagTemp or {} end
+	AsistenteDB.diag = AsistenteDB.diag or {}
+	local d = AsistenteDB.diag.serpiente
+	if type(d) ~= "table" or d.sesion ~= S.sesion then
+		d = { sesion = S.sesion, intentos = 0, cuadros = 0, texturas = {} }
+		AsistenteDB.diag.serpiente = d
+	end
+	return d
+end
+S.Diag = D
+S.sesion = (time and time()) or 0
+
+local function anotarError(donde, err)
+	local d = D()
+	d.errores = (d.errores or 0) + 1
+	if not d.error then
+		d.error = donde .. ": " .. tostring(err)
+		if geterrorhandler then geterrorhandler()(err) end -- una vez, para /errores
+	end
+end
+
+local gira = true -- SetRotation; apagado para siempre si falla (como Polestar, Maps/RouteLines.lua)
+
 local function textura(host, archivo, capa, sub)
 	local t = host:CreateTexture(nil, capa, nil, sub)
-	t:SetTexture(MEDIA .. archivo)
+	local ok = t:SetTexture(MEDIA .. archivo)
+	D().texturas[archivo] = ok ~= false and (t.GetTexture and t:GetTexture() ~= nil) or false
 	if t.SetSnapToPixelGrid then t:SetSnapToPixelGrid(false) end -- se mueve en fracciones de píxel sin temblar
 	if t.SetTexelSnappingBias then t:SetTexelSnappingBias(0) end
 	return t
@@ -219,7 +267,10 @@ local function colocar(t, host, x, y, tam, ang)
 	t:SetPoint("CENTER", host, "TOPLEFT", x, -y)
 	t:SetSize(tam, tam)
 	-- SetRotation gira en sentido antihorario con y hacia arriba: el ángulo de la huella va con y hacia abajo
-	if t.SetRotation then t:SetRotation(-ang) end
+	if gira and t.SetRotation and not pcall(t.SetRotation, t, -ang) then
+		gira = false
+		D().gira = false
+	end
 end
 
 local function dibujar(s, t)
@@ -238,11 +289,24 @@ local function dibujar(s, t)
 	colocar(s.lengua, s.host, x, y, C.largoCabeza * 24 / 11, ang)
 	s.lengua:SetShown(lengua)
 	s.h = h
+	local dd = D()
+	dd.cuadros = (dd.cuadros or 0) + 1
+	if dd.cuadros % 120 == 1 then -- de vez en cuando, no en cada cuadro
+		dd.pose = { x = x, y = y, alfa = alfa, visible = s.host:IsVisible() or false,
+			alfaEfectivo = s.host.GetEffectiveAlpha and s.host:GetEffectiveAlpha() or nil,
+			escala = s.host.GetEffectiveScale and s.host:GetEffectiveScale() or nil,
+			cabezaVisible = s.cabeza:IsVisible() or false, ancho = s.host:GetWidth(), alto = s.host:GetHeight() }
+	end
 end
 
 local function rearmar(s)
 	local g = S.Geometria(s.f)
 	s.P = g and S.Camino(g) or nil
+	s.fuente = g and g.fuente
+	local d = D()
+	d.geometria = g and { fuente = g.fuente, inkL = g.ink.l, inkR = g.ink.r, inkT = g.ink.t, inkB = g.ink.b, tagR = g.tag.r,
+		mambaL = g.mamba.l, mambaR = g.mamba.r, mambaT = g.mamba.t } or "sin geometría (Wordmark/Tagline/MambaMarca o GetPoint)"
+	d.puntos = s.P and #s.P or 0
 	local clara = S.PielClara()
 	s.alfaPiel = clara and 0.85 or 1
 	tenirMarca(s.f, clara)
@@ -261,7 +325,21 @@ end
 
 -- Arma la serpiente sobre la ventana f (PolestarPicker), una sola vez.
 function S.Montar(f)
-	if not f or S.actual or not rawget(f, "Sidebar") or not rawget(f, "MambaMarca") then return S.actual end
+	if S.actual then return S.actual end
+	local d = D()
+	d.intentos = (d.intentos or 0) + 1
+	d.encendida = S.Encendida()
+	d.reducir = reducir()
+	if not f then d.motivo = "no existe PolestarPicker"; return nil end
+	if not rawget(f, "Sidebar") then d.motivo = "la ventana no tiene Sidebar"; return nil end
+	if not rawget(f, "MambaMarca") then d.motivo = "la ventana no tiene MambaMarca (falta el parche P12-encabezado)"; return nil end
+	local ok, s = pcall(S.Armar, f)
+	if not ok then d.motivo = "error al armar"; anotarError("Montar", s); return nil end
+	d.montada, d.motivo = true, nil
+	return s
+end
+
+function S.Armar(f)
 	local side = f.Sidebar
 	local host = CreateFrame("Frame", nil, side)
 	host:SetAllPoints(side)
@@ -277,9 +355,15 @@ function S.Montar(f)
 	s.lengua:Hide()
 	host:SetScript("OnShow", function() rearmar(s) end)
 	host:SetScript("OnUpdate", function(_, dt)
-		if s.pausada or reducir() then return end
+		if s.pausada or s.rota or reducir() then return end
+		-- recién abierta la ventana puede no tener posición: se vuelve a medir en pantalla apenas la tenga
+		if s.fuente ~= "pantalla" then
+			s.remedir = (s.remedir or 0) + (dt or 0)
+			if s.remedir > 0.25 then s.remedir = 0; rearmar(s) end
+		end
 		s.t = (s.t + (dt or 0)) % C.ciclo
-		dibujar(s, s.t)
+		local ok, err = pcall(dibujar, s, s.t)
+		if not ok then s.rota = true; anotarError("dibujar", err) end -- un error, no uno por cuadro
 	end)
 	S.actual = s
 	aplicar(s)
@@ -303,11 +387,20 @@ ev:SetScript("OnEvent", function(_, e)
 		return
 	end
 	local P = _G.Polestar
-	if _G.PolestarPicker then S.Montar(_G.PolestarPicker) end
-	if P and P.UI and P.UI.ShowPicker and hooksecurefunc then
-		hooksecurefunc(P.UI, "ShowPicker", function()
-			local s = S.Montar(_G.PolestarPicker)
-			if s then s.pausada = InCombatLockdown and InCombatLockdown() or false end
+	local d = D()
+	d.hook = (P and P.UI and P.UI.ShowPicker and hooksecurefunc) and true or false
+	local function probar()
+		local s = S.Montar(_G.PolestarPicker)
+		if s then s.pausada = InCombatLockdown and InCombatLockdown() or false end
+		return s
+	end
+	if _G.PolestarPicker then probar() end
+	if d.hook then hooksecurefunc(P.UI, "ShowPicker", probar) end
+	-- respaldo: si la ventana se abre por otro camino que no pasa por ShowPicker, se monta igual en cuanto existe
+	if C_Timer and C_Timer.NewTicker then
+		local tic
+		tic = C_Timer.NewTicker(1, function()
+			if S.actual or probar() then tic:Cancel() end
 		end)
 	end
 end)
