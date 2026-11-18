@@ -440,6 +440,11 @@ G.MambaAPI.Abrir("MambaServicios")
 v = textos()
 check(any("Abrir la ventana de servicios" in x for x in v), "Ciudad › Servicios tiene el botón «Abrir la ventana de servicios»")
 check(any("Abrirla sola al entrar a una ciudad" in x for x in v), "Ciudad › Servicios tiene el interruptor de abrirla sola")
+# la columna Distancia con las yardas (antes salía vacía: "x, y = a and f()" cortaba a un valor)
+L.execute("function UnitPosition() return -1280, 150, 0, 1 end")
+G.Polestar.UI.Picker.Render()
+v = textos()
+check(any(x.endswith("yardas") or x == "aquí" for x in v), f"Ciudad › Servicios: la columna Distancia muestra las yardas ({[x for x in v if 'yard' in x][:2]})")
 MED = L.eval("""function()
   local abierto = 0
   local orig = MambaAPI.AbrirServicios
