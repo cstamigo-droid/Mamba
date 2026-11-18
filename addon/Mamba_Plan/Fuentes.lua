@@ -9,6 +9,11 @@ local F = {}
 M.Fuentes = F
 
 function F.Precio(itemID)
+	local api = _G.MambaAPI
+	if api and api.PrecioObjeto and itemID then
+		local ok, p, _, edad = pcall(api.PrecioObjeto, itemID)
+		if ok and type(p) == "number" and p > 0 then return p, edad end
+	end
 	local T = _G.Tasador
 	if not (T and T.PrecioSubasta and itemID) then return nil end
 	local ok, p, dias = pcall(T.PrecioSubasta, "item:" .. itemID, itemID)
@@ -39,12 +44,29 @@ function F.PasadasPara(pct)
 end
 
 function F.Clase()
+	local api = _G.MambaAPI
+	if api and api.Clase then
+		local ok, C = pcall(api.Clase)
+		if ok and type(C) == "table" then return C end
+	end
 	local C = _G.AsistenteClase
 	if type(C) == "table" then return C end
 end
 
+-- Partes de la ventana de Mamba (Asistente/Grupos.lua): MambaAPI.Abrir(parte, pestaña).
+local PARTES = {
+	Equipo = { "MambaEquipo", "mejorar" }, Clase = { "MambaClase", "talentos" },
+	Subasta = { "MambaSubasta", "vender" }, Medidor = { "MambaMedidor" },
+}
+
 -- ¿Qué sección de otra sesión abrir? (botones "Ver en Equipo", etc.). Devuelve false si no existe.
-function F.AbrirSeccion(clave)
+function F.AbrirSeccion(clave, pestana)
+	local api = _G.MambaAPI
+	local p = PARTES[clave]
+	if api and api.Abrir and p then
+		local ok, r = pcall(api.Abrir, p[1], pestana or p[2])
+		if ok and r ~= false then return true end
+	end
 	local P = _G.Polestar
 	local UI = P and P.UI
 	if not (UI and UI.ShowPicker and UI.Picker and UI.Picker.ShowSection) then return false end
