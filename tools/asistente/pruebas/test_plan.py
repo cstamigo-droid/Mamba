@@ -173,6 +173,18 @@ for v in ["ahora", "metas", "talentos", "equipo", "profesiones", "farmeo", "bols
 check(not list(G2.ERRORES.values()), "todas las vistas sin errores: %s" % list(G2.ERRORES.values())[:3])
 check(not list(G2.MambaPlanPJ.diag.fallas.values()) if G2.MambaPlanPJ.diag.fallas else True, "sin fallas anotadas")
 
+# ---------- 8b. Corrección de Cristian (18-11): "Como juego ahora", mixto, especialización y varias metas ----------
+ahora = M.ComoJuegaAhora(M.Estado())
+check(ahora.nombre == "Equilibrio" and ahora.rol == "danio", "Hope 19/0/8: Equilibrio, daño")
+r3 = L.eval('{ rol = "sanar", rol2 = "danio", estilos = { jce = 1, jcj = 2, oro = 2 } }')
+usos = [x.uso for x in M.ProfesionesRecomendadas(M.Estado(), r3).values()]
+check("mazmorra" in usos and "jcj" in usos and "oro" in usos and usos.index("mazmorra") < usos.index("jcj"),
+      "varias metas a la vez, la principal primero: %s" % usos)
+L2.execute('MambaPlan.AbrirInicio(); local v = MambaPlanInicio; for i = 1, 4 do v.siguiente.scripts.OnClick(v.siguiente) end')
+check(G2.MambaPlanPJ.respondido and not G2.MambaPlanInicio.visible, "los 4 pasos con Siguiente/Listo guardan las respuestas")
+check(G2.MambaPlanPJ.respuestas.estilos is not None, "las metas de juego se guardan (varias)")
+check(not list(G2.ERRORES.values()), "asistente de 4 pasos sin errores: %s" % list(G2.ERRORES.values())[:2])
+
 # ---------- 9. Prueba estática ----------
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")

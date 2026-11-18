@@ -34,7 +34,7 @@ function M.MacrosSugeridas(e, max)
 	for _, m in ipairs(M.MACROS[e.clase] or {}) do
 		local sabe = true
 		for _, id in ipairs(m.usa) do if not M.Conoce(id) then sabe = false end end
-		if sabe and not existe(nombreMacro(m)) and (not m.rol or not r.rol or m.rol == r.rol) then
+		if sabe and not existe(nombreMacro(m)) and (not m.rol or not r.rol or m.rol == r.rol or m.rol == r.rol2) then
 			out[#out + 1] = m
 		end
 	end

@@ -192,8 +192,12 @@ function M.ProfesionesRecomendadas(e, r)
 	local fuentes = M.FUENTES_PROF or {}
 	local usos = {}
 	if e.nivel < 60 then usos[#usos + 1] = "subir" end
-	local u = M.USO_DE_ESTILO[r and r.estilo or ""] or "mazmorra"
-	usos[#usos + 1] = u
+	-- todas las que eligió, la principal primero (Cristian, 18-11: "juego para mazmorrear, jcj y oro")
+	local elegidos = {}
+	for k, prio in pairs(r and r.estilos or {}) do elegidos[#elegidos + 1] = { k, prio } end
+	table.sort(elegidos, function(x, y) if x[2] ~= y[2] then return x[2] < y[2] end return x[1] < y[1] end)
+	if #elegidos == 0 then elegidos[1] = { r and r.estilo or "jce", 1 } end
+	for _, x in ipairs(elegidos) do usos[#usos + 1] = M.USO_DE_ESTILO[x[1]] or "mazmorra" end
 	local out, visto = {}, {}
 	local function agregar(par, porque, fts, uso)
 		local clave = table.concat(par, " + ")

@@ -221,7 +221,14 @@ local function cabecera(e, r)
 	for _, p in ipairs(e.profesiones) do profs[#profs + 1] = p.nombre .. " " .. p.rango .. "/" .. p.max end
 	cab.numeros:SetText(("Oro %s   ·   Bolsas: %d libres de %d   ·   %s"):format(M.Dinero(e.oro), e.bolsas.libres, e.bolsas.total,
 		#profs > 0 and table.concat(profs, " · ") or "sin profesiones"))
-	cab.respuestas:SetText(r.rol and (("Elegiste: %s · %s"):format(roles[r.rol] or r.rol, estilos[r.estilo] or "")) or "Todavía no respondiste las preguntas de inicio.")
+	local es = {}
+	for _, k in ipairs({ "jce", "jcj", "oro" }) do
+		local prio = r.estilos and r.estilos[k]
+		if prio then es[#es + 1] = estilos[k] .. (prio == 2 and " (de segundo)" or "") end
+	end
+	if #es == 0 and r.estilo then es[1] = estilos[r.estilo] end
+	cab.respuestas:SetText(r.rol and (("Elegiste: %s%s%s · %s"):format(roles[r.rol] or r.rol, r.rol2 and (" + " .. (roles[r.rol2] or r.rol2)) or "",
+		r.spec and (" (" .. r.spec .. ")") or "", table.concat(es, ", "))) or "Todavía no respondiste las preguntas de inicio.")
 end
 
 function M.Refrescar()
