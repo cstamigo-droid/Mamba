@@ -253,14 +253,20 @@ G = L.globals()
 L.execute('Fire("PLAYER_LOGIN")')
 check(G.MambaBarrasPJ.version == 2 and G.MambaBarrasPJ.copiadoDe == "instalación" and M.Config(1).punto == "BOTTOM", "v1 sin copia: copia una vez")
 check(G.MambaBarrasPJ.anterior is not None and G.MambaBarrasPJ.anterior[1].x == 736, "lo de antes queda para Deshacer")
-L, M = nuevo('MambaBarrasPJ = { version = 2, barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
+check(L.eval("function(M) return M.avisoCopia end")(M) is True, "avisa en el chat que copió (y cómo deshacer)")
+L, M = nuevo('MambaBarrasPJ = { version = 2, copiadoDe = "instalación", barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
 G = L.globals()
 L.execute('Fire("PLAYER_LOGIN")')
-check(M.Config(1).x == 736 and G.MambaBarrasPJ.copiadoDe is None, "v2: no vuelve a pisar lo del jugador")
+check(M.Config(1).x == 736, "ya copiado: no vuelve a pisar lo del jugador")
 L, M = nuevo('MambaBarrasPJ = { version = 1, barras = {} }', con_copia=False)
 G = L.globals()
 L.execute('Fire("PLAYER_LOGIN")')
-check(G.MambaBarrasPJ.version == 2 and G.MambaBarrasPJ.anterior is None, "v1 sin copia disponible: queda igual")
+check(G.MambaBarrasPJ.anterior is None and G.MambaBarrasPJ.copiadoDe is None, "sin copia disponible: queda igual")
+# revisión wow-addon-lua (tanda 3): sin copia NO se gasta la oportunidad; cuando llega la copia, se copia
+L, M = nuevo('MambaBarrasPJ = { version = 2, barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MambaBarrasPJ.copiadoDe == "instalación" and G.MambaBarrasPJ.anterior[1].x == 736, "entró antes sin copia: copia cuando aparece")
 
 # ---------- 10. Prueba estática: nada decide ni lanza por el jugador ----------
 PROHIBIDO = re.compile(r"\b(CastSpell\w*|UseAction|RunMacroText|TargetUnit|CastShapeshiftForm|SpellStopCasting|"

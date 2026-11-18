@@ -123,20 +123,26 @@ function M.Config(id)
 end
 
 -- Primera vez de este personaje: si hay copia de Bartender, se usa; si no, el lugar por defecto.
--- Versión 2 (K99, 18-11): si la primera vez no había copia (la instalación todavía no la traía), se copia UNA
--- vez cuando aparece; lo de antes queda para «Deshacer».
+-- K99 (18-11): si al entrar no había copia (la instalación todavía no la traía), se vuelve a mirar en cada
+-- entrada hasta que aparezca, y se copia UNA sola vez; lo de antes queda para «Deshacer» y se avisa.
 local function primeraVez()
 	local p = pj()
-	if p.version and (p.version >= 2 or p.copiadoDe) then return end
-	local antes = p.version and p.barras
-	p.version = 2
+	if p.copiadoDe then return end
 	local perfil, origen = M.CopiaBartender()
-	if antes and perfil then p.anterior = antes end
 	local conv = perfil and M.DeBartender(perfil)
-	if conv then
-		p.barras = conv
-		p.copiadoDe = origen
-		M.Anotar("copiaBartender", origen)
+	local yaEntro = p.version ~= nil
+	p.version = 2
+	if not conv then return end -- sin copia todavía: se vuelve a intentar la próxima vez
+	if yaEntro and p.barras then p.anterior = p.barras end
+	p.barras = conv
+	p.copiadoDe = origen
+	M.Anotar("copiaBartender", origen)
+	if yaEntro then
+		M.avisoCopia = true
+		local chat = _G.DEFAULT_CHAT_FRAME
+		if chat and chat.AddMessage then
+			chat:AddMessage("Mamba: copié tus barras de Bartender. Si preferías como estaban, en Mamba › Interfaz › Barras aprieta «Deshacer».")
+		end
 	end
 end
 
