@@ -195,7 +195,7 @@ local function pasoRol(cuerpo, ancho, e)
 	if ahora then
 		local f = tarjeta(cuerpo, ancho, "Como juego ahora: " .. ahora.nombre,
 			"Lo leí de tus talentos: " .. ROL[ahora.rol][1]:lower() .. (ahora.rol2 and (" y " .. ROL[ahora.rol2][1]:lower()) or "") .. ".",
-			borrador.modoRol == "ahora", function() borrador.spec = ahora.nombre; fijar(ahora.rol, ahora.rol2, "ahora") end)
+			borrador.modoRol == "ahora", function() borrador.spec, borrador.arbol = ahora.nombre, ahora.arbol; fijar(ahora.rol, ahora.rol2, "ahora") end)
 		f:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", 0, -y); y = y + 50
 	end
 	for _, r in ipairs(roles) do
@@ -242,10 +242,11 @@ local function pasoRol(cuerpo, ancho, e)
 	t:SetText("Especialización:")
 	filas[#filas + 1] = t
 	local x = 110
-	for _, ar in ipairs(e.talentos or {}) do
+	for ia, ar in ipairs(e.talentos or {}) do
 		if ar.nombre and ar.nombre ~= "" then
 			local b = P.Boton(cuerpo, ar.nombre .. (borrador.spec == ar.nombre and "  ✓" or ""), function()
 				borrador.spec = (borrador.spec ~= ar.nombre) and ar.nombre or nil
+				borrador.arbol = borrador.spec and ia or nil
 				dibujar()
 			end, borrador.spec == ar.nombre)
 			b:SetPoint("TOPLEFT", cuerpo, "TOPLEFT", x, -y)
@@ -432,7 +433,7 @@ function M.AbrirInicio()
 	if not borrador.rol then
 		local ahora = M.ComoJuegaAhora(M.Estado())
 		if ahora then
-			borrador.rol, borrador.rol2, borrador.modoRol, borrador.spec = ahora.rol, ahora.rol2, "ahora", ahora.nombre
+			borrador.rol, borrador.rol2, borrador.modoRol, borrador.spec, borrador.arbol = ahora.rol, ahora.rol2, "ahora", ahora.nombre, ahora.arbol
 		end
 	end
 	pagina = 1
