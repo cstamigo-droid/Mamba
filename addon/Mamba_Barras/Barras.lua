@@ -286,6 +286,11 @@ function M.Disponer(id)
 	M.Rejillar(h, h.botones, c)
 	M.Colocar(h, c)
 	verBarra(h, c)
+	-- para revisar desde el computador dónde quedó cada barra (sin pedir capturas)
+	local d = db().diag
+	d.lugares = d.lugares or {}
+	d.lugares[tostring(id)] = { punto = c.punto, x = c.x, y = c.y, escala = c.escala, mostrar = c.mostrar,
+		izq = h.GetLeft and h:GetLeft(), abajo = h.GetBottom and h:GetBottom(), ancho = h.GetWidth and h:GetWidth() }
 	if M.AlDisponer then M.AlDisponer(id) end
 end
 
@@ -311,9 +316,13 @@ function M.MostrarVacios(si)
 end
 
 ---------------------------------------------------------------- esconder las barras del juego
+-- Medido en el juego el 18-11: con solo SetParent la barra principal del juego seguía a la vista. El Modo de
+-- edición del cliente nuevo reemplaza Hide() en sus barras: hay que esconderla con su Hide original (HideBase),
+-- y quitarle los eventos que la vuelven a mostrar al entrar y salir de combate o al arrastrar un hechizo.
 local function esconderMarco(f, eventos)
 	if not f then return end
 	if eventos and f.UnregisterAllEvents then f:UnregisterAllEvents() end
+	if f.HideBase then pcall(f.HideBase, f) elseif f.Hide then pcall(f.Hide, f) end
 	f:SetParent(oculto)
 end
 local function esconderBoton(b)
@@ -334,6 +343,13 @@ function M.EsconderJuego()
 	esconderMarco(_G.MainMenuBar, false)     -- cliente viejo
 	vistos.MainActionBar = _G.MainActionBar ~= nil
 	vistos.MainMenuBar = _G.MainMenuBar ~= nil
+	for _, barra in ipairs({ _G.MainMenuBar, _G.MainActionBar }) do
+		if barra and barra.UnregisterEvent then
+			for _, e in ipairs({ "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "ACTIONBAR_SHOWGRID", "ACTIONBAR_HIDEGRID" }) do
+				pcall(barra.UnregisterEvent, barra, e)
+			end
+		end
+	end
 	for _, n in ipairs(M.MARCOS_JUEGO) do
 		vistos[n] = _G[n] ~= nil
 		esconderMarco(_G[n], true)

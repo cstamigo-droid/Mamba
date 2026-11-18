@@ -11,6 +11,7 @@ AQUI = pathlib.Path(__file__).parent
 D = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI.parent.parent.parent / "addon" / "Mamba_Barras"
 toc = (D / "Mamba_Barras.toc").read_text(encoding="utf-8")
 ARCHIVOS = [l.strip() for l in toc.splitlines() if l.strip().endswith(".lua") and not l.startswith("libs")]
+ARCHIVOS = [a for a in ARCHIVOS if a != "Teclas_cortas.lua"]
 
 ok = fail = 0
 
@@ -250,5 +251,15 @@ check(not list(G.ERRORES.values()), "build/render sin errores: %s" % list(G.ERRO
 M.AbrirOpciones(5)
 check(G.ABIERTO and G.SECCION_VISTA == "MambaInterfaz", "abrir opciones lleva a la sección del hub")
 
+# ---------- 12. Defectos vistos en el juego el 18-11 ----------
+L, M = nuevo('CreateFrame("Frame", "MainActionBar", UIParent); MainActionBar.HideBase = function(self) self.escondidaBase = true end')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MainActionBar.escondidaBase is True, "la barra principal del juego se esconde con su Hide original (HideBase)")
+K = LuaRuntime(unpack_returned_tuples=True)
+K.execute((AQUI / "mock_barras.lua").read_text(encoding="utf-8"))
+K.execute((D / "Teclas_cortas.lua").read_text(encoding="utf-8"))
+kb = K.eval('LibStub("LibKeyBound-1.0")')
+check(kb.ToShortKey(kb, "CTRL-1") == "c1" and kb.ToShortKey(kb, "SHIFT-MOUSEWHEELUP") == "sRuA" and kb.ToShortKey(kb, "Q") == "Q", "teclas cortas")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)

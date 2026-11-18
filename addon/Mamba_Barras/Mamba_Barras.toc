@@ -12,6 +12,7 @@
 ## Category-esES: Mamba
 
 libs\LibStub\LibStub.lua
+Teclas_cortas.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibButtonGlow-1.0\LibButtonGlow-1.0.lua
 libs\LibActionButton-1.0\LibActionButton-1.0.lua
