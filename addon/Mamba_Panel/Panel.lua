@@ -179,6 +179,23 @@ local function fila(GF, i)
 	return r
 end
 
+---------------------------------------------------------------- alto de un texto
+-- En el juego, GetStringHeight puede quedar en una línea cuando el texto ya se partió en dos (se mide antes de
+-- que el texto se acomode): las filas se montaban entre sí y con lo de Polestar de abajo (captura de Entrañas,
+-- 18-11). El alto sale del ancho del texto, que no depende del acomodo, y se toma el mayor de los dos; además se
+-- fija en el texto, que así nunca se sale de su caja.
+local function alto(fs, ancho, maxl)
+	local lh = (fs.GetLineHeight and fs:GetLineHeight()) or 12
+	local uw = (fs.GetUnboundedStringWidth and fs:GetUnboundedStringWidth()) or fs:GetStringWidth() or 0
+	local txt = fs:GetText()
+	if not txt or txt == "" then fs:SetHeight(lh); return 0 end
+	local n = max(1, min(maxl, math.ceil(uw * 1.1 / max(1, ancho))))
+	local h = max(n * lh + (n - 1) * 2, min(fs:GetStringHeight() or 0, maxl * lh + (maxl - 1) * 2))
+	fs:SetHeight(h)
+	return h
+end
+N.AltoTexto = alto
+
 ---------------------------------------------------------------- el gancho de Polestar (parche P9)
 -- Polestar lo llama en cada acomodo de la ventana viva. Solo mide y ancla: los textos ya vienen armados.
 local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
@@ -221,8 +238,9 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 		r.Text:SetWidth(tw)
 		r.Sub:SetWidth(tw)
 		local inset = max(0, (UP_ROW - r.Text:GetLineHeight()) / 2)
-		local h = max(UP_ROW, floor(inset * 2 + r.Text:GetStringHeight() + 2 + r.Sub:GetStringHeight() + 0.5))
-		if abajo then h = h + 18 end
+		local hT, hS = alto(r.Text, tw, 2), alto(r.Sub, tw, 2)
+		local h = max(UP_ROW, floor(inset * 2 + hT + (hS > 0 and (2 + hS) or 0) + 0.5))
+		if abajo then h = h + 20 end
 		r.Icon:ClearAllPoints()
 		r.Icon:SetPoint("LEFT", r, "TOPLEFT", TEXT_X - 2, -UP_ROW / 2)
 		r.Text:ClearAllPoints()

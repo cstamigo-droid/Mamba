@@ -391,3 +391,33 @@ test('botones: miden su texto (nunca "Llévam"); en un panel angosto bajan a su 
 	assert.equal(out.angosto.abajo, true, 'en un panel angosto el botón baja');
 	assert.equal(out.angosto.ancla, 'TOPLEFT');
 });
+
+test('alto de las filas: con una medida vieja de una línea (como en el juego), las filas no se montan', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local _, _, filas = N._Piezas()
+		-- la medida vieja del cliente: una sola línea aunque el texto se parta
+		for _, r in ipairs(filas) do
+			r.Text.GetStringHeight = function(self) return self:GetLineHeight() end
+			r.Sub.GetStringHeight = function(self) return self:GetLineHeight() end
+		end
+		local cont = N.LayoutLineas(GF, GF.parts.body, 300, true, 14, 39, 24, 30)
+		local res, suma = {}, 30 + 6
+		for i, r in ipairs(filas) do
+			if r:IsShown() then
+				local _, _, _, _, y = r:GetPoint(1)
+				local unidades = math.ceil(r.Sub:GetUnboundedStringWidth() * 1.1 / r.Sub:GetWidth())
+				res[#res + 1] = { y = y, h = r:GetHeight(), sub = r.Sub:GetHeight(), lineas = math.min(2, unidades), lh = r.Sub:GetLineHeight() }
+				suma = suma + r:GetHeight()
+			end
+		end
+		emit({ filas = res, alto = cont:GetHeight(), suma = suma })`);
+	const f = out.filas;
+	assert.ok(f.length >= 2);
+	for (let i = 0; i < f.length; i++) {
+		assert.ok(f[i].sub >= f[i].lineas * f[i].lh, `fila ${i + 1}: el cómo tiene alto para sus ${f[i].lineas} líneas`);
+		if (i + 1 < f.length) assert.ok(f[i].y - f[i].h >= f[i + 1].y - 0.01, `fila ${i + 1} no pisa a la siguiente`);
+	}
+	assert.ok(out.alto >= out.suma - 0.01, 'la parte de Mamba mide lo que miden sus filas: no pisa lo de Polestar de abajo');
+});
