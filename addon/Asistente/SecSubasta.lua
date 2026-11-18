@@ -393,6 +393,11 @@ ev:SetScript("OnEvent", function(_, e, boton)
 					local ok, x = pcall(MP.MaterialDelPlan, id)
 					vital = ok and type(x) == "table" and x.clase == "vital"
 				end
+				local MPr = _G.MambaProfesiones
+				if not vital and type(MPr) == "table" and MPr.Vital then
+					local ok2, t = pcall(MPr.Vital, id)
+					vital = ok2 and type(t) == "string" and t ~= ""
+				end
 				if que == "basura" and not vital then venderAlVendedor(id) end
 			end
 		end

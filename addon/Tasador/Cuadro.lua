@@ -114,14 +114,20 @@ function T.AgregarLineas(tooltip, link, datos)
 	-- sin el veredicto de Polestar, el del propio Tasador (Mejora.lua)
 	if not conVeredicto and mejoraTxt then tooltip:AddLine(mejoraTxt, TEXTO[1], TEXTO[2], TEXTO[3], true) end
 
-	-- 3) Mi plan: VITAL o lo pide el plan
-	local MP = _G.MambaPlan
+	-- 3) Mi plan: VITAL o lo pide el plan; si Mi plan no dice nada, Mamba_Profesiones (VITAL para subir una profesión)
+	local MP, dicho = _G.MambaPlan, false
 	if id and type(MP) == "table" and MP.MaterialDelPlan then
 		local ok, x = pcall(MP.MaterialDelPlan, id)
 		if ok and type(x) == "table" and x.texto then
 			local c = x.clase == "vital" and VITAL or PLAN
 			tooltip:AddLine(x.texto, c[1], c[2], c[3], true)
+			dicho = true
 		end
+	end
+	local MPr = _G.MambaProfesiones
+	if id and not dicho and type(MPr) == "table" and MPr.Vital then
+		local ok, txt = pcall(MPr.Vital, id)
+		if ok and type(txt) == "string" and txt ~= "" then tooltip:AddLine(txt, VITAL[1], VITAL[2], VITAL[3], true) end
 	end
 
 	-- 4) cuánto vale
