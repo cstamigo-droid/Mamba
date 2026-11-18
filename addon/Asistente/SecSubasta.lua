@@ -384,7 +384,16 @@ ev:SetScript("OnEvent", function(_, e, boton)
 		-- lo que TÚ marcaste como basura se vende con la basura gris, si el interruptor está encendido
 		local P = _G.Polestar
 		if P and P.Get and P.Get("qol.sellJunk") and not (IsShiftKeyDown and IsShiftKeyDown()) then
-			for id, que in pairs(db()) do if que == "basura" then venderAlVendedor(id) end end
+			-- nunca lo VITAL para tu plan (MambaPlan.MaterialDelPlan), aunque lo hayas marcado como basura
+			local MP = _G.MambaPlan
+			for id, que in pairs(db()) do
+				local vital = false
+				if type(MP) == "table" and MP.MaterialDelPlan then
+					local ok, x = pcall(MP.MaterialDelPlan, id)
+					vital = ok and type(x) == "table" and x.clase == "vital"
+				end
+				if que == "basura" and not vital then venderAlVendedor(id) end
+			end
 		end
 	elseif e == "MERCHANT_CLOSED" then abierto.vendedor = false
 	elseif e == "BAG_UPDATE_DELAYED" then bolsasCache = nil end

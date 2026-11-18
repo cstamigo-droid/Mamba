@@ -121,6 +121,8 @@ function T.AgregarLineas(tooltip, link, datos)
 	local p = PS()
 	local sola = p and p.Get and p.Get("qol.sellJunk")
 	local texto = ACCION[que]
+	if not marca and info.mejora then texto = "Equípalo (Guardar: es mejora para ti)" end
+	if que == "subastar" and info.subasta then texto = "Subastar a " .. T.Dinero(info.subasta) end
 	if que == "basura" and not sola then texto = "Es basura: véndela al vendedor" end
 	local motivo = marca and "lo elegiste tú" or r.motivo
 	tooltip:AddLine(hex(ORO) .. "Qué hacer:|r " .. texto .. (motivo and motivo ~= "" and ("  |cff9ba2b9(" .. motivo .. ")|r") or ""), TEXTO[1], TEXTO[2], TEXTO[3], true)
