@@ -472,8 +472,10 @@ local function crearBoton()
 	boton:SetSize(31, 31)
 	boton:SetFrameStrata("MEDIUM")
 	boton:SetFrameLevel(8)
-	boton:RegisterForClicks("LeftButtonUp")
-	boton:RegisterForDrag("LeftButton")
+	boton:RegisterForClicks("AnyUp")
+	-- se mueve arrastrando con el botón DERECHO: con el izquierdo, un clic con un poco de movimiento se tomaba
+	-- como arrastre y no abría nada
+	boton:RegisterForDrag("RightButton")
 	local icono = boton:CreateTexture(nil, "BACKGROUND")
 	icono:SetTexture("Interface\\Icons\\Ability_Hunter_Pet_WindSerpent")
 	icono:SetSize(20, 20)
@@ -484,9 +486,27 @@ local function crearBoton()
 	borde:SetSize(53, 53)
 	borde:SetPoint("TOPLEFT", boton, "TOPLEFT", 0, 0)
 	boton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-	boton:SetScript("OnClick", function()
-		if A.Hub and A.Hub.Disponible() then A.Hub.Alternar() return end
-		if v and v:IsShown() then v:Hide() else A.AbrirVentana() end
+	boton:SetScript("OnClick", function(_, cual)
+		if cual and cual ~= "LeftButton" then return end
+		-- diagnóstico del último clic, para leerlo en las SavedVariables (AsistenteDB.diagBoton)
+		local d = { cuando = date and date("%H:%M:%S") or "", hub = A.Hub and A.Hub.Disponible() and "si" or "no" }
+		local ok, err = pcall(function()
+			if A.Hub and A.Hub.Disponible() then
+				d.abiertoAntes = A.Hub.Abierto() and "si" or "no"
+				if A.Hub.Abierto() then _G.PolestarPicker:Hide() return end
+				-- el mismo camino que /equipo (que sí abre): A.AbrirVentana -> Hub.Abrir
+				A.AbrirVentana()
+				if not A.Hub.Abierto() then A.Hub.Abrir("MambaEquipo") end
+			elseif v and v:IsShown() then v:Hide()
+			else A.AbrirVentana() end
+		end)
+		local w = _G.PolestarPicker
+		d.ok, d.err = ok and "si" or "no", err and tostring(err):sub(1, 200) or nil
+		d.ventanaDespues = w and w:IsShown() and "si" or "no"
+		local P = _G.Polestar and _G.Polestar.UI and _G.Polestar.UI.Picker
+		d.seccion = P and P.Section and tostring(P.Section()) or "?"
+		if AsistenteDB then AsistenteDB.diagBoton = d end
+		if not ok and geterrorhandler then geterrorhandler()(err) end
 	end)
 	boton:SetScript("OnDragStart", function(self)
 		self:SetScript("OnUpdate", function()
@@ -499,7 +519,7 @@ local function crearBoton()
 	end)
 	boton:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
 	boton:SetScript("OnEnter", function(self)
-		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Arrastrar: mover este botón" })
+		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Arrastrar con el botón derecho: mover este botón" })
 	end)
 	boton:SetScript("OnLeave", alSalir)
 	ubicarBoton()
