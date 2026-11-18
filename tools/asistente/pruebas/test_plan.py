@@ -228,6 +228,13 @@ check(pasos[0].tipo == "Ahora" and pasos[0].titulo == "Entrega 2 misiones en Org
 check("Mulgore 1-12 · paso 1 de 2" in pasos[0].detalle, "guía y número de paso")
 check(any(p.clave == "meta:entrenar40" or p.clave == "meta:montura40" for p in pasos), "al 39: entrenar y montura del 40 en Ahora")
 
+# ---------- 8e. Cambiar de vista aunque Polestar llame a render con la sección todavía oculta ----------
+S.onNav("equipo"); S.render()
+padre.visible = False
+S.onNav("ahora"); S.render()
+check(M2.ultimaVista == "ahora", "Ahora se dibuja aunque la sección esté oculta al llamar a render (visto en el juego: quedaba Equipo)")
+padre.visible = True
+
 # ---------- 9. Prueba estática ----------
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")

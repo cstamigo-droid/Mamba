@@ -243,7 +243,10 @@ local function cabecera(e, r)
 end
 
 function M.Refrescar()
-	if not (raiz and raiz:IsShown() and lista) then return end
+	-- Sin exigir IsShown: Polestar llama a render antes de mostrar la sección, y con esa condición la lista se
+	-- quedaba con lo de la vista anterior ("Ahora" mostraba "Equipo a buscar": visto en el juego el 18-11).
+	if not (raiz and lista) then return end
+	M.ultimaVista = vista
 	local e, r = M.Estado(), M.PJ().respuestas or {}
 	cabecera(e, r)
 	local ancho = math.max(300, (lista:GetWidth() or 600) - 14)
@@ -303,7 +306,11 @@ local function registrar()
 	registrada = UI.RegisterSection({
 		key = KEY, label = "Mi plan", icon = "pin", order = 20,
 		build = construir,
-		render = function() M.Proteger("refrescar", M.Refrescar) end,
+		render = function()
+			M.Proteger("refrescar", M.Refrescar)
+			-- otra vez en el cuadro siguiente, ya con la sección a la vista y su ancho final
+			if C_Timer then C_Timer.After(0, function() M.Proteger("refrescar", M.Refrescar) end) end
+		end,
 		nav = function()
 			local items = {}
 			for _, x in ipairs(M.VISTAS) do items[#items + 1] = { key = x.key, label = x.label, icon = x.icon } end
