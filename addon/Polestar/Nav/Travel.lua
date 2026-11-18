@@ -2389,7 +2389,8 @@ end
 -- noHearth = true: the way without the Hearthstone (the Engine's hearth goal weighs the two).
 -- While a quest timer runs, the player's own estimates leave out the Hearthstone and teleports, as the route does.
 --   -> seconds | nil (unknown position or unreachable) | nil, "busy" (budgeted, this frame's budget is spent)
-function Nav.EstimateTravel(from, to, budgeted, noHearth)
+-- Mamba (PARCHES.md P8): noFlights = true plans without flights; a third value, the plan's legs (read-only).
+function Nav.EstimateTravel(from, to, budgeted, noHearth, noFlights)
 	local tc, twx, twy = pointWorld(to)
 	if not tc then return nil end
 	local fc, fwx, fwy
@@ -2408,9 +2409,10 @@ function Nav.EstimateTravel(from, to, budgeted, noHearth)
 	local D = Nav.danger
 	local key = format("%d:%d:%d>%d:%.1f:%.1f:%d:%d", fc, floor(fwx / CACHE_CELL), floor(fwy / CACHE_CELL),
 		tc, twx, twy, from ~= nil and 0 or timed == "escort" and 4 or timed and 3 or noHearth and 2 or 1, D and D.Level() or 0)
+	if noFlights then key = key .. ":nf" end -- Mamba (PARCHES.md P8)
 	local now = GetTime()
 	local hit = estimates[key]
-	if hit and now - hit.at < CACHE_SECONDS then return hit.seconds end
+	if hit and now - hit.at < CACHE_SECONDS then return hit.seconds, nil, hit.legs end -- Mamba (PARCHES.md P8): legs
 	if budgetFrame ~= now then budgetFrame, budgetSpent = now, 0 end
 	if budgeted and budgetSpent >= ESTIMATE_MS then return nil, "busy" end
 	local clock = debugprofilestop
@@ -2443,6 +2445,7 @@ function Nav.EstimateTravel(from, to, budgeted, noHearth)
 		teleports = teleports,
 		items = Travel.PortalItems(),
 		departure = departureFn(),
+		noFlights = noFlights or nil, -- Mamba (PARCHES.md P8)
 		walkOnly = ghost or timed == "escort",
 		-- The same way the plan takes (its walks through zones far above dearer).
 		walkDanger = walkDanger(fc, fwx, fwy, tc, twx, twy),
@@ -2454,8 +2457,8 @@ function Nav.EstimateTravel(from, to, budgeted, noHearth)
 		if #estimateOrder >= CACHE_MAX then estimates[table.remove(estimateOrder, 1)] = nil end
 		estimateOrder[#estimateOrder + 1] = key
 	end
-	estimates[key] = { at = now, seconds = seconds }
-	return seconds
+	estimates[key] = { at = now, seconds = seconds, legs = plan } -- Mamba (PARCHES.md P8): legs
+	return seconds, nil, plan
 end
 
 -- A route worth following: more than one leg. A lone walk is the direct arrow.

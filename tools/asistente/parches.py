@@ -48,6 +48,24 @@ PARCHES = [
      "answerTomTom = false, -- the stand-in has methods only: an addon reading TomTom.db would error",
      "answerTomTom = true, -- Mamba (PARCHES.md P3): reemplaza a TomTom (/way y su API de puntos). "
      "The stand-in has methods only: an addon reading TomTom.db would error"),
+    # P8: el planificador ya arma los tramos al estimar; Mamba (Asistente/Llevame.lua) los lee y pide la ruta sin vuelos.
+    ("P8-tramos", "Polestar/Nav/Travel.lua",
+     "function Nav.EstimateTravel(from, to, budgeted, noHearth)" + LF,
+     "-- Mamba (PARCHES.md P8): noFlights = true plans without flights; a third value, the plan's legs (read-only)." + LF +
+     "function Nav.EstimateTravel(from, to, budgeted, noHearth, noFlights)" + LF),
+    ("P8-tramos", "Polestar/Nav/Travel.lua",
+     "tc, twx, twy, from ~= nil and 0 or timed == \"escort\" and 4 or timed and 3 or noHearth and 2 or 1, D and D.Level() or 0)",
+     "tc, twx, twy, from ~= nil and 0 or timed == \"escort\" and 4 or timed and 3 or noHearth and 2 or 1, D and D.Level() or 0)" + LF +
+     "	if noFlights then key = key .. \":nf\" end -- Mamba (PARCHES.md P8)"),
+    ("P8-tramos", "Polestar/Nav/Travel.lua",
+     "if hit and now - hit.at < CACHE_SECONDS then return hit.seconds end",
+     "if hit and now - hit.at < CACHE_SECONDS then return hit.seconds, nil, hit.legs end -- Mamba (PARCHES.md P8): legs"),
+    ("P8-tramos", "Polestar/Nav/Travel.lua",
+     "		departure = departureFn()," + LF + "		walkOnly = ghost or timed == \"escort\",",
+     "		departure = departureFn()," + LF + "		noFlights = noFlights or nil, -- Mamba (PARCHES.md P8)" + LF + "		walkOnly = ghost or timed == \"escort\","),
+    ("P8-tramos", "Polestar/Nav/Travel.lua",
+     "estimates[key] = { at = now, seconds = seconds }" + LF + "	return seconds" + LF,
+     "estimates[key] = { at = now, seconds = seconds, legs = plan } -- Mamba (PARCHES.md P8): legs" + LF + "	return seconds, nil, plan" + LF),
 ]
 
 # Parches al código de forge (la herramienta de Polestar que construye los datos), relativos a la raíz.

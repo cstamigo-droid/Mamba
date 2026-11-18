@@ -83,6 +83,7 @@ python test_servicios.py ../../../addon ../../..
 python test_tasador.py ../../../addon/Tasador
 python test_escaneo.py ../../../addon/Tasador
 python test_medidor.py ../../../addon/Medidor
+python test_llevame.py ../../../addon   # «Llévame» (K58) con el planificador REAL de Polestar y el parche P8
 # filas de la 1.0 que cubre Polestar, con el Polestar del fork (Node 24 + Lua 5.1)
 LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-reemplazos.test.js
 # controles del fork

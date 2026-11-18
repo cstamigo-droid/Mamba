@@ -146,7 +146,15 @@ end
 ---------------------------------------------------------------- Mazmorras
 -- La flecha a la entrada. silencio: no escribir en el chat si funcionó.
 function E.FlechaA(m, silencio)
-	local ok, motivo = E.GuiarEntrada(m)
+	-- Con el motor de «Llévame» (Asistente/Llevame.lua, K58): la misma flecha, más los tramos en el panel de la guía.
+	local LL = A and A.Llevame
+	local ok, motivo
+	if LL and LL.Llevame then
+		ok, motivo = LL.Llevame({ tipo = "mazmorra", clave = "m:" .. m.clave, nombre = m.nombre, m = m })
+		if not ok and motivo == "sin_ruta" then motivo = "sin_entrada" end
+	else
+		ok, motivo = E.GuiarEntrada(m)
+	end
 	E.ultimaFlecha = { clave = m.clave, ok = ok, motivo = motivo }
 	if not ok and not silencio and A and A.Decir then
 		A.Decir(m.nombre .. ": " .. (motivo == "combate" and "sal de combate para poner la flecha." or "no conozco su entrada."))
