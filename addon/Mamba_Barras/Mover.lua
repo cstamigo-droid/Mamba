@@ -130,3 +130,14 @@ ev:SetScript("OnEvent", function()
 	if M.moviendoBarras then M.TerminarMover() end
 	if M.asignando then M.TerminarTeclas() end
 end)
+
+-- K55 ampliado (18-11): el modo «Mover elementos» de Mamba también pone las barras en su modo de mover.
+local enlace = CreateFrame("Frame")
+M.Escuchar(enlace, "PLAYER_LOGIN")
+enlace:SetScript("OnEvent", function()
+	local api = _G.MambaAPI
+	if not (api and api.AlModoMover) then return end
+	pcall(api.AlModoMover, function(activo)
+		if activo then M.EmpezarMover() else M.TerminarMover() end
+	end)
+end)

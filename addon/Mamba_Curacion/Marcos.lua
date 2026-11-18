@@ -330,7 +330,19 @@ end)
 -- "Mover marcos": el asa solo se ve fuera de combate y con la opción encendida
 function M.MostrarAsa()
 	if not asa then return end
-	if M.DB().mover and not enCombate() then asa:Show() else asa:Hide() end
+	if (M.DB().mover or M.modoMover) and not enCombate() then asa:Show() else asa:Hide() end
 end
 function M.Asa() return asa end
 M.AlCambiar(function() M.Proteger("aplicar", M.Aplicar); M.Proteger("asa", M.MostrarAsa) end)
+
+-- K55 ampliado (18-11): el modo «Mover elementos» de Mamba muestra también el asa de estos marcos.
+local enlace = CreateFrame("Frame")
+enlace:RegisterEvent("PLAYER_LOGIN")
+enlace:SetScript("OnEvent", function()
+	local api = _G.MambaAPI
+	if not (api and api.AlModoMover) then return end
+	pcall(api.AlModoMover, function(activo)
+		M.modoMover = activo and true or false
+		M.Proteger("asa", M.MostrarAsa)
+	end)
+end)

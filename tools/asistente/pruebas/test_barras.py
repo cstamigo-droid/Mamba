@@ -315,5 +315,13 @@ check(G.MOVIBLES is not None and G.MOVIBLES["MambaBarrasVentana"] is True, "la v
 c1 = M.Config(1); c1.punto, c1.x, c1.y = "CENTER", 5, 5
 G.RESTABLECER()
 check(M.Config(1).punto == "BOTTOM" and abs(M.Config(1).x + 302.58) < 0.01, "Restablecer: la barra vuelve al lugar de Bartender")
+# K55 ampliado: el modo «Mover elementos» de Mamba pone las barras en su modo de mover
+L, M = nuevo('MambaAPI = { AlModoMover = function(fn) MODO_MOVER = fn end }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MODO_MOVER is not None, "Barras se enganchan al modo Mover de Mamba")
+if G.MODO_MOVER is not None:
+    G.MODO_MOVER(True); check(M.moviendoBarras, "modo Mover: las barras muestran sus recuadros")
+    G.MODO_MOVER(False); check(not M.moviendoBarras, "al salir: las barras salen de su modo")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)
