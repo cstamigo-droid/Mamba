@@ -304,7 +304,7 @@ local function registrar()
 	local UI = PS and PS.UI
 	if registrada or not (UI and UI.RegisterSection) then return registrada end
 	registrada = UI.RegisterSection({
-		key = KEY, label = "Mi plan", icon = "pin", order = 20,
+		key = KEY, label = "Mi plan", icon = "pin", order = 21, -- 20 es Buscar (Lookup) de Polestar: empatar deja el orden al azar
 		build = construir,
 		render = function()
 			M.Proteger("refrescar", M.Refrescar)

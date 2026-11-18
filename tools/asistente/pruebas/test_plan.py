@@ -162,7 +162,7 @@ G2 = L2.globals()
 L2.execute('Fire("PLAYER_LOGIN")')
 check(G2.MambaPlanInicio is not None and G2.MambaPlanInicio.visible, "primera vez: el asistente se abre solo")
 S = G2.SECCION
-check(S is not None and S.key == "MambaPlan" and S.order == 20, "sección Mi plan en el riel, lugar 20")
+check(S is not None and S.key == "MambaPlan" and S.order == 21, "sección Mi plan en el riel, lugar 20")
 items, activa = S.nav()
 check(len(list(items.values())) == 10 and activa == "ahora", "índice de Mi plan")
 padre = L2.eval('function() local f = CreateFrame("Frame", nil, UIParent); f.w, f.h = 700, 500; return f end')()
