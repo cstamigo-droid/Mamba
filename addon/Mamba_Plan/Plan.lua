@@ -249,10 +249,25 @@ function M.Pasos(e, r)
 	local function add(p)
 		if not pj.descartados[p.clave] and not pj.hechos[p.clave] then pasos[#pasos + 1] = p end
 	end
-	-- la guía es la columna: siempre primero
-	add(paso({ clave = "guia", tipo = "Subir", titulo = "Sigue tu guía de Polestar",
-		detalle = "La ruta de misiones la lleva Polestar; lo de abajo se suma cuando te queda de paso.",
-		accion = "guia", fijo = true }))
+	-- la guía es la columna: siempre primero, con lo que viene ("Entrega 2 misiones → vuela a ...")
+	local pp = M.Fuentes.ProximoPaso and M.Fuentes.ProximoPaso(4)
+	if pp and #pp.metas > 0 then
+		add(paso({ clave = "guia", tipo = "Ahora", titulo = table.concat(pp.metas, "  →  "),
+			detalle = ("%s · paso %s de %s"):format(pp.guia or "Tu guía", tostring(pp.paso), tostring(pp.total)),
+			accion = "guia", fijo = true }))
+	else
+		add(paso({ clave = "guia", tipo = "Subir", titulo = "Abre tu guía de leveo",
+			detalle = "Todavía no hay una guía abierta: elige la de tu zona y aquí sale el próximo paso.",
+			accion = "guia", fijo = true }))
+	end
+	-- el entrenamiento y la montura del próximo nivel, en una línea, cuando ya están cerca
+	for _, m in ipairs(M.Metas(e)) do
+		if (m.clave:find("^entrenar") or m.clave:find("^montura")) and m.nivel - e.nivel <= 1 then
+			add(paso({ clave = "meta:" .. m.clave, tipo = "Nivel " .. m.nivel, titulo = m.titulo .. ": " .. M.Dinero(m.costo),
+				detalle = m.falta > 0 and ("Te faltan " .. M.Dinero(m.falta) .. ".") or "Te alcanza.", lugar = m.lugar,
+				confianza = m.confianza }))
+		end
+	end
 	-- rango de profesión que se te acaba
 	for _, p in ipairs(e.profesiones) do
 		local rg = M.RANGOS and M.RANGOS[p.nombre]

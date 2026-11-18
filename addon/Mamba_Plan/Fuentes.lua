@@ -38,6 +38,37 @@ function F.Mazmorras(nivel)
 	return out
 end
 
+-- El próximo paso de la guía de Polestar: "Entrega 2 misiones en Orgrimmar → vuela a Molino Tarren → ...".
+-- Usa piezas internas de Polestar (Engine.GetGuide, GetLiveStep, UI.PlainGoalText); si cambian, devuelve nil y
+-- "Ahora" sigue sin esa línea (lo vigila polestar_al_dia.py: INTERNAS). -> { guia, paso, total, metas = { textos } }
+function F.ProximoPaso(max)
+	local P = _G.Polestar
+	local E, UI = P and P.Engine, P and P.UI
+	if not (E and E.GetGuide and E.GetLiveStep and UI and (UI.PlainGoalText or UI.GoalText)) then return nil end
+	local ok, g = pcall(E.GetGuide)
+	local ok2, i = pcall(E.GetLiveStep)
+	if not (ok and ok2 and type(g) == "table" and type(g.steps) == "table" and type(i) == "number") then return nil end
+	local texto = UI.PlainGoalText or UI.GoalText
+	local metas = {}
+	max = max or 4
+	for s = i, math.min(#g.steps, i + 3) do
+		local paso = g.steps[s]
+		for _, goal in ipairs(paso and paso.goals or {}) do
+			if goal.status ~= "done" and #metas < max then
+				local okT, t = pcall(texto, goal)
+				if okT and type(t) == "string" and t ~= "" then
+					t = t:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+					metas[#metas + 1] = t
+				end
+			end
+		end
+		if #metas >= max then break end
+	end
+	local numero = E.StepNumber and select(2, pcall(E.StepNumber, i)) or i
+	local total = E.StepTotal and select(2, pcall(E.StepTotal)) or #g.steps
+	return { guia = g.title, paso = numero, total = total, metas = metas }
+end
+
 function F.PasadasPara(pct)
 	local E = _G.Asistente_Equipo
 	if E and E.Pasadas then return E.Pasadas(pct) end
