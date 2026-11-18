@@ -171,7 +171,7 @@ asa = Cu.Asa()
 check(asa is not None and not asa.visible, "el asa está escondida por defecto")
 Cu.DB().mover = True; G.COMBATE = False; Cu.MostrarAsa()
 check(asa.visible, "Mover marcos: el asa se ve fuera de combate")
-G.COMBATE = True; L.execute('Fire("PLAYER_REGEN_DISABLED")')
+G.COMBATE = False; L.execute('Fire("PLAYER_REGEN_DISABLED")'); G.COMBATE = True  # en el evento, InCombatLockdown() todavía da false
 check(not asa.visible, "en combate el asa se esconde")
 b2 = L.eval('CreateFrame("Button", "MambaCuraCabeceraUnitButton2", MambaCuraCabecera, "SecureActionButtonTemplate")')
 b2.attr["unit"] = "party2"

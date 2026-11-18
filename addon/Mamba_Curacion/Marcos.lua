@@ -291,7 +291,12 @@ ev:SetScript("OnEvent", function(_, e, unidad)
 	if e == "PLAYER_LOGIN" or e == "ACTIVE_TALENT_GROUP_CHANGED" or e == "LEARNED_SPELL_IN_TAB" then
 		M.Proteger("aplicar", M.Aplicar)
 	elseif e == "PLAYER_REGEN_ENABLED" or e == "PLAYER_REGEN_DISABLED" then
-		M.Proteger("asa", M.MostrarAsa)
+		-- al entrar en combate InCombatLockdown() todavía da false: el asa se esconde SIEMPRE (y se corta el arrastre)
+		if e == "PLAYER_REGEN_DISABLED" then
+			if asa then if asa.StopMovingOrSizing and ancla then ancla:StopMovingOrSizing() end; asa:Hide() end
+		else
+			M.Proteger("asa", M.MostrarAsa)
+		end
 		if e == "PLAYER_REGEN_ENABLED" and pendiente then M.Proteger("aplicar", M.Aplicar) end
 	elseif e == "GROUP_ROSTER_UPDATE" then
 		M.Proteger("mostrar", M.MostrarSegun)
