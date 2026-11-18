@@ -4310,6 +4310,12 @@ function W.Shell(name, opts)
 	f.Tagline = W.Text(side, "small", "textDim")
 	f.Tagline:SetPoint("TOPLEFT", side, "TOPLEFT", textX, -(WORD_TOP + 30))
 	f.Tagline:SetText(opts.tagline or L["A community project"])
+	-- Mamba: el nombre de la ventana es Mamba; Polestar (de nnachit) queda en la línea de abajo, como crédito.
+	f.Wordmark:SetAlpha(0)
+	f.MambaMarca = W.Text(side, "display", "text")
+	f.MambaMarca:SetPoint("BOTTOMLEFT", f.Tagline, "TOPLEFT", 0, 4)
+	f.MambaMarca:SetText("MAMBA")
+	f.Tagline:SetText("con Polestar, de nnachit")
 	if opts.headerSearch then
 		-- The search is in the header (below); the navigation starts under
 		-- the band, a hairline over it.
@@ -4616,12 +4622,28 @@ function W.ShellRail(f, items, bottom, active, onSelect)
 	end
 	local limit = f:GetHeight() - 2 - y -- the top of the bottom group
 	y = f.psNavTop -- the first section level with the sidebar's first row
+	-- Mamba: when the sections don't fit at full height, the rows shrink (down to 30); under 44 the label
+	-- hides and the name shows on hover (b.psTip). Before, the sections that didn't fit were simply cut.
+	local room = limit - y
+	local row = RAIL_ROW
+	if #items > 0 and room < #items * RAIL_ROW then
+		-- no caben: empiezan más arriba (bajo el emblema) y las filas se achican, hasta 26
+		y = math.min(y, 96)
+		room = limit - y
+		row = math.max(26, math.min(RAIL_ROW, math.floor(room / #items)))
+	end
 	for k = 1, #items do
-		if y + RAIL_ROW > limit then break end
+		if y + row > limit then break end
 		i = i + 1
 		n = n + 1
 		place(items[k], i, y)
-		y = y + RAIL_ROW
+		local b = f.railButtons[i]
+		b:SetHeight(row)
+		local compact = row < 44
+		b.Label:SetShown(not compact)
+		b.Icon:ClearAllPoints()
+		if compact then b.Icon:SetPoint("CENTER", b, "CENTER", 0, 0) else b.Icon:SetPoint("TOP", b, "TOP", 0, -10) end
+		y = y + row
 	end
 	for k = i + 1, #f.railButtons do f.railButtons[k]:Hide() end
 	f.psRailFloor = limit

@@ -263,13 +263,31 @@ local function filaLeave(self)
 	if w and w.HideTooltip then w.HideTooltip(self) end
 end
 
+-- El ícono de un objeto (por su id). Si el juego todavía no lo tiene, se pide y la fila se vuelve a pintar
+-- cuando llega (GET_ITEM_INFO_RECEIVED, abajo). Mientras tanto, un hueco neutro, no el "?" rojo.
+local faltan = {}
 local function iconoDe(x)
 	if type(x) == "number" then
 		local f = (C_Item and C_Item.GetItemIconByID) or GetItemIcon
-		return f and f(x) or "Interface\\Icons\\INV_Misc_QuestionMark"
+		local t = f and f(x)
+		if t then return t end
+		faltan[x] = true
+		if C_Item and C_Item.RequestLoadItemDataByID then pcall(C_Item.RequestLoadItemDataByID, x) end
+		return "Interface\\Buttons\\UI-EmptySlot-Disabled"
 	end
 	return x
 end
+
+local llegada = CreateFrame("Frame")
+pcall(llegada.RegisterEvent, llegada, "GET_ITEM_INFO_RECEIVED")
+local pendiente = false
+llegada:SetScript("OnEvent", function(_, _, id)
+	if not faltan[id] then return end
+	faltan[id] = nil
+	if pendiente then return end
+	pendiente = true
+	C_Timer.After(0.3, function() pendiente = false; Hub.Redibujar() end)
+end)
 
 function V:Fila(d)
 	local o = pool(self, "fila", function(p)
@@ -336,8 +354,11 @@ function V:Fila(d)
 		local dx = (conIcono and ((d.iconoEnCol2 and i == 2) or (not d.iconoEnCol2 and i == 1))) and 40 or 0
 		fa:ClearAllPoints(); fb:ClearAllPoints()
 		local dos = cel[2] and cel[2] ~= ""
-		fa:SetPoint(dos and "BOTTOMLEFT" or "LEFT", o, dos and "LEFT" or "LEFT", x + dx, dos and 1 or 0)
-		fb:SetPoint("TOPLEFT", o, "LEFT", x + dx, -2)
+		-- dos líneas: cada una con su alto, una arriba de la otra (antes podían pisarse)
+		fa:SetHeight(18); fb:SetHeight(15)
+		fa:SetJustifyV("MIDDLE"); fb:SetJustifyV("MIDDLE")
+		fa:SetPoint(dos and "BOTTOMLEFT" or "LEFT", o, "LEFT", x + dx, dos and 0 or 0)
+		fb:SetPoint("TOPLEFT", o, "LEFT", x + dx, -1)
 		fa:SetWidth(ancho - dx - 8); fb:SetWidth(ancho - dx - 8)
 		color(fa, cel.col or "text")
 		fa:SetText(cel[1] or ""); fb:SetText(cel[2] or "")

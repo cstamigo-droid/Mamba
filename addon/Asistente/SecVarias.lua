@@ -8,6 +8,8 @@ local format, floor = string.format, math.floor
 -- Quita los consejos de comandos ("Escribe /clase ...", "Comandos: ..."): en la ventana todo es un botón.
 local function sinComandos(t)
 	if type(t) ~= "string" then return nil end
+	-- el aviso de "sin verificar" va una sola vez arriba de la pestaña, no en cada línea
+	t = t:gsub("%s*%(NO VERIFICADO[^%)]*%)", ""):gsub(",?%s*NO VERIFICADO:?", "")
 	if t:find("/%a") and (t:find("^Escribe") or t:find("Comandos:") or t:find("cámbialo con") or t:find("Mira /")) then
 		t = t:gsub("%s*%(?cámbialo con /[^%)]*%)?", ""):gsub("Comandos:.*$", ""):gsub("Escribe /.*$", ""):gsub("Mira /.*$", "")
 		if t:match("^%s*$") then return nil end
@@ -75,6 +77,7 @@ Hub.Seccion({
 			V:Nota("Datos de ForeverDB.net.")
 			return
 		end
+		if p == "prof" then V:Nota("|cfffabf4dOjo:|r parte de estos consejos viene de la versión clásica del juego y está sin verificar en Forever.", "text") end
 		local lineas = capturar(M, function() if p == "prof" then M.Comando("prof") else M.Resumen(clase) end end)
 		for _, t in ipairs(lineas) do
 			t = sinComandos(t)

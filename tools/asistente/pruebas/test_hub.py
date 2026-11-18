@@ -155,6 +155,10 @@ def revisar(nombre, minimo=3):
         check(not any(ing in x for x in v), f"{nombre}: sin {ing!r}")
     check(len(lista(G.ERRORES)) == ERR0, f"{nombre}: sin errores de Lua ({lista(G.ERRORES)[-1:] if lista(G.ERRORES) else ''})")
     check(not any("muchomejor" in x.replace(" ", "") for x in v), f"{nombre}: nunca «mucho mejor»")
+    check(not any("[" in x or "]" in x for x in v), f"{nombre}: nombres sin corchetes ({[x for x in v if '[' in x][:1]})")
+    check(sum(x.count("NO VERIFICADO") for x in v) == 0, f"{nombre}: sin «NO VERIFICADO» repetido en las filas")
+    check(not any(x.strip().startswith("0 %") for x in v), f"{nombre}: nunca «0 %» (sin dato)")
+    check(not any("←" in x or "la tuya, sin datos" in x for x in v), f"{nombre}: sin símbolos que la fuente no tiene ni frases raras")
     return v
 
 
@@ -266,6 +270,21 @@ L.execute('MambaErroresDB = MambaErroresDB or {}; MambaErroresDB.lista = { { msg
 G.MambaAPI.Abrir("MambaErrores")
 check(any("x.lua:1: prueba" in x for x in textos()), "Errores muestra el error guardado")
 
+# 8b) Tu rol: se elige con un clic, sin mandar a los ajustes
+G.MambaAPI.Abrir("MambaEquipo", "rol")
+v = textos()
+check(any("Elige tu rol" in x for x in v), "Tu rol: título «Elige tu rol»")
+check(not any("ajustes de equipo" in x for x in v), "Tu rol: no manda a los ajustes de equipo")
+ELEGIR = L.eval("""function()
+  for _, f in ipairs(TODOS) do
+    local lb = rawget(f, "Label")
+    if type(lb) == "table" and lb.text == "Elegir" and f:IsVisible() and f.scripts.OnClick then f.scripts.OnClick(f); return true end
+  end
+end""")
+check(ELEGIR() is True, "Tu rol: hay botones «Elegir»")
+check(G.AJUSTES["gear.spec.DRUID"] is not None, f"«Elegir» fija el rol en Polestar (gear.spec.DRUID = {G.AJUSTES['gear.spec.DRUID']})")
+G.AJUSTES["gear.spec.DRUID"] = None
+
 # 9) los comandos viejos abren el hub
 L.execute('Slash("/equipo", "mazmorras")')
 check(str(G.SECCION) == "MambaGrupoEquipo", "/equipo abre la sección Equipo del hub")
@@ -287,6 +306,17 @@ G.MambaAPI.Abrir("MambaMedidor")
 revisar("Medidor en combate", 1)
 G.COMBATE = False
 
-check(len([c for c in lista(G.chat)]) == 0 or True, "")
+# 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
+if W_REAL:
+    RIEL = L.eval("""function()
+      local f = CreateFrame("Frame"); f.h = 680
+      f.Rail = CreateFrame("Frame", nil, f); f.railButtons = {}; f.psRail = Polestar.Widgets.SHELL.rail; f.psNavTop = 150
+      local items = {}
+      for i = 1, 12 do items[i] = { key = "s" .. i, label = "S" .. i, icon = "compact" } end
+      local bottom = { { key = "o", label = "Op" }, { key = "i", label = "Im" }, { key = "e", label = "Er" } }
+      return Polestar.Widgets.ShellRail(f, items, bottom, "s1", function() end)
+    end""")
+    n = RIEL()
+    check(n == 12, f"el riel muestra las 12 secciones ({n})")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

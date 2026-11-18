@@ -29,10 +29,22 @@ local function calidad(x)
 	return ok and q or nil
 end
 
+-- Texto limpio de un enlace o nombre: sin códigos de color, sin |H...|h y sin corchetes.
+local function limpio(t)
+	t = tostring(t or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|H.-|h", ""):gsub("|h", ""):gsub("[%[%]]", "")
+	return t
+end
+A.TextoLimpio = limpio
+
 local function nombreObj(e, id, respaldo)
 	local n = e.NombreObjeto and e.NombreObjeto(id, respaldo) or respaldo or ("objeto " .. id)
-	n = tostring(n):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|H.-|h", ""):gsub("|h", ""):gsub("^%[", ""):gsub("%]$", "")
-	return hex(calidad(id)) .. n .. "|r"
+	return hex(calidad(id)) .. limpio(n) .. "|r"
+end
+
+-- Un enlace de objeto como nombre limpio con el color de su calidad.
+local function nombreLink(link)
+	local id = tonumber(tostring(link):match("item:(%d+)"))
+	return hex(calidad(link) or (id and calidad(id))) .. limpio(link) .. "|r"
 end
 
 local MAZCOL = "|cffa385ff"
@@ -129,15 +141,15 @@ local function textoMejora(c, p)
 	local act = c.porRanura[p.ranura]
 	if act and act.ilegible then return "|cff9ba2b9mejora: sin datos aún (atributos de tu pieza sin leer)|r" end
 	if p.vacia or not (act and act.link) then return "|cff6bd999llena una ranura vacía|r" end
-	if act and not act.sabe then return "|cff6bd999mejor|r |cff9ba2b9que la tuya (la tuya, sin datos)|r" end
-	return "|cff6bd999+" .. A.Pct(p.pctMejora, 0) .. "|r |cff9ba2b9sobre|r " .. tostring(act.link):gsub("[%[%]]", "")
+	if act and not act.sabe then return "|cff9ba2b9mejora probable: no pude medir la tuya|r" end
+	return "|cff6bd999+" .. A.Pct(p.pctMejora, 0) .. "|r |cff9ba2b9sobre|r " .. nombreLink(act.link)
 end
 
 local function dondeComo(p)
 	if p.mision then return "misión «" .. tostring(p.jefe) .. "»", "100 %", "recompensa de misión" end
 	if p.bichos then return "enemigos comunes", A.Pct(p.pct), "por enemigo" end
 	local n = p.pct and p.pct > 0 and math.ceil(100 / p.pct)
-	return tostring(p.jefe), p.pct and A.Pct(p.pct) or "sin datos aún", n and ("~" .. n .. " entradas") or "caída desconocida"
+	return tostring(p.jefe), n and A.Pct(p.pct) or "sin dato", n and ("~" .. n .. " entradas") or "no se sabe cuánto cae"
 end
 
 local function flecha(c, m)
@@ -206,7 +218,7 @@ local function pestanaMejorar(est, V, c)
 		V:Vacio(est.cuando == "ya" and "Nada que mejorar ya" or "Sin resultados", est.cuando == "ya" and "No encontré piezas mejores que las tuyas en las mazmorras de tu nivel con datos." or "No hay piezas para esta ranura en los datos.")
 		return
 	end
-	local cols = { { "Ranura", 96 }, { "Mejora", 330 }, { "Dónde", 200 }, { "Probabilidad", 110 }, { "Nivel", 50 } }
+	local cols = { { "Ranura", 112 }, { "Mejora", 320 }, { "Dónde", 194 }, { "Probabilidad", 110 }, { "Nivel", 50 } }
 	if est.cuando ~= "ya" then cols[#cols + 1] = { "Cuándo", 90 } end
 	V:Columnas(cols)
 	for _, fi in ipairs(filas) do
@@ -238,8 +250,8 @@ local function pestanaLlevas(est, V, c)
 			elseif r.ilegible then nota = "atributos sin leer: compárala tú"
 			elseif not r.sabe then nota = "tiene un «Equipar:» que no se pudo medir" end
 			local mejor = c.ya[r.ranura]
-			V:Fila({ icono = r.link and (GetInventoryItemTexture and GetInventoryItemTexture("player", r.ranura)) or nil, item = r.link, iconoEnCol2 = true,
-				celdas = { { ranuraNombre(c, r.ranura), nil, col = "textDim" }, { r.link and tostring(r.link):gsub("[%[%]]", "") or "|cff9ba2b9vacía|r" },
+			V:Fila({ icono = r.link and tonumber(tostring(r.link):match("item:(%d+)")) or nil, item = r.link, iconoEnCol2 = true,
+				celdas = { { ranuraNombre(c, r.ranura), nil, col = "textDim" }, { r.link and nombreLink(r.link) or "|cff9ba2b9vacía|r" },
 					{ nota or (mejor and ("puedes mejorarla: " .. nombreObj(c.e, mejor.p.id, mejor.p.nombre)) or "|cff6bd999lo mejor que hay a tu nivel|r") } } })
 		end
 	end
@@ -311,20 +323,65 @@ local function pestanaMazmorras(est, V, c)
 end
 
 -- Al 60, Contra jugadores y Tu rol: las filas del módulo, dibujadas con las piezas del hub.
+local function sinVerificar(t)
+	local hubo = false
+	t = tostring(t or "")
+	local n
+	t, n = t:gsub("%s*%(NO VERIFICADO[^%)]*%)", ""); hubo = hubo or n > 0
+	t, n = t:gsub("%s*%(mejor, pero NO VERIFICADO%)", ""); hubo = hubo or n > 0
+	t, n = t:gsub(",? ?pero NO VERIFICADO", ""); hubo = hubo or n > 0
+	t, n = t:gsub("%s*NO VERIFICADO:?", ""); hubo = hubo or n > 0
+	t = t:gsub("|cff%x%x%x%x%x%xPROVISIONAL|r: ", ""):gsub("^PROVISIONAL: ", "")
+	return t, hubo
+end
+
 local function pestanaFilas(est, V, c, seccion)
 	local L = A.NuevaLista()
 	local ok, err = pcall(c.e.Seccion, seccion, L)
-	if not ok then V:Vacio("Algo falló", "Abre «Errores» en el riel: ahí está el detalle.") ; if geterrorhandler then geterrorhandler()(err) end return end
-	for _, o in ipairs(L.filas) do
+	if not ok then V:Vacio("Algo falló", "Abre «Errores», abajo en el riel: ahí está el detalle.") ; if geterrorhandler then geterrorhandler()(err) end return end
+	if seccion == "60" or seccion == "jcj" then
+		V:Nota("|cfffabf4dProvisional:|r datos de la beta, sin verificar todavía en Forever. Las bandas abren el 9-12-2026.", "text")
+	end
+	local i = 1
+	while i <= #L.filas do
+		local o = L.filas[i]
+		local txt = sinVerificar(o.texto)
 		if o.blanco then V:Espacio(6)
-		elseif o.tipo == "titulo" then V:Titulo(o.texto)
-		elseif o.tipo == "nota" then V:Nota(o.texto)
+		elseif o.tipo == "titulo" then V:Titulo(txt)
 		elseif o.item then
 			local link = o.item
 			local id = type(link) == "number" and link or tonumber(tostring(link):match("item:(%d+)"))
+			-- la línea de abajo: la nota que sigue (de dónde sale), si la hay
+			local sub = ""
+			local sig = L.filas[i + 1]
+			if sig and sig.tipo == "nota" and not sig.item then sub = sinVerificar(sig.texto); i = i + 1 end
+			local titulo = limpio(txt)
 			V:Columnas({ { "", 840 } }, true)
-			V:Fila({ icono = id, item = link, celdas = { { o.texto } } })
-		else V:Nota(o.texto, "text") end
+			V:Fila({ icono = id, item = link, celdas = { { id and (hex(calidad(id)) .. titulo .. "|r") or titulo, limpio(sub) } } })
+		else V:Nota(txt, o.tipo == "nota" and "textMuted" or "text") end
+		i = i + 1
+	end
+end
+
+-- 8) Tu rol: se elige aquí con un clic.
+local function pestanaRol(est, V, c)
+	local roles = c.e.Roles(c.G, c.clase)
+	V:Titulo("Elige tu rol", "lo usan esta ventana, la guía y «Mi plan»")
+	V:Nota("Mamba compara cada pieza con lo que más le sirve a tu rol. Por defecto lo lee de tus talentos.", "textDim")
+	local P = _G.Polestar
+	local actual = P and P.Get and P.Get("gear.spec." .. c.clase)
+	local auto = not actual or actual == "auto"
+	V:Columnas({ { "", 600 }, { "", 200 } }, true)
+	V:Fila({ celdas = { { "Automático: según mis talentos", auto and ("|cff6bd999en uso ahora|r (" .. c.e.NombreRol(c.rol, c.etiqueta) .. ")") or "" } },
+		ir = (not auto) and function() P.Set("gear.spec." .. c.clase, "auto"); cache = {} end or nil, irTexto = "Elegir" })
+	for _, r in ipairs(roles) do
+		local enUso = (not auto) and actual == r.clave
+		V:Fila({ celdas = { { r.nombre, enUso and "|cff6bd999en uso ahora|r" or "" } },
+			ir = (not enUso) and function()
+				P.Set("gear.spec." .. c.clase, r.clave)
+				if c.G.RefreshPlayer then pcall(c.G.RefreshPlayer) end
+				cache = {}
+			end or nil, irTexto = "Elegir" })
 	end
 end
 
@@ -372,7 +429,7 @@ Hub.Seccion({
 		elseif p == "mazmorras" then pestanaMazmorras(est, V, c)
 		elseif p == "60" then pestanaFilas(est, V, c, "60")
 		elseif p == "jcj" then pestanaFilas(est, V, c, "jcj")
-		elseif p == "rol" then pestanaFilas(est, V, c, "rol")
+		elseif p == "rol" then pestanaRol(est, V, c)
 		else pestanaFilas(est, V, c, "fuentes") end
 	end,
 })
