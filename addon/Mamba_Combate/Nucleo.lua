@@ -8,6 +8,7 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
+	cercanosSola = true,
 }
 
 function M.DB()

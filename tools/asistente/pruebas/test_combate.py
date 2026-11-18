@@ -117,13 +117,21 @@ def nuevo():
     L.execute((AQUI / "mock_barras.lua").read_text(encoding="utf-8"))
     L.execute(MOCK)
     if SIN_EVENTOS:
-        L.execute('for _, e in ipairs({"PLAYER_SWING","PLAYER_SWING_RANGE_UPDATE","DAMAGE_METER_COMBAT_SESSION_UPDATED","DAMAGE_METER_RESET","LOSS_OF_CONTROL_ADDED","UNIT_THREAT_LIST_UPDATE","NAME_PLATE_UNIT_ADDED","ACTIVE_TALENT_GROUP_CHANGED"}) do EVENTOS_DESCONOCIDOS[e] = true end')
+        L.execute('for _, e in ipairs({"PLAYER_SWING","PLAYER_SWING_RANGE_UPDATE","DAMAGE_METER_COMBAT_SESSION_UPDATED","DAMAGE_METER_RESET","LOSS_OF_CONTROL_ADDED","UNIT_THREAT_LIST_UPDATE","NAME_PLATE_UNIT_ADDED","ACTIVE_TALENT_GROUP_CHANGED","DAMAGE_METER_CURRENT_SESSION_UPDATED","CHAT_MSG_COMBAT_HONOR_GAIN","PLAYER_DEAD","PARTY_KILL","PLAYER_ENTERING_WORLD"}) do EVENTOS_DESCONOCIDOS[e] = true end')
     M = L.table()
     cargar = L.eval('function(src, name, M) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f("Mamba_Combate", M) end')
     for n in ARCHIVOS:
         src = (D / n).read_text(encoding="utf-8")
         if ROMPER and n == "Rotacion.lua":
             src = src.replace("local v = R.Condicion(c)", "local v = true")
+        if ROMPER and n == "Ranking.lua":
+            # control negativo K106: ordena aunque haya secretos (los compara) y dibuja sin freno
+            src = src.replace("\tif not secreto then\n\t\tfor _, f in ipairs(filas) do if type(f.total) ~= \"number\" then f.total = 0 end end\n", "\tif true then\n")
+            src = src.replace("\tif pendiente then return end\n", "")
+        if ROMPER and n == "Cercanos.lua":
+            # control negativo K105: anota muertes repetidas y se abre sola aunque esté silenciada
+            src = src.replace("if ultima[clave] and t - ultima[clave] < 10 then", "if false then")
+            src = src.replace("d.cercanosSola and not Cz.Silenciada() and", "d.cercanosSola and")
         cargar(src, n, M)
     return L
 
@@ -356,5 +364,206 @@ check(not malos, "forma de los datos: %s" % malos[:5])
 if NOMBRES_CSV:
     faltan = [i for i in ids if i not in NOMBRES_CSV]
     check(not faltan, "todos los ids existen en el cliente (SpellName.csv): faltan %s" % faltan[:10])
+# ---------- K106: ranking del grupo (ventana como Details)
+Rk = C.Ranking
+L.execute('''
+TIMERS = {}
+C_Timer = { After = function(s, fn) table.insert(TIMERS, fn) end,
+  NewTicker = function(s, fn) local t = { fn = fn }; function t:Cancel() self.cancelado = true end; TICKERS = (TICKERS or 0) + 1; return t end }
+function CorrerTimers() local t = TIMERS; TIMERS = {}; for _, fn in ipairs(t) do fn() end end
+function AbbreviateNumbers(v) ABREVIADO = (ABREVIADO or 0) + 1; return "#cifra" end
+RAID_CLASS_COLORS = { DRUID = { r = 1, g = 0.49, b = 0.04, colorStr = "ffff7c0a" }, WARRIOR = { r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc69b6d" },
+  ROGUE = { r = 1, g = 0.96, b = 0.41, colorStr = "fffff468" } }
+SESION = { totalAmount = 300, maxAmount = 200, durationSeconds = 10, combatSources = {
+  { name = "Tanque", totalAmount = 100, amountPerSecond = 10, classFilename = "WARRIOR", isLocalPlayer = false, sourceGUID = "g2" },
+  { name = "Hope", totalAmount = 200, amountPerSecond = 20, classFilename = "DRUID", isLocalPlayer = true, sourceGUID = "g1" } } }
+PEDIDO_HECHIZOS = {}
+C_DamageMeter.GetCombatSessionSourceFromType = function(s, t, g, x) table.insert(PEDIDO_HECHIZOS, { s, t, g, x }); if g == "g2" then return { totalAmount = 100, maxAmount = 100, combatSpells = { { spellID = 1082, totalAmount = 100 } } } end; return HECHIZOS end
+ANTERIORES = { { sessionID = 11 }, { sessionID = 12, name = "Jabalí" }, { sessionID = 13, name = "la actual" } }
+C_DamageMeter.GetAvailableCombatSessions = function() return ANTERIORES end
+C_DamageMeter.GetCombatSessionFromID = function(id, t) PEDIDO_ID = id; return { maxAmount = 50, combatSources = { { name = "Viejo" .. id, totalAmount = 50, classFilename = "DRUID", sourceGUID = "gv" } } } end
+''')
+Rk.Abrir()
+V = Rk.Ventana()
+check(V is not None and V.visible, "K106: el ranking se abre")
+check(C.DB().rankingAbierto is True, "K106: recuerda que quedó abierto")
+fila1 = V.filas[1]
+check(fila1.visible and "Hope" in str(fila1.izq.texto) and "(tú)" in str(fila1.izq.texto) and str(fila1.izq.texto).startswith("1."), "K106: fila 1 = Hope (tú), ordenado (fue %s)" % fila1.izq.texto)
+check(fila1.barra.valor == 200 and "/s" in str(fila1.der.texto), "K106: barra con su total y por segundo")
+check(fila1.barra.color[1] == 1 and abs(fila1.barra.color[2] - 0.49) < 1e-9, "K106: barra con el color de su clase")
+check(not V.filas[3].visible, "K106: sin filas de más")
+Rk.estado.tipo = "HealingDone"; Rk.Dibujar()
+check("Curación" in V.estado.texto, "K106: tipo Curación")
+Rk.estado.tipo = "DamageTaken"; Rk.Dibujar()
+check("Daño recibido" in V.estado.texto, "K106: tipo Daño recibido")
+V.tipos[1].scripts.OnClick(V.tipos[1])
+check(Rk.estado.tipo == "DamageDone", "K106: botón Daño")
+# clic en Tanque: desglose de ESE jugador
+V.filas[2].scripts.OnClick(V.filas[2])
+check(Rk.estado.guid == "g2" and G.PEDIDO_HECHIZOS[len(G.PEDIDO_HECHIZOS)][3] == "g2", "K106: clic en una barra pide los hechizos de ese jugador")
+check("Zarpa" in str(V.filas[1].izq.texto) and "100 %" in str(V.filas[1].der.texto), "K106: desglose con nombre del hechizo y %% (fue %s / %s)" % (V.filas[1].izq.texto, V.filas[1].der.texto))
+check("Tanque" in V.estado.texto and V.atras.visible, "K106: dice de quién es y tiene Volver")
+V.atras.scripts.OnClick(V.atras)
+check(Rk.estado.guid is None and "Hope" in str(V.filas[1].izq.texto), "K106: Volver regresa al grupo")
+# peleas anteriores
+V.segs[3].scripts.OnClick(V.segs[3])
+check(G.PEDIDO_ID == 12 and "Viejo12" in str(V.filas[1].izq.texto) and "Jabalí" in V.estado.texto, "K106: pelea anterior, la más nueva primero (id 12)")
+V.mas.scripts.OnClick(V.mas)
+check(G.PEDIDO_ID == 11 and "2 de 2" in V.estado.texto, "K106: «Más vieja» va a la pelea 11")
+V.segs[1].scripts.OnClick(V.segs[1])
+# valores secretos: no compara, pasa los valores a la barra y al texto, orden del juego
+L.execute('''SESION = { maxAmount = Secreto(), totalAmount = Secreto(), combatSources = {
+  { name = Secreto(), totalAmount = Secreto(), amountPerSecond = Secreto(), classFilename = "DRUID", isLocalPlayer = Secreto(), sourceGUID = Secreto() },
+  { name = Secreto(), totalAmount = Secreto(), classFilename = "WARRIOR", sourceGUID = Secreto() } } }''')
+ABREV0 = G.ABREVIADO or 0
+C.Proteger("ranking", Rk.Dibujar)
+check(C.DB().diag.fallas is None and len(list(G.ERRORES.values())) == 0, "K106: con todo secreto no rompe: %s" % (C.DB().diag.fallas and list(C.DB().diag.fallas.values())[:2]))
+check(V.filas[1].visible and V.filas[2].visible and G.issecretvalue(V.filas[1].barra.valor), "K106: con secretos igual muestra las barras (valor secreto a la barra)")
+check((G.ABREVIADO or 0) > ABREV0 and "#cifra" in str(V.filas[1].der.texto), "K106: la cifra secreta la abrevia el juego")
+check(V.filas[1].barra.color[1] == 1 and V.filas[2].barra.color[1] == 0.78, "K106: orden del juego (druida, guerrero) con su color")
+check("esconde" in V.estado.texto, "K106: avisa que en combate el juego esconde las cifras")
+V.filas[1].scripts.OnClick(V.filas[1])
+check(G.issecretvalue(Rk.estado.guid) and C.DB().diag.fallas is None and len(list(G.ERRORES.values())) == 0, "K106: clic con guid secreto: lo pasa al juego sin romper")
+V.atras.scripts.OnClick(V.atras)
+# freno: 30 eventos seguidos = un solo dibujo
+L.execute('SESION = { maxAmount = 10, combatSources = { { name = "Hope", totalAmount = 10, classFilename = "DRUID" } } }; TIMERS = {}')
+for _ in range(30):
+    L.execute('Fire("DAMAGE_METER_COMBAT_SESSION_UPDATED")')
+if not SIN_EVENTOS:
+    check(len(G.TIMERS) == 1, "K106: 30 eventos del medidor = 1 dibujo pendiente (freno), fueron %d" % len(G.TIMERS))
+    L.execute('CorrerTimers()')
+    check("Hope" in str(V.filas[1].izq.texto), "K106: el dibujo frenado llega")
+Rk.Cerrar()
+L.execute('TIMERS = {}; Fire("DAMAGE_METER_COMBAT_SESSION_UPDATED")')
+check(len(G.TIMERS) == 0, "K106: cerrada, no trabaja")
+check(C.DB().rankingAbierto is False, "K106: recuerda que quedó cerrada")
+
+# ---------- K105: enemigos cerca (ventana como Spy) sobre la alerta del Tasador
+Cz = C.Cercanos
+check(not Cz.HayDeteccion(), "K105: sin Tasador no hay detección propia")
+Cz.Abrir()
+VC = Cz.Ventana()
+check(VC.visible and "Tasador" in str(VC.vacio.texto), "K105: sin Tasador lo dice en la ventana")
+Cz.Cerrar()
+# la alerta del Tasador con su API (archivo real), sobre un Tasador falso mínimo
+L.execute('''
+MambaAPI = {}
+UNIDADES = {}
+function UnitIsPlayer(u) return UNIDADES[u] ~= nil or (OBJ_JUGADOR and u == "target") end
+function UnitFactionGroup(u) if u == "player" then return "Horde" end; return UNIDADES[u] and UNIDADES[u].fac end
+UnitName = function(u) if UNIDADES[u] then return UNIDADES[u].name end; return ({ player = "Hope", party1 = "Tanque", target = "Jabalí" })[u] or u end
+UnitLevel = function(u) if UNIDADES[u] then return UNIDADES[u].lvl end; if u == "target" then return NIVEL_OBJ or 38 end; return 39 end
+UnitClass = function(u) if UNIDADES[u] then return UNIDADES[u].cl, UNIDADES[u].tok end; return "Druida", "DRUID" end
+function GetGuildInfo(u) return UNIDADES[u] and UNIDADES[u].gremio end
+UnitCanAttack = function() return true end
+AVISOS_PANTALLA, SONIDOS = 0, 0
+RaidWarningFrame = {}; ChatTypeInfo = { RAID_WARNING = {} }; SOUNDKIT = { RAID_WARNING = 1 }
+function RaidNotice_AddMessage() AVISOS_PANTALLA = AVISOS_PANTALLA + 1 end
+PlaySound = function() SONIDOS = SONIDOS + 1 end
+TAS = { db = { ajustes = {} }, Leer = function(v) if issecretvalue(v) then return nil end; return v end, Decir = function() end }
+GUARDA_DESC = EVENTOS_DESCONOCIDOS; EVENTOS_DESCONOCIDOS = {}
+''')
+src = (AQUI.parent.parent.parent / "addon" / "Tasador" / "Alerta.lua").read_text(encoding="utf-8")
+L.eval('function(src) local f = assert(loadstring(src, "@Alerta.lua")); f("Tasador", TAS) end')(src)
+L.execute('EVENTOS_DESCONOCIDOS = GUARDA_DESC; Fire("PLAYER_LOGIN")')
+check(Cz.HayDeteccion(), "K105: engancha con MambaAPI.AlVerEnemigo del Tasador")
+check(C.DB().cercanosSola is True, "K105: abrir sola viene encendido")
+G.RELOJ = 200
+L.execute('UNIDADES.nameplate1 = { name = "Pícaro", lvl = 41, fac = "Alliance", cl = "Pícaro", tok = "ROGUE", gremio = "Los Rojos" }; TIMERS = {}; Fire("NAME_PLATE_UNIT_ADDED", "nameplate1")')
+check(VC.visible and VC.abiertaSola, "K105: aparece un enemigo y la ventana se abre sola")
+check(G.AVISOS_PANTALLA == 1 and G.SONIDOS == 1, "K105: la alerta del Tasador avisa como siempre")
+L.execute('CorrerTimers()')
+f1 = VC.filas[1]
+check("|cfffff468Pícaro|r" in str(f1.arriba.texto), "K105: nombre en el color de su clase (fue %s)" % f1.arriba.texto)
+check("nivel 41" in str(f1.abajo.texto) and "Pícaro" in str(f1.abajo.texto) and "<Los Rojos>" in str(f1.abajo.texto), "K105: nivel, clase y gremio (fue %s)" % f1.abajo.texto)
+check("hace 0 s" in str(f1.cuando.texto), "K105: hace cuánto se vio")
+check(VC.tic is not None and not VC.tic.cancelado, "K105: reloj de 5 s con la ventana abierta")
+VC.bSilencio.scripts.OnClick(VC.bSilencio)
+check(Cz.Silenciada() and G.TAS.db.ajustes.alertaSilencio is True and VC.bSilencio.texto == "Activar alerta", "K105: el botón silencia la alerta")
+G.RELOJ = 230
+L.execute('UNIDADES.nameplate2 = { name = "Mago", lvl = Secreto(), fac = "Alliance", cl = "Mago", tok = "MAGE" }; Fire("NAME_PLATE_UNIT_ADDED", "nameplate2"); CorrerTimers()')
+check(G.AVISOS_PANTALLA == 1 and G.SONIDOS == 1, "K105: silenciada: sin cartel ni sonido")
+check("Mago" in str(VC.filas[1].arriba.texto) and "nivel ??" in str(VC.filas[1].abajo.texto), "K105: silenciada, la lista se sigue llenando; nivel secreto = ??")
+check("Pícaro" in str(VC.filas[2].arriba.texto) and "hace 30 s" in str(VC.filas[2].cuando.texto), "K105: el más reciente arriba (fue %s)" % VC.filas[2].cuando.texto)
+Cz.Cerrar()
+Cz.cerradaEn = None  # que solo cuente el silencio
+G.RELOJ = 240
+L.execute('UNIDADES.nameplate3 = { name = "Brujo", lvl = 40, fac = "Alliance", cl = "Brujo", tok = "WARLOCK" }; Fire("NAME_PLATE_UNIT_ADDED", "nameplate3")')
+check(not VC.visible, "K105: silenciada no se abre sola")
+Cz.Silenciar(False)
+check(not Cz.Silenciada(), "K105: se vuelve a activar la alerta")
+L.execute('UNIDADES.nameplate4 = { name = Secreto(), lvl = 40, fac = "Alliance" }; Fire("NAME_PLATE_UNIT_ADDED", "nameplate4")')
+check(len(list(G.ERRORES.values())) == 0 and C.DB().diag.fallas is None, "K105: nombre secreto (instancia): no rompe")
+Cz.Cerrar()
+G.RELOJ = 355
+check([x.nombre for x in Cz.Recientes().values()] == ["Brujo"], "K105: «cerca ahora» = últimos 2 minutos")
+# abrir sola: solo con un enemigo NUEVO, y no si el jugador la cerró hace menos de un minuto
+Cz.cerradaEn = None
+G.RELOJ = 365
+L.execute('Fire("NAME_PLATE_UNIT_ADDED", "nameplate3")')  # el Brujo otra vez (visto hace 2 min: vuelve)
+check(VC.visible, "K105: un enemigo que vuelve tras irse abre la ventana")
+Cz.Cerrar()
+G.RELOJ = 370
+L.execute('UNIDADES.nameplate5 = { name = "Chamán", lvl = 40, fac = "Alliance", cl = "Chamán", tok = "SHAMAN" }; Fire("NAME_PLATE_UNIT_ADDED", "nameplate5")')
+check(not VC.visible, "K105: la cerró el jugador: no se reabre sola al minuto")
+G.RELOJ = 380
+L.execute('Fire("NAME_PLATE_UNIT_ADDED", "nameplate5")')
+check(not VC.visible, "K105: el mismo enemigo visto otra vez no la reabre")
+# muertes
+L.execute('''EPOCA = 1800000000; time = function() return EPOCA end
+COMBATLOG_HONORGAIN = "%s muere, muerte con honor. Rango: %s (Puntos de honor estimados: %d)"
+COMBATLOG_HONORGAIN_NO_RANK = "%s muere, muerte con honor."
+GUIDS = { player = "G-yo", party1 = "G-p1" }; UnitGUID = function(u) return GUIDS[u] end
+GetNumGroupMembers = function() return 2 end; IsInRaid = function() return false end
+JUGADORES = { ["G-brujo"] = "Brujo", ["G-picaro"] = "Pícaro", ["G-chaman"] = "Chamán" }
+GetPlayerInfoByGUID = function(g) if JUGADORES[g] then return "Clase", "X", "Raza", "X", 2, JUGADORES[g], "" end end''')
+p = Cz.Patron("%2$s mató a %1$s.")
+check(p is not None and L.eval('string.match')("Juan mató a Pepe.", p) == "Pepe", "K105: patrón de honor con posiciones (%1$s)")
+if not SIN_EVENTOS:
+    L.execute('Fire("PARTY_KILL", "G-yo", "G-brujo")')
+    mj = C.DB().muertesJcJ
+    check(len(mj) == 1 and mj[1].tipo == "mataste" and mj[1].nombre == "Brujo" and mj[1].claseToken == "WARLOCK" and mj[1].nivel == 40, "K105: PARTY_KILL tuyo = mataste, con clase y nivel")
+    L.execute('Fire("CHAT_MSG_COMBAT_HONOR_GAIN", "Brujo muere, muerte con honor. Rango: Cabo (Puntos de honor estimados: 12)")')
+    check(len(C.DB().muertesJcJ) == 1, "K105: el mensaje de honor de la misma muerte no la cuenta dos veces")
+    L.execute('Fire("CHAT_MSG_COMBAT_HONOR_GAIN", "Pícaro muere, muerte con honor.")')
+    check(len(C.DB().muertesJcJ) == 2 and C.DB().muertesJcJ[1].tipo == "grupo", "K105: mensaje de honor sin rango (clave real del juego; texto esMX inventado, NO VERIFICADO) = tu grupo")
+    L.execute('Fire("PARTY_KILL", "G-yo", "G-picaro")')
+    check(len(C.DB().muertesJcJ) == 2 and C.DB().muertesJcJ[1].tipo == "mataste", "K105: si después llega tu golpe, sube a «mataste»")
+    L.execute('Fire("PARTY_KILL", "G-p1", "G-chaman")')
+    check(C.DB().muertesJcJ[1].tipo == "grupo" and C.DB().muertesJcJ[1].nombre == "Chamán", "K105: PARTY_KILL de alguien del grupo = tu grupo")
+    n0 = len(C.DB().muertesJcJ)
+    L.execute('Fire("PARTY_KILL", "G-extraño", "G-brujo"); Fire("PARTY_KILL", "G-yo", "G-jabali"); Fire("PARTY_KILL", Secreto(), Secreto()); Fire("CHAT_MSG_COMBAT_HONOR_GAIN", Secreto())')
+    check(len(C.DB().muertesJcJ) == n0, "K105: muerte ajena, de un bicho o secreta: nada")
+    L.execute('''C_DeathRecap = { GetRecapLink = function() return RECAP_LINK end,
+      GetRecapEvents = function(id) return RECAP[id] end }
+    RECAP_LINK = "|Hdeath:7|h[Registro]|h"
+    RECAP = { [7] = { { sourceName = "Mago", timestamp = EPOCA - 2 } }, [8] = { { sourceName = "Jabalí", timestamp = EPOCA } },
+      [9] = { { sourceName = "Chamán", timestamp = EPOCA - 600 } }, [10] = { { sourceName = "Chamán", timestamp = EPOCA, hideCaster = true } } }
+    TIMERS = {}; Fire("PLAYER_DEAD"); CorrerTimers()''')
+    check(C.DB().muertesJcJ[1].tipo == "temato" and C.DB().muertesJcJ[1].nombre == "Mago", "K105: el registro de muerte dice quién te mató")
+    n0 = len(C.DB().muertesJcJ)
+    G.RELOJ = 500
+    L.execute('Fire("PLAYER_DEAD"); CorrerTimers()')
+    check(len(C.DB().muertesJcJ) == n0, "K105: el mismo registro de antes (muerte por caída o bicho) no repite al Mago")
+    for k in (8, 9, 10):
+        L.execute('RECAP_LINK = "|Hdeath:%d|h[R]|h"; Fire("PLAYER_DEAD"); CorrerTimers()' % k)
+    check(len(C.DB().muertesJcJ) == n0, "K105: bicho, registro de hace 10 min o atacante escondido: no entran")
+    Cz.vista = "muertes"; Cz.Abrir()
+    check("Mataste: 2" in VC.estado.texto and "Tu grupo: 1" in VC.estado.texto and "Te mataron: 1" in VC.estado.texto, "K105: cuenta muertes (fue %s)" % VC.estado.texto)
+    check("te mató" in str(VC.filas[1].arriba.texto) and "Tu grupo mató a " in str(VC.filas[2].arriba.texto) and "Mataste a " in str(VC.filas[3].arriba.texto), "K105: lista de muertes")
+for i in range(60):
+    Cz.Muerte("mataste", "X%d" % i)
+check(len(C.DB().muertesJcJ) == 50, "K105: guarda como mucho 50 muertes")
+Cz.Abrir(); Cz.Cerrar()
+check(VC.tic is None, "K105: al cerrar se apaga el reloj")
+check(len(list(G.ERRORES.values())) == 0 and C.DB().diag.fallas is None, "K105/K106 sin errores: %s" % (C.DB().diag.fallas and list(C.DB().diag.fallas.values())[:3]))
+filasM, cabM = C.FilasMedidor()
+check(any(str(f.titulo) == "Ranking del grupo" for f in filasM.values()), "K106: botón «Abrir el ranking» en Combate › Medidor")
+m.elegir("avisos"); m.refrescar()
+check(C.DB().diag.fallas is None, "panel Avisos con el interruptor y el botón de Enemigos cerca")
+src_todo = "".join((D / n).read_text(encoding="utf-8") for n in ("Ranking.lua", "Cercanos.lua"))
+check("SLASH_" not in src_todo and "SlashCmdList" not in src_todo, "K105/K106 sin comandos /")
+check("GameFont" not in src_todo and "|cff" not in src_todo and "SetTextColor(" not in src_todo, "K105/K106: letra y colores de la apariencia (E2/E3)")
+check("OnUpdate" not in src_todo, "K105/K106: nada corre por cuadro")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
