@@ -508,8 +508,8 @@ hecho ni respaldado por Blizzard.
    {build} (+ ItemSparse esMX de Classic Era 1.15.9.70576), y la caché de hotfixes del cliente en esMX
    (Cache/ADB/esMX/DBCache.bin) para los objetos nuevos de Forever. Lo que no tiene nombre esMX queda en inglés con "*" (NO VERIFICADO).
 
-NO se usa: AtlasLoot (GPL-2.0 solo, choca con GPL-3.0), QuestieDB ni Polestar_Codex (permisos solo
-para Polestar), Wowhead ni otros sitios que prohíben copiar.
+Fuera, a propósito: bases de botín o de misiones con licencia GPL-2.0 solo (choca con GPL-3.0) o con
+permisos solo para otro addon, y sitios que prohíben copiar.
 
 Huellas sha256 de lo que se leyó:
 {huellas}
