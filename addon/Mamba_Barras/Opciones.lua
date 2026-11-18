@@ -149,19 +149,22 @@ local function dibujarBloqueado(p, ancho)
 	b:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 0, -16)
 end
 
-function M.DibujarPanel(p, ancho, alto)
+-- sinLista: la lista de barras la muestra otro (el índice del menú de Polestar).
+function M.DibujarPanel(p, ancho, alto, sinLista)
 	panel = p
 	if M.bloqueadoPor then return dibujarBloqueado(p, ancho) end
 	local pie = 50
+	local listaW = sinLista and 0 or LISTA_W
 	-- izquierda: la lista de barras
 	local izq = CreateFrame("Frame", nil, p)
 	izq:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
-	izq:SetSize(LISTA_W, alto - pie)
-	local raya = P.Linea(p, true)
+	izq:SetSize(math.max(1, listaW), alto - pie)
+	if sinLista then izq:Hide() end
+	local raya = P.Linea(sinLista and izq or p, true)
 	raya:SetPoint("TOPLEFT", izq, "TOPRIGHT", 0, 0)
 	raya:SetPoint("BOTTOMLEFT", izq, "BOTTOMRIGHT", 0, 0)
 	local y = 4
-	for _, d in ipairs(todas()) do
+	for _, d in ipairs(sinLista and {} or todas()) do
 		local f = P.Fila(izq, LISTA_W, 24)
 		f.id = d.id
 		f:SetPoint("TOPLEFT", izq, "TOPLEFT", 0, -y)
@@ -179,8 +182,8 @@ function M.DibujarPanel(p, ancho, alto)
 	end
 	-- derecha: las opciones de la barra elegida
 	local der = CreateFrame("Frame", nil, p)
-	der:SetPoint("TOPLEFT", izq, "TOPRIGHT", 8, 0)
-	der:SetSize(ancho - LISTA_W - 8, alto - pie)
+	der:SetPoint("TOPLEFT", p, "TOPLEFT", sinLista and 0 or (LISTA_W + 8), 0)
+	der:SetSize(ancho - (sinLista and 0 or (LISTA_W + 8)), alto - pie)
 	p.derecha = der
 	-- abajo: los botones
 	local mover = P.Boton(p, "Mover barras", function() M.EmpezarMover() end, true)
@@ -229,8 +232,12 @@ end
 function M.AbrirOpciones(id)
 	if id then elegida = id end
 	local A = _G.Asistente
+	local UI = _G.Polestar and _G.Polestar.UI
 	if M.enVentanaMamba and A and A.AbrirVentana then
 		A.AbrirVentana("barras")
+	elseif M.enMenuPolestar and UI and UI.ShowPicker and UI.Picker and UI.Picker.ShowSection then
+		UI.ShowPicker()
+		UI.Picker.ShowSection("MambaBarras")
 	else
 		ventanaPropia():Show()
 	end
@@ -318,6 +325,35 @@ ev:SetScript("OnEvent", function()
 	if A and A.RegistrarPestana then
 		local ok = pcall(A.RegistrarPestana, { clave = "barras", nombre = "Barras", dibujar = M.DibujarPanel })
 		M.enVentanaMamba = ok
+	end
+	-- 1b) el menú de Polestar (su riel izquierdo): sección "Barras", con la lista de barras en su índice
+	local PS = _G.Polestar
+	local UI = PS and PS.UI
+	if not M.enVentanaMamba and UI and UI.RegisterSection then
+		local hecho = false
+		M.enMenuPolestar = UI.RegisterSection({
+			key = "MambaBarras", label = "Barras", icon = "layers", order = 60,
+			build = function(parent)
+				local w, h = parent:GetWidth(), parent:GetHeight()
+				if not w or w < 200 then w = 620 end
+				if not h or h < 200 then h = 480 end
+				M.DibujarPanel(parent, w, h, true)
+				hecho = true
+			end,
+			render = function() if hecho then M.RefrescarPanel(); if not M.bloqueadoPor then elegir(elegida) end end end,
+			nav = function()
+				local items = {}
+				for _, d in ipairs(todas()) do
+					local c = M.Config(d.id)
+					items[#items + 1] = { key = tostring(d.id), label = d.nombre, count = c.mostrar and c.botones or 0 }
+				end
+				return items, tostring(elegida)
+			end,
+			onNav = function(k)
+				elegida = tonumber(k) or k
+				if UI.Picker and UI.Picker.Render then UI.Picker.Render() end
+			end,
+		}) and true or false
 	end
 	-- 2) Ajustes de Polestar › Mamba › Barras: un botón que la abre
 	if A and A.Opciones then

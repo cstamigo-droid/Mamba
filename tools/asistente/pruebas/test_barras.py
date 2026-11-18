@@ -233,5 +233,22 @@ for n in ARCHIVOS:
     check("|cff" not in src.lower(), n + ": color fijo en el texto (E3)")
     check(not re.search(r"GameFont\w+", src) or n == "Piezas.lua", n + ": letra fija (E2), solo permitida en el respaldo sin Polestar")
 
+# ---------- 11. Sección "Barras" en el menú de Polestar (riel izquierdo del hub) ----------
+L, M = nuevo('Polestar = { UI = { Picker = {} } }; function Polestar.UI.RegisterSection(s) SECCION = s; return true end; '
+             'function Polestar.UI.ShowPicker() ABIERTO = true end; function Polestar.UI.Picker.ShowSection(k) SECCION_VISTA = k end; '
+             'function Polestar.UI.Picker.Render() end')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+S = G.SECCION
+check(S is not None and S.key == "MambaBarras" and S.label == "Barras", "sección registrada en el hub")
+items, activa = S.nav()
+check(len(list(items.values())) == 11 and activa == "1", "índice: 9 barras + formas + mascota, la 1 elegida")
+padre = L.eval('function() local f = CreateFrame("Frame", nil, UIParent); f.w, f.h = 640, 480; return f end')()
+S.build(padre)
+S.onNav("3"); S.render()
+check(not list(G.ERRORES.values()), "build/render sin errores: %s" % list(G.ERRORES.values()))
+M.AbrirOpciones(5)
+check(G.ABIERTO and G.SECCION_VISTA == "MambaBarras", "abrir opciones lleva a la sección del hub")
+
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)
