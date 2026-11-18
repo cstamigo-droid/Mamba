@@ -458,7 +458,7 @@ function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, can
 			r.accion = "vende"
 			r.motivo = "Hoy todo el mercado está más bajo que lo normal (" .. T.Dinero(normal) .. "): es el precio de hoy. No hay datos de que vuelva a subir."
 		else
-			r.accion, r.motivo = "vende", (vd and vd >= 1) and "Precio donde lo de delante se vende en un día." or "Precio del 20 % más barato de hoy."
+			r.accion, r.motivo = "vende", (vd and vd >= 1) and "Precio donde lo de delante se vende en un día." or "Precio para vender rápido hoy."
 		end
 	end
 	-- ¿La subasta deja más que el vendedor? Con la comisión y el depósito que se pierde si no se vende.

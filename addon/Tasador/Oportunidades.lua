@@ -260,7 +260,6 @@ function T.MostrarReventa(tipo)
 			T.Decir("  Nada que cumpla todas las condiciones ahora. Es normal: el detector pide margen, liquidez medida y precio que no venga bajando.")
 		end
 		if type(err) == "number" and err > 0 then T.Decir("  (" .. err .. " objetos aún cargando: repite el comando en unos segundos)") end
-		T.Decir("  " .. T.Col("gris", "Solo consejos: compras tú, con tu clic. " .. NOVERIF))
 	end)
 end
 
@@ -272,7 +271,7 @@ function T.MostrarVender()
 		local a, b = T.TextoConsejo(lista[i])
 		T.Decir("  " .. a .. (b ~= "" and ("  " .. T.Col("gris", b)) or ""))
 	end
-	T.Decir("  " .. T.Col("gris", "\"Vende ya\" = el precio bajó 3 días seguidos. Publicas tú, con tu clic. " .. NOVERIF))
+	T.Decir("  " .. T.Col("gris", "\"Vende ya\" = el precio bajó 3 días seguidos."))
 end
 
 function T.MostrarFabricar()
@@ -401,7 +400,7 @@ function T.RefrescarVentana(recalcular)
 	local pie
 	if not edad then pie = "Sin escaneo: abre la subasta y aprieta \"Escanear (Tasador)\"."
 	elseif #vistas == 0 then pie = "Nada aquí ahora (escaneo de hace " .. T.Horas(edad) .. "). Es normal: los filtros piden margen y ventas medidas."
-	else pie = #vistas .. " filas · escaneo de hace " .. T.Horas(edad) .. " · solo consejos: compras y publicas tú, con tu clic." end
+	else pie = #vistas .. " filas · escaneo de hace " .. T.Horas(edad) .. "." end
 	v.pie:SetText(colV("gris", pie))
 	return vistas
 end
