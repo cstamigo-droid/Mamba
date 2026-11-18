@@ -81,7 +81,7 @@ end
 --   * no es del jugador (tus subastas no miden al mercado).
 -- Puede incluir cancelaciones de lo más barato: por eso se llama "desaparecidas", no "vendidas seguro".
 -- Devuelve ventas[id] = { u = unidades, c = cobre }, una entrada por cada objeto observado (u puede ser 0),
--- o nil si no se puede estimar (primera foto, tiempo raro o más de 48 h).
+-- o nil si no se puede estimar (primera foto, tiempo raro o más de 8 h).
 function T.CompararFotos(vieja, nueva, segundos, jugador)
 	if type(vieja) ~= "table" or type(nueva) ~= "table" then return nil end
 	if type(segundos) ~= "number" or segundos <= 0 or segundos > T.VENTANA_MAX then return nil end
@@ -89,7 +89,12 @@ function T.CompararFotos(vieja, nueva, segundos, jugador)
 	for id, vendedores in pairs(vieja) do
 		vendedores = T.FotoTabla(vendedores)
 		local ahoraItem = T.FotoTabla(nueva[id]) or {}
-		if jugador then vendedores[jugador], ahoraItem[jugador] = nil, nil end
+		if jugador and (vendedores[jugador] or ahoraItem[jugador]) then -- copia: no tocar las tablas de quien llama
+			local v2, a2 = {}, {}
+			for k, x in pairs(vendedores) do if k ~= jugador then v2[k] = x end end
+			for k, x in pairs(ahoraItem) do if k ~= jugador then a2[k] = x end end
+			vendedores, ahoraItem = v2, a2
+		end
 		if vendedores["?"] or ahoraItem["?"] then vendedores, ahoraItem = juntar(vendedores), juntar(ahoraItem) end
 		local minNuevo
 		for quien, precios in pairs(ahoraItem) do
@@ -291,7 +296,8 @@ T.Delante = delanteDe
 -- percentil 20 de hoy: así una unidad suelta a 1 cobre no fija tu precio.
 function T.PrecioSugerido(esc, ventasDia)
 	if #esc == 0 then return nil end
-	if not ventasDia then return percentilEscalera(esc, 0.2) end
+	-- con menos de 1 venta al día (límite bajo) no hay "un día de ventas" que medir: percentil 20
+	if not ventasDia or ventasDia < 1 then return percentilEscalera(esc, 0.2) end
 	local acum = 0
 	for _, x in ipairs(esc) do
 		acum = acum + x[2]
@@ -318,6 +324,15 @@ end
 function T.ProbVenta(ventasDia, delante, k, horas)
 	if not ventasDia or ventasDia <= 0 then return nil end
 	return min(1, ventasDia * (horas / 24) / (delante + k))
+end
+
+-- Ventas por día para la probabilidad de venta: el límite bajo si es 1 o más; si las ventas están medidas pero
+-- casi no hay, el promedio medido con un piso de 0,05 (casi nada). nil solo si no hay nada medido (y entonces
+-- quien llama supone 1 de cada 2 y lo dice).
+function T.VentasParaProb(liq)
+	if not liq or liq.midiendo then return nil end
+	if (liq.ventasDiaBaja or 0) >= 1 then return liq.ventasDiaBaja end
+	return max(liq.ventasDia or 0, 0.05)
 end
 
 -- Pérdida esperada de depósitos hasta vender: publicar hasta que salga (geométrica) => dep * (1 - p) / p.
@@ -423,7 +438,8 @@ function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, can
 	local normal = T.PrecioNormal(e, hoyDia)
 	local liq = T.Liquidez(e, hoyDia)
 	local vd = liq and liq.ventasDiaBaja
-	if vd then r.cuantas = math.max(1, floor(vd * (a.horasPublicacion or 24) / 24)) end
+	if vd and vd >= 1 then r.cuantas = math.max(1, floor(vd * (a.horasPublicacion or 24) / 24)) end
+	r.pocoVenta = vd ~= nil and vd < 1
 	r.tendencia, r.normal = tendencia, normal
 	if #escalera == 0 then
 		if not normal then return nil, "nadie lo vende hoy y no tengo su precio normal" end
@@ -446,11 +462,13 @@ function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, can
 	end
 	-- ¿La subasta deja más que el vendedor? Con la comisión y el depósito que se pierde si no se vende.
 	local delante = delanteDe(escalera, r.precio)
-	local p = T.ProbVenta(vd, delante, cantidad, a.horasPublicacion or 24) or 0.5
+	local p = T.ProbVenta(T.VentasParaProb(liq), delante, cantidad, a.horasPublicacion or 24) or 0.5
 	local perdida = T.PerdidaDeposito(T.Deposito(id, vendedor, cantidad, a), p) or 0
 	r.neto = r.precio * (1 - a.comision) - perdida / cantidad
 	if vendedor and vendedor > 0 and r.neto < vendedor * (a.margen or 1.5) then
 		r.accion, r.precio, r.motivo = "vendedor", vendedor, "La subasta no deja al menos 1,5 veces lo que paga el vendedor (después de comisión y depósito)."
+	elseif r.pocoVenta then
+		r.motivo = (r.motivo or "") .. " Ojo: casi no se vende (menos de 1 al día)."
 	end
 	return r
 end
@@ -471,7 +489,8 @@ function T.Fabricar(receta, precioDe, a, vendedorDe, liqDe, delanteDeId)
 	local n = receta.n or 1
 	local liq = liqDe and liqDe(receta.producto)
 	local vd = liq and liq.ventasDiaBaja
-	if liq and not liq.midiendo and (liq.ventasDia or 0) <= 0 then
+	-- medido y menos de 1 venta al día (límite bajo): no se fabrica para vender
+	if liq and not liq.midiendo and (vd or 0) < 1 then
 		return { producto = receta.producto, costo = costo, noSeVende = true, horas = liq.horas, n = n }
 	end
 	local delante = (delanteDeId and delanteDeId(receta.producto, pv)) or 0

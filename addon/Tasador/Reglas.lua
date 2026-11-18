@@ -21,7 +21,7 @@ T.DEFAULTS = {
 	minVendedor = 100,    -- reventa al vendedor: ganancia mínima 1 plata
 	probMin = 0.2,        -- reventa: probabilidad mínima de vender en una publicación
 	maxDiasVender = 2,    -- reventa: no comprar lo que tardaría más de 2 días en venderse
-	riesgoDia = 0.05,     -- reventa: se descuenta 5 % por día de espera (riesgo de que baje; SUPUESTO, ORO.md: caídas de 50 % en una semana)
+	riesgoDia = 0.08,     -- reventa: se descuenta 8 % por día de espera (SUPUESTO; ORO.md: caídas de 50 % en una semana ≈ 7-10 %/día)
 	edadFotoMax = 3600,   -- comprar: el escaneo tiene que ser de hace 60 min o menos
 	edadFotoVenta = 21600, -- vender: el escaneo tiene que ser de hace 6 h o menos
 }

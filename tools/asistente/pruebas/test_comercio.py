@@ -336,6 +336,10 @@ c = T.ConsejoVenta(hist(L, [10000, 8000, 6000], 3000), F({"Ana": {6000: {4: 5}},
 check(c.accion != "espera", "sin tendencia medida (3 días) nunca dice 'espera'")
 c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000), F({"Ana": {1: {4: 1}}, "Beto": {8700: {4: 100}}}), 1, 3000, 600, a, "Hope")
 check(c.precio == 8700, "una unidad suelta a 1 cobre no fija el precio (percentil 20)")
+una_venta = {"v": {"3000": 1}, "vc": {"3000": 9000}, "o": {"3000": 24 * 3600}}
+check(T.PrecioSugerido(L.eval("{ {100, 1}, {8700, 100} }"), 0) == 8700, "PrecioSugerido con 0 ventas al día: percentil 20, nunca el mínimo suelto")
+c = T.ConsejoVenta(hist(L, [9000, 9000], 3000, una_venta), F({"Ana": {100: {4: 1}}, "Beto": {8700: {4: 100}}}), 0, 3000, 600, a, "Hope")
+check(c.precio == 8700 and c.cuantas is None and "casi no se vende" in c.motivo, f"1 venta al día: no vende al mínimo suelto (regresión 1 del revisor): {c.precio}")
 c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000, liq_ok), F({"Ana": {9500: {4: 30}}, "Beto": {9800: {4: 40}}}), 1, 3000, 600, a, "Hope")
 check(c.accion == "vende" and c.precio == 9800 and c.cuantas == 50, f"vende en el escalón donde lo de delante pasa de un día de ventas ({c.precio}, {c.cuantas})")
 c = T.ConsejoVenta(hist(L, [1007, 1007, 1007, 1007], 3000), F({"Ana": {1060: {4: 300}}}), 1000, 3000, 600, a, "Hope", 20)
@@ -352,6 +356,8 @@ check(abs(f.costo - 80) < 0.01 and f.sinLiquidez and abs(f.ganancia - (200 * 0.9
       f"margen de una receta con depósito supuesto ({f.ganancia})")
 nada = T.Fabricar(receta, precio, a, None, L.eval("function() return { midiendo = false, ventasDia = 0, ventasDiaBaja = 0, horas = 20 } end"))
 check(nada.noSeVende and nada.ganancia is None, "producto medido que no se vende: 'no se vende', no 'sin medir'")
+una = T.Fabricar(receta, precio, a, None, L.eval("function() return { midiendo = false, ventasDia = 1, ventasDiaBaja = 0, horas = 24 } end"))
+check(una.noSeVende, "1 venta en 24 h (límite bajo 0): no se fabrica para vender (regresión 2 del revisor)")
 a2 = T.Ajustes(); a2.horasPublicacion = 48
 check(T.Deposito(1, 100, 10, a2) == 4 * T.Deposito(1, 100, 10, a) / 2 * 1, "el depósito sube con la duración (48 h = 4 veces 12 h)")
 falta = T.Fabricar(receta, L.eval("function(id) if id == 10 then return 30 end end"), a)

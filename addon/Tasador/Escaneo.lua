@@ -170,6 +170,8 @@ local function categoria(id)
 	return T.CategoriaEvento(clase, sub)
 end
 
+local POR_TANDA_FOTO = 2000 -- objetos de la foto por cuadro
+local avisar
 local function terminar(buffer)
 	estado.activo, estado.leyendo = false, false
 	T.db = T.db or TasadorDB or {}
@@ -180,14 +182,43 @@ local function terminar(buffer)
 		T.Decir("La subasta mandó una lista vacía: no se guardó nada. Prueba de nuevo en 15 minutos.")
 		return
 	end
-	-- Ventas entre la foto anterior y esta (Comercio.lua). La foto anterior se reemplaza siempre.
+	-- Ventas entre la foto anterior y esta (Comercio.lua), y la foto nueva compacta: EN TANDAS de objetos, en
+	-- cuadros distintos (con 60.000 subastas, todo junto congelaría el juego ~0,5 s). La foto anterior se
+	-- reemplaza recién al final, de una vez.
 	local ahora = time and time() or 0
 	local segundos = T.db.fotoHora and (ahora - T.db.fotoHora) or nil
 	local nueva = T.FotoDe(buffer)
 	local yo = UnitName and T.Leer(UnitName("player")) or nil
-	local ventas = T.CompararFotos(T.db.foto, nueva, segundos, yo)
-	if ventas then T.AnotarVentas(T.db.precios, ventas, dia, segundos) end
-	T.db.foto, T.db.fotoHora = T.FotoDe(buffer, true), ahora
+	local vieja = T.db.foto
+	-- ¿se puede medir? (hay foto anterior y pasaron entre 0 y 8 h; la misma regla que CompararFotos)
+	local medir = type(vieja) == "table" and type(segundos) == "number" and segundos > 0 and segundos <= T.VENTANA_MAX
+	local ids = {}
+	for id in pairs(medir and vieja or {}) do ids[#ids + 1] = { "v", id } end
+	for id in pairs(nueva) do ids[#ids + 1] = { "n", id } end
+	local ventas = medir and {} or nil
+	local compacta, pos = {}, 1
+	estado.guardando = true
+	local function tanda()
+		local fin = math.min(#ids, pos + POR_TANDA_FOTO - 1)
+		local trozo = {}
+		for i = pos, fin do
+			local x = ids[i]
+			if x[1] == "v" then trozo[x[2]] = vieja[x[2]] else compacta[x[2]] = T.FotoTexto(nueva[x[2]]) end
+		end
+		if ventas and next(trozo) then
+			for id, v in pairs(T.CompararFotos(trozo, nueva, segundos, yo) or {}) do ventas[id] = v end
+		end
+		pos = fin + 1
+		if pos <= #ids then C_Timer.After(0, tanda) return end
+		estado.guardando = false
+		if ventas then T.AnotarVentas(T.db.precios, ventas, dia, segundos) end
+		T.db.foto, T.db.fotoHora = compacta, ahora
+		avisar(n, dia, ventas, segundos)
+	end
+	tanda()
+end
+
+avisar = function(n, dia, ventas, segundos)
 	T.db.ultimoEscaneo = dia
 	T.db.diasEscaneados = T.db.diasEscaneados or {}
 	T.db.diasEscaneados[tostring(dia)] = true
@@ -242,7 +273,7 @@ end
 
 -- Lo llama el botón (clic del jugador). Devuelve true si pidió la lista.
 function T.Escanear()
-	if estado.activo then T.Decir("Ya estoy escaneando: espera unos segundos.") return false end
+	if estado.activo or estado.guardando then T.Decir("Ya estoy escaneando: espera unos segundos.") return false end
 	if moderna() then
 		estado.tipo = "moderna"
 	elseif antigua() then

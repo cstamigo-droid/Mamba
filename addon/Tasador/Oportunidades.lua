@@ -96,7 +96,7 @@ function T.Analizar(alTerminar)
 			local fin = math.min(#ids, pos + POR_TANDA - 1)
 			for i = pos, fin do
 				local id = ids[i]
-				local fotoItem = T.db.foto[id]
+				local fotoItem = T.FotoTabla(T.db.foto[id]) -- se lee el texto una sola vez por objeto
 				local x = info(id)
 				if not x then
 					sinCargar = sinCargar + 1
@@ -200,9 +200,10 @@ function T.DetalleOportunidad(o)
 		l[#l + 1] = "Precio normal (mediana de los días anteriores): " .. T.Dinero(o.normal) .. "."
 		l[#l + 1] = "Costo " .. T.Dinero(o.costo) .. " · cobras " .. T.Dinero(o.venta * o.unidades) .. " menos la comisión."
 		l[#l + 1] = "Depósito " .. T.Dinero(o.deposito) .. "; pérdida esperada si no se vende: " .. T.Dinero(o.perdidaDeposito) .. "."
-		l[#l + 1] = "Riesgo de que baje mientras esperas (supuesto 5 % por día): " .. T.Dinero(o.riesgo) .. "."
+		l[#l + 1] = "Riesgo de que baje mientras esperas (supuesto 8 % por día): " .. T.Dinero(o.riesgo) .. "."
 		l[#l + 1] = (o.diasVender < 1 and "Se venderían en menos de un día" or "Se venderían en 1 a 2 días") .. " (MODELO, sin verificar)."
 		l[#l + 1] = "Ventas por día: subastas que desaparecieron antes de vencer en tus escaneos. Puede incluir cancelaciones y tus propias compras; se usa el límite bajo."
+		l[#l + 1] = "Solo se mide en las horas en que escaneas: escanea a horas distintas para que no sea solo tu horario."
 	end
 	l[#l + 1] = NOVERIF
 	return l
@@ -219,7 +220,7 @@ end
 
 function T.TextoFabricar(f)
 	if f.noSeVende then
-		return nombre(f.producto) .. "  no se vende: 0 ventas en " .. math.floor(f.horas or 0) .. " h de escaneos", ""
+		return nombre(f.producto) .. "  casi no se vende (menos de 1 al día en " .. math.floor(f.horas or 0) .. " h de escaneos): no lo fabriques para vender", ""
 	end
 	if f.falta then
 		local n = {}
