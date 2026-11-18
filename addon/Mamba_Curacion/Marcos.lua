@@ -6,7 +6,7 @@
 -- sin hacer cuentas con ellos, y lo que no se puede leer no se muestra. Licencia: GPL-3.0-only.
 local _, M = ...
 
-local cabecera, ancla
+local cabecera, ancla, asa
 local botones = {}
 local pendiente = false
 local function enCombate() return InCombatLockdown and InCombatLockdown() end
@@ -77,6 +77,18 @@ end
 local COLOR_LIMPIAR = { Magic = { 0.2, 0.6, 1 }, Curse = { 0.6, 0, 1 }, Poison = { 0, 0.6, 0 }, Disease = { 0.6, 0.4, 0 } }
 
 -- Actualiza un botón con lo que el juego deja leer (todo protegido: nada de cuentas con valores secretos).
+-- Alcance (K12): del hechizo del clic izquierdo si se puede, si no el de grupo
+function M.Alcance(b)
+	local u = b.GetAttribute and b:GetAttribute("unit")
+	if not (u and M.DB().rango) then return end
+		local inR
+		local sp = b:GetAttribute("spell1")
+		if sp and C_Spell and C_Spell.IsSpellInRange then inR = C_Spell.IsSpellInRange(sp, u) end
+		if not secreto(inR) and inR == nil and UnitInRange then inR = UnitInRange(u) end
+		if secreto(inR) and b.SetAlphaFromBoolean then pcall(b.SetAlphaFromBoolean, b, inR, 1, 0.45)
+		elseif not secreto(inR) then b:SetAlpha((inR == false or inR == 0) and 0.45 or 1) end
+end
+
 function M.Pintar(b)
 	local u = b.GetAttribute and b:GetAttribute("unit")
 	if not (u and UnitExists and UnitExists(u)) then return end
@@ -91,15 +103,7 @@ function M.Pintar(b)
 	if UnitIsDeadOrGhost and UnitIsDeadOrGhost(u) then b.estado:SetText("Muerto")
 	elseif UnitIsConnected and not UnitIsConnected(u) then b.estado:SetText("Desconectado")
 	else b.estado:SetText("") end
-	-- alcance (K12): del hechizo del clic izquierdo si se puede, si no el de grupo
-	if d.rango then
-		local inR
-		local sp = b:GetAttribute("spell1")
-		if sp and C_Spell and C_Spell.IsSpellInRange then inR = C_Spell.IsSpellInRange(sp, u) end
-		if not secreto(inR) and inR == nil and UnitInRange then inR = UnitInRange(u) end
-		if secreto(inR) and b.SetAlphaFromBoolean then pcall(b.SetAlphaFromBoolean, b, inR, 1, 0.45)
-		elseif not secreto(inR) then b:SetAlpha((inR == false or inR == 0) and 0.45 or 1) end
-	end
+	M.Alcance(b)
 	-- mis HoT con su cuenta regresiva (K13)
 	local A = C_UnitAuras
 	local n = 0
@@ -115,6 +119,8 @@ function M.Pintar(b)
 				pcall(h.icono.SetTexture, h.icono, a.icon)
 				if not secreto(a.duration) and not secreto(a.expirationTime) and (a.duration or 0) > 0 then
 					h.cd:SetCooldown(a.expirationTime - a.duration, a.duration)
+				elseif h.cd.Clear then
+					h.cd:Clear()
 				end
 				h:Show()
 			end
@@ -166,8 +172,20 @@ function M.Aplicar()
 		ancla = CreateFrame("Frame", "MambaCuraAncla", UIParent)
 		ancla:SetSize(d.ancho * d.columnas, 20)
 		ancla:SetPoint("LEFT", UIParent, "LEFT", 260, -120)
+		-- el asa: un marco aparte (no protegido) que solo se ve con "Mover marcos" y fuera de combate
+		asa = CreateFrame("Frame", "MambaCuraAsa", UIParent)
+		asa:SetSize(160, 18)
+		asa:SetPoint("BOTTOMLEFT", ancla, "TOPLEFT", 0, 16)
+		asa.fondo = asa:CreateTexture(nil, "BACKGROUND")
+		asa.fondo:SetAllPoints(asa)
+		asa.fondo:SetColorTexture(0.1, 0.1, 0.12, 0.9)
+		asa.texto = M.Piezas.Texto(asa, "small", "text")
+		asa.texto:SetPoint("CENTER", asa, "CENTER", 0, 0)
+		asa.texto:SetText("Arrastra para mover")
+		asa:Hide()
 		local api = _G.MambaAPI
-		if api and api.Movible then pcall(api.Movible, ancla, "MambaCuraAncla") end
+		if api and api.Movible then pcall(api.Movible, ancla, "MambaCuraAncla", asa) end
+		ancla:EnableMouse(false)
 	end
 	if not cabecera then
 		cabecera = CreateFrame("Frame", "MambaCuraCabecera", ancla, "SecureGroupHeaderTemplate")
@@ -200,9 +218,11 @@ function M.Aplicar()
 		local h = cabecera.GetAttribute and cabecera:GetAttribute("child" .. i)
 		if type(h) == "table" then M.NuevoBoton(h) end
 	end
-	-- los botones que ya existen reciben el perfil nuevo y el tamaño
+	-- los botones que ya existen reciben el perfil nuevo y el tamaño (y los clics de todos los botones del ratón:
+	-- un botón creado en plena pelea solo tiene el izquierdo hasta acá)
 	local rueda = usaRueda(attrs)
 	for _, b in ipairs(botones) do
+		if b.RegisterForClicks then b:RegisterForClicks("AnyUp") end
 		b:SetSize(d.ancho, d.alto)
 		b:SetAttribute("_onenter", rueda and ENTRAR or nil)
 		b:SetAttribute("_onleave", rueda and SALIR or nil)
@@ -256,13 +276,14 @@ function M.Pendiente() return pendiente end
 
 ---------------------------------------------------------------- eventos
 local ev = CreateFrame("Frame")
-for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "GROUP_ROSTER_UPDATE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_AURA",
+for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "GROUP_ROSTER_UPDATE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_AURA",
 	"UNIT_CONNECTION", "ACTIVE_TALENT_GROUP_CHANGED", "SPELL_UPDATE_COOLDOWN", "LEARNED_SPELL_IN_TAB" }) do M.Escuchar(ev, e) end
 ev:SetScript("OnEvent", function(_, e, unidad)
 	if e == "PLAYER_LOGIN" or e == "ACTIVE_TALENT_GROUP_CHANGED" or e == "LEARNED_SPELL_IN_TAB" then
 		M.Proteger("aplicar", M.Aplicar)
-	elseif e == "PLAYER_REGEN_ENABLED" then
-		if pendiente then M.Proteger("aplicar", M.Aplicar) end
+	elseif e == "PLAYER_REGEN_ENABLED" or e == "PLAYER_REGEN_DISABLED" then
+		M.Proteger("asa", M.MostrarAsa)
+		if e == "PLAYER_REGEN_ENABLED" and pendiente then M.Proteger("aplicar", M.Aplicar) end
 	elseif e == "GROUP_ROSTER_UPDATE" then
 		M.Proteger("mostrar", M.MostrarSegun)
 		M.PintarTodo()
@@ -283,6 +304,14 @@ ev:SetScript("OnUpdate", function(_, dt)
 	t = t + (dt or 0)
 	if t < 0.25 then return end
 	t = 0
-	M.PintarTodo()
+	for _, b in ipairs(botones) do if b:IsVisible() then M.Proteger("alcance", M.Alcance, b) end end
+	M.ActualizarPresteza()
 end)
-M.AlCambiar(function() M.Proteger("aplicar", M.Aplicar) end)
+
+-- "Mover marcos": el asa solo se ve fuera de combate y con la opción encendida
+function M.MostrarAsa()
+	if not asa then return end
+	if M.DB().mover and not enCombate() then asa:Show() else asa:Hide() end
+end
+function M.Asa() return asa end
+M.AlCambiar(function() M.Proteger("aplicar", M.Aplicar); M.Proteger("asa", M.MostrarAsa) end)

@@ -44,6 +44,7 @@ local function dibujarMarcos(p, ancho)
 		P.Desplegable(p, "Mostrar", "Solo en grupo, siempre o nunca. Los modos de pelea también los muestran u ocultan.",
 			{ { value = "grupo", text = "Solo en grupo" }, { value = "siempre", text = "Siempre" }, { value = "nunca", text = "Nunca" } },
 			function() return d.mostrar end, function(v) d.mostrar = v; M.Cambio() end),
+		I("Mover marcos", "Muestra un asa arriba de los marcos para arrastrarlos (solo fuera de combate). Apágalo al terminar.", "mover"),
 		I("Incluirme a mí cuando juego solo", nil, "solo"),
 		I("Mis efectos de curación en el tiempo, con su cuenta regresiva", "Hasta 3 por compañero.", "hots"),
 		I("Marcar lo que puedo limpiar", "Solo lo que tu clase limpia (veneno, maldición, magia o enfermedad).", "limpiar"),

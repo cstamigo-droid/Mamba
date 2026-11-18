@@ -38,7 +38,7 @@ M.LIMPIA = {
 	PALADIN = { Magic = true, Poison = true, Disease = true }, MAGE = { Curse = true },
 }
 
-M.DEFECTO = { mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
+M.DEFECTO = { mover = false, mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
 
 function M.DB()
 	MambaCuraDB = MambaCuraDB or {}

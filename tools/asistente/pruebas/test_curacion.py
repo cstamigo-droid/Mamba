@@ -61,6 +61,9 @@ mt.SetValue = function(self, v) self.valor = v end
 mt.SetCooldown = function(self, a, b) self.cd = { a, b } end
 mt.SetHideCountdownNumbers = function() end
 mt.SetBindingClick = function() end
+mt.EnableMouse = function(self, v) self.raton = v end
+mt.RegisterForClicks = function(self, v) self.clics = v end
+MambaAPI = { Movible = function(f, n, asa) f.raton = true; if asa then asa.raton = true end end }
 '''
 
 
@@ -162,5 +165,19 @@ m = G.MambaInterfaz.modulos["curacion"]
 m.dibujar(padre, 620, 480)
 m.elegir("clics"); m.refrescar()
 check(len(list(G.ERRORES.values())) == 0, "paneles de Curación sin errores: %s" % list(G.ERRORES.values())[:3])
+# ---------- GATE 18-11: el ancla no se come los clics; se mueve con un asa fuera de combate
+check(G.MambaCuraAncla.raton is False, "el ancla de los marcos no recibe el ratón")
+asa = Cu.Asa()
+check(asa is not None and not asa.visible, "el asa está escondida por defecto")
+Cu.DB().mover = True; G.COMBATE = False; Cu.MostrarAsa()
+check(asa.visible, "Mover marcos: el asa se ve fuera de combate")
+G.COMBATE = True; L.execute('Fire("PLAYER_REGEN_DISABLED")')
+check(not asa.visible, "en combate el asa se esconde")
+b2 = L.eval('CreateFrame("Button", "MambaCuraCabeceraUnitButton2", MambaCuraCabecera, "SecureActionButtonTemplate")')
+b2.attr["unit"] = "party2"
+cab.scripts["OnAttributeChanged"](cab, "child2", b2)
+check(b2.clics is None, "botón creado en combate: no toca RegisterForClicks")
+G.COMBATE = False; L.execute('Fire("PLAYER_REGEN_ENABLED")')
+check(b2.clics == "AnyUp" and asa.visible, "al salir de combate: todos los clics y el asa de vuelta")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
