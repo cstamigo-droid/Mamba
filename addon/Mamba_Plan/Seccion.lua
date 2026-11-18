@@ -179,10 +179,21 @@ local function datos(e, r)
 			end
 		end
 	elseif vista == "farmeo" then
+		local hay = 0
 		for _, i in ipairs(M.ComoJuntar(e)) do
-			if i.accion == "farmeo" then add({ tipo = "Farmear", titulo = i.titulo, detalle = i.detalle }) end
+			if i.accion == "farmeo" then
+				hay = hay + 1
+				add({ tipo = "Farmear", titulo = i.titulo, detalle = i.detalle, acciones = { ACCION.subasta } })
+			end
 		end
-		add({ tipo = "", titulo = "Mejor lugar por objetivo y ruta en el mapa", detalle = "Llega con la sección Farmeo (en construcción)." })
+		if hay == 0 then
+			add({ tipo = "Farmear", titulo = "No tienes profesiones de recolección",
+				detalle = "Herboristería, Minería o Desuello dan oro sin gastar materiales. Mira cuál te conviene.",
+				acciones = { { "Ver profesiones", function() vista = "profesiones"; M.Refrescar() end } } })
+		end
+		-- lo que se junta matando (tela, cuero, carne) vale igual: se vende en la subasta
+		add({ tipo = "Vender", titulo = "Lo que juntas matando también es oro", detalle = "Tela, cuero y carne: el Tasador te dice cuál conviene subastar.",
+			acciones = { ACCION.subasta } })
 	elseif vista == "bolsas" then
 		local b = M.Bolsas(e)
 		add({ tipo = "Tienes", titulo = ("%d casillas · %d libres · la más chica: %d%s"):format(e.bolsas.total, e.bolsas.libres, b.menor,
@@ -197,7 +208,7 @@ local function datos(e, r)
 		for _, x in ipairs(M.TodasLasMacros(e)) do
 			local m = x.m
 			add({ tipo = x.creada and "Creada" or (x.sabe and "" or "Te falta un hechizo"), titulo = m.titulo,
-				detalle = (m.detalle or "") .. (m.detalle and " " or "") .. "Que funcione en Forever se prueba en el juego.",
+				detalle = m.detalle or "",
 				acciones = x.sabe and { { x.creada and "Ponerla en el cursor" or "Crear macro", function() M.CrearMacro(m.clave) end } } or nil })
 		end
 	elseif vista == "builds" then
