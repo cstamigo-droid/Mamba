@@ -21,6 +21,7 @@ Barras.lua
 Formas.lua
 Mascota.lua
 Piezas.lua
+Interfaz.lua
 Teclas.lua
 Mover.lua
 Opciones.lua

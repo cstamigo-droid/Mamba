@@ -235,9 +235,8 @@ function M.AbrirOpciones(id)
 	local UI = _G.Polestar and _G.Polestar.UI
 	if M.enVentanaMamba and A and A.AbrirVentana then
 		A.AbrirVentana("barras")
-	elseif M.enMenuPolestar and UI and UI.ShowPicker and UI.Picker and UI.Picker.ShowSection then
-		UI.ShowPicker()
-		UI.Picker.ShowSection("MambaBarras")
+	elseif M.enMenuPolestar and _G.MambaInterfaz and _G.MambaInterfaz.Abrir("barras", elegida) then
+		-- abierto en el menú de Polestar
 	else
 		ventanaPropia():Show()
 	end
@@ -326,34 +325,25 @@ ev:SetScript("OnEvent", function()
 		local ok = pcall(A.RegistrarPestana, { clave = "barras", nombre = "Barras", dibujar = M.DibujarPanel })
 		M.enVentanaMamba = ok
 	end
-	-- 1b) el menú de Polestar (su riel izquierdo): sección "Barras", con la lista de barras en su índice
-	local PS = _G.Polestar
-	local UI = PS and PS.UI
-	if not M.enVentanaMamba and UI and UI.RegisterSection then
-		local hecho = false
-		M.enMenuPolestar = UI.RegisterSection({
-			key = "MambaBarras", label = "Barras", icon = "layers", order = 210,
-			build = function(parent)
-				local w, h = parent:GetWidth(), parent:GetHeight()
-				if not w or w < 200 then w = 620 end
-				if not h or h < 200 then h = 480 end
-				M.DibujarPanel(parent, w, h, true)
-				hecho = true
-			end,
-			render = function() if hecho then M.RefrescarPanel(); if not M.bloqueadoPor then elegir(elegida) end end end,
-			nav = function()
+	-- 1b) el menú de Polestar: dentro de la sección común "Interfaz" (Interfaz.lua), con las barras en su índice
+	local I = _G.MambaInterfaz
+	if not M.enVentanaMamba and I then
+		I.Agregar({
+			clave = "barras", titulo = "Barras", orden = 1,
+			items = function()
 				local items = {}
 				for _, d in ipairs(todas()) do
 					local c = M.Config(d.id)
 					items[#items + 1] = { key = tostring(d.id), label = d.nombre, count = c.mostrar and c.botones or 0 }
 				end
-				return items, tostring(elegida)
+				return items
 			end,
-			onNav = function(k)
-				elegida = tonumber(k) or k
-				if UI.Picker and UI.Picker.Render then UI.Picker.Render() end
-			end,
-		}) and true or false
+			activo = function() return tostring(elegida) end,
+			elegir = function(k) elegida = tonumber(k) or k end,
+			dibujar = function(parent, w, h) M.DibujarPanel(parent, w, h, true) end,
+			refrescar = function() M.RefrescarPanel(); if not M.bloqueadoPor then elegir(elegida) end end,
+		})
+		M.enMenuPolestar = I.Registrada()
 	end
 	-- 2) Ajustes de Polestar › Mamba › Barras: un botón que la abre
 	if A and A.Opciones then
