@@ -17,6 +17,7 @@ Comercio.lua
 Escaneo.lua
 Juego.lua
 Tooltip.lua
+Cuadro.lua
 Alerta.lua
 Recetas.lua
 Oportunidades.lua

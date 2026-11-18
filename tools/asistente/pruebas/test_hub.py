@@ -323,6 +323,37 @@ G.MambaAPI.Abrir("MambaMedidor")
 revisar("Medidor en combate", 1)
 G.COMBATE = False
 
+# 10b) el cuadro del objeto: UN solo bloque «Mamba» (fila E8), sin «Tasador:» ni la línea propia de Polestar
+CUADRO = L.eval("""function(id, marca)
+  local out = {}
+  local tt = GameTooltip
+  local a1, a2 = tt.AddLine, tt.AddDoubleLine
+  tt.AddLine = function(_, t) out[#out + 1] = tostring(t) end
+  tt.AddDoubleLine = function(_, l, r) out[#out + 1] = tostring(l) .. " | " .. tostring(r) end
+  AsistenteDB.objetos = AsistenteDB.objetos or {}
+  AsistenteDB.objetos[id] = marca
+  MambaPlan = { MaterialDelPlan = function(x) if x == id then return { clase = "vital", texto = "VITAL: lo necesitas para subir Alquimia" } end end }
+  local ok, err = pcall(TIP_HOOK, tt, { id = id, lines = {} })
+  tt.AddLine, tt.AddDoubleLine = a1, a2
+  MambaPlan = nil
+  if not ok then out[#out + 1] = "ERROR " .. tostring(err) end
+  return out
+end""")
+if G.TIP_HOOK is not None:
+    G.ITEMS[9001] = L.eval('{name="Paño de prueba",q=1,sell=150,cls=7,sub=5,bind=0,loc="",stats={}}')
+    c = [str(x) for x in lista(CUADRO(9001, None))]
+    check(sum(1 for x in c if x == "Mamba") == 1, f"cuadro: un solo encabezado «Mamba» ({c})")
+    check(not any(x.startswith("Tasador") or "Polestar" in x for x in c), f"cuadro: sin «Tasador:» ni «Polestar» sueltos ({c})")
+    check(sum(1 for x in c if "Qué hacer:" in x) == 1, f"cuadro: UNA acción al final ({c})")
+    check(c and "Qué hacer:" in c[-1], "cuadro: la acción va al final")
+    check(any("VITAL: lo necesitas" in x for x in c), "cuadro: muestra lo que dice Mi plan (MaterialDelPlan)")
+    c2 = [str(x) for x in lista(CUADRO(9001, "guardar"))]
+    check(any("Qué hacer:" in x and "Guardar" in x and "lo elegiste tú" in x for x in c2), f"cuadro: respeta lo que marcaste ({c2[-1:]})")
+    check(not any("ERROR" in x for x in c + c2), f"cuadro: sin errores ({[x for x in c + c2 if 'ERROR' in x]})")
+    G.AsistenteDB.objetos[9001] = None
+else:
+    check(False, "el Tasador instaló su gancho del cuadro (TIP_HOOK)")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()
