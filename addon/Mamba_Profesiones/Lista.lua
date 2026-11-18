@@ -154,6 +154,6 @@ end
 -- K62: puntuación simple de impacto ÷ costo, en estrellas.
 function Lista.Estrellas(razon)
 	if not razon then return "" end
-	if razon >= 2 then return "★★★" elseif razon >= 0.7 then return "★★☆" end
-	return "★☆☆"
+	if razon >= 2 then return "Conviene mucho" elseif razon >= 0.7 then return "Conviene" end
+	return "Conviene poco"
 end

@@ -41,9 +41,9 @@ local function crearCuerpo(b)
 	b.vida:SetPoint("TOPLEFT", b, "TOPLEFT", 1, -1)
 	b.vida:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", -1, 1)
 	b.vida:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
-	b.nombre = b.vida:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+	b.nombre = M.Piezas.Texto(b.vida, "small", "text")
 	b.nombre:SetPoint("CENTER", b.vida, "CENTER", 0, 4)
-	b.estado = b.vida:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+	b.estado = M.Piezas.Texto(b.vida, "small", "textMuted")
 	b.estado:SetPoint("TOP", b.nombre, "BOTTOM", 0, -1)
 	b.borde = b:CreateTexture(nil, "OVERLAY")
 	b.borde:SetAllPoints(b)
@@ -136,7 +136,7 @@ end
 function M.ActualizarPresteza()
 	if not ancla then return end
 	if not aviso then
-		aviso = ancla:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+		aviso = M.Piezas.Texto(ancla, "small", "text")
 		aviso:SetPoint("BOTTOMLEFT", ancla, "TOPLEFT", 0, 2)
 	end
 	local lista = M.PrestezaLista()

@@ -60,7 +60,7 @@ local function filasTuyas()
 	end
 	table.sort(out, function(a, b) return a.orden > b.orden end)
 	return out, { titulo = "Tus profesiones", linea1 = "El camino más barato de cada una (SkillUp Forever) con lo que cuesta en oro y en tiempo.",
-		linea2 = "★ = puntos de habilidad por minuto de esfuerzo (más estrellas, más conviene ahora)." }
+		linea2 = "«Conviene mucho» = muchos puntos de habilidad por minuto de esfuerzo." }
 end
 
 local function filasCompra()

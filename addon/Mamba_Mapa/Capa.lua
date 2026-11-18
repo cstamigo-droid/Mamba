@@ -182,7 +182,7 @@ function M.ActualizarCoords()
 	local d = db()
 	if Minimap and d.coords then
 		if not textoMini then
-			textoMini = Minimap:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+			textoMini = M.Piezas.Texto(Minimap, "small", "text")
 			textoMini:SetPoint("TOP", Minimap, "BOTTOM", 0, -4)
 		end
 		local x, y = coords(C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player"))
@@ -192,7 +192,7 @@ function M.ActualizarCoords()
 	local W = WorldMapFrame
 	if W and W.IsShown and W:IsShown() and d.coordsMapa then
 		if not textoMapa then
-			textoMapa = (W.BorderFrame or W):CreateFontString(nil, "OVERLAY", "GameFontNormal")
+			textoMapa = M.Piezas.Texto((W.BorderFrame or W), "body", "text")
 			textoMapa:SetPoint("BOTTOM", W.ScrollContainer or W, "BOTTOM", 0, 6)
 		end
 		local mapa = W.GetMapID and W:GetMapID()

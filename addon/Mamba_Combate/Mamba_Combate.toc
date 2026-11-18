@@ -1,0 +1,25 @@
+## Interface: 16001
+## Title: Mamba: combate
+## Notes: Cómo jugar tu clase en cada caso, sugerencia del próximo hechizo (solo muestra), modos de pelea, avisos, medidor de combate del juego, temporizador del disparo, barra de lanzamiento, amenaza y placas de nombre. Se ajusta en el menú de Polestar › Interfaz › Combate.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariablesPerCharacter: MambaCombateDB
+## OptionalDeps: Polestar, Asistente, Mamba_Barras, Mamba_Curacion
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Interfaz.lua
+Nucleo.lua
+Piezas.lua
+Lista.lua
+Jugar_DRUID_HUNTER.lua
+Jugar_OTRAS.lua
+Rotacion.lua
+Disparo.lua
+Amenaza.lua
+Avisos.lua
+Medidor.lua
+DosBuilds.lua
+Seccion.lua
