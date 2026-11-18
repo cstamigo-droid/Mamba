@@ -120,6 +120,6 @@ f:SetScript("OnEvent", function(_, evento)
 	local ok, n, prof = pcall(T.LeerRecetas)
 	if ok and n and n > 0 and prof and not avisado[prof] then
 		avisado[prof] = true
-		T.Decir("Anoté " .. n .. " recetas de " .. prof .. ". /tasador fabricar te dice cuáles dejan ganancia hoy.")
+		T.Decir("Anoté " .. n .. " recetas de " .. prof .. ". Cuáles dejan ganancia hoy: botón de Mamba del minimapa › Subasta › Fabricar.")
 	end
 end)

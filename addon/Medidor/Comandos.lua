@@ -77,3 +77,6 @@ end
 
 SLASH_MEDIDOR1 = "/medidor"
 SlashCmdList.MEDIDOR = M.Comando
+
+-- La sección «Medidor» de la ventana de Mamba lee los datos desde aquí.
+_G.Medidor = M

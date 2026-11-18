@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: Asistente
-## Notes: El asistente de Mamba: la ventana de Mamba (equipo, clase y subasta, con botón en el minimapa), el buscador de servicios con flecha y los módulos que se cargan cuando hacen falta. /mamba · /equipo · /clase · /servicios · /capa
+## Notes: El asistente de Mamba: sus secciones dentro de la ventana de Polestar (Equipo, Subasta, Ir a…, Clase, Servicios, Capa, Medidor y Errores), con un botón en el minimapa.
 ## Author: Cristian Amigo
 ## Version: 0.1.0
 ## Group: Asistente
@@ -16,3 +16,8 @@ Estilo.lua
 Ventana.lua
 Comandos.lua
 Capa.lua
+Hub.lua
+SecEquipo.lua
+SecSubasta.lua
+SecLugares.lua
+SecVarias.lua

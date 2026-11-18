@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: Asistente: clase
+## Notes: Asesor según tu clase: profesiones, builds por rol con su fuente, revisión de tus talentos y cómo cambiar de rol. Solo aconseja: no cambia nada. /clase
+## Author: Cristian Amigo
+## Version: 0.1.0
+## Group: Asistente
+## Category: Asistente
+## Dependencies: Asistente
+## OptionalDeps: Polestar
+## LoadOnDemand: 1
+## X-License: GPL-3.0-only
+## X-Datos: árboles y builds de ForeverDB.net (GPL-3.0 con crédito) y planes de Polestar (GPL-3.0-only). Ver NOTICE-ForeverDB.txt y LICENSE-ForeverDB.txt
+
+Logica.lua
+Datos_Builds.lua
+Datos_Profesiones.lua
+Lectura.lua
+Comandos.lua

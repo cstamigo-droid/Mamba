@@ -472,7 +472,7 @@ function T.AlTerminarEscaneo()
 		local r, p = 0, 0
 		for _, o in ipairs(lista) do if o.tipo == "reventa" then r = r + 1 else p = p + 1 end end
 		if r + p > 0 then
-			T.Decir(string.format("%d para revender y %d para vender al PNJ. Míralas con /tasador op.", r, p))
+			T.Decir(string.format("%d para revender y %d para vender al PNJ. Míralas en el botón de Mamba del minimapa › Subasta.", r, p))
 		end
 		if v and v:IsShown() then T.RefrescarVentana() end
 	end)

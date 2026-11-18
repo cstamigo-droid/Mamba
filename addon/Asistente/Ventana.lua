@@ -283,7 +283,7 @@ function A.Redibujar(mantenerPosicion)
 			local ok, err = pcall(M.Seccion, actual.seccion, L)
 			if not ok then
 				L:Blanco()
-				L:Fila("Algo falló al armar esta sección. Escribe /errores y avísale a Claude.", { tipo = "nota" })
+				L:Fila("Algo falló al armar esta sección. Abre «Errores» y mándale el texto a Cristian.", { tipo = "nota" })
 				if geterrorhandler then geterrorhandler()(err) end
 			end
 		end
@@ -300,7 +300,17 @@ end
 
 -- seccion: la clave de una sección, lo escrito después del comando (el módulo la traduce con
 -- M.Alias), o nil (la primera). navegar: guardar la vista actual para «Volver». atras: viene de «Volver».
+-- Con Polestar, la ventana de Mamba son sus secciones en el hub de Polestar (Hub.lua).
+local HUB_PESTANA = { equipo = "MambaEquipo", clase = "MambaClase", tasador = "MambaSubasta", servicios = "MambaServicios" }
+local HUB_SECCION = { revisar = "llevas", mazmorras = "mazmorras", ["60"] = "60", jcj = "jcj", rol = "rol", fuentes = "fuentes",
+	prof = "prof", builds = "talentos", reventa = "reventa", pnj = "pnj", vender = "vender", fabricar = "fabricar" }
+
 function A.AbrirVentana(pestana, seccion, navegar, atras)
+	if A.Hub and A.Hub.Disponible() then
+		local clave = pestana and HUB_PESTANA[pestana] or nil
+		local base = type(seccion) == "string" and seccion:lower():match("^%s*([^%s:]*)") or nil
+		if A.Hub.Abrir(clave, base and HUB_SECCION[base] or nil) then return end
+	end
 	crear()
 	pestana = pestana or actual.pestana or "equipo"
 	local p = pestanaDe(pestana)
@@ -445,12 +455,12 @@ end
 local boton
 local function dbMinimapa()
 	A.PrepararDB()
-	AsistenteDB.minimapa = AsistenteDB.minimapa or { angulo = 200, oculto = false }
+	AsistenteDB.minimapa = AsistenteDB.minimapa or { angulo = 160, oculto = false } -- 225 es el de Polestar
 	return AsistenteDB.minimapa
 end
 
 local function ubicarBoton()
-	local a = math.rad(dbMinimapa().angulo or 200)
+	local a = math.rad(dbMinimapa().angulo or 160)
 	local r = ((Minimap.GetWidth and Minimap:GetWidth() or 140) / 2) + 5
 	boton:ClearAllPoints()
 	boton:SetPoint("CENTER", Minimap, "CENTER", math.cos(a) * r, math.sin(a) * r)
@@ -475,6 +485,7 @@ local function crearBoton()
 	borde:SetPoint("TOPLEFT", boton, "TOPLEFT", 0, 0)
 	boton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 	boton:SetScript("OnClick", function()
+		if A.Hub and A.Hub.Disponible() then A.Hub.Alternar() return end
 		if v and v:IsShown() then v:Hide() else A.AbrirVentana() end
 	end)
 	boton:SetScript("OnDragStart", function(self)
@@ -488,7 +499,7 @@ local function crearBoton()
 	end)
 	boton:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
 	boton:SetScript("OnEnter", function(self)
-		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Arrastrar: mover este botón", "/mamba boton: ocultarlo" })
+		A.CuadroAyuda(self, "Mamba", { "Clic: abrir o cerrar la ventana de Mamba", "Arrastrar: mover este botón" })
 	end)
 	boton:SetScript("OnLeave", alSalir)
 	ubicarBoton()

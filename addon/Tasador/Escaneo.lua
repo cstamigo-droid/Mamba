@@ -249,12 +249,12 @@ avisar = function(n, dia, ventas, segundos)
 	local dias = 0
 	for d in pairs(T.db.diasEscaneados) do if tonumber(d) and tonumber(d) >= dia - T.DIAS_GUARDADOS then dias = dias + 1 end end
 	if dias >= 3 then
-		T.Decir(string.format("Escaneo listo: %d objetos con precio. Ya puedes usar /tasador baratos y /tasador hierbas.", n))
+		T.Decir(string.format("Escaneo listo: %d objetos con precio. Míralos en el botón de Mamba del minimapa › Subasta.", n))
 	else
-		T.Decir(string.format("Escaneo listo: %d objetos con precio (el cuadro de cada objeto ya los muestra). Para /tasador baratos y hierbas hacen falta 3 días distintos de escaneo: llevas %d.", n, dias))
+		T.Decir(string.format("Escaneo listo: %d objetos con precio (el cuadro de cada objeto ya los muestra). Para «Baratos» y «Hierbas» hacen falta 3 días distintos de escaneo: llevas %d.", n, dias))
 	end
 	if ventas then
-		T.Decir("Comparé con tu escaneo de hace " .. T.Horas(segundos) .. ": ventas estimadas anotadas. /tasador op muestra las oportunidades.")
+		T.Decir("Comparé con tu escaneo de hace " .. T.Horas(segundos) .. ": ventas estimadas anotadas. Las oportunidades: botón de Mamba del minimapa › Subasta.")
 	elseif segundos and segundos > T.VENTANA_MAX then
 		T.Decir("Tu escaneo anterior es de hace más de 8 horas: no puedo saber qué se vendió. Escanea cada 1 a 4 horas mientras juegas.")
 	else
@@ -354,8 +354,12 @@ local function ponerBoton()
 	-- sin padre y después SetParent: la interfaz de mando intercepta CreateFrame con padre (ARQUITECTURA §4)
 	boton = CreateFrame("Button", "TasadorBotonEscanear", nil, "UIPanelButtonTemplate")
 	if boton.SetParent then boton:SetParent(padre) end
-	boton:SetSize(150, 22)
-	boton:SetPoint("TOPRIGHT", padre, "TOPRIGHT", -60, -2)
+	boton:SetSize(170, 24)
+	-- Abajo a la derecha, colgando del borde como las pestañas del juego: arriba a la derecha quedaba tapado por
+	-- la barra del título de la subasta moderna de Forever (TasadorDB.diag decía "visible" y no se veía).
+	boton:SetPoint("TOPRIGHT", padre, "BOTTOMRIGHT", -8, -2)
+	if boton.SetFrameStrata and padre.GetFrameStrata then boton:SetFrameStrata(padre:GetFrameStrata()) end
+	if boton.SetFrameLevel and padre.GetFrameLevel then boton:SetFrameLevel(padre:GetFrameLevel() + 30) end
 	boton:SetText("Escanear (Tasador)")
 	boton:SetScript("OnClick", function() T.Escanear() end)
 end
