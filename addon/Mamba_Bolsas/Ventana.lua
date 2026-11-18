@@ -20,7 +20,7 @@ local PIE = 46       -- alto del pie (barra de bolsas + regla)
 local BARRA = 28     -- alto de la fila del buscador
 local CHIPS = 22     -- alto de la fila de filtros
 local CELDA = 70     -- ancho de cada bolsa en el pie
-local MIN_ANCHO = 470
+local MIN_ANCHO = 500
 
 local function PS()
 	local p = _G.Polestar
@@ -120,14 +120,15 @@ end
 
 local MARCA = {
 	basura = { "Interface\\Buttons\\UI-GroupLoot-Coin-Up", true },
-	vender = { "Interface\\Buttons\\UI-GroupLoot-Coin-Up", true },
+	vender = { "Interface\\Icons\\INV_Misc_Coin_02", false },
 	subastar = { "Interface\\Buttons\\UI-GroupLoot-Coin-Up", false },
 	guardar = { "Interface\\PetBattles\\PetBattle-LockIcon", false },
 }
 
+local BASE = 37 -- tamaño de la plantilla del juego: las casillas en vivo se escalan, no se estiran
 local function pintar(b, d, f)
 	local o = adornar(b)
-	local tam = f.tam
+	local tam = b.vivo and BASE or f.tam
 	o.nuevo:SetSize(tam * 1.75, tam * 1.75)
 	o.mejoraBrillo:SetSize(tam * 1.75, tam * 1.75)
 	o.mejora:SetSize(math.max(12, tam * 0.45), math.max(12, tam * 0.45))
@@ -151,7 +152,7 @@ local function pintar(b, d, f)
 		o.marca:Show()
 	else o.marca:Hide() end
 	o.mision:SetShown(marcas and M.EsDeMision(d) or false)
-	local mejora = M.Op("mejora") and d and d.id and M.EsMejora(d)
+	local mejora = M.Op("mejora") and f.dueno == M.Clave() and d and d.id and M.EsMejora(d)
 	o.mejora:SetShown(mejora or false)
 	o.mejoraBrillo:SetShown(mejora or false)
 	o.nuevo:SetShown(M.Op("nuevo") and d and d.nuevo or false)
@@ -167,8 +168,7 @@ local function marcoBolsa(f, bolsa)
 	local m = f.marcos[bolsa]
 	if m then return m end
 	m = CreateFrame("Frame", nil, f.rejilla)
-	m:SetID(bolsa)
-	m.GetBagID = function(self) return self:GetID() end
+	m:SetID(bolsa) -- la plantilla lee la bolsa con GetParent():GetID()
 	m:SetAllPoints(f.rejilla)
 	m.botones = {}
 	f.marcos[bolsa] = m
@@ -373,7 +373,7 @@ local function celda(f, i)
 	c:RegisterForDrag("LeftButton")
 	c:SetScript("OnEnter", function(self)
 		f.resalte = self.bolsa
-		M.DibujarCasillas(f)
+		M.PintarResalte(f)
 		local lineas = { self.libres .. " libres de " .. self.total, "Clic: ver solo esta bolsa · otra vez: todas" }
 		if self.inv and M.EsVivo(f) then lineas[#lineas + 1] = "Arrastra una bolsa aquí para ponértela" end
 		local A = _G.Asistente
@@ -381,19 +381,21 @@ local function celda(f, i)
 	end)
 	c:SetScript("OnLeave", function()
 		f.resalte = nil
-		M.DibujarCasillas(f)
+		M.PintarResalte(f)
 		if GameTooltip then GameTooltip:Hide() end
 	end)
 	c:SetScript("OnClick", function(self)
-		if CursorHasItem and CursorHasItem() and self.inv and PutItemInBag and not InCombatLockdown() then
-			pcall(PutItemInBag, self.inv)
-			return
+		if CursorHasItem and CursorHasItem() and M.EsVivo(f) and not InCombatLockdown() then
+			if self.bolsa == 0 and PutItemInBackpack then pcall(PutItemInBackpack); return end
+			if self.inv and PutItemInBag then pcall(PutItemInBag, self.inv); return end
 		end
 		f.sola = (f.sola ~= self.bolsa) and self.bolsa or nil
 		M.Dibujar(f)
 	end)
 	c:SetScript("OnReceiveDrag", function(self)
-		if self.inv and PutItemInBag and not InCombatLockdown() then pcall(PutItemInBag, self.inv) end
+		if not M.EsVivo(f) or InCombatLockdown() then return end
+		if self.bolsa == 0 and PutItemInBackpack then pcall(PutItemInBackpack)
+		elseif self.inv and PutItemInBag then pcall(PutItemInBag, self.inv) end
 	end)
 	c:SetScript("OnDragStart", function(self)
 		if self.inv and self.bolsa ~= 0 and PickupBagFromSlot and M.EsVivo(f) and not InCombatLockdown() then pcall(PickupBagFromSlot, self.inv) end
@@ -406,8 +408,8 @@ local function dibujarPie(f, bolsas)
 	local vivo = M.EsVivo(f)
 	local p = M.DB().personajes[f.dueno]
 	local libresT, totalT = 0, 0
-	local ancho = (f.anchoRejilla or 400)
-	local porFila = math.max(1, math.floor((ancho - 200) / CELDA))
+	local ancho = (f.anchoVentana or MIN_ANCHO) - 2 * f.margen
+	local porFila = math.max(1, math.floor((ancho - 150) / CELDA)) -- a la derecha van el total y el oro
 	for i, b in ipairs(bolsas) do
 		local c = celda(f, i)
 		local libres, total, nombre, icono, inv
@@ -446,9 +448,18 @@ local function dibujarPie(f, bolsas)
 end
 
 ---------------------------------------------------------------- la rejilla
+-- Pasar el ratón por una bolsa del pie: solo cambia el resalte, sin volver a leer las casillas.
+function M.PintarResalte(f)
+	for i, d in ipairs(f.lista or {}) do
+		local b = f.mostrados and f.mostrados[i]
+		if b and b.mamba then b.mamba.resalte:SetShown(f.resalte ~= nil and d.bolsa == f.resalte) end
+	end
+end
+
 -- Solo vuelve a pintar las casillas (resalte, filtro, búsqueda): sin mover nada.
 function M.DibujarCasillas(f)
 	if not (f and f.lista) then return end
+	M.RefrescarSugerencias() -- lo que marcaste con Alt + clic derecho se ve al momento
 	for i, d in ipairs(f.lista) do
 		local b = f.mostrados and f.mostrados[i]
 		if b then
@@ -477,6 +488,10 @@ function M.Dibujar(f)
 	f.lista, f.mostrados = lista, {}
 	local x, y, col = 0, 0, 0
 	local paso = f.tam + HUECO
+	-- un banco grande no sale de la pantalla: más columnas si no cabe
+	local altoPantalla = (UIParent and UIParent:GetHeight() or 1080) / (M.Op("escala") or 1)
+	local filasMax = math.max(4, math.floor((altoPantalla * 0.9 - f.cuerpo - 260) / paso))
+	if math.ceil(#lista / cols) > filasMax then cols = math.ceil(#lista / filasMax) end
 	local maxCol, nGuardado = 0, 0
 	for i, d in ipairs(lista) do
 		if d.filaNueva and col > 0 then col = 0; y = y + paso + 4 end
@@ -491,9 +506,15 @@ function M.Dibujar(f)
 			if not b then b = crearGuardado(f); f.guardados[nGuardado] = b end
 		end
 		if b then
-			b:SetSize(f.tam, f.tam)
 			b:ClearAllPoints()
-			b:SetPoint("TOPLEFT", f.rejilla, "TOPLEFT", col * paso, -y)
+			if b.vivo then
+				local e = f.tam / BASE
+				b:SetScale(e)
+				b:SetPoint("TOPLEFT", f.rejilla, "TOPLEFT", col * paso / e, -y / e)
+			else
+				b:SetSize(f.tam, f.tam)
+				b:SetPoint("TOPLEFT", f.rejilla, "TOPLEFT", col * paso, -y)
+			end
 			b:Show()
 			if b.vivo then actualizarVivo(b, d, f) else actualizarGuardado(b, d, f) end
 			f.mostrados[i] = b
@@ -505,19 +526,27 @@ function M.Dibujar(f)
 	local anchoRejilla = math.max(cols, 1) * paso - HUECO
 	f.anchoRejilla = anchoRejilla
 	local ancho = math.max(MIN_ANCHO, anchoRejilla + 2 * f.margen)
+	f.anchoVentana = ancho
 	local altoPie = dibujarPie(f, bolsas)
 	f.vacio:SetShown(#lista == 0)
 	if #lista == 0 then
-		f.vacio:SetText(vivo and "No hay bolsas." or (f.tipo == "banco" and "Todavía no viste este banco: habla con un banquero una vez." or "Sin datos de este personaje."))
+		f.vacio:SetText(vivo and "No hay bolsas." or (f.tipo == "banco" and "Todavía no viste este banco: habla con un banquero una vez." or "Todavía no hay casillas guardadas de este personaje: entra una vez con él."))
 	end
 	local altoRejilla = math.max(filas, #lista == 0 and 60 or 0)
 	f.rejilla:SetSize(anchoRejilla, math.max(1, altoRejilla))
 	f:SetSize(ancho, f.cuerpo + 8 + BARRA + 6 + CHIPS + 10 + altoRejilla + 12 + altoPie + 10)
+	if f.banda and f.banda.SetTexCoord then -- la banda de estrellas, al ancho nuevo (sin estirarse)
+		local _, T = PS()
+		if T and T.BandCoords then f.banda:SetTexCoord(T.BandCoords(ancho - 2, f.cuerpo)) end
+	end
 	f:SetScale(M.Op("escala") or 1)
 	f:SetAlpha(math.max(0.3, M.Op("fondo") or 1))
 	M.Titulo(f)
 	M.PintarChips(f)
-	if f.botonVista then f.botonVista.psActive = f.sola ~= nil end
+	if f.botonVista then
+		local _, _, W = PS()
+		if W and W.SetIconState then W.SetIconState(f.botonVista, f.sola ~= nil) else f.botonVista.psActive = f.sola ~= nil end
+	end
 end
 
 function M.Titulo(f)
@@ -564,7 +593,7 @@ local function chips(f)
 			M.PintarChips(f)
 			M.DibujarCasillas(f)
 		end)
-		x = x + w + 18
+		x = x + w + 14
 		f.chips[#f.chips + 1] = c
 	end
 end
@@ -607,6 +636,9 @@ function M.CrearVentanaBolsas(tipo)
 		f:ClearAllPoints()
 		f:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -60, 120)
 	end
+	-- K55: lugar por personaje, candado y "Restablecer posiciones", con ESTE lugar como el de siempre
+	local api = _G.MambaAPI
+	if api and api.Movible then pcall(api.Movible, f, nombre, nil, { yaArrastra = true }) end
 	-- fila del buscador y los botones
 	local y = -(f.cuerpo + 8)
 	local der = {}
@@ -632,8 +664,9 @@ function M.CrearVentanaBolsas(tipo)
 	end)
 	f.botonOrdenar = agregar("reload", "Ordenar y apilar", function()
 		if not M.EsVivo(f) then return end
-		local ok, msg = M.Ordenar(f.tipo == "banco")
-		if msg then f.aviso:SetText(msg) else f.aviso:SetText("") end
+		local _, msg = M.Ordenar(f.tipo == "banco")
+		f.aviso:SetText(msg or "")
+		if msg and C_Timer and C_Timer.After then C_Timer.After(4, function() f.aviso:SetText("") end) end
 	end)
 	local xDer = -f.margen
 	for _, b in ipairs(der) do
@@ -652,8 +685,9 @@ function M.CrearVentanaBolsas(tipo)
 	f.buscador:SetPoint("RIGHT", der[#der], "LEFT", -10, 0)
 	f.buscador:SetHeight(BARRA - 4)
 	chips(f)
-	f.aviso = P.Texto(f, "note", "warning")
-	f.aviso:SetPoint("TOPRIGHT", f, "TOPRIGHT", -f.margen, -(f.cuerpo + 8 + BARRA + 9))
+	f.aviso = P.Texto(f.cabeza or f, "note", "warning")
+	if f.cerrar then f.aviso:SetPoint("RIGHT", f.cerrar, "LEFT", -10, 0)
+	else f.aviso:SetPoint("TOPRIGHT", f, "TOPRIGHT", -40, -6) end
 	-- la rejilla
 	f.rejilla = CreateFrame("Frame", nil, f)
 	f.rejilla:SetPoint("TOPLEFT", f, "TOPLEFT", f.margen, -(f.cuerpo + 8 + BARRA + 6 + CHIPS + 10))
@@ -662,10 +696,10 @@ function M.CrearVentanaBolsas(tipo)
 	f.vacio:SetPoint("TOPLEFT", f.rejilla, "TOPLEFT", 0, -8)
 	-- el pie
 	f.linea = P.Linea(f, false)
-	f.linea:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", f.margen, PIE + 14)
-	f.linea:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -f.margen, PIE + 14)
 	f.pie = CreateFrame("Frame", nil, f)
 	f.pie:SetPoint("TOPLEFT", f.rejilla, "BOTTOMLEFT", 0, -14)
+	f.linea:SetPoint("BOTTOMLEFT", f.pie, "TOPLEFT", 0, 6)
+	f.linea:SetPoint("RIGHT", f, "RIGHT", -f.margen, 0)
 	f.pie:SetPoint("RIGHT", f, "RIGHT", -f.margen, 0)
 	f.pie:SetHeight(PIE)
 	f.totalTexto = P.Texto(f, "number", "text")
@@ -677,34 +711,40 @@ function M.CrearVentanaBolsas(tipo)
 	f:HookScript("OnShow", function(self) M.Dibujar(self) end)
 	f:HookScript("OnHide", function(self)
 		self.sola, self.resalte = nil, nil
-		if self.tipo == "banco" and M.bancoAbierto then
+		if self.tipo == "banco" and M.bancoAbierto and self.dueno == M.Clave() then
 			local B = C_Bank
 			if B and B.CloseBankFrame then pcall(B.CloseBankFrame) elseif CloseBankFrame then pcall(CloseBankFrame) end
 		end
 		if self.tipo == "inventario" and C_NewItems and C_NewItems.ClearAll and M.Op("nuevo") == false then pcall(C_NewItems.ClearAll) end
 	end)
 	-- cambios del juego
-	local pendiente = false
-	local function programar(soloCasillas)
+	-- un solo pedido en espera; si alguno pidió el redibujo completo, se hace el completo
+	local pendiente, completo = false, false
+	local function programar(soloCasillas, espera)
+		if not soloCasillas then completo = true end
 		if pendiente then return end
 		pendiente = true
 		local function correr()
-			pendiente = false
+			local todo = completo
+			pendiente, completo = false, false
 			if not f:IsShown() then return end
-			if soloCasillas then M.DibujarCasillas(f) else M.Dibujar(f) end
+			if todo then M.Dibujar(f) else M.DibujarCasillas(f) end
 		end
-		if C_Timer and C_Timer.After then C_Timer.After(0.05, correr) else correr() end
+		if C_Timer and C_Timer.After then C_Timer.After(espera or 0.05, correr) else correr() end
 	end
 	table.insert(M.alCambiar, function(motivo)
 		if not f:IsShown() then return end
-		if motivo == "casillas" or motivo == "datos" then
-			if M.EsVivo(f) or motivo == "datos" then programar(true) end
+		if motivo == "casillas" then
+			if M.EsVivo(f) then programar(true) end
+		elseif motivo == "datos" then
+			programar(true, 0.4) -- nombres y misiones que llegan de a poco: se juntan
 		elseif motivo == "fuera-de-combate" then
 			if f.pendiente then programar(false) end
 		elseif motivo == "banco-abierto" or motivo == "banco-cerrado" then
 			if f.tipo == "banco" then programar(false) end
 		elseif motivo == "oro" then
-			if f.oroTexto then programar(false) end
+			local p = M.DB().personajes[f.dueno]
+			if p and p.oro and f.oroTexto then f.oroTexto:SetText(GetCoinTextureString and GetCoinTextureString(p.oro) or M.Dinero(p.oro)) end
 		else
 			if M.EsVivo(f) then programar(false) end
 		end

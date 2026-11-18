@@ -19,7 +19,7 @@ local POR_DEFECTO = {
 	unir = true,        -- sin la ventana de Mamba: la ventana unida del juego
 	cuadro = true,      -- "Tienes N…" en el cuadro del objeto
 	columnas = 12, tamano = 37, escala = 1, fondo = 0.96,
-	fija = false, separar = false, vista = "todas", reves = false,
+	fija = false, separar = false, reves = false,
 	columnasBanco = 14,
 	marcas = true, nuevo = true, mejora = true,
 }
@@ -38,7 +38,12 @@ local function db()
 	return d
 end
 M.DB = db
-function M.Op(k) return db().opciones[k] end
+function M.Op(k)
+	local d = MambaBolsasDB
+	local o = d and d.opciones
+	if o and o[k] ~= nil then return o[k] end
+	return db().opciones[k]
+end
 
 local function clave()
 	return (UnitName("player") or "?") .. " - " .. (GetRealmName and GetRealmName() or "")

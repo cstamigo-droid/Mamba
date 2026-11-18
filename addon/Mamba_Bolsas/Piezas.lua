@@ -34,7 +34,7 @@ end
 
 function P.Ventana(nombre, titulo, ancho, alto)
 	local a = A()
-	if a and a.CrearVentana then return movible(a.CrearVentana(nombre, titulo, ancho, alto), nombre) end
+	if a and a.CrearVentana then return a.CrearVentana(nombre, titulo, ancho, alto) end -- ya la suma a Ventanas.Movible
 	local f = CreateFrame("Frame", nombre, UIParent, "BasicFrameTemplateWithInset")
 	f:SetSize(ancho, alto)
 	f:SetPoint("CENTER")
