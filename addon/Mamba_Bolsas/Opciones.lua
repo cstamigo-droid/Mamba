@@ -1,5 +1,5 @@
 -- Mamba_Bolsas: su parte en Interfaz (menú de Polestar): buscar en todos tus personajes, ver qué lleva cada
--- uno y las opciones (bolsas unidas, líneas en el cuadro del objeto). Licencia: GPL-3.0-only.
+-- uno y las opciones de la ventana de bolsas. Licencia: GPL-3.0-only.
 local _, M = ...
 local P = M.Piezas
 
@@ -8,7 +8,8 @@ local panel, buscador, opciones, filas, hijo, sf = nil, nil, nil, {}, nil, nil
 local texto = ""
 
 local function abrirBolsas()
-	if ToggleAllBags then ToggleAllBags() elseif OpenAllBags then OpenAllBags() end
+	if M.Activa and M.Activa() then M.AbrirInventario(nil)
+	elseif ToggleAllBags then ToggleAllBags() elseif OpenAllBags then OpenAllBags() end
 end
 
 local function fila(i, ancho)
@@ -96,6 +97,8 @@ local function dibujar(p, ancho, alto)
 	t:SetText("Bolsas")
 	local abrir = P.Boton(p, "Abrir mis bolsas", abrirBolsas, true)
 	abrir:SetPoint("TOPRIGHT", p, "TOPRIGHT", -12, -4)
+	local banco = P.Boton(p, "Ver mi banco", function() if M.AbrirBanco then M.AbrirBanco(M.Clave()) end end)
+	banco:SetPoint("RIGHT", abrir, "LEFT", -8, 0)
 	local A = _G.Asistente
 	if A and A.Buscador then
 		buscador = A.Buscador(p, "Buscar en todos mis personajes", function(x) texto = x; M.RefrescarPanel() end)
@@ -120,20 +123,45 @@ local function dibujar(p, ancho, alto)
 	hijo:SetWidth(ancho - 30)
 	opciones = CreateFrame("Frame", nil, p)
 	opciones:SetPoint("TOPLEFT", t, "BOTTOMLEFT", -12, -10)
-	opciones:SetSize(ancho - 20, 200)
+	opciones:SetSize(ancho - 20, 600)
 	local d = M.DB().opciones
-	local o1 = P.Interruptor(opciones, "Todas las bolsas en una ventana", "La ventana de bolsas unidas del juego, con buscador y botón de ordenar.",
-		function() return d.unir end, function(v) d.unir = v and true or false; pcall(M.AplicarUnir) end)
-	o1:SetPoint("TOPLEFT", opciones, "TOPLEFT", 0, 0)
-	P.Acomodar(o1, ancho - 30)
-	local o2 = P.Interruptor(opciones, "Decir en el cuadro del objeto cuántos tienes y dónde", nil,
-		function() return d.cuadro end, function(v) d.cuadro = v and true or false end)
-	o2:SetPoint("TOPLEFT", o1, "BOTTOMLEFT", 0, -4)
-	P.Acomodar(o2, ancho - 30)
-	if M.sinUnir then
-		local n = P.Texto(opciones, "note", "textMuted")
-		n:SetPoint("TOPLEFT", o2, "BOTTOMLEFT", 12, -8)
-		n:SetText("Este cliente no tiene la ventana de bolsas unidas: tus bolsas se abren como siempre.")
+	local anterior
+	local function poner(fila)
+		if anterior then fila:SetPoint("TOPLEFT", anterior, "BOTTOMLEFT", 0, -4) else fila:SetPoint("TOPLEFT", opciones, "TOPLEFT", 0, 0) end
+		P.Acomodar(fila, ancho - 30)
+		anterior = fila
+	end
+	local function redibujar() if M.Redibujar then M.Redibujar() end end
+	local function interruptor(etiqueta, ayuda, k, despues)
+		poner(P.Interruptor(opciones, etiqueta, ayuda, function() return d[k] end,
+			function(v) d[k] = v and true or false; if despues then pcall(despues) end; redibujar() end))
+	end
+	local function deslizador(etiqueta, ayuda, k, min, max, paso, formato)
+		poner(P.Deslizador(opciones, etiqueta, ayuda, min, max, paso, formato, function() return d[k] end,
+			function(v) d[k] = v; redibujar() end))
+	end
+	interruptor("Usar la ventana de bolsas de Mamba", "Todas tus bolsas y el banco en la ventana de Mamba: barra de bolsas, filtros, buscador, ordenar y los otros personajes. Apagado: las bolsas del juego.", "propia", function()
+		if M.AplicarReemplazo then M.AplicarReemplazo() end
+	end)
+	deslizador("Columnas de las bolsas", nil, "columnas", 6, 24, 1, "%d")
+	deslizador("Columnas del banco", nil, "columnasBanco", 6, 24, 1, "%d")
+	deslizador("Tamaño de las casillas", nil, "tamano", 26, 48, 1, "%d")
+	deslizador("Escala de la ventana", nil, "escala", 0.6, 1.5, 0.05, "%.2f")
+	deslizador("Transparencia", "Qué tanto se ve la ventana (1 = nada transparente).", "fondo", 0.3, 1, 0.05, "%.2f")
+	interruptor("Bloquear la posición", "La ventana de bolsas y la del banco no se arrastran. El candado de Ajustes › Mamba › Ventanas también las fija.", "fija", function()
+		if M.AplicarFija then M.AplicarFija() end
+	end)
+	interruptor("Separar las bolsas", "Con todas juntas, cada bolsa empieza en una fila nueva.", "separar")
+	interruptor("Bolsas al revés", "La mochila al final, como en la barra del juego.", "reves")
+	interruptor("Marcas sobre los objetos", "Basura, para vender, subastar o guardar (lo que marcas con Alt + clic derecho o Ctrl + Alt + clic) y los objetos de misión.", "marcas")
+	interruptor("Brillo de las mejoras", "Flecha y brillo verde en el equipo que es mejor que el tuyo.", "mejora")
+	interruptor("Resaltar lo nuevo", "Lo que acaba de entrar a tus bolsas brilla hasta que pasas el ratón.", "nuevo")
+	interruptor("Decir en el cuadro del objeto cuántos tienes y dónde", nil, "cuadro")
+	interruptor("Sin la ventana de Mamba: la ventana unida del juego", "Solo cuenta con la de Mamba apagada.", "unir", function() if not d.propia then M.AplicarUnir() end end)
+	if M.OtroCargado and M.OtroCargado() then
+		local n = P.Texto(opciones, "note", "warning")
+		n:SetPoint("TOPLEFT", anterior, "BOTTOMLEFT", 12, -8)
+		n:SetText(M.OtroCargado() .. " está encendido: mientras lo esté, se usan sus bolsas.")
 	end
 	M.RefrescarPanel()
 end
