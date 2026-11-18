@@ -460,6 +460,35 @@ PS_ = L.eval("function() return MambaAPI.PonerEnSubasta(9001, 100) end")
 r = PS_()
 check(r[0] is False and "subastador" in str(r[1]), f"PonerEnSubasta sin la subasta abierta: no hace nada y lo dice ({r[1]})")
 
+# 10f) modo «Mover elementos» (K55 ampliado): marcos sin título, rueda = tamaño, nada en combate
+MOV = L.eval("""function()
+  local W = Asistente.Ventanas
+  local f = CreateFrame("Frame", "MambaPruebaMedidor", UIParent)
+  f.GetScale = function(self) return self.escala or 1 end
+  f.SetScale = function(self, e) self.escala = e end
+  local ok1 = MambaAPI.Movible(f, "pruebaMedidor", { etiqueta = "Medidor de daño", sinAsa = true })
+  COMBATE = true
+  local enCombate, motivo = MambaAPI.ModoMover(true)
+  COMBATE = false
+  local entra = MambaAPI.ModoMover(true)
+  local visto = false
+  for _, f2 in ipairs(TODOS) do
+    if f2.nombre and type(f2.nombre) == "table" and tostring(f2.nombre.text or ""):find("Medidor de daño", 1, true) and f2:IsShown() then visto = f2 end
+  end
+  local escala
+  if visto and visto.scripts.OnMouseWheel then visto.scripts.OnMouseWheel(visto, 1); escala = f.escala end
+  Fire("PLAYER_REGEN_DISABLED")
+  local salio = not W.moviendo
+  return ok1, enCombate, tostring(motivo), entra, visto ~= false, escala, salio
+end""")
+r = MOV()
+check(r[0] is True, "MambaAPI.Movible acepta un marco sin título con opciones (sinAsa, etiqueta)")
+check(r[1] is False and "combate" in r[2], "en combate no se entra al modo Mover")
+check(r[3] is True and r[4] is True, "el modo Mover muestra cada elemento con su nombre")
+check(r[5] is not None and abs(r[5] - 1.05) < 0.001, f"la rueda cambia el tamaño del elemento ({r[5]})")
+check(r[6] is True, "si empieza un combate, se sale solo del modo Mover")
+check(G.REGISTRADAS["MambaGrupoMover"] is not None, "la entrada «Mover» está al pie del riel")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

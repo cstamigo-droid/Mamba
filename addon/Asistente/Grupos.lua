@@ -10,6 +10,29 @@ Hub.Grupo({ clave = "MambaGrupoOro", nombre = "Oro", icono = "qol-coin", orden =
 -- «Ir a…» con su propia entrada en el riel, a la vista (K58/K108); Ciudad = Servicios + Capa
 Hub.Grupo({ clave = "MambaGrupoIrA", nombre = "Ir a…", icono = "icon-goto", orden = 115, partes = { "MambaIrA" } })
 Hub.Grupo({ clave = "MambaGrupoCiudad", nombre = "Ciudad", icono = "icon-talk", orden = 120, partes = { "MambaServicios", "MambaCapa" } })
+Hub.Seccion({
+	clave = "MambaMover", nombre = "Mover", icono = "resize", orden = 890,
+	titulo = function() return "Mover elementos", "Pon cada parte de Mamba donde quieras, con el tamaño que quieras" end,
+	dibujar = function(est, V)
+		local W = A.Ventanas
+		if not W then V:Vacio("Sin datos aún", "Falta el módulo de ventanas.") return end
+		local n = 0
+		for _ in pairs(W.marcos) do n = n + 1 end
+		V:Panel({ titulo = W.moviendo and "Estás moviendo los elementos" or "Mover elementos",
+			texto = (W.moviendo and "Arrastra cada recuadro verde a donde quieras; la rueda del ratón cambia su tamaño. Se guarda solo, para este personaje." or
+				"Muestra cada parte de Mamba con un recuadro verde: arrástralo a donde quieras y usa la rueda para su tamaño.")
+				.. "\n" .. n .. " elementos registrados. En combate no se mueve nada.",
+			boton = { W.moviendo and "Terminar" or "Mover elementos", function()
+				local ok, motivo = W.ModoMover(not W.moviendo)
+				if ok and W.moviendo and _G.PolestarPicker then _G.PolestarPicker:Hide() end
+				est.aviso = motivo
+			end } })
+		if est.aviso then V:Nota("|cfffabf4d" .. est.aviso .. "|r"); est.aviso = nil end
+		V:Interruptor("Fijar todo (que nada se mueva)", W.Fijas(), function(v) W.Fijar(v) end)
+		V:Botones({ { "Restablecer posiciones", function() W.Restablecer() end } }, "Devuelve cada elemento a su lugar y tamaño de siempre.")
+	end,
+})
+Hub.Grupo({ clave = "MambaGrupoMover", nombre = "Mover", icono = "resize", orden = 890, foot = true, partes = { "MambaMover" } })
 Hub.Grupo({ clave = "MambaGrupoErrores", nombre = "Errores", icono = "bug", orden = 900, foot = true, partes = { "MambaErrores" } })
 
 ---------------------------------------------------------------- API pública (_G.MambaAPI)
@@ -171,4 +194,9 @@ function API.PonerEnSubasta(id, precio)
 	if not ok then return false, tostring(r) end
 	return r and true or false, motivo
 end
+
+-- El modo «Mover elementos» (como el modo de edición): API.ModoMover(true|false) -> ok, motivo;
+-- API.AlModoMover(fn(activo)) para mostrar lo que está escondido mientras se mueve.
+function API.ModoMover(si) if A.Ventanas then return A.Ventanas.ModoMover(si) end return false end
+function API.AlModoMover(fn) if A.Ventanas then A.Ventanas.AlModoMover(fn) end end
 
