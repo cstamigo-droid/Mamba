@@ -114,7 +114,7 @@ local function filasCompra()
 			if fa and fa.forma.tipo == "nodo" and _G.MambaMapa then acc[#acc + 1] = { "Ver ruta", function() _G.MambaMapa.MostrarRuta(fa.forma.mapa, f.id) end } end
 			out[#out + 1] = { tipo = elige, titulo = ("%s: te faltan %d (tienes %d de %d)"):format(f.nombre, f.falta, f.tiene or 0, f.necesita or 0),
 				detalle = table.concat(partes, "\n"),
-				conf = f.ahorro and ("Elegido por " .. M.Dinero(f.ahorro) .. " de diferencia contra la otra forma") or nil, acciones = acc }
+				conf = f.ahorro and ("Elegido por ≈ " .. M.Dinero(f.ahorro) .. " de diferencia contra la otra forma") or nil, acciones = acc }
 		end
 	end
 	cab.vacio = "No te falta nada para tu rango actual."
@@ -144,7 +144,7 @@ local function filasGanar()
 	for i, r in ipairs(res) do
 		if i > 25 then break end
 		local siguiente = res[i + 1]
-		out[#out + 1] = { tipo = r.ganancia > 0 and ("+" .. M.Dinero(r.ganancia)) or "pierde", titulo = r.nombre .. " (" .. r.prof .. ")",
+		out[#out + 1] = { tipo = r.ganancia > 0 and ("≈ +" .. M.Dinero(r.ganancia)) or "pierde", titulo = r.nombre .. " (" .. r.prof .. ")",
 			detalle = ("Se vende ≈ %s neto · materiales %s"):format(M.Dinero(r.venta or 0), M.Dinero(r.costo or 0)),
 			conf = (r.noSeVende and "Casi no se vende: no lo fabriques para vender. " or (r.sinLiquidez and "Ventas sin medir aún. " or ""))
 				.. (siguiente and i == 1 and ("La siguiente deja " .. M.Dinero(siguiente.ganancia)) or ""),
@@ -170,7 +170,7 @@ local function filasFarmeo()
 	local cab = { titulo = "Farmeo: el mejor lugar para tu nivel", filtros = filtros, alFiltro = function(k) objetivo = k; M.Refrescar() end }
 	local lugares, motivo = C.Lugares(objetivo)
 	if motivo then cab.linea1 = motivo; return {}, cab end
-	cab.linea1 = "Ordenados por oro por hora (precio del Tasador × lo que se junta). ≈ = estimado; al farmear con \"Llévame\" se mide."
+	cab.linea1 = "Ordenados por oro por hora NETO (precio del Tasador × lo que se junta, menos el 5 % de la subasta). ≈ = estimado; al farmear con \"Llévame\" se mide."
 	local out = {}
 	for i, l in ipairs(lugares) do
 		local sig = lugares[i + 1]

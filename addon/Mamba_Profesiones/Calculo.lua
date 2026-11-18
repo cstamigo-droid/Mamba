@@ -19,7 +19,7 @@ C.ZONA_BANDO = {
 -- Modelos (≈, se corrigen con lo medido): criaturas muertas por hora en solitario a tu nivel, y nodos por hora.
 C.MATANZAS_HORA = 90
 C.NODOS_HORA_MAX = 40
-C.UNIDADES_NODO = 2
+C.COMISION = 0.05 -- la subasta se queda con el 5 %: el oro por hora es NETO (R0)
 
 local function skillUp()
 	local S = _G.SkillUpForever
@@ -77,12 +77,13 @@ function C.Medido(id, mapa)
 end
 
 -- Formas de juntar un objeto que este personaje puede usar, con unidades/hora (≈ o medidas).
--- fila de datos: { tipo, mapa, x, y, nombre, nivelMin, nivelMax|habilidad, %, apariciones }
+-- fila de datos: { tipo, mapa, x, y, nombre, nivelMin, nivelMax|habilidad, %, apariciones, unidades por caída }
 function C.Farmeo(id, p)
 	p = p or C.Personaje()
 	local out = {}
 	for _, f in ipairs((M.FUENTES or {})[id] or {}) do
-		local tipo, mapa, x, y, nombre, n1, n2, pct, ap = unpack(f)
+		local tipo, mapa, x, y, nombre, n1, n2, pct, ap, u = unpack(f)
+		u = u or 1
 		local zb = C.ZONA_BANDO[mapa]
 		local sirve = not (zb and p.bando and zb ~= p.bando)
 		local rate, porque
@@ -93,12 +94,14 @@ function C.Farmeo(id, p)
 			if not mia and tipo == "hierba" and p.raza == "Tauren" then mia = p.nivel * 5 end
 			local puede = (mia or -1) >= n1
 			if not puede then sirve, porque = false, "pide " .. n1 .. " de habilidad" end
-			rate = math.min(C.NODOS_HORA_MAX, ap * 0.4) * pct / 100 * C.UNIDADES_NODO
+			rate = math.min(C.NODOS_HORA_MAX, ap * 0.4) * pct / 100 * u
+			-- Cultivo (tauren): saca hierbas doble (bono de raza verificado en DatosProfesiones)
+			if tipo == "hierba" and p.raza == "Tauren" then rate = rate * 2 end
 		elseif sirve then
 			if n1 > p.nivel + 3 then sirve, porque = false, "criaturas de nivel " .. n1 .. "-" .. n2 .. ": muy altas" end
 			if tipo == "piel" and not habilidad(p, DESU) then sirve, porque = false, "necesita Desuello" end
 			local kills = (n2 < p.nivel - 10) and C.MATANZAS_HORA * 1.5 or C.MATANZAS_HORA
-			rate = kills * pct / 100
+			rate = kills * pct / 100 * u
 		end
 		local medido = C.Medido(id, mapa)
 		out[#out + 1] = { tipo = nodo and "nodo" or tipo, clase = tipo, mapa = mapa, x = x, y = y, nombre = nombre, nivel = { n1, n2 }, pct = pct,
@@ -219,7 +222,12 @@ function C.Fabricar()
 						if pr then costo = costo + pr * m[2] else falta = true end
 					end
 					local pv = C.Precio(r.id)
-					if pv and not falta then res = { costo = costo, venta = pv * receta.n * (1 - a.comision) } ; res.ganancia = res.venta - costo end
+					-- sin el Tasador: comisión y un depósito supuesto (15 % de lo que paga el vendedor, el mismo supuesto del Tasador)
+					local vend = select(11, GetItemInfo(r.id)) or 0
+					if pv and not falta then
+						res = { costo = costo, venta = pv * receta.n * (1 - a.comision) - vend * receta.n * (a.depositoPct or 0.15), sinLiquidez = true }
+						res.ganancia = res.venta - costo
+					end
 				end
 				if res and res.ganancia then
 					out[#out + 1] = { prof = prof, nombre = r.nombre, id = r.id, costo = res.costo, venta = res.venta,
@@ -255,28 +263,24 @@ function C.Lugares(objetivo, p)
 	end
 	local out = {}
 	for _, f in ipairs(((M.LUGARES or {})[objetivo]) or {}) do
-		local t, mapa, x, y, nombre, n1, n2, puntaje = unpack(f)
+		local t, mapa, x, y, nombre, n1, n2, puntaje, item, pct, u, ap = unpack(f)
+		u = u or 1
 		local zb = C.ZONA_BANDO[mapa]
 		if (t == tramo or t == tramo - 1) and not (zb and p.bando and zb ~= p.bando) and (nodos or n1 <= p.nivel + 3) then
-			local item = C.OBJETOS[objetivo][t]
+			-- cada fila trae SU objeto, su % y sus unidades por caída (revisión wow-economía 18-11)
 			local porHora
 			if nodos then
-				porHora = math.min(C.NODOS_HORA_MAX, puntaje * 0.4) * C.UNIDADES_NODO
+				porHora = math.min(C.NODOS_HORA_MAX, (ap or puntaje) * 0.4) * (pct or 100) / 100 * u
+				if objetivo == "hierbas" and p.raza == "Tauren" then porHora = porHora * 2 end
 			else
-				porHora = C.MATANZAS_HORA * 0.3 -- ≈ si no hay fila de ese objeto en ese mapa
-				for _, g in ipairs(C.Farmeo(item, p)) do
-					if g.mapa == mapa and g.porHora then porHora = g.porHora; break end
-				end
+				local kills = (n2 < p.nivel - 10) and C.MATANZAS_HORA * 1.5 or C.MATANZAS_HORA
+				porHora = kills * (pct or 0) / 100 * u
 			end
 			local medido = C.Medido(item, mapa)
 			if medido then porHora = medido end
 			local pr = C.Precio(item)
-			if nodos and mapa then
-				local cx, cy = M.CentroNodos and M.CentroNodos(objetivo, mapa)
-				x, y = cx or x, cy or y
-			end
 			out[#out + 1] = { mapa = mapa, x = x, y = y, nombre = nombre, nivel = { n1, n2 }, item = item,
-				porHora = porHora, oroHora = pr and pr * porHora, medido = medido ~= nil, tramo = t }
+				porHora = porHora, oroHora = pr and pr * porHora * (1 - C.COMISION), medido = medido ~= nil, tramo = t }
 		end
 	end
 	table.sort(out, function(a, b) return (a.oroHora or a.porHora or 0) > (b.oroHora or b.porHora or 0) end)
