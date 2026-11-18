@@ -110,6 +110,9 @@ local function asignar(k)
 	local b = M.bajoRaton
 	if not b then return end
 	if k == "ESCAPE" then return M.TerminarTeclas() end
+	-- SetBinding es protegida en combate: si la pelea empezó antes de que llegara PLAYER_REGEN_DISABLED,
+	-- no se toca nada (revisión wow-addon-lua, 18-11).
+	if InCombatLockdown() then return M.FueraDeCombate("terminarTeclas", M.TerminarTeclas) end
 	if k == "BACKSPACE" or k == "DELETE" then
 		local a = accionDe(b)
 		while GetBindingKey(a) do SetBinding(GetBindingKey(a), nil) end

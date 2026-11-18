@@ -185,6 +185,15 @@ G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "LSHIFT")
 check(G.GUARDADO == 3, "una tecla sola de Mayús no se asigna")
 G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "ESCAPE")
 check(not M.asignando, "Esc termina")
+# la pelea empieza antes de que llegue PLAYER_REGEN_DISABLED: no se llama a SetBinding (protegida)
+check(M.EmpezarTeclas(), "vuelve a asignar")
+M.bajoRaton = G.MambaBoton3
+L.execute('COMBATE = true')
+G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "R")
+check(G.GUARDADO == 3 and not (G.BINDINGS["ACTIONBUTTON3"] and list(G.BINDINGS["ACTIONBUTTON3"].values())), "en combate no asigna teclas")
+check(not list(G.BLOQUEOS.values()), "en combate no se toca nada protegido al apretar una tecla")
+L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
+check(not M.asignando, "al salir de combate se cierra el modo de teclas")
 
 # ---------- 5. Mover ----------
 check(M.EmpezarMover(), "empieza mover")
