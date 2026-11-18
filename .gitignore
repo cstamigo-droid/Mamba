@@ -37,3 +37,6 @@ tools/discord-bot/.env
 
 # Mamba: caché de Python
 __pycache__/
+
+# Mamba: el changes.log de WhatsTraining es parte del addon incluido tal como lo publica su autor (incluidos.py)
+!addon/WhatsTraining/changes.log

@@ -3,6 +3,10 @@
 Uso:
   python -I polestar_al_dia.py            revisa (no cambia nada)
   python -I polestar_al_dia.py --fijar    guarda el contrato actual como el aceptado (después de probar)
+  python -I polestar_al_dia.py --fork RUTA_REPO
+      solo la versión: ¿hay una etiqueta vX.Y.Z publicada que la rama `asistente` del fork todavía no
+      fusionó? Imprime "FUSIONAR vX.Y.Z" (sale 1), "AL DÍA vX.Y.Z" (sale 0) o el error (sale 2).
+      La usa tools/asistente/seguir_polestar.sh (ARQUITECTURA §13f.7, M4). No cambia nada.
 
 Qué compara (ARQUITECTURA.md §6 y §13):
   - la versión instalada (Polestar.toc) contra la última publicada en GitHub (fitzforge/polestar);
@@ -87,6 +91,13 @@ INTERNAS = [(GEAR, "Gear", n, "Asistente_Equipo") for n in
 INTERNAS += [(WEIGHTS, "Gear", "CLASSES", "Asistente_Equipo"), (WEIGHTS, "Gear", "PROFICIENCY", "Asistente_Equipo")]
 INTERNAS += [(ITEMDB, "DB", "Get", "Asistente_Equipo (Polestar.ItemDB.Get)"),
              (ITEMDB, "DB", "ItemName", "Asistente_Equipo (Polestar.ItemDB.ItemName)")]
+# Regla de estética (WOW_FOREVER/ESTETICA_MAMBA.md): addon/Asistente/Estilo.lua dibuja con estas piezas de
+# Polestar. Si cambian, revisar Estilo.lua y correr tests/mamba-estetica.test.js.
+THEME, WIDGETS, INIT = "addon/Polestar/Theme/Theme.lua", "addon/Polestar/Theme/Widgets.lua", "addon/Polestar/Core/Init.lua"
+ESTILO = "Asistente/Estilo.lua (estética)"
+INTERNAS += [(THEME, "Theme", n, ESTILO) for n in ["Skin", "Band", "BandCoords", "Hex", "OnChanged", "TipColor"]]
+INTERNAS += [(WIDGETS, "W", n, ESTILO) for n in ["Text", "IconButton", "FrameClose", "SearchBox", "Hover", "Rim", "Haze", "Tooltip"]]
+INTERNAS += [(WIDGETS, "ns", "RegisterOptions", ESTILO), (INIT, "ns", "DragWindow", ESTILO), (INIT, "ns", "CloseOnEscape", ESTILO)]
 # archivos de datos cuyo FORMATO de entrada leemos (las líneas "-- Entry:" de su cabecera)
 FORMATOS = ["addon/Polestar_ItemDB/Items.lua", "addon/Polestar_ItemDB/Forever.lua"]  # los lee generador/equipo.py
 
@@ -112,6 +123,13 @@ def cuerpo_definicion(fuente, prefijo, nombre):
             for k in range(i + 1, len(lineas)):
                 if lineas[k] == fin:
                     return "\n".join(lineas[i:k + 1])
+    # definida con sangría (dentro de un bloque do ... end, como Theme.TipColor): hasta el `end` con su misma sangría
+    for i, l in enumerate(lineas):
+        m = re.match(rf"^(\s+)function {p}\.{n}\(", l)
+        if m:
+            for k in range(i + 1, len(lineas)):
+                if lineas[k] == m.group(1) + "end":
+                    return "\n".join(lineas[i:k + 1])
     raise ValueError(f"no encuentro {prefijo}.{nombre} en Polestar: ¿la quitaron o la renombraron?")
 
 
@@ -136,8 +154,37 @@ for _f in FORMATOS:
     QUE[f"formato:{_f}"] = f"formato de {_f}: revisar el generador de Asistente_Equipo (generador/equipo.py)"
 
 
+def numeros(tag):
+    return [int(x) for x in re.findall(r"\d+", tag)]
+
+
+def fusionada(repo):
+    """Última etiqueta de Polestar (v*) que ya está dentro de la rama asistente del fork."""
+    import subprocess
+    r = subprocess.run(["git", "-C", str(repo), "describe", "--tags", "--abbrev=0", "--match", "v*", "asistente"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise ValueError("git describe falló en " + str(repo) + ": " + r.stderr.strip())
+    return re.sub(r"-asistente.*$", "", r.stdout.strip())
+
+
+def main_fork(repo):
+    try:
+        ultima, base = ultima_version(), fusionada(repo)
+    except Exception as e:  # sin internet, GitHub caído, repositorio movido
+        print("NO SE PUDO REVISAR:", e)
+        return 2
+    if numeros(ultima) > numeros(base):
+        print(f"FUSIONAR {ultima} (Mamba está sobre {base})")
+        return 1
+    print(f"AL DÍA {base} (última publicada: {ultima})")
+    return 0
+
+
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
+    if "--fork" in argv:
+        return main_fork(pathlib.Path(argv[argv.index("--fork") + 1]))
     try:
         ultima = ultima_version()
         actual = contrato(ultima)
