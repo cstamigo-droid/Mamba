@@ -76,7 +76,7 @@ Pedido de Cristian (17-11): que el addon mire la subasta y diga **cómo ganar or
 | `/tasador op` | Ventana **Oportunidades**, ordenada por ganancia, con pestañas: Todo, Reventa, Al PNJ, Vender lo tuyo y Fabricar. Pasa el ratón por una fila para ver el detalle |
 | `/tasador reventa` | Qué comprar barato para revender: hasta qué precio comprar, cuántas, a cuánto revender, y la ganancia en oro y en % |
 | `/tasador pnj` | Subastas más baratas que lo que paga el vendedor (PNJ): las compras y se las vendes a él |
-| `/tasador vender` | Para cada cosa de tus bolsas: a cuánto publicarla, cuántas por día y si es **VENDE YA**, **vende**, **espera** o **al vendedor** |
+| `/tasador vender` | Para cada cosa de tus bolsas: a cuánto publicarla, cuántas por día y si es **VENDE YA**, **vende**, **espera**, **al vendedor** o **no lo publiques** |
 | `/tasador fabricar` | Qué recetas tuyas dejan ganancia hoy. Antes abre **una vez** la ventana de cada profesión (Alquimia, Cocina, Primeros auxilios): el addon anota tus recetas. Si pasas por un vendedor de viales o especias, anota sus precios |
 | `/tasador eventos` | Mide si las bandas del 9-12 suben el precio de hierbas y consumibles. Es una hipótesis: el addon la mide, no la da por cierta |
 | `/tasador deposito 15` · `/tasador duracion 24` | Ajustes del depósito supuesto y de la duración de tus publicaciones |
@@ -108,6 +108,7 @@ Pedido de Cristian (17-11): que el addon mire la subasta y diga **cómo ganar or
 - **"Vende ya"**: el precio bajó 10 % o más en los últimos días (contando la tendencia de todos los días, no uno suelto).
 - **"Espera"**: unos pocos rematan muy barato, pero la mayoría sigue a precio normal y el precio no viene bajando. Si todo el mercado de hoy está más bajo, el addon dice **"vende"**: ese es el precio nuevo.
 - **"Al vendedor"**: la subasta, después de la comisión y del depósito, no deja al menos 1,5 veces lo que paga el PNJ.
+- **"No lo publiques"**: con lo que hay delante y lo poco que se vende, perderías más en depósitos de lo que cobras.
 
 ### NO VERIFICADO en Forever (todo se puede ajustar)
 - Comisión 5 % (`/tasador comision`).
@@ -118,7 +119,7 @@ Pedido de Cristian (17-11): que el addon mire la subasta y diga **cómo ganar or
 - Si la subasta se comparte con la Alianza.
 
 ### Pruebas
-`tools/asistente/pruebas/test_comercio.py`: 129 pruebas con Lua 5.1, más `test_escaneo.py` (37) y `test_tasador.py` (118). Incluye:
+`tools/asistente/pruebas/test_comercio.py`: 134 pruebas con Lua 5.1, más `test_escaneo.py` (37) y `test_tasador.py` (118). Incluye:
 - la simulación de subastas que desaparecen (ventas, cancelaciones, republicar a otro precio y dueño desconocido);
 - la prueba de que nada compra ni publica sin tu clic, con su control positivo.
 

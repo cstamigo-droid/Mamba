@@ -170,7 +170,15 @@ local function categoria(id)
 	return T.CategoriaEvento(clase, sub)
 end
 
-local POR_TANDA_FOTO = 2000 -- objetos de la foto por cuadro
+-- Trabajo por cuadro al guardar la foto: se mide en SUBASTAS (un objeto con 1.000 subastas pesa 1.000), no en
+-- objetos, para que una subasta concentrada en pocos objetos tampoco congele el juego.
+local POR_TANDA_FOTO = 4000
+local function peso(x)
+	if type(x) == "string" then return 1 + math.floor(#x / 16) end -- ~16 letras por subasta en la foto compacta
+	local n = 1
+	if type(x) == "table" then for _, precios in pairs(x) do for _ in pairs(precios) do n = n + 1 end end end
+	return n
+end
 local avisar
 local function terminar(buffer)
 	estado.activo, estado.leyendo = false, false
@@ -198,22 +206,37 @@ local function terminar(buffer)
 	local ventas = medir and {} or nil
 	local compacta, pos = {}, 1
 	estado.guardando = true
-	local function tanda()
-		local fin = math.min(#ids, pos + POR_TANDA_FOTO - 1)
-		local trozo = {}
-		for i = pos, fin do
-			local x = ids[i]
-			if x[1] == "v" then trozo[x[2]] = vieja[x[2]] else compacta[x[2]] = T.FotoTexto(nueva[x[2]]) end
+	local tanda
+	local function paso()
+		local trozo, trabajo = {}, 0
+		while pos <= #ids and trabajo < POR_TANDA_FOTO do
+			local x = ids[pos]
+			if x[1] == "v" then
+				trozo[x[2]] = vieja[x[2]]
+				trabajo = trabajo + peso(vieja[x[2]]) * 2 -- comparar cuesta leer la foto vieja y la nueva
+			else
+				compacta[x[2]] = T.FotoTexto(nueva[x[2]])
+				trabajo = trabajo + peso(nueva[x[2]])
+			end
+			pos = pos + 1
 		end
 		if ventas and next(trozo) then
 			for id, v in pairs(T.CompararFotos(trozo, nueva, segundos, yo) or {}) do ventas[id] = v end
 		end
-		pos = fin + 1
 		if pos <= #ids then C_Timer.After(0, tanda) return end
 		estado.guardando = false
 		if ventas then T.AnotarVentas(T.db.precios, ventas, dia, segundos) end
 		T.db.foto, T.db.fotoHora = compacta, ahora
 		avisar(n, dia, ventas, segundos)
+	end
+	-- si una tanda falla, se suelta el escáner (si no, quedaría "Ya estoy escaneando" hasta recargar)
+	tanda = function()
+		local ok, err = pcall(paso)
+		if not ok then
+			estado.guardando = false
+			T.db.foto, T.db.fotoHora = nil, nil -- foto dudosa: el próximo escaneo empieza una foto nueva
+			T.Decir("Error guardando la foto del escaneo: los precios quedaron, las ventas de este escaneo no. (" .. tostring(err) .. ")")
+		end
 	end
 	tanda()
 end
@@ -273,7 +296,8 @@ end
 
 -- Lo llama el botón (clic del jugador). Devuelve true si pidió la lista.
 function T.Escanear()
-	if estado.activo or estado.guardando then T.Decir("Ya estoy escaneando: espera unos segundos.") return false end
+	if estado.activo then T.Decir("Ya estoy escaneando: espera unos segundos.") return false end
+	if estado.guardando then T.Decir("Estoy guardando el escaneo anterior: espera unos segundos.") return false end
 	if moderna() then
 		estado.tipo = "moderna"
 	elseif antigua() then

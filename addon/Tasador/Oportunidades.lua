@@ -212,10 +212,13 @@ end
 function T.TextoConsejo(x)
 	if not x.c then return x.link .. "  " .. (x.motivo == "escanea" and "escanea la subasta" or tostring(x.motivo)), "" end
 	local c = x.c
-	local acc = ({ ["vende ya"] = "VENDE YA", vende = "Vende", espera = "Espera", vendedor = "Al vendedor" })[c.accion]
+	local acc = ({ ["vende ya"] = "VENDE YA", vende = "Vende", espera = "Espera", vendedor = "Al vendedor",
+		["no publiques"] = "No lo publiques" })[c.accion]
 	local cuantas = c.cuantas and (" · publica hasta " .. c.cuantas .. " por día") or ""
-	return x.link .. (x.cantidad > 1 and (" x" .. x.cantidad) or "") .. "  " .. acc .. " a " .. T.Dinero(c.precio) .. cuantas,
-		c.motivo or ""
+	local precio = c.accion == "no publiques" and "" or (" a " .. T.Dinero(c.precio))
+	local neto = (c.accion == "vende" or c.accion == "vende ya") and c.neto and c.neto > 0
+		and (" (te quedan ~" .. T.Dinero(c.neto) .. " c/u)") or ""
+	return x.link .. (x.cantidad > 1 and (" x" .. x.cantidad) or "") .. "  " .. acc .. precio .. neto .. cuantas, c.motivo or ""
 end
 
 function T.TextoFabricar(f)

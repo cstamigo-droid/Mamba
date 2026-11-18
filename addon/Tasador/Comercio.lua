@@ -89,6 +89,7 @@ function T.CompararFotos(vieja, nueva, segundos, jugador)
 	for id, vendedores in pairs(vieja) do
 		vendedores = T.FotoTabla(vendedores)
 		local ahoraItem = T.FotoTabla(nueva[id]) or {}
+		if type(vendedores) ~= "table" or type(ahoraItem) ~= "table" then vendedores, ahoraItem = {}, {} end
 		if jugador and (vendedores[jugador] or ahoraItem[jugador]) then -- copia: no tocar las tablas de quien llama
 			local v2, a2 = {}, {}
 			for k, x in pairs(vendedores) do if k ~= jugador then v2[k] = x end end
@@ -457,7 +458,7 @@ function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, can
 			r.accion = "vende"
 			r.motivo = "Hoy todo el mercado está más bajo que lo normal (" .. T.Dinero(normal) .. "): es el precio de hoy. No hay datos de que vuelva a subir."
 		else
-			r.accion, r.motivo = "vende", vd and "Precio donde lo de delante se vende en un día." or "Precio del 20 % más barato de hoy (ventas sin medir)."
+			r.accion, r.motivo = "vende", (vd and vd >= 1) and "Precio donde lo de delante se vende en un día." or "Precio del 20 % más barato de hoy."
 		end
 	end
 	-- ¿La subasta deja más que el vendedor? Con la comisión y el depósito que se pierde si no se vende.
@@ -467,6 +468,9 @@ function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, can
 	r.neto = r.precio * (1 - a.comision) - perdida / cantidad
 	if vendedor and vendedor > 0 and r.neto < vendedor * (a.margen or 1.5) then
 		r.accion, r.precio, r.motivo = "vendedor", vendedor, "La subasta no deja al menos 1,5 veces lo que paga el vendedor (después de comisión y depósito)."
+	elseif r.neto <= 0 then
+		r.accion = "no publiques"
+		r.motivo = "Con lo que hay delante y lo poco que se vende, perderías más en depósitos de lo que cobras. Guárdalo o espera a que se vacíe la fila."
 	elseif r.pocoVenta then
 		r.motivo = (r.motivo or "") .. " Ojo: casi no se vende (menos de 1 al día)."
 	end
