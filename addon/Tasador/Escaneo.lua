@@ -26,7 +26,7 @@ function T.SumarSubasta(buffer, id, cantidad, compraYa, vendedor, tramo)
 	if unidad < b.min then b.min = unidad end
 	b.cant = b.cant + cantidad
 	b.n = (b.n or 0) + 1
-	local precio = math.floor(unidad + 0.5)
+	local precio = math.max(1, math.floor(unidad + 0.5)) -- nunca 0: dividiría por 0 en los márgenes
 	if b.lista then b.lista[#b.lista + 1] = { precio, cantidad } end
 	if b.foto then
 		local quien = type(vendedor) == "string" and vendedor ~= "" and vendedor or "?"
@@ -54,9 +54,10 @@ function T.Percentil(lista, q)
 end
 
 -- La foto del escaneo: foto[id][vendedor][precio] = { [tramo] = unidades } (para CompararFotos).
-function T.FotoDe(buffer)
+-- compacta = true la guarda como texto por objeto (T.FotoTexto), para TasadorDB.
+function T.FotoDe(buffer, compacta)
 	local foto = {}
-	for id, b in pairs(buffer) do if b.foto then foto[id] = b.foto end end
+	for id, b in pairs(buffer) do if b.foto then foto[id] = compacta and T.FotoTexto(b.foto) or b.foto end end
 	return foto
 end
 
@@ -183,9 +184,10 @@ local function terminar(buffer)
 	local ahora = time and time() or 0
 	local segundos = T.db.fotoHora and (ahora - T.db.fotoHora) or nil
 	local nueva = T.FotoDe(buffer)
-	local ventas = T.CompararFotos(T.db.foto, nueva, segundos)
+	local yo = UnitName and T.Leer(UnitName("player")) or nil
+	local ventas = T.CompararFotos(T.db.foto, nueva, segundos, yo)
 	if ventas then T.AnotarVentas(T.db.precios, ventas, dia, segundos) end
-	T.db.foto, T.db.fotoHora = nueva, ahora
+	T.db.foto, T.db.fotoHora = T.FotoDe(buffer, true), ahora
 	T.db.ultimoEscaneo = dia
 	T.db.diasEscaneados = T.db.diasEscaneados or {}
 	T.db.diasEscaneados[tostring(dia)] = true
@@ -197,9 +199,9 @@ local function terminar(buffer)
 		T.Decir(string.format("Escaneo listo: %d objetos con precio (el cuadro de cada objeto ya los muestra). Para /tasador baratos y hierbas hacen falta 3 días distintos de escaneo: llevas %d.", n, dias))
 	end
 	if ventas then
-		T.Decir("Comparé con tu escaneo de hace " .. T.Horas(segundos) .. ": ventas anotadas. /tasador op muestra las oportunidades.")
+		T.Decir("Comparé con tu escaneo de hace " .. T.Horas(segundos) .. ": ventas estimadas anotadas. /tasador op muestra las oportunidades.")
 	elseif segundos and segundos > T.VENTANA_MAX then
-		T.Decir("Tu escaneo anterior es de hace más de 48 horas: no puedo saber qué se vendió. Escanea cada pocas horas.")
+		T.Decir("Tu escaneo anterior es de hace más de 8 horas: no puedo saber qué se vendió. Escanea cada 1 a 4 horas mientras juegas.")
 	else
 		T.Decir("Foto guardada. Vuelve a escanear en 1 a 4 horas: así sé qué se vendió.")
 	end

@@ -5,7 +5,7 @@
 -- Licencia: GPL-3.0.
 local _, T = ...
 
-local NOVERIF = "Comisión 5 %, depósito y duración: NO VERIFICADO en Forever (ajústalos con /tasador comision y /tasador deposito)."
+local NOVERIF = "NO VERIFICADO en Forever: comisión 5 %, depósito, duraciones, tiempo restante de las subastas, si la subasta es la moderna o la antigua y si se comparte con la Alianza (ajusta con /tasador comision, deposito y duracion)."
 
 ---------------------------------------------------------------- colores (regla de estética E3: sin |cff fijo)
 local function A() local a = _G.Asistente; return type(a) == "table" and a or nil end
@@ -22,12 +22,17 @@ local function colV(nombre, texto) -- dentro de la ventana
 end
 
 ---------------------------------------------------------------- datos del juego
+local pedidos = {}
 local function info(id)
 	local f = (C_Item and C_Item.GetItemInfo) or _G.GetItemInfo
 	if not f then return nil end
 	local ok, nombre, link, _, _, _, _, _, pila, _, _, vendedor = pcall(f, id)
 	if not ok or not T.Leer(nombre) then
-		if C_Item and C_Item.RequestLoadItemDataByID then pcall(C_Item.RequestLoadItemDataByID, id) end
+		-- se pide una sola vez por objeto y sesión (no miles de pedidos al servidor en cada análisis)
+		if not pedidos[id] and C_Item and C_Item.RequestLoadItemDataByID then
+			pedidos[id] = true
+			pcall(C_Item.RequestLoadItemDataByID, id)
+		end
 		return nil
 	end
 	return { link = T.Leer(link) or T.Leer(nombre), pila = T.Leer(pila) or 1, vendedor = T.Leer(vendedor) or 0 }
@@ -133,7 +138,7 @@ function T.ConsejosBolsas()
 	end
 	for id, b in pairs(por) do
 		local fotoItem = T.db.foto and T.db.foto[id]
-		local c, motivo = T.ConsejoVenta(T.db.precios and T.db.precios[tostring(id)], fotoItem, b.vendedor, hoy, edad, a, yo)
+		local c, motivo = T.ConsejoVenta(T.db.precios and T.db.precios[tostring(id)], fotoItem, b.vendedor, hoy, edad, a, yo, b.cantidad, id)
 		out[#out + 1] = { id = id, link = b.link, cantidad = b.cantidad, c = c, motivo = motivo,
 			valor = c and c.precio * b.cantidad or 0 }
 	end
@@ -150,8 +155,13 @@ function T.ConsejosFabricar()
 	local function precioDe(id) return (T.PrecioMercado(id, hoy)) end
 	local function vendedorDe(id) local x = info(id); return x and x.vendedor or 0 end
 	local function liqDe(id) return T.Liquidez(T.db.precios and T.db.precios[tostring(id)], hoy) end
+	local yo = jugador()
+	local function delanteDe(id, precio)
+		local f = T.db.foto and T.db.foto[id]
+		return f and T.Delante(T.Escalera(f, yo), precio) or nil
+	end
 	for producto, r in pairs(mias) do
-		local f = T.Fabricar({ producto = producto, n = r.n, mats = r.mats }, precioDe, a, vendedorDe, liqDe)
+		local f = T.Fabricar({ producto = producto, n = r.n, mats = r.mats }, precioDe, a, vendedorDe, liqDe, delanteDe)
 		f.prof = r.prof
 		out[#out + 1] = f
 	end
@@ -175,8 +185,9 @@ function T.TextoOportunidad(o)
 		return string.format("%s  compra %d a %s o menos y véndelas al PNJ por %s c/u", o.link, o.unidades,
 			T.Dinero(o.comprarHasta), T.Dinero(o.venta)), "+" .. T.Dinero(o.ganancia)
 	end
-	return string.format("%s  compra %d hasta %s, revende a %s · %d al día", o.link, o.unidades, T.Dinero(o.comprarHasta),
-		T.Dinero(o.venta), math.floor(o.ventasDia + 0.5)), "+" .. T.Dinero(o.ganancia) .. " (" .. pct(o.pct) .. ")"
+	return string.format("%s  compra %d hasta %s, revende a %s · %d+ al día · %d días, %d h vistas", o.link, o.unidades,
+		T.Dinero(o.comprarHasta), T.Dinero(o.venta), math.floor(o.ventasDia), o.diasHistoria or 0, math.floor(o.horas or 0)),
+		"+" .. T.Dinero(o.ganancia) .. " (" .. pct(o.pct) .. ")"
 end
 
 function T.DetalleOportunidad(o)
@@ -189,8 +200,9 @@ function T.DetalleOportunidad(o)
 		l[#l + 1] = "Precio normal (mediana de los días anteriores): " .. T.Dinero(o.normal) .. "."
 		l[#l + 1] = "Costo " .. T.Dinero(o.costo) .. " · cobras " .. T.Dinero(o.venta * o.unidades) .. " menos la comisión."
 		l[#l + 1] = "Depósito " .. T.Dinero(o.deposito) .. "; pérdida esperada si no se vende: " .. T.Dinero(o.perdidaDeposito) .. "."
-		l[#l + 1] = "Venderlas tomaría unos " .. string.format("%.1f", o.diasVender) .. " días (" .. pct(o.prob) .. " de vender en una publicación)."
-		l[#l + 1] = "Ventas por día: estimadas de tus escaneos (mínimo; incluye cancelaciones que no pude distinguir)."
+		l[#l + 1] = "Riesgo de que baje mientras esperas (supuesto 5 % por día): " .. T.Dinero(o.riesgo) .. "."
+		l[#l + 1] = (o.diasVender < 1 and "Se venderían en menos de un día" or "Se venderían en 1 a 2 días") .. " (MODELO, sin verificar)."
+		l[#l + 1] = "Ventas por día: subastas que desaparecieron antes de vencer en tus escaneos. Puede incluir cancelaciones y tus propias compras; se usa el límite bajo."
 	end
 	l[#l + 1] = NOVERIF
 	return l
@@ -206,6 +218,9 @@ function T.TextoConsejo(x)
 end
 
 function T.TextoFabricar(f)
+	if f.noSeVende then
+		return nombre(f.producto) .. "  no se vende: 0 ventas en " .. math.floor(f.horas or 0) .. " h de escaneos", ""
+	end
 	if f.falta then
 		local n = {}
 		for _, id in ipairs(f.falta) do n[#n + 1] = nombre(id) end
@@ -345,7 +360,7 @@ local function filasDe(cual)
 	end
 	if cual == "todo" or cual == "fabricar" then
 		for _, f in ipairs(T.ConsejosFabricar() or {}) do
-			if cual == "fabricar" or (f.ganancia and f.ganancia > 0) then
+			if cual == "fabricar" or (f.ganancia and f.ganancia > 0 and not f.sinLiquidez) then
 				local a, b = T.TextoFabricar(f)
 				local col = f.ganancia and (f.ganancia > 0 and "bueno" or "dudoso") or "gris"
 				out[#out + 1] = { izq = a, der = colV(col, b), titulo = nombre(f.producto), valor = f.ganancia or -1,
@@ -359,9 +374,11 @@ local function filasDe(cual)
 end
 
 local vistas = {}
-function T.RefrescarVentana()
+-- recalcular = false: solo repinta (rueda del ratón); las filas se calculan al abrir, al cambiar de pestaña
+-- y al terminar un análisis.
+function T.RefrescarVentana(recalcular)
 	if not v then return end
-	vistas = filasDe(pestana)
+	if recalcular ~= false then vistas = filasDe(pestana) end
 	desplaza = math.max(0, math.min(desplaza, #vistas - FILAS))
 	for i = 1, FILAS do
 		local fila, d = filas[i], vistas[i + desplaza]
@@ -422,9 +439,9 @@ local function crearVentana()
 	if v.EnableMouseWheel then v:EnableMouseWheel(true) end
 	v:SetScript("OnMouseWheel", function(_, delta)
 		desplaza = math.max(0, desplaza - delta)
-		T.RefrescarVentana()
+		T.RefrescarVentana(false)
 	end)
-	if a.AlCambiarApariencia then a.AlCambiarApariencia(function() if v and v:IsShown() then T.RefrescarVentana() end end) end
+	if a.AlCambiarApariencia then a.AlCambiarApariencia(function() if v and v:IsShown() then T.RefrescarVentana(false) end end) end
 end
 
 function T.AbrirOportunidades()

@@ -11,14 +11,17 @@ T.DEFAULTS = {
 	minimoCobre = 2000,   -- y al menos 20 de plata más POR MONTÓN (por el tiempo y el depósito)
 	diasViejo = 7,        -- un precio de subasta de más de 7 días se marca como viejo
 	-- Comerciante (Comercio.lua). Lo marcado NO VERIFICADO es un supuesto ajustable, no un dato de Forever.
-	depositoPct = 0.15,   -- depósito = 15 % de lo que paga el vendedor por unidad (MODELO, NO VERIFICADO)
-	depositoMin = 100,    -- mínimo por publicación: 1 plata (Blizzard anunció 1 cobre desde el 17-11: NO VERIFICADO)
+	depositoPct = 0.15,   -- depósito = 15 % de lo que paga el vendedor por unidad y por 12 h (MODELO, NO VERIFICADO)
+	depositoMin = 100,    -- mínimo por publicación: 1 plata (ORO.md: Timesaver, hasta el 17-11; el cambio a 1 cobre
+	                      -- que anunció Warcraft Tavern se postergó al 17-11 según Blizzard: revisar en el juego)
 	horasPublicacion = 24, -- duración de la publicación que usas (NO VERIFICADO cuáles ofrece Forever)
 	minVentasDia = 5,     -- reventa: solo si se venden al menos 5 unidades al día
 	minMargen = 0.10,     -- reventa: margen neto mínimo 10 % (para no confundir ruido con ventaja)
 	minGanancia = 10000,  -- reventa: ganancia neta mínima 1 oro por operación
 	minVendedor = 100,    -- reventa al vendedor: ganancia mínima 1 plata
 	probMin = 0.2,        -- reventa: probabilidad mínima de vender en una publicación
+	maxDiasVender = 2,    -- reventa: no comprar lo que tardaría más de 2 días en venderse
+	riesgoDia = 0.05,     -- reventa: se descuenta 5 % por día de espera (riesgo de que baje; SUPUESTO, ORO.md: caídas de 50 % en una semana)
 	edadFotoMax = 3600,   -- comprar: el escaneo tiene que ser de hace 60 min o menos
 	edadFotoVenta = 21600, -- vender: el escaneo tiene que ser de hace 6 h o menos
 }

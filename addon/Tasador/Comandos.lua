@@ -58,7 +58,7 @@ local AYUDA = {
 	"/tasador fabricar  → qué recetas tuyas dejan ganancia hoy (abre antes tu ventana de profesión)",
 	"/tasador eventos  → mide si las bandas del 9-12 mueven hierbas y consumibles",
 	"/tasador deposito 15  → depósito en % de lo que paga el vendedor (supuesto, NO VERIFICADO)",
-	"/tasador duracion 24  → horas de tus publicaciones (12, 24 o 48)",
+	"/tasador duracion 24  → horas de tus publicaciones (las que te ofrezca la subasta: 2, 8, 12, 24, 48...)",
 	"Pasa el ratón sobre cualquier objeto para ver su tasación y si es mejora.",
 	"Precios de subasta: aprieta \"Escanear (Tasador)\" en la casa de subastas (o usa Auctionator si lo tienes).",
 }
@@ -98,9 +98,9 @@ local function Comando(msg)
 	elseif cmd == "deposito" and tonumber(arg) and tonumber(arg) >= 0 and tonumber(arg) <= 100 then
 		T.db.ajustes.depositoPct = tonumber(arg) / 100
 		T.Decir("Depósito supuesto: " .. tonumber(arg) .. "% de lo que paga el vendedor (si la subasta del juego lo calcula, uso el suyo).")
-	elseif cmd == "duracion" and (arg == "12" or arg == "24" or arg == "48") then
+	elseif cmd == "duracion" and tonumber(arg) and tonumber(arg) >= 1 and tonumber(arg) <= 72 then
 		T.db.ajustes.horasPublicacion = tonumber(arg)
-		T.Decir("Tus publicaciones duran " .. arg .. " horas.")
+		T.Decir("Tus publicaciones duran " .. tonumber(arg) .. " horas.")
 	elseif cmd == "comision" and tonumber(arg) then
 		local p = tonumber(arg)
 		if p >= 0 and p <= 50 then

@@ -23,7 +23,9 @@ end
 -- quedaban a una subasta de ese tramo. NO VERIFICADO para Forever: se usa el límite inferior más bajo
 -- conocido (clásico: largo 2-8 h, muy largo 8 h o más; moderno: largo 2-12 h, muy largo 12-48 h).
 T.TRAMO_MIN = { [0] = 0, [1] = 0, [2] = 1800, [3] = 7200, [4] = 28800 }
-T.VENTANA_MAX = 48 * 3600 -- con más tiempo entre escaneos todo pudo vencer: no se estima nada
+-- Con más de 8 h entre escaneos todo lo de tramo "muy largo" pudo vencer: no se mide nada (y esas horas no
+-- cuentan como observadas, para no "medir" 0 ventas por construcción).
+T.VENTANA_MAX = 8 * 3600
 
 local function suma(tramos)
 	local u = 0
@@ -31,38 +33,94 @@ local function suma(tramos)
 	return u
 end
 
----------------------------------------------------------------- C3: ventas entre dos fotos
+-- La foto de cada objeto se guarda COMPACTA (un texto) para no inflar TasadorDB:
+-- "vendedor\tprecio\ttramo\tunidades;..." <-> { [vendedor] = { [precio] = { [tramo] = unidades } } }
+function T.FotoTexto(t)
+	if type(t) ~= "table" then return t end
+	local partes = {}
+	for quien, precios in pairs(t) do
+		for precio, tramos in pairs(precios) do
+			for tr, u in pairs(tramos) do partes[#partes + 1] = quien .. "\t" .. precio .. "\t" .. tr .. "\t" .. u end
+		end
+	end
+	return table.concat(partes, ";")
+end
+function T.FotoTabla(x)
+	if type(x) ~= "string" then return x end
+	local t = {}
+	for quien, precio, tr, u in x:gmatch("([^\t;]*)\t(%d+)\t(%d+)\t(%d+)") do
+		precio, tr, u = tonumber(precio), tonumber(tr), tonumber(u)
+		t[quien] = t[quien] or {}
+		t[quien][precio] = t[quien][precio] or {}
+		t[quien][precio][tr] = (t[quien][precio][tr] or 0) + u
+	end
+	return t
+end
+
+-- Si en alguna de las dos fotos un objeto tiene subastas sin dueño conocido ("?"), no se puede seguir a cada
+-- vendedor: todo el objeto se junta en uno solo (tope del objeto entero). Si no, "Ana" en una foto y "?" en
+-- la otra parecería que Ana vendió todo.
+local function juntar(t)
+	local uno = {}
+	for _, precios in pairs(t) do
+		for precio, tramos in pairs(precios) do
+			uno[precio] = uno[precio] or {}
+			for tr, u in pairs(tramos) do uno[precio][tr] = (uno[precio][tr] or 0) + u end
+		end
+	end
+	return { ["*"] = uno }
+end
+
+---------------------------------------------------------------- C3: unidades desaparecidas entre dos fotos
 -- foto[id][vendedor][precioUnidad] = { [tramo] = unidades }. segundos = tiempo real entre las dos fotos.
--- Unidades que desaparecieron y que NO pudieron vencer = vendidas (mínimo). Dos topes conservadores:
---   por precio: perdidas - las que pudieron vencer;
---   por vendedor: si el mismo vendedor tiene ahora tantas como antes (republicó a otro precio), 0.
+-- Cuenta como "desaparecida antes de vencer" (casi siempre una venta) lo que cumple TODO:
+--   * no pudo vencer en ese tiempo (por su tramo de tiempo restante);
+--   * su precio es igual o menor que el más barato que quedó: quien compra materiales se lleva primero lo más
+--     barato, así que lo que desaparece MÁS CARO que algo que sigue ahí fue casi siempre una cancelación;
+--   * el mismo vendedor no tiene ahora tantas como antes (si republicó a otro precio, no es venta);
+--   * no es del jugador (tus subastas no miden al mercado).
+-- Puede incluir cancelaciones de lo más barato: por eso se llama "desaparecidas", no "vendidas seguro".
 -- Devuelve ventas[id] = { u = unidades, c = cobre }, una entrada por cada objeto observado (u puede ser 0),
 -- o nil si no se puede estimar (primera foto, tiempo raro o más de 48 h).
-function T.CompararFotos(vieja, nueva, segundos)
+function T.CompararFotos(vieja, nueva, segundos, jugador)
 	if type(vieja) ~= "table" or type(nueva) ~= "table" then return nil end
 	if type(segundos) ~= "number" or segundos <= 0 or segundos > T.VENTANA_MAX then return nil end
 	local ventas = {}
 	for id, vendedores in pairs(vieja) do
-		local ahoraItem = nueva[id] or {}
+		vendedores = T.FotoTabla(vendedores)
+		local ahoraItem = T.FotoTabla(nueva[id]) or {}
+		if jugador then vendedores[jugador], ahoraItem[jugador] = nil, nil end
+		if vendedores["?"] or ahoraItem["?"] then vendedores, ahoraItem = juntar(vendedores), juntar(ahoraItem) end
+		local minNuevo
+		for quien, precios in pairs(ahoraItem) do
+			if quien ~= jugador then
+				for precio, tramos in pairs(precios) do
+					if suma(tramos) > 0 and (not minNuevo or precio < minNuevo) then minNuevo = precio end
+				end
+			end
+		end
 		local u, c = 0, 0
 		for quien, precios in pairs(vendedores) do
-			local ahora = ahoraItem[quien] or {}
-			local porPrecio, cobre, antesTot, vencibleTot, ahoraTot = 0, 0, 0, 0, 0
-			for precio, tramos in pairs(precios) do
-				local antes, vencible = 0, 0
-				for tr, n in pairs(tramos) do
-					antes = antes + n
-					if (T.TRAMO_MIN[tr] or 0) <= segundos then vencible = vencible + n end
+			if quien ~= jugador then
+				local ahora = ahoraItem[quien] or {}
+				local porPrecio, cobre, antesTot, vencibleTot, ahoraTot = 0, 0, 0, 0, 0
+				for precio, tramos in pairs(precios) do
+					local antes, vencible = 0, 0
+					for tr, n in pairs(tramos) do
+						antes = antes + n
+						if (T.TRAMO_MIN[tr] or 0) <= segundos then vencible = vencible + n end
+					end
+					local perdidas = max(0, antes - suma(ahora[precio]) - vencible)
+					if minNuevo and precio > minNuevo then perdidas = 0 end
+					porPrecio, cobre = porPrecio + perdidas, cobre + perdidas * precio
+					antesTot, vencibleTot = antesTot + antes, vencibleTot + vencible
 				end
-				local perdidas = max(0, antes - suma(ahora[precio]) - vencible)
-				porPrecio, cobre = porPrecio + perdidas, cobre + perdidas * precio
-				antesTot, vencibleTot = antesTot + antes, vencibleTot + vencible
-			end
-			for _, tramos in pairs(ahora) do ahoraTot = ahoraTot + suma(tramos) end
-			local vendidas = min(porPrecio, max(0, antesTot - ahoraTot - vencibleTot))
-			if vendidas > 0 then
-				u = u + vendidas
-				c = c + cobre * vendidas / porPrecio -- precio promedio de lo perdido a cada precio
+				for _, tramos in pairs(ahora) do ahoraTot = ahoraTot + suma(tramos) end
+				local vendidas = min(porPrecio, max(0, antesTot - ahoraTot - vencibleTot))
+				if vendidas > 0 then
+					u = u + vendidas
+					c = c + cobre * vendidas / porPrecio -- precio promedio de lo perdido a cada precio
+				end
 			end
 		end
 		ventas[id] = { u = u, c = c }
@@ -87,8 +145,10 @@ end
 
 ---------------------------------------------------------------- C4: liquidez
 T.HORAS_MIN_LIQUIDEZ = 12
--- Ventas por día de los últimos 7 días (con hoy). Devuelve { ventasDia, realizado, horas, unidades,
--- midiendo } o nil si nunca se observó. ventasDia y realizado son nil si midiendo (menos de 12 h vistas).
+-- Ventas por día de los últimos 7 días (con hoy). Devuelve { ventasDia, ventasDiaBaja, realizado, horas,
+-- unidades, midiendo } o nil si nunca se observó. ventasDiaBaja = límite inferior (90 %, aproximación de
+-- Poisson): con pocas ventas vistas el número real puede ser mucho menor, y las decisiones usan este.
+-- Ojo: solo se mide en las horas en que escaneas (si escaneas de noche, mide la noche).
 function T.Liquidez(e, hoyDia, dias)
 	if type(e) ~= "table" or type(e.o) ~= "table" or not hoyDia then return nil end
 	local desde = hoyDia - (dias or 7) + 1
@@ -104,7 +164,10 @@ function T.Liquidez(e, hoyDia, dias)
 	if s <= 0 then return nil end
 	local r = { horas = s / 3600, unidades = u }
 	r.midiendo = r.horas < T.HORAS_MIN_LIQUIDEZ
-	if not r.midiendo then r.ventasDia = u / s * 86400 end
+	if not r.midiendo then
+		r.ventasDia = u / s * 86400
+		r.ventasDiaBaja = max(0, u - 1.2816 * math.sqrt(u)) / s * 86400
+	end
 	if u > 0 then r.realizado = c / u end
 	return r
 end
@@ -145,8 +208,7 @@ local function mediana(t)
 end
 T.Mediana = mediana
 
--- Precio "normal": mediana del precio de los 7 días ANTES de hoy (hoy no cuenta: no se valida con el mismo
--- dato que se quiere juzgar). Pide 2 días o más. Devuelve precio, días usados.
+-- Precio "normal": mediana del precio de los 7 días ANTES de hoy. Pide 2 días o más. Devuelve precio, días.
 function T.PrecioNormal(e, hoyDia)
 	if not hoyDia then return nil end
 	local v = {}
@@ -157,31 +219,37 @@ function T.PrecioNormal(e, hoyDia)
 	return mediana(v), #v
 end
 
----------------------------------------------------------------- C9: tendencia
--- "bajando": los últimos 4 días escaneados (dentro de 10 días) bajan 3 veces seguidas y en total 10 % o más.
--- "subiendo": lo mismo hacia arriba. "estable": hay datos y ninguna de las dos. nil: menos de 4 días.
+---------------------------------------------------------------- C9: tendencia (v2)
+-- Pendiente robusta (Theil-Sen: mediana de las pendientes entre cada par de días) de los últimos 7 días
+-- escaneados dentro de 10 días, con hoy. Cambio = pendiente × días cubiertos / precio mediano.
+-- "bajando" si el cambio es -10 % o peor; "subiendo" si +10 % o más; "estable" si no. nil con menos de 4 días.
+-- Un rebote de un día no esconde una caída (la versión 1, "3 bajadas seguidas", sí lo hacía).
 function T.Tendencia(e, hoyDia)
 	local s = T.Serie(e, hoyDia)
 	local u = {}
 	for i = #s, 1, -1 do
 		if hoyDia and s[i][1] < hoyDia - 9 then break end
-		table.insert(u, 1, s[i][2])
-		if #u == 4 then break end
+		table.insert(u, 1, s[i])
+		if #u == 7 then break end
 	end
 	if #u < 4 then return nil end
-	local baja, sube = true, true
-	for i = 2, 4 do
-		if not (u[i] < u[i - 1]) then baja = false end
-		if not (u[i] > u[i - 1]) then sube = false end
+	local pend, precios = {}, {}
+	for i = 1, #u do
+		precios[#precios + 1] = u[i][2]
+		for j = i + 1, #u do pend[#pend + 1] = (u[j][2] - u[i][2]) / (u[j][1] - u[i][1]) end
 	end
-	if baja and u[4] <= u[1] * 0.9 then return "bajando" end
-	if sube and u[4] >= u[1] * 1.1 then return "subiendo" end
-	return "estable"
+	local nivel = mediana(precios)
+	if not nivel or nivel <= 0 then return nil end
+	local cambio = mediana(pend) * (u[#u][1] - u[1][1]) / nivel
+	if cambio <= -0.10 then return "bajando", cambio end
+	if cambio >= 0.10 then return "subiendo", cambio end
+	return "estable", cambio
 end
 
 ---------------------------------------------------------------- escalera de precios de la foto
 -- foto de UN objeto -> { {precio, unidades}, ... } de menor a mayor. Sin las subastas del jugador.
 function T.Escalera(fotoItem, sinVendedor)
+	fotoItem = T.FotoTabla(fotoItem)
 	local porPrecio = {}
 	if type(fotoItem) == "table" then
 		for quien, precios in pairs(fotoItem) do
@@ -196,16 +264,53 @@ function T.Escalera(fotoItem, sinVendedor)
 	return e
 end
 
----------------------------------------------------------------- depósito y probabilidad de venta
--- Depósito de UNA publicación de k unidades. MODELO, NO VERIFICADO para Forever: % del pago del vendedor
--- (ajustable con /tasador deposito) con un mínimo por publicación. Si el juego sabe calcularlo, el
--- puente del juego pasa ajustes.depositoReal(id, k) y se usa ese.
+-- Percentil q de una escalera (por unidades).
+local function percentilEscalera(esc, q)
+	local total = 0
+	for _, x in ipairs(esc) do total = total + x[2] end
+	if total <= 0 then return nil end
+	local acum = 0
+	for _, x in ipairs(esc) do
+		acum = acum + x[2]
+		if acum >= total * q then return x[1] end
+	end
+	return esc[#esc][1]
+end
+T.PercentilEscalera = percentilEscalera
+
+-- Unidades más baratas o iguales a un precio.
+local function delanteDe(esc, precio)
+	local d = 0
+	for _, x in ipairs(esc) do if x[1] <= precio then d = d + x[2] end end
+	return d
+end
+T.Delante = delanteDe
+
+-- Precio sugerido para publicar: con ventas medidas, el escalón donde lo que queda delante pasa de un día de
+-- ventas (lo de más abajo se vende antes que tú de todos modos: igualarlo no sirve). Sin ventas medidas, el
+-- percentil 20 de hoy: así una unidad suelta a 1 cobre no fija tu precio.
+function T.PrecioSugerido(esc, ventasDia)
+	if #esc == 0 then return nil end
+	if not ventasDia then return percentilEscalera(esc, 0.2) end
+	local acum = 0
+	for _, x in ipairs(esc) do
+		acum = acum + x[2]
+		if acum > ventasDia then return x[1] end
+	end
+	return esc[#esc][1]
+end
+
+---------------------------------------------------------------- depósito, probabilidad de venta y riesgo
+-- Depósito de UNA publicación de k unidades. MODELO, NO VERIFICADO para Forever: % del pago del vendedor por
+-- cada 12 h de publicación (ajustable con /tasador deposito), con un mínimo por publicación. Más horas =
+-- más depósito (si no, alargar la publicación parecería gratis). Si el juego sabe calcularlo, el puente del
+-- juego pasa a.depositoReal(id, k) y se usa ese.
 function T.Deposito(id, vendedor, k, a)
 	if type(a.depositoReal) == "function" then
 		local ok, v = pcall(a.depositoReal, id, k)
 		if ok and type(v) == "number" and v >= 0 then return v end
 	end
-	return max(a.depositoMin or 0, (vendedor or 0) * (a.depositoPct or 0) * k)
+	return max(a.depositoMin or 0, (vendedor or 0) * (a.depositoPct or 0) * k * (a.horasPublicacion or 12) / 12)
 end
 
 -- Probabilidad de vender k unidades en una publicación: lo que se vende en su duración contra lo que hay
@@ -221,53 +326,66 @@ function T.PerdidaDeposito(dep, p)
 	return dep * (1 - p) / p
 end
 
----------------------------------------------------------------- C6: comprar para revender
+---------------------------------------------------------------- C6: comprar para revender (v2)
 -- e = historia del objeto, fotoItem = su foto, vendedor = lo que paga el PNJ por unidad (o 0),
 -- edadFoto = segundos desde la foto, a = ajustes. Devuelve oportunidad o nil, motivo.
+-- Precio de reventa = el MENOR entre el normal (días anteriores), el de lo que desapareció y el percentil 20
+-- de lo que queda hoy después de tu compra (los demás publican al precio de hoy, no al de la semana pasada).
+-- Ganancia = cobro - costo - depósito que se pierde - riesgo de que el precio baje mientras esperas.
 function T.Reventa(e, fotoItem, vendedor, hoyDia, edadFoto, a, id, jugador)
 	if not fotoItem or not edadFoto or edadFoto > (a.edadFotoMax or 3600) then return nil, "escanea" end
-	local normal, nDias = T.PrecioNormal(e, hoyDia)
-	if not normal then return nil, "historia corta (" .. (nDias or 0) .. " días antes de hoy; hacen falta 2)" end
-	if T.Tendencia(e, hoyDia) == "bajando" then return nil, "el precio viene bajando" end
+	local tendencia = T.Tendencia(e, hoyDia)
+	if not tendencia then return nil, "historia corta (hacen falta 4 días con escaneo)" end
+	if tendencia == "bajando" then return nil, "el precio viene bajando" end
+	local normal = T.PrecioNormal(e, hoyDia)
+	if not normal then return nil, "historia corta" end
 	local liq = T.Liquidez(e, hoyDia)
 	if not liq or liq.midiendo then return nil, "liquidez sin medir (hacen falta 12 h de escaneos)" end
-	if liq.ventasDia < (a.minVentasDia or 5) then return nil, "se vende poco" end
-	local venta = normal
-	if liq.realizado and liq.realizado < venta then venta = liq.realizado end -- lo que de verdad se pagó
-	local cobro = venta * (1 - a.comision)
+	local vd = liq.ventasDiaBaja
+	if vd < (a.minVentasDia or 5) then return nil, "se vende poco" end
+	local venta0 = normal
+	if liq.realizado and liq.realizado < venta0 then venta0 = liq.realizado end
 	local escalera = T.Escalera(fotoItem, jugador)
-	local tope = floor(liq.ventasDia) -- nunca más de lo que se vende en un día
+	local tope = floor(vd) -- nunca más de lo que se vende en un día (límite bajo)
 	local horas = a.horasPublicacion or 24
-	-- Comprar escalones mientras cada uno deje el margen mínimo por unidad.
-	local compra = {}
-	local k = 0
+	local compra, k = {}, 0
 	for _, esc in ipairs(escalera) do
 		local p, u = esc[1], esc[2]
-		if (cobro - p) / p < (a.minMargen or 0.1) or k >= tope then break end
+		if (venta0 * (1 - a.comision) - p) / p < (a.minMargen or 0.1) or k >= tope then break end
 		local toma = min(u, tope - k)
 		compra[#compra + 1] = { p, toma }
 		k = k + toma
 	end
-	-- Si el total no pasa (depósito incluido), se quita el escalón más caro y se vuelve a probar.
+	-- Si el total no pasa, se quita el escalón más caro y se vuelve a probar.
 	while #compra > 0 do
 		local costo, n, hasta = 0, 0, 0
-		for _, c in ipairs(compra) do costo, n, hasta = costo + c[1] * c[2], n + c[2], c[1] end
-		local delante = 0
-		for _, esc in ipairs(escalera) do
-			if esc[1] <= venta then delante = delante + esc[2] end
+		local quedan = {}
+		for i, esc in ipairs(escalera) do quedan[i] = { esc[1], esc[2] } end
+		for i, c in ipairs(compra) do
+			costo, n, hasta = costo + c[1] * c[2], n + c[2], c[1]
+			quedan[i][2] = quedan[i][2] - c[2]
 		end
-		delante = max(0, delante - n) -- lo que compras ya no está delante
-		local p = T.ProbVenta(liq.ventasDia, delante, n, horas)
+		local resto = {}
+		for _, x in ipairs(quedan) do if x[2] > 0 then resto[#resto + 1] = x end end
+		local venta = venta0
+		local p20 = percentilEscalera(resto, 0.2)
+		if p20 and p20 < venta then venta = p20 end
+		local cobro = venta * (1 - a.comision)
+		local delante = delanteDe(resto, venta)
+		local p = T.ProbVenta(vd, delante, n, horas)
 		local dep = T.Deposito(id, vendedor, n, a)
 		local perdida = T.PerdidaDeposito(dep, p)
-		if perdida and p >= (a.probMin or 0.2) then
-			local ganancia = cobro * n - costo - perdida
+		local dias = (delante + n) / vd
+		if perdida and p >= (a.probMin or 0.2) and dias <= (a.maxDiasVender or 2) then
+			local riesgo = cobro * n * (a.riesgoDia or 0.05) * dias
+			local ganancia = cobro * n - costo - perdida - riesgo
 			local pct = ganancia / costo
 			if ganancia > 0 and pct >= (a.minMargen or 0.1) and ganancia >= (a.minGanancia or 10000) then
 				return {
 					tipo = "reventa", id = id, comprarHasta = hasta, unidades = n, costo = costo, venta = venta,
-					ganancia = ganancia, pct = pct, ventasDia = liq.ventasDia, prob = p, deposito = dep,
-					perdidaDeposito = perdida, diasVender = (delante + n) / liq.ventasDia, normal = normal,
+					ganancia = ganancia, pct = pct, ventasDia = vd, prob = p, deposito = dep, riesgo = riesgo,
+					perdidaDeposito = perdida, diasVender = dias, normal = normal, horas = liq.horas,
+					diasHistoria = #T.Serie(e, hoyDia),
 				}
 			end
 		end
@@ -291,46 +409,57 @@ function T.ReventaVendedor(fotoItem, vendedor, edadFoto, a, id, jugador)
 		ganancia = ganancia, pct = ganancia / costo }
 end
 
----------------------------------------------------------------- C8 y C9: ¿a cuánto vendo y cuándo?
+---------------------------------------------------------------- C8 y C9: ¿a cuánto vendo y cuándo? (v2)
 -- Devuelve { accion = "vende ya" | "vende" | "espera" | "vendedor", precio, cuantas, motivo }
--- o nil, "escanea" si no hay foto reciente.
-function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador)
+-- o nil, "escanea" si no hay foto reciente. cantidad = cuántas tienes (para el depósito).
+-- "espera" solo si hay tendencia medida (4 días) que no baja Y lo barato es poco (el percentil 20 de hoy
+-- sigue normal): eso es alguien rematando. Si todo el mercado de hoy está abajo, es el precio nuevo: vende.
+function T.ConsejoVenta(e, fotoItem, vendedor, hoyDia, edadFoto, a, jugador, cantidad, id)
 	if not fotoItem or not edadFoto or edadFoto > (a.edadFotoVenta or 6 * 3600) then return nil, "escanea" end
+	cantidad = cantidad or 1
 	local escalera = T.Escalera(fotoItem, jugador)
 	local r = {}
 	local tendencia = T.Tendencia(e, hoyDia)
 	local normal = T.PrecioNormal(e, hoyDia)
 	local liq = T.Liquidez(e, hoyDia)
-	if liq and liq.ventasDia then r.cuantas = math.max(1, floor(liq.ventasDia * (a.horasPublicacion or 24) / 24)) end
+	local vd = liq and liq.ventasDiaBaja
+	if vd then r.cuantas = math.max(1, floor(vd * (a.horasPublicacion or 24) / 24)) end
 	r.tendencia, r.normal = tendencia, normal
 	if #escalera == 0 then
 		if not normal then return nil, "nadie lo vende hoy y no tengo su precio normal" end
 		r.accion, r.precio = "vende", normal
 		r.motivo = "Nadie lo vende hoy: publica a su precio normal."
 	else
-		local minimo = escalera[1][1]
-		r.precio = minimo
+		local minimo, p20 = escalera[1][1], percentilEscalera(escalera, 0.2)
+		r.precio = T.PrecioSugerido(escalera, vd)
 		if tendencia == "bajando" then
-			r.accion, r.motivo = "vende ya", "El precio bajó 3 días seguidos: vende hoy, al más barato."
-		elseif normal and minimo < normal * 0.8 then
-			r.accion, r.precio = "espera", normal
-			r.motivo = "Hoy alguien vende muy barato (" .. T.Dinero(minimo) .. "); lo normal es " .. T.Dinero(normal) .. "."
+			r.accion, r.motivo = "vende ya", "El precio viene bajando (10 % o más en los últimos días): vende hoy."
+		elseif tendencia and normal and minimo < normal * 0.8 and p20 >= normal * 0.8 then
+			r.accion, r.precio = "espera", p20
+			r.motivo = "Unos pocos venden muy barato (" .. T.Dinero(minimo) .. "); la mayoría está a " .. T.Dinero(p20) .. "."
+		elseif normal and p20 < normal * 0.8 then
+			r.accion = "vende"
+			r.motivo = "Hoy todo el mercado está más bajo que lo normal (" .. T.Dinero(normal) .. "): es el precio de hoy. No hay datos de que vuelva a subir."
 		else
-			r.accion, r.motivo = "vende", "Publica igual al más barato de hoy."
+			r.accion, r.motivo = "vende", vd and "Precio donde lo de delante se vende en un día." or "Precio del 20 % más barato de hoy (ventas sin medir)."
 		end
 	end
-	local neto = r.precio * (1 - a.comision)
-	r.neto = neto
-	if vendedor and vendedor > 0 and neto <= vendedor then
-		r.accion, r.precio, r.motivo = "vendedor", vendedor, "El vendedor paga igual o más que la subasta."
+	-- ¿La subasta deja más que el vendedor? Con la comisión y el depósito que se pierde si no se vende.
+	local delante = delanteDe(escalera, r.precio)
+	local p = T.ProbVenta(vd, delante, cantidad, a.horasPublicacion or 24) or 0.5
+	local perdida = T.PerdidaDeposito(T.Deposito(id, vendedor, cantidad, a), p) or 0
+	r.neto = r.precio * (1 - a.comision) - perdida / cantidad
+	if vendedor and vendedor > 0 and r.neto < vendedor * (a.margen or 1.5) then
+		r.accion, r.precio, r.motivo = "vendedor", vendedor, "La subasta no deja al menos 1,5 veces lo que paga el vendedor (después de comisión y depósito)."
 	end
 	return r
 end
 
 ---------------------------------------------------------------- C10: fabricar o no
 -- receta = { producto = id, n = unidades que salen, mats = { {id, cantidad}, ... } }
--- precioDe(id) -> precio por unidad o nil. liqDe(id) -> tabla de T.Liquidez o nil.
-function T.Fabricar(receta, precioDe, a, vendedorDe, liqDe)
+-- precioDe(id) -> precio por unidad o nil. liqDe(id) -> tabla de T.Liquidez o nil. delanteDe(id, precio) ->
+-- unidades publicadas a ese precio o menos (de la foto) o nil.
+function T.Fabricar(receta, precioDe, a, vendedorDe, liqDe, delanteDeId)
 	local costo, falta = 0, {}
 	for _, m in ipairs(receta.mats or {}) do
 		local p = precioDe(m[1])
@@ -341,13 +470,18 @@ function T.Fabricar(receta, precioDe, a, vendedorDe, liqDe)
 	if #falta > 0 then return { producto = receta.producto, falta = falta } end
 	local n = receta.n or 1
 	local liq = liqDe and liqDe(receta.producto)
-	local p = liq and liq.ventasDia and T.ProbVenta(liq.ventasDia, 0, n, a.horasPublicacion or 24) or nil
+	local vd = liq and liq.ventasDiaBaja
+	if liq and not liq.midiendo and (liq.ventasDia or 0) <= 0 then
+		return { producto = receta.producto, costo = costo, noSeVende = true, horas = liq.horas, n = n }
+	end
+	local delante = (delanteDeId and delanteDeId(receta.producto, pv)) or 0
+	local p = vd and T.ProbVenta(vd, delante, n, a.horasPublicacion or 24) or nil
 	local dep = T.Deposito(receta.producto, vendedorDe and vendedorDe(receta.producto) or 0, n, a)
-	-- sin liquidez medida se supone 1 de cada 2 publicaciones vendida (pérdida = 1 depósito) y se avisa
-	local perdida = T.PerdidaDeposito(dep, p or 0.5)
+	-- sin ventas medidas se supone 1 de cada 2 publicaciones vendida (pérdida = 1 depósito) y se avisa
+	local perdida = T.PerdidaDeposito(dep, (p and p > 0) and p or 0.5)
 	local venta = pv * n * (1 - a.comision) - perdida
 	return { producto = receta.producto, costo = costo, venta = venta, ganancia = venta - costo,
-		pct = costo > 0 and (venta - costo) / costo or nil, sinLiquidez = p == nil, n = n }
+		pct = costo > 0 and (venta - costo) / costo or nil, sinLiquidez = vd == nil, n = n, prob = p }
 end
 
 ---------------------------------------------------------------- C11: eventos (medir, no suponer)

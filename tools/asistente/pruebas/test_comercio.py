@@ -29,8 +29,20 @@ PROHIBIDAS = [
     "PlaceAuctionBid", "PostAuction", "StartAuction", "PlaceBid", "ConfirmCommoditiesPurchase", "StartCommoditiesPurchase",
     "PostItem", "PostCommodity", "CancelAuction", "CancelSell", "ClickAuctionSellItemButton", "PickupContainerItem",
     "UseContainerItem", "BuyMerchantItem", "PickupMerchantItem", "DoTradeSkill", "CraftRecipe", "ConfirmPostCommodity",
-    "ConfirmPostItem", "SellCursorItem", "PickupItem", "AutoEquipCursorItem",
+    "ConfirmPostItem", "SellCursorItem", "PickupItem", "AutoEquipCursorItem", "SplitContainerItem", "DeleteCursorItem",
+    "SellAllJunkItems", "BuybackItem", "RepairAllItems", "DoCraft", "TakeInboxItem", "TakeInboxMoney", "SendMail",
+    "PlaceAuction", "PostCommodityAuction", "RunScript", "loadstring", "getglobal", "SecureCmdOptionParse",
 ]
+
+
+def sin_comentarios(src):
+    """Quita los textos entre comillas ANTES de cortar los comentarios: un "--" dentro de un texto no esconde nada."""
+    fuera = []
+    for linea in src.splitlines():
+        linea = re.sub(r'"(?:[^"\\]|\\.)*"', '""', linea)
+        linea = re.sub(r"'(?:[^'\\]|\\.)*'", "''", linea)
+        fuera.append(linea.split("--")[0])
+    return "\n".join(fuera)
 
 EXTRA = r'''
 -- Reloj controlable: OFFSET en segundos. Con tabla, os.time (para el calendario de eventos).
@@ -133,9 +145,16 @@ check("Recetas.lua" in orden and "## Version: 0.4.0" in toc, "toc 0.4.0 con Rece
 
 # ================================================================ C12 (estático): nada que compre ni publique
 for archivo in sorted(D.glob("*.lua")):
-    codigo = "\n".join(l.split("--")[0] for l in archivo.read_text(encoding="utf-8").splitlines())
+    texto = archivo.read_text(encoding="utf-8")
+    codigo = sin_comentarios(texto)
     hallado = [p for p in PROHIBIDAS if re.search(r"\b" + p + r"\b", codigo)]
     check(not hallado, f"{archivo.name} no llama a {hallado}")
+    # un nombre armado con texto (_G["Post".."Auction"]) no lo ve la búsqueda: _G[...] solo en la lectura de
+    # textos del juego de Juego.lua (ITEM_SOULBOUND...), que no se llama.
+    dinamico = [l for l in codigo.splitlines() if "_G[" in l and "local t = _G[clave]" not in l]
+    check(not dinamico, f"{archivo.name}: sin _G[...] dinámico ({dinamico})")
+# control: un "--" dentro de un texto no esconde una compra
+check(re.search(r"\bPostAuction\b", sin_comentarios('local a = "x--y"; PostAuction(1)')), "control: el texto con -- no esconde la llamada")
 
 # ================================================================ C15: estética en lo nuevo
 for n in ("Comercio.lua", "Recetas.lua", "Oportunidades.lua"):
@@ -174,13 +193,32 @@ vieja = F({100: {"Ana": {50: {4: 20}}, "Beto": {55: {3: 10}}, "Caro": {60: {1: 5
 nueva = F({100: {"Ana": {50: {4: 12}}, "Dani": {68: {4: 10}}},
            200: {"?": {30: {4: 2}}}})
 v = T.CompararFotos(vieja, nueva, 90 * 60)
-# Ana vendió 8 (50), Beto 10 (55, tramo largo: no pudo vencer en 1,5 h), Caro 5 de tramo corto: pudo vencer -> 0,
-# Dani republicó a 68: 0. Item 200 sin vendedor conocido: 4.
-check(v[100].u == 18 and abs(v[100].c - (8 * 50 + 10 * 55)) < 0.01, f"ventas del 100: {v[100].u} u, {v[100].c} c (esperado 18, 950)")
+# Ana vendió 8 (50). Beto (55) desapareció, pero queda Ana más barata a 50: quien compra se lleva primero lo
+# más barato, así que eso fue una cancelación -> 0 (v2). Caro, tramo corto: pudo vencer -> 0. Dani republicó: 0.
+check(v[100].u == 8 and abs(v[100].c - 8 * 50) < 0.01, f"ventas del 100: {v[100].u} u, {v[100].c} c (esperado 8, 400)")
+# compradores que se llevan de lo más barato hacia arriba: Ana entera y 6 de Beto
+r = T.CompararFotos(F({1: {"Ana": {50: {4: 20}}, "Beto": {55: {4: 10}}}}), F({1: {"Beto": {55: {4: 4}}}}), 3600)
+check(r[1].u == 26, "compras de lo más barato hacia arriba: 20 + 6")
+# cancelación de lo caro con lo barato todavía ahí: no es venta (hallazgo ALTA del revisor de economía)
+r = T.CompararFotos(F({1: {"Ana": {120: {4: 20}}, "Beto": {100: {4: 10}}}}), F({1: {"Beto": {100: {4: 10}}}}), 3600)
+check(r[1].u == 0, "cancelar lo caro mientras lo barato sigue: 0")
+# las subastas del jugador no miden al mercado
+r = T.CompararFotos(F({1: {"Hope": {10: {4: 5}}}}), F({}), 3600, "Hope")
+check(r[1].u == 0, "tus propias subastas no cuentan")
 check(v[200].u == 4, "vendedor desconocido: se cuenta juntando")
-v8 = T.CompararFotos(vieja, nueva, 9 * 3600)
-check(v8[100].u == 0, "con 9 h todo lo de tramo largo o muy largo pudo vencer: 0 (control negativo)")
-check(T.CompararFotos(vieja, nueva, 49 * 3600) is None, "más de 48 h: no estima")
+v8 = T.CompararFotos(vieja, nueva, 8 * 3600)
+check(v8[100].u == 0, "con 8 h todo lo de tramo largo o muy largo pudo vencer: 0 (control negativo)")
+check(T.CompararFotos(vieja, nueva, 9 * 3600) is None, "más de 8 h: no estima ni cuenta horas observadas")
+# dueño conocido en una foto y desconocido en la otra (hallazgo ALTA del revisor de Lua): 0, no 20
+r = T.CompararFotos(F({1: {"Ana": {50: {4: 20}}}}), F({1: {"?": {50: {4: 20}}}}), 3600)
+check(r[1].u == 0, "Ana en una foto y '?' en la otra: nadie vendió")
+r = T.CompararFotos(F({1: {"?": {50: {4: 20}}}}), F({1: {"Ana": {50: {4: 15}}}}), 3600)
+check(r[1].u == 5, "y si de verdad bajó, se cuenta con el tope del objeto entero")
+# foto compacta (texto) de ida y vuelta
+t = T.FotoTabla(T.FotoTexto(F({"Ana": {50: {4: 20, 3: 2}}, "Beto Cruz": {7: {0: 1}}})))
+check(t["Ana"][50][4] == 20 and t["Ana"][50][3] == 2 and t["Beto Cruz"][7][0] == 1, "foto compacta: ida y vuelta")
+r = T.CompararFotos(L.eval('{ [1] = "Ana\\t50\\t4\\t20" }'), L.eval('{ [1] = "Ana\\t50\\t4\\t12" }'), 3600)
+check(r[1].u == 8, "CompararFotos lee la foto compacta")
 check(T.CompararFotos(None, nueva, 3600) is None, "primera foto: no estima")
 # vendedor que vende 5 y publica 5 nuevas a otro precio: tope por vendedor -> 0 (mínimo conservador)
 r = T.CompararFotos(F({1: {"Eva": {10: {4: 5}}}}), F({1: {"Eva": {9: {4: 5}}}}), 3600)
@@ -212,8 +250,9 @@ G.TasadorBotonEscanear.click()
 L.execute('Fire("REPLICATE_ITEM_LIST_UPDATE")'); L.execute("RunTimers()")
 dia = str(T.DiaHoy())
 e = G.TasadorDB.precios["2447"]
+check(type(G.TasadorDB.foto[2447]) == "str" or isinstance(G.TasadorDB.foto[2447], str), "la foto se guarda compacta (texto)")
 check(e.v[dia] == 15 and e.o[dia] == 3 * 3600 and e.vc[dia] == 1500, f"ventas anotadas: {e.v[dia]} u, {e.vc[dia]} c en {e.o[dia]} s")
-check(any("ventas anotadas" in c for c in chat(L)), "avisa que comparó")
+check(any("ventas estimadas anotadas" in c for c in chat(L)), "avisa que comparó")
 liq = T.Liquidez(e, T.DiaHoy())
 check(liq.midiendo and liq.ventasDia is None and liq.realizado == 100, "con 3 h vistas: 'midiendo', sin número de ventas por día")
 e.o[dia] = 12 * 3600
@@ -230,11 +269,14 @@ def hist(L, serie, hoy, extra=None):
     if extra:
         e.update(extra)
     return tabla(L, e)
-check(T.Tendencia(hist(L, [100, 95, 90, 85], 3000), 3000) == "bajando", "bajó 3 días seguidos y 15 %: bajando")
-check(T.Tendencia(hist(L, [100, 99, 98, 97], 3000), 3000) == "estable", "bajó solo 3 %: no es 'bajando' (ruido)")
-check(T.Tendencia(hist(L, [100, 90, 95, 85], 3000), 3000) == "estable", "con un rebote: estable")
-check(T.Tendencia(hist(L, [100, 90, 80], 3000), 3000) is None, "con 3 días no opina")
-check(T.Tendencia(hist(L, [80, 90, 100, 115], 3000), 3000) == "subiendo", "subiendo")
+TEN = lambda serie: T.Tendencia(hist(L, serie, 3000), 3000)
+check(TEN([100, 95, 90, 85])[0] == "bajando", "bajó 15 %: bajando")
+check(TEN([100, 99, 98, 97])[0] == "estable", "bajó solo 3 %: no es 'bajando' (ruido)")
+check(TEN([100, 90, 95, 85])[0] == "bajando", "una caída con un rebote sigue siendo caída (v2)")
+check(TEN([100, 65, 66, 65])[0] == "bajando", "caída de 35 % con rebote de 1 %: bajando (sonda del revisor)")
+check(TEN([100, 90, 80]) is None, "con 3 días no opina")
+check(TEN([80, 90, 100, 115])[0] == "subiendo", "subiendo")
+check(TEN([100, 104, 97, 101, 99, 103, 100])[0] == "estable", "ruido de ±4 %: estable")
 
 # ================================================================ C6: comprar para revender
 a = T.Ajustes()
@@ -248,9 +290,10 @@ r = T.Reventa(base(), foto, 5, 3000, 600, a, 2447, "Hope")
 if isinstance(r, tuple): print("motivo:", r)
 check(r is not None and r.unidades == 10 and r.comprarHasta == 60, f"reventa: compra 10 a 60 ({r and r.unidades}, {r and r.comprarHasta})")
 if r:
-    neto = 100 * 0.95 * 10 - 600 - r.perdidaDeposito
-    check(abs(r.ganancia - neto) < 0.01 and abs(r.pct - neto / 600) < 1e-9, "margen en oro y en % con comisión y depósito")
-    check(r.venta == 100 and abs(r.ventasDia - 60) < 0.01, "revende al precio realizado/normal; 60 al día")
+    neto = r.venta * 0.95 * 10 - 600 - r.perdidaDeposito - r.riesgo
+    check(abs(r.ganancia - neto) < 0.01 and abs(r.pct - neto / 600) < 1e-9 and r.riesgo > 0, "margen en oro y en % con comisión, depósito y riesgo")
+    check(r.venta == 98, f"revende al percentil 20 de lo que queda HOY (98), no al normal de antes (100): {r.venta}")
+    check(abs(r.ventasDia - (60 - 1.2816 * 60 ** 0.5)) < 0.01, "usa el límite bajo de ventas por día (60 vistas -> ~50)")
     check(r.prob <= 1 and r.perdidaDeposito >= 0, "probabilidad y pérdida de depósito")
 check(T.Reventa(base(), foto, 5, 3000, 4000, a, 2447, "Hope")[1] == "escanea", "foto de hace más de 60 min: escanea")
 check(T.Reventa(hist(L, [100], 3000, liq_ok), foto, 5, 3000, 600, a, 2447, "Hope")[0] is None, "historia corta: nada")
@@ -262,8 +305,14 @@ foto_justa = F({"Ana": {90: {4: 10}}})  # 95 - 90 = 5 %: menos del 10 %
 check(T.Reventa(base(), foto_justa, 5, 3000, 600, a, 2447, "Hope")[0] is None, "margen de 5 %: es ruido, nada")
 check(T.Reventa(base(), F({"Hope": {60: {4: 10}}}), 5, 3000, 600, a, 2447, "Hope")[0] is None, "no te propone comprar tus propias subastas")
 # nunca más de lo que se vende en un día
+r = T.Reventa(base(), F({"Ana": {40: {4: 55}}, "Beto": {99: {4: 20}}, "Caro": {150: {4: 100}}}), 5, 3000, 600, a, 2447, "Hope")
+check(not isinstance(r, tuple) and r.unidades == 50, "tope: compra solo lo que se vende en un día (50 de 55)")
 r = T.Reventa(base(), F({"Ana": {40: {4: 80}}}), 5, 3000, 600, a, 2447, "Hope")
-check(not isinstance(r, tuple) and r.unidades == 60, "tope: compra solo lo que se vende en un día (60 de 80)")
+check(isinstance(r, tuple), "si después de tu compra quedan 30 a 40, ese es el precio de hoy: nada")
+r = T.Reventa(hist(L, [100, 80, 60], 3000, liq_ok), F({"Ana": {60: {4: 16}}, "Beto": {70: {4: 100}}}), 5, 3000, 600, a, 2447, "Hope")
+check(isinstance(r, tuple), "100 -> 80 -> 60 con el mercado de hoy a 70: nada (sonda del revisor)")
+r = T.Reventa(base(), F({"Ana": {40: {4: 55}}, "Beto": {99: {4: 300}}}), 5, 3000, 600, a, 2447, "Hope")
+check(isinstance(r, tuple), "si tardaría más de 2 días en venderse: nada (riesgo de inventario)")
 r = T.Reventa(base(), F({"Ana": {40: {4: 500}}}), 5, 3000, 600, a, 2447, "Hope")
 check(isinstance(r, tuple), "si quedan 440 baratas delante de ti, no conviene: nada")
 # el depósito que se pierde puede matar la operación: vendedor caro (depósito alto) y poca prob.
@@ -277,12 +326,20 @@ check(T.ReventaVendedor(F({"Ana": {80: {4: 3}}}), 100, 7200, a, 1, "Hope")[1] ==
 check(T.ReventaVendedor(F({"Ana": {80: {4: 3}}}), 0, 600, a, 1, "Hope") is None, "el PNJ no lo compra: nada")
 
 # ================================================================ C8: consejo de venta
-c = T.ConsejoVenta(hist(L, [130, 120, 110, 100], 3000), F({"Ana": {100: {4: 5}}}), 1, 3000, 600, a, "Hope")
-check(c.accion == "vende ya" and c.precio == 100, "bajando: VENDE YA al más barato")
-c = T.ConsejoVenta(hist(L, [100, 101, 99, 100], 3000), F({"Ana": {60: {4: 5}}}), 1, 3000, 600, a, "Hope")
-check(c.accion == "espera" and c.precio == 100, "alguien remata a 60 con normal 100: espera")
-c = T.ConsejoVenta(hist(L, [100, 101, 99, 100], 3000, liq_ok), F({"Ana": {95: {4: 5}}}), 1, 3000, 600, a, "Hope")
-check(c.accion == "vende" and c.precio == 95 and c.cuantas == 60, "normal: vende igual al más barato, hasta lo que se vende en un día")
+c = T.ConsejoVenta(hist(L, [13000, 12000, 11000, 10000], 3000), F({"Ana": {10000: {4: 5}}}), 1, 3000, 600, a, "Hope")
+check(c.accion == "vende ya" and c.precio == 10000, "bajando: VENDE YA")
+c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000), F({"Ana": {6000: {4: 5}}, "Beto": {10000: {4: 100}}}), 1, 3000, 600, a, "Hope")
+check(c.accion == "espera" and c.precio == 10000, "unos pocos rematan a 60p y la mayoría está a 1o: espera")
+c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000), F({"Ana": {6000: {4: 100}}, "Beto": {6500: {4: 50}}}), 1, 3000, 600, a, "Hope")
+check(c.accion == "vende", "todo el mercado de hoy está abajo: vende (no 'espera'; sonda del revisor)")
+c = T.ConsejoVenta(hist(L, [10000, 8000, 6000], 3000), F({"Ana": {6000: {4: 5}}, "Beto": {10000: {4: 100}}}), 1, 3000, 600, a, "Hope")
+check(c.accion != "espera", "sin tendencia medida (3 días) nunca dice 'espera'")
+c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000), F({"Ana": {1: {4: 1}}, "Beto": {8700: {4: 100}}}), 1, 3000, 600, a, "Hope")
+check(c.precio == 8700, "una unidad suelta a 1 cobre no fija el precio (percentil 20)")
+c = T.ConsejoVenta(hist(L, [10000, 10100, 9900, 10000], 3000, liq_ok), F({"Ana": {9500: {4: 30}}, "Beto": {9800: {4: 40}}}), 1, 3000, 600, a, "Hope")
+check(c.accion == "vende" and c.precio == 9800 and c.cuantas == 50, f"vende en el escalón donde lo de delante pasa de un día de ventas ({c.precio}, {c.cuantas})")
+c = T.ConsejoVenta(hist(L, [1007, 1007, 1007, 1007], 3000), F({"Ana": {1060: {4: 300}}}), 1000, 3000, 600, a, "Hope", 20)
+check(c.accion == "vendedor", "subasta apenas sobre el PNJ, con depósito y fila: al vendedor (sonda del revisor)")
 c = T.ConsejoVenta(hist(L, [10, 10, 10, 10], 3000), F({"Ana": {10: {4: 5}}}), 20, 3000, 600, a, "Hope")
 check(c.accion == "vendedor", "si el PNJ paga más: al vendedor")
 check(T.ConsejoVenta(hist(L, [10, 10], 3000), None, 1, 3000, None, a, "Hope")[1] == "escanea", "sin foto: escanea (C13)")
@@ -293,6 +350,10 @@ precio = L.eval("function(id) local p = { [10] = 30, [11] = 20, [900] = 200 }; r
 f = T.Fabricar(receta, precio, a)
 check(abs(f.costo - 80) < 0.01 and f.sinLiquidez and abs(f.ganancia - (200 * 0.95 - 100 - 80)) < 0.01,
       f"margen de una receta con depósito supuesto ({f.ganancia})")
+nada = T.Fabricar(receta, precio, a, None, L.eval("function() return { midiendo = false, ventasDia = 0, ventasDiaBaja = 0, horas = 20 } end"))
+check(nada.noSeVende and nada.ganancia is None, "producto medido que no se vende: 'no se vende', no 'sin medir'")
+a2 = T.Ajustes(); a2.horasPublicacion = 48
+check(T.Deposito(1, 100, 10, a2) == 4 * T.Deposito(1, 100, 10, a) / 2 * 1, "el depósito sube con la duración (48 h = 4 veces 12 h)")
 falta = T.Fabricar(receta, L.eval("function(id) if id == 10 then return 30 end end"), a)
 check(falta.falta is not None and falta.ganancia is None, "falta el precio: sin margen (C13)")
 
@@ -415,7 +476,10 @@ def escenario(asistente):
     L.execute('SUBASTAS = { {2447, 20, 50000, "Ana", 3}, {2447, 40, 198000, "Beto", 3}, {4306, 3, 300, "Caro", 3} }')
     G.TasadorBotonEscanear.click()
     L.execute('Fire("REPLICATE_ITEM_LIST_UPDATE")'); L.execute("RunTimers()")
-    L.execute('Fire("TRADE_SKILL_SHOW"); Fire("MERCHANT_SHOW")')
+    # todos los eventos que registra el addon, sin ninguna pulsación
+    for ev in ("TRADE_SKILL_SHOW", "TRADE_SKILL_LIST_UPDATE", "TRADE_SKILL_UPDATE", "MERCHANT_SHOW", "NAME_PLATE_UNIT_ADDED",
+               "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "AUCTION_ITEM_LIST_UPDATE", "AUCTION_HOUSE_CLOSED", "AUCTION_HOUSE_SHOW"):
+        L.execute(f'Fire("{ev}", "nameplate1")')
     for cmd in ("op", "reventa", "pnj", "vender", "fabricar", "eventos", "", "baratos", "hierbas"):
         L.execute(f"SlashCmdList.TASADOR('{cmd}')"); L.execute("RunTimers()")
     return L, T, G
@@ -424,7 +488,7 @@ L, T, G = escenario(asistente=False)
 txt = "\n".join(chat(L))
 if "-v" in sys.argv:
     print(txt)
-check("compra 20 hasta 25p, revende a 50p" in txt and "+4o 50p (90 %)" in txt, "reventa encontrada en el escenario (20 hasta 25p, revende a 50p, +4o 50p = 90 %)")
+check("compra 20 hasta 25p, revende a 49p 50c" in txt and "6 días, 16 h vistas" in txt, "reventa del escenario: 20 hasta 25p, revende al precio de hoy 49p 50c, con días y horas vistas")
 check("vende al PNJ" in txt or "véndelas al PNJ" in txt, "seda bajo el precio del PNJ")
 check("sanación" not in txt, "sin recetas no inventa ninguna")
 check("La ventana necesita el addon Asistente" in txt, "sin Asistente: todo por el chat")
@@ -448,6 +512,29 @@ check(G.TRAMPAS == 2, "control: la trampa cuenta las llamadas")
 falso = "local x = 1\nC_AuctionHouse.StartCommoditiesPurchase(2447, 20) -- comprar\n"
 falso = "\n".join(l.split("--")[0] for l in falso.splitlines())
 check(any(re.search(r"\b" + p + r"\b", falso) for p in PROHIBIDAS), "control: la búsqueda estática encuentra una compra")
+
+# subasta ANTIGUA con las trampas puestas
+L, T = nuevo()
+G = L.globals()
+L.execute(r'''
+C_AuctionHouse = nil
+CanSendAuctionQuery = function() return true, true end
+QueryAuctionItems = function() end
+GetNumAuctionItems = function() return #SUBASTAS, #SUBASTAS end
+GetAuctionItemInfo = function(_, i) local s = SUBASTAS[i]
+	return "x", 0, s[2], 1, true, 1, 0, 1, 1, s[3], 0, false, nil, s[4], s[4], 0, s[1], true end
+GetAuctionItemTimeLeft = function(_, i) return SUBASTAS[i][5] end
+SUBASTAS = { {2447, 20, 2000, "Ana", 4}, {2447, 5, 600, "Beto", 4} }
+ITEMS[2447] = { name = "Peacebloom", q = 1, sell = 5, cls = 7, sub = 9, stack = 20 }
+''')
+L.execute("PonerTrampas({" + ",".join(f'"{p}"' for p in PROHIBIDAS) + "})")
+T.Escanear(); L.execute('Fire("AUCTION_ITEM_LIST_UPDATE")'); L.execute("RunTimers()")
+L.execute("OFFSET = 3600; SUBASTAS = { {2447, 5, 600, \"Beto\", 4} }")
+T.Escanear(); L.execute('Fire("AUCTION_ITEM_LIST_UPDATE")'); L.execute("RunTimers()")
+for cmd in ("op", "reventa", "pnj", "vender", "fabricar", "eventos"):
+    L.execute(f"SlashCmdList.TASADOR('{cmd}')"); L.execute("RunTimers()")
+check(G.TasadorDB.precios["2447"].v[str(T.DiaHoy())] == 20, "subasta antigua: tramos 1-4 y ventas estimadas (20 de Ana)")
+check(G.TRAMPAS == 0, f"C12 con la subasta antigua: 0 llamadas ({G.TRAMPAS})")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
