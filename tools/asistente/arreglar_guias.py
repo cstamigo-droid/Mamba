@@ -394,7 +394,9 @@ def cascada(guias: Path) -> list[tuple[str, int, str, str]]:
             r = f.resolve().relative_to(guias.resolve()).as_posix()
             b = next((x for x in ("alliance", "horde") if f"/{x}/" in "/" + r), "")
             q = int(n[2])
-            if q in acepta.get(b, set()) or q in acepta.get("", set()):
+            # Solo cuentan las aceptaciones del mismo bando: las de reputation/ no están en la cadena de
+            # leveo y la etapa report las marca igual (18-11, 02:00: 1126, 5230, 6135 en Silithus).
+            if q in acepta.get(b, set()) if b else q in acepta.get("", set()):
                 continue
             quitar.setdefault(f, set()).add(l)
         if not quitar:
