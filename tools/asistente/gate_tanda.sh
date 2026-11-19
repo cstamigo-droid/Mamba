@@ -44,6 +44,9 @@ done
 # las de Polestar que tocan los parches de Mamba (P13 Calabozos)
 for t in tests/dungeons*.test.js; do [ -f "$t" ] && corre "polestar-$(basename "$t" .test.js)" env LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test "$t"; done
 corre glifos     python -I $P/test_glifos.py addon
+# K111 (19-11): valores secretos de Forever usados en un if, and/or/not, comparación o cuenta (el simulado no los atrapa)
+corre secretos_detector python -I tools/asistente/secretos_lua.py --probar
+corre secretos   python -I tools/asistente/secretos_lua.py addon
 echo "== 3. sintaxis de cada .lua (Lua 5.1)"
 corre sintaxis   python -I tools/asistente/sintaxis_lua.py addon
 echo "== 5. parches.py"

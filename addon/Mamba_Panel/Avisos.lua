@@ -136,7 +136,10 @@ function N.Saqueo()
 	-- el bicho se nombra solo si el botín es de verdad del objetivo (GetLootSourceInfo); si no, no se nombra
 	local bicho
 	local guid = UnitGUID and UnitGUID("target")
-	if guid and GetLootSourceInfo and UnitIsDead and UnitIsDead("target") then
+	local muerto = UnitIsDead and UnitIsDead("target")
+	-- en Forever pueden venir secretos (K110): probarlos en el if daría error; se leen como "no sé"
+	if issecretvalue and (issecretvalue(guid) or issecretvalue(muerto)) then guid, muerto = nil, nil end
+	if guid and GetLootSourceInfo and muerto then
 		for i = 1, GetNumLootItems() do
 			local ok, fuente = pcall(GetLootSourceInfo, i)
 			if ok and fuente == guid then bicho = UnitName("target"); break end

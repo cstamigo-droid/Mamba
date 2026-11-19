@@ -85,7 +85,9 @@ function M.Estado()
 	e.razaNombre, e.raza = UnitRace("player")
 	e.bando = UnitFactionGroup and UnitFactionGroup("player") or "Horde"
 	e.oro = GetMoney and GetMoney() or 0
-	e.xp, e.xpMax = UnitXP and UnitXP("player") or 0, UnitXPMax and UnitXPMax("player") or 1
+	-- la exp puede venir secreta en Forever (K110): `secreto or 0` da error; se lee como "no sé"
+	local function legible(v) if issecretvalue and issecretvalue(v) then return nil end return v end
+	e.xp, e.xpMax = legible(UnitXP and UnitXP("player")) or 0, legible(UnitXPMax and UnitXPMax("player")) or 1
 	e.profesiones = profesiones()
 	e.bolsas = bolsas()
 	e.talentos = talentos()
