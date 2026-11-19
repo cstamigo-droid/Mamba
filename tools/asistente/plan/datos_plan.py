@@ -62,8 +62,12 @@ def bolsas(db):
     for r in leer("SkillLineAbility.csv"):
         sp, sk = int(r["Spell"]), int(r["SkillLine"])
         if sp in crea and sk in PROF:
+            # MinSkillLineRank viene en 1 para casi todas (revisor de la tanda 5, 19-11: "la puedes hacer tú" a
+            # cualquier sastre con la Bolsa sin fondo). Provisorio: el nivel en que la receta empieza a dar puntos
+            # (TrivialSkillLineRankLow); abajo se corrige con lo que pide el instructor o el objeto de receta.
+            hab = int(r.get("TrivialSkillLineRankLow") or 0) or int(r["MinSkillLineRank"] or 0)
             for it in crea[sp]:
-                items[it].setdefault("fabrica", (PROF[sk], int(r["MinSkillLineRank"] or 0), sp))
+                items[it].setdefault("fabrica", (PROF[sk], hab, sp))
     # vendedores y misiones (ForeverTDB)
     for it in items:
         n = db.execute("select count(distinct entry) from npc_vendor where item=?", (it,)).fetchone()[0]
@@ -88,6 +92,11 @@ def bolsas(db):
             receta[aprende[sp]] = int(r.get("ParentItemID") or 0)
         elif sp in craft and r.get("TriggerType") == "6":  # el objeto de receta enseña el hechizo directo
             receta[sp] = int(r.get("ParentItemID") or 0)
+    recetas = set(receta.values())
+    rangoReceta = {}
+    for r in leer("ItemSparse.csv", "esMX"):
+        if int(r["ID"]) in recetas and int(r.get("RequiredSkillRank") or 0) > 0:
+            rangoReceta[int(r["ID"])] = int(r["RequiredSkillRank"])
     reactivos = {}
     for r in leer("SpellReagents.csv"):
         sp = int(r["SpellID"])
@@ -105,6 +114,14 @@ def bolsas(db):
         if not (enInstructor or recVende or recCae):
             del d["fabrica"]  # nadie la enseña: no se puede fabricar
             continue
+        # la habilidad REAL que pide: la del instructor (ForeverTDB) o la del objeto de receta (RequiredSkillRank)
+        real = None
+        if enInstructor:
+            real = db.execute("select max(ReqSkillRank) from trainer_spell where SpellId=?", (sp,)).fetchone()[0]
+        if not real and rec:
+            real = rangoReceta.get(rec)
+        if real:
+            d["fabrica"] = (f[0], int(real), sp)
         d["aprende"] = "instructor" if enInstructor else ("receta del vendedor" if recVende else "receta que cae de enemigos")
         d["receta"] = rec
         d["reactivos"] = reactivos.get(sp, [])

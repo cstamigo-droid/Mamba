@@ -306,6 +306,24 @@ bo3 = M.Bolsas(M.Estado())
 check(bo3.recomendada is None, "sin oro y sin misión: no recomienda comprar una que retrasa la montura")
 L.execute('C_QuestLog = nil; ORO = ORO_ANTES')
 
+# ---------- 8g. Revisor tanda 5: habilidad REAL de la receta (Bolsa sin fondo = Sastrería 300) ----------
+L3, M3 = nuevo('NIVEL = 10; PROFS = { { "Sastrería", 50, 75 }, { "Desuello", 40, 75 } }; '
+               'BOLSAS = { [0] = { 16, 2 }, [1] = { 6, 1, 1 }, [2] = { 6, 1, 2 }, [3] = { 0, 0 }, [4] = { 0, 0 } }')
+G3 = L3.globals()
+sinFondo = [b for b in M3.BOLSAS.values() if b.nombre == "Bolsa sin fondo"]
+check(len(sinFondo) == 1 and sinFondo[0].fabrica[2] == 300, "Bolsa sin fondo pide Sastrería 300 (dato real, no 1)")
+bo = M3.Bolsas(M3.Estado())
+rec = bo.recomendada
+check(rec is None or rec.nombre != "Bolsa sin fondo", "nivel 10 con Sastrería 50: NO recomienda la Bolsa sin fondo: %s" % (rec and rec.nombre))
+check(not any(o.nombre == "Bolsa sin fondo" for o in bo.opciones.values()), "ni la lista como fuente (no la puede hacer ni comprar hecha)")
+lino = [o for o in bo.opciones.values() if o.nombre == "Bolsa de lino"]
+check(lino and "La puedes hacer tú" in lino[0].formas[1], "Bolsa de lino (Sastrería 45): con 50 la puede hacer")
+# control negativo: con Sastrería 300 sí aparece y dice que la puede hacer
+L3.execute('PROFS[1] = { "Sastrería", 300, 300 }; NIVEL = 60')
+bo2 = M3.Bolsas(M3.Estado())
+sf = [o for o in bo2.opciones.values() if o.nombre == "Bolsa sin fondo"]
+check(sf and "La puedes hacer tú" in sf[0].formas[1], "control negativo: con Sastrería 300 sí la ofrece")
+
 # ---------- 9. Prueba estática ----------
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")

@@ -157,7 +157,7 @@ local function misionHecha(q)
 end
 
 -- Las fuentes de una bolsa que ESTE personaje puede usar: { tipo = "mision"|"fabrica"|"vendedor", texto, lugar, prio }
-function M.FuentesBolsa(e, b)
+function M.FuentesBolsa(e, b, id)
 	local out = {}
 	local lado = LADO[e.bando] or 2
 	for _, m in ipairs(b.misiones or {}) do
@@ -174,17 +174,25 @@ function M.FuentesBolsa(e, b)
 		local mia = M.Profesion(e, prof)
 		local mats = {}
 		for _, r in ipairs(b.reactivos or {}) do mats[#mats + 1] = r[2] .. " " .. (r[3] ~= "" and r[3] or ("objeto " .. r[1])) end
-		local quien = mia and ((mia.rango >= hab) and "la puedes hacer tú" or ("tú, con " .. prof .. " " .. hab .. " (tienes " .. mia.rango .. ")"))
-			or ("un " .. prof:lower() .. " de " .. hab .. " o más (pídesela a un compañero o en el chat de comercio)")
-		local donde = b.aprende == "instructor" and "la enseña el instructor" or (b.aprende ~= "" and b.aprende or "")
-		local lugar
-		local rg = M.RANGOS and M.RANGOS[prof]
-		if mia and rg then
-			for _, x in ipairs(rg) do if x.tope >= hab and x.instructor then lugar = M.LugarDe(x.quien, e.bando); break end end
+		-- Revisor de la tanda 5 (19-11): solo cuenta si TÚ la puedes hacer ya (tu habilidad alcanza la de la receta) o
+		-- si está HECHA en tu subasta a un precio que pagas sin retrasar la montura. "Pídesela a alguien" no es fuente.
+		local puedo = mia and (mia.rango or 0) >= hab
+		local precio = id and M.Fuentes.Precio(id)
+		local comprable = precio and precio <= (e.oro or 0) and not M.RetrasaMontura(e, precio)
+		if puedo then
+			local donde = b.aprende == "instructor" and "la enseña tu instructor" or (b.aprende ~= "" and b.aprende or "")
+			local lugar
+			local rg = M.RANGOS and M.RANGOS[prof]
+			if rg and b.aprende == "instructor" then
+				for _, x in ipairs(rg) do if x.tope >= hab and x.instructor then lugar = M.LugarDe(x.quien, e.bando); break end end
+			end
+			out[#out + 1] = { tipo = "fabrica", prio = 2, lugar = lugar, materiales = mats,
+				texto = ("La puedes hacer tú (%s %d, tienes %d)%s. Materiales: %s"):format(prof, hab, mia.rango,
+					donde ~= "" and (" · " .. donde) or "", #mats > 0 and table.concat(mats, ", ") or "sin dato") }
+		elseif comprable then
+			out[#out + 1] = { tipo = "fabrica", prio = 2, materiales = mats,
+				texto = ("La hace un %s de %d: hecha en tu subasta a %s"):format(prof:lower(), hab, M.Dinero(precio)) }
 		end
-		out[#out + 1] = { tipo = "fabrica", prio = 2, lugar = lugar, materiales = mats,
-			texto = ("Se fabrica con %s %d: %s%s. Materiales: %s"):format(prof, hab, quien, donde ~= "" and (" · " .. donde) or "",
-				#mats > 0 and table.concat(mats, ", ") or "sin dato") }
 	end
 	if b.vendedores then
 		local lugar = M.LugarDe(b.quienVende, e.bando)
@@ -205,7 +213,7 @@ function M.Bolsas(e)
 		local especial = b.familia ~= "bolsa"
 		local paraMi = not especial or FAMILIA_CLASE[b.familia] == e.clase or (b.familia == "hierbas" and tieneHierbas)
 		if paraMi and b.nivel <= e.nivel then
-			local fuentes = M.FuentesBolsa(e, b)
+			local fuentes = M.FuentesBolsa(e, b, id)
 			local precio, dias = M.Fuentes.Precio(id)
 			if #fuentes > 0 or precio then
 				local formas = {}
