@@ -1,8 +1,20 @@
 -- Mamba_Plan: crear macros con un clic. Mamba arma el texto con los nombres que da el juego, la guarda como
 -- macro de tu personaje y te la pone en el cursor para que la sueltes en tu barra. Solo fuera de combate (el
 -- juego no deja crear macros en combate). La macro la usas tú: Mamba no la aprieta nunca.
+-- Prueba en el juego (A7): al crearla, Mamba le pregunta al juego qué hechizo usaría la macro
+-- (GetMacroSpell). Si el juego no reconoce ninguno, la macro no funciona en Forever: se borra, queda anotada
+-- en diag.macrosMal y no se vuelve a ofrecer. Las que el juego entiende quedan en diag.macrosBien.
 -- Licencia: GPL-3.0-only.
 local _, M = ...
+
+local function diag()
+	local pj = M.PJ()
+	pj.diag = pj.diag or {}
+	pj.diag.macrosBien = pj.diag.macrosBien or {}
+	pj.diag.macrosMal = pj.diag.macrosMal or {}
+	return pj.diag
+end
+M.DiagMacros = diag
 
 local function cuerpo(m)
 	local faltan = {}
@@ -27,12 +39,23 @@ local function existe(nombre)
 	return ok and i and i > 0
 end
 
+-- ¿El juego entiende la macro? Pregunta qué hechizo usaría (nil = ninguno). -> true | false | nil (no se pudo saber)
+function M.MacroFunciona(idx)
+	if not GetMacroSpell then return nil end
+	local ok, id = pcall(GetMacroSpell, idx)
+	if not ok then return nil end
+	if id == nil then return false end
+	return true
+end
+
 -- Las de tu clase que puedes usar (conoces todos sus hechizos), de tu rol primero, y que todavía no creaste.
+-- Las que el juego ya rechazó no se ofrecen.
 function M.MacrosSugeridas(e, max)
 	local r = M.PJ().respuestas or {}
+	local mal = diag().macrosMal
 	local out = {}
 	for _, m in ipairs(M.MACROS[e.clase] or {}) do
-		local sabe = true
+		local sabe = not mal[m.clave]
 		for _, id in ipairs(m.usa) do if not M.Conoce(id) then sabe = false end end
 		if sabe and not existe(nombreMacro(m)) and (not m.rol or not r.rol or m.rol == r.rol or m.rol == r.rol2) then
 			out[#out + 1] = m
@@ -50,13 +73,16 @@ function M.TodasLasMacros(e)
 	for _, m in ipairs(M.MACROS[e.clase] or {}) do
 		local sabe = true
 		for _, id in ipairs(m.usa) do if not M.Conoce(id) then sabe = false end end
-		out[#out + 1] = { m = m, sabe = sabe, creada = existe(nombreMacro(m)) }
+		local dg = diag()
+		out[#out + 1] = { m = m, sabe = sabe, creada = existe(nombreMacro(m)), bien = dg.macrosBien[m.clave] and true or nil,
+			mal = dg.macrosMal[m.clave] }
 	end
 	return out
 end
 
--- Crea la macro (o usa la que ya existe) y la pone en el cursor. -> true | false, motivo
-function M.CrearMacro(clave)
+-- Crea la macro (o usa la que ya existe), la prueba con el juego y la pone en el cursor (sinCursor: no).
+-- -> true | false, motivo
+function M.CrearMacro(clave, sinCursor)
 	if InCombatLockdown and InCombatLockdown() then return false, "en combate no se puede" end
 	local _, clase = UnitClass("player")
 	local m
@@ -71,8 +97,32 @@ function M.CrearMacro(clave)
 		if not ok or not r then return false, "el juego no dejó crearla (¿lugares de macros llenos?)" end
 		idx = r
 	end
-	if PickupMacro then pcall(PickupMacro, idx) end
+	local dg = diag()
+	local funciona = M.MacroFunciona(idx)
+	if funciona == false then
+		-- el juego no reconoce ningún hechizo en ella: no sirve en Forever, se saca
+		if DeleteMacro then pcall(DeleteMacro, idx) end
+		dg.macrosMal[clave] = (date and date("%d-%m %H:%M") or "") .. " el juego no reconoce su hechizo"
+		dg.macrosBien[clave] = nil
+		M.Cambio()
+		return false, "el juego no la entiende en Forever: la saqué"
+	end
+	if funciona then dg.macrosBien[clave] = date and date("%d-%m %H:%M") or true end
+	if PickupMacro and not sinCursor then pcall(PickupMacro, idx) end
 	M.PJ().hechos["macro:" .. clave] = true
 	M.Cambio()
 	return true, "ok"
+end
+
+-- Todas las que te sirven, de una vez y sin cursor (A7: "creadas con un clic"). -> creadas, sacadas, motivo
+function M.CrearTodasLasMacros(e)
+	if InCombatLockdown and InCombatLockdown() then return 0, 0, "en combate no se puede" end
+	local creadas, sacadas = 0, 0
+	for _, x in ipairs(M.TodasLasMacros(e)) do
+		if x.sabe and not x.mal then
+			local ok = M.CrearMacro(x.m.clave, true)
+			if ok then creadas = creadas + 1 else sacadas = sacadas + 1 end
+		end
+	end
+	return creadas, sacadas
 end

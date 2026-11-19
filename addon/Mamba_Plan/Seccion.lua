@@ -205,11 +205,27 @@ local function datos(e, r)
 				confianza = o.precioDias and ("precio de la subasta, hace " .. o.precioDias .. " día(s)") or "dato del juego" })
 		end
 	elseif vista == "macros" then
-		for _, x in ipairs(M.TodasLasMacros(e)) do
+		local todas = M.TodasLasMacros(e)
+		local faltan = 0
+		for _, x in ipairs(todas) do if x.sabe and not x.mal and not x.creada then faltan = faltan + 1 end end
+		add({ tipo = "", titulo = faltan > 0 and ("Crear las %d que te sirven, de una vez"):format(faltan) or "Ya tienes todas las que te sirven",
+			detalle = "Mamba las prueba con el juego al crearlas y saca las que no funcionan en Forever. Quedan en tus macros (Esc › Macros) para arrastrarlas a una barra.",
+			acciones = faltan > 0 and { { "Crear todas", function()
+				local c, s2, motivo = M.CrearTodasLasMacros(e)
+				M.ultimoMacros = motivo or (("Creadas: %d · sacadas porque el juego no las entiende: %d"):format(c, s2))
+				M.Cambio()
+			end } } or nil })
+		if M.ultimoMacros then add({ tipo = "Resultado", titulo = M.ultimoMacros }) end
+		for _, x in ipairs(todas) do
 			local m = x.m
-			add({ tipo = x.creada and "Creada" or (x.sabe and "" or "Te falta un hechizo"), titulo = m.titulo,
-				detalle = m.detalle or "",
-				acciones = x.sabe and { { x.creada and "Ponerla en el cursor" or "Crear macro", function() M.CrearMacro(m.clave) end } } or nil })
+			local tipo
+			if x.mal then tipo = "No funciona"
+			elseif x.creada then tipo = x.bien and "Creada ✓" or "Creada"
+			elseif not x.sabe then tipo = "Te falta un hechizo" else tipo = "" end
+			add({ tipo = tipo, titulo = m.titulo,
+				detalle = x.mal and "El juego no reconoce su hechizo en Forever: Mamba la sacó y no la vuelve a ofrecer." or (m.detalle or ""),
+				confianza = x.bien and "el juego la entiende (probada al crearla)" or nil,
+				acciones = (x.sabe and not x.mal) and { { x.creada and "Ponerla en el cursor" or "Crear macro", function() M.CrearMacro(m.clave) end } } or nil })
 		end
 	elseif vista == "builds" then
 		for _, b in ipairs(M.CONOCIDAS or {}) do

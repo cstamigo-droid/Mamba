@@ -34,6 +34,13 @@ function M.FilasJugar()
 		end }
 	local out = {}
 	local c = casos[caso]
+	-- C1b, a la vista: la prioridad en una tira de íconos con su tecla (lo que sabes; «·» si no está en tus barras)
+	local tira = {}
+	for _, p in ipairs(c and c.pasos or {}) do
+		if M.Conoce(p.h) then tira[#tira + 1] = ("|T%s:24:24:0:0|t %s"):format(tostring(M.Icono(p.h)), R.Tecla(p.h) or "·") end
+	end
+	if #tira > 0 then out[#out + 1] = { tipo = "En orden", titulo = table.concat(tira, "   ›   "),
+		detalle = "Haz el primero que puedas; si no se puede, el siguiente. En combate, Mamba marca en tus barras el que toca." } end
 	for i, p in ipairs(c and c.pasos or {}) do
 		local sabe = M.Conoce(p.h)
 		local tecla = sabe and R.Tecla(p.h)
@@ -47,8 +54,15 @@ function M.FilasJugar()
 	end
 	if c and c.nota and c.nota ~= "" then out[#out + 1] = { tipo = "Ojo", titulo = M.Texto(c.nota) } end
 	if M.Clase() == "DRUID" then
-		out[#out + 1] = { tipo = "Formas", titulo = "Cuándo cambiar de forma",
-			detalle = M.Texto("Varios enemigos o te pegan mucho: {5487}. Uno solo, para matar rápido: {768}. Para curar o lanzar desde lejos: sal de forma. Cambiar de forma quita las raíces y la lentitud.") }
+		out[#out + 1] = { tipo = "Formas", titulo = "Cuándo cambiar de forma" }
+		for _, x in ipairs({ { 5487, "Varios enemigos o te pegan mucho: {5487}." }, { 768, "Uno solo, para matar rápido: {768}." },
+			{ 8936, "Para curar o lanzar desde lejos: sal de forma ({8936}, {2912})." },
+			{ 783, "Te enraízan o te frenan: cambia de forma ({783}): se quitan." } }) do
+			if M.Conoce(x[1]) then
+				local tecla = R.Tecla(x[1])
+				out[#out + 1] = { tipo = "", titulo = icono(x[1]) .. M.Texto(x[2]), detalle = tecla and ("Tecla: " .. tecla) or nil }
+			end
+		end
 	end
 	return out, cab
 end
@@ -146,7 +160,13 @@ local function dibujarAvisos(p, ancho)
 		I("Barra de lanzamiento", "Con tu retraso de conexión en rojo al final y la espera entre hechizos debajo.", "lanzamiento"),
 		I("Números de enfriamiento en los botones", "La opción del juego; la respetan las barras de Mamba.", "numerosCD"),
 		I("Amenaza del grupo", "Solo en grupo.", "amenaza"),
-		I("Placas de nombre de Mamba", "Color por amenaza, élite o raro, y lanzamientos interrumpibles.", "placas"),
+		I("Placas de nombre compactas de Mamba", "En los enemigos: una barra fina con la vida, el nombre, ÉLITE o RARO, el color de la amenaza, el marcador y los lanzamientos INTERRUMPIBLES. Apagadas vuelven las del juego.", "placas"),
+		P.Deslizador(p, "Ancho de las placas", nil, 50, 200, 10, "%d", function() return d.placaAncho end, function(v) d.placaAncho = v; M.Cambio() end),
+		P.Deslizador(p, "Alto de las placas", nil, 3, 20, 1, "%d", function() return d.placaAlto end, function(v) d.placaAlto = v; M.Cambio() end),
+		I("Ficha del enemigo (contra jugadores)", "Al elegir de objetivo a un jugador enemigo: su clase, sus controles y defensas (apagados con los segundos que le faltan si ya los usó) y lo tuyo para responder, con su tecla.", "ficha"),
+		I("Aviso cuando un enemigo usa una defensa", "«X usó Escudo divino». Los controles («X usó Aturdir») van con los avisos en pantalla.", "avisoDefensas"),
+		P.Desplegable(p, "Barra de marcadores", "Calavera, cruz, luna… Clic: marca a tu objetivo.", { { value = "siempre", text = "Siempre" }, { value = "grupo", text = "Solo en grupo" }, { value = "nunca", text = "Nunca" } },
+			function() return d.marcadores end, function(v) d.marcadores = v; M.Cambio() end),
 		I("Medidor de combate en pantalla", "Clic: cambia qué mide. Clic derecho: esta pelea o el total.", "medidor"),
 		I("Abrir sola la ventana de enemigos cerca", "Cuando aparece un jugador de la otra facción (fuera de mazmorras). Silenciar la alerta también la deja quieta.", "cercanosSola"),
 		P.Boton(p, "Ver enemigos cerca y muertes", function() if M.Cercanos then M.Cercanos.Abrir() end end),
