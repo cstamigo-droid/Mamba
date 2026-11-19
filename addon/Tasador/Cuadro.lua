@@ -178,8 +178,10 @@ function T.AgregarLineas(tooltip, link, datos)
 			for i = 1, math.min(3, #objs) do
 				local o = objs[i]
 				local titulo = (o.entry and o.entry.title) or (Q.GetQuestTitle and Q.GetQuestTitle(o.q)) or ("misión " .. tostring(o.q))
-				local falta = (o.max or 1) - (o.cur or 0)
-				local estado = o.done and "listo" or (falta > 0 and ("faltan " .. falta .. " (" .. (o.cur or 0) .. "/" .. (o.max or 1) .. ")") or "listo")
+				-- el avance puede venir secreto: sin él, solo el nombre de la misión (no se pierden las líneas de precio)
+				local max, cur = T.Leer(o.max), T.Leer(o.cur)
+				local falta = (type(max) == "number" and type(cur) == "number") and (max - cur) or nil
+				local estado = (T.Leer(o.done) == true or falta == 0) and "listo" or (falta and falta > 0 and ("faltan " .. falta .. " (" .. cur .. "/" .. max .. ")") or "en tu registro")
 				tooltip:AddDoubleLine("Para la misión «" .. tostring(titulo) .. "»", estado, PLAN[1], PLAN[2], PLAN[3], TEXTO[1], TEXTO[2], TEXTO[3])
 			end
 			tooltip:AddLine("Está en tu registro · Alt + clic derecho: ver la misión y Llévame", GRIS[1], GRIS[2], GRIS[3], true)
@@ -188,7 +190,7 @@ function T.AgregarLineas(tooltip, link, datos)
 			if okA and type(lista) == "table" and lista[1] then
 				local t = Q.GetQuestTitle and Q.GetQuestTitle(lista[1].q) or tostring(lista[1].q)
 				tooltip:AddLine("Lo pide «" .. tostring(t) .. "», una misión de tu guía que todavía no tomaste: guárdalo.", PLAN[1], PLAN[2], PLAN[3], true)
-			elseif T.MisionVieja and T.MisionVieja(id) then
+			elseif T.MisionVieja and T.MisionVieja(id) and not (T.MECANICAS and T.MECANICAS[id]) and not info.inicia then
 				tooltip:AddLine("Su misión ya se entregó: se puede tirar.", GRIS[1], GRIS[2], GRIS[3], true)
 			end
 		end

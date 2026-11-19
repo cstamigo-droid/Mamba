@@ -113,7 +113,10 @@ end
 
 function T.Evaluar(info, ajustes)
 	ajustes = ajustes or T.DEFAULTS
-	if info and info.id and (info.clase == T.CLASE_MISION or info.esMision) and T.MisionVieja(info.id) then
+	-- "se puede tirar": solo un objeto de misión común. Nunca una mecánica de Forever ni uno que inicia una misión
+	-- (revisor de la tanda 5: esta regla iba antes de T.Protegido y se saltaba esas protecciones).
+	local mecanica = info and info.id and T.MECANICAS and T.MECANICAS[info.id]
+	if info and info.id and not mecanica and not info.inicia and (info.clase == T.CLASE_MISION or info.esMision) and T.MisionVieja(info.id) then
 		return { accion = T.ACCION.BOTAR, motivo = "La misión ya se entregó: se puede tirar." }
 	end
 	local protegido = T.Protegido(info)

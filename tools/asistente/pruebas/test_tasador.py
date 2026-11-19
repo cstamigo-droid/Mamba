@@ -428,6 +428,25 @@ check(any("Guardar" in x and "Qué hacer" in x for x in lines), f"K116 mientras 
 lines = lines_of(L.eval('ShowTip("|Hitem:9202|h[C]|h")'))
 check(any("se puede tirar" in x for x in lines) and not any("Qué hacer" in x and "Guardar" in x for x in lines),
       f"K116 misión ya entregada: se puede tirar {lines}")
+# revisor de la tanda 5: "se puede tirar" NUNCA para una mecánica de Forever (aunque sea de clase 12 y su misión
+# se haya entregado), y un avance secreto no borra las líneas de precio
+L.execute("""
+Polestar.QuestDB.IsObsoleteQuestItem = function(id) return id == 9202 or id == 9203 end
+local viejo = Polestar.QuestDB.ObjectivesForItem
+Polestar.QuestDB.ObjectivesForItem = function(id)
+  if id == 9205 then return { { q = 102, entry = { title = "Pieles" }, cur = SECRET, max = 8, done = false } } end
+  return viejo(id)
+end
+ITEMS[9203] = {name="Eco de prueba",q=1,sell=10,cls=12,sub=0,bind=1,loc="",stats={}}
+ITEMS[9205] = {name="Piel",q=1,sell=10,cls=12,sub=0,bind=4,loc="",stats={}}
+""")
+L.eval("function(t) t.MECANICAS[9203] = true end")(T)
+lines = lines_of(L.eval('ShowTip("|Hitem:9203|h[E]|h")'))
+check(any("Qué hacer" in x and "Guardar" in x for x in lines) and not any("se puede tirar" in x for x in lines),
+      f"revisor t5: una mecánica de clase 12 con su misión entregada sigue en Guardar {lines}")
+lines = lines_of(L.eval('ShowTip("|Hitem:9205|h[P]|h")'))
+check(any("Pieles" in x for x in lines) and any("Vendedor:" in x for x in lines),
+      f"revisor t5: con el avance secreto sigue la misión y las líneas de precio {lines}")
 L.execute("Polestar.QuestDB = nil")
 
 print(f"\n{ok} OK, {fail} fallas")

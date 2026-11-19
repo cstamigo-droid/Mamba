@@ -200,6 +200,7 @@ end
 function API.ModoMover(si) if A.Ventanas then return A.Ventanas.ModoMover(si) end return false end
 function API.AlModoMover(fn) if A.Ventanas then A.Ventanas.AlModoMover(fn) end end
 
+-- La usan: la venta de basura de Polestar (QoL/Vendor.lua, parche P14) y Mamba_Bolsas cuando la sume.
 -- K115: ¿se puede vender este objeto? -> motivo (texto) si NO, o nil. Una sola entrada para todos los módulos:
 -- la lista por id de ForeverTDB del Tasador (Tasador/Mecanicas.lua: saco de dormir, ecos, llaves...), la regla del
 -- Tasador (misión, llave, ligado de utilidad, si se pasa el objeto entero) y la de Profesiones (lo VITAL).
