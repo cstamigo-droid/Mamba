@@ -333,7 +333,7 @@ local function SeccionRol(L)
 		L:Blanco()
 		L:Fila("Roles de tu clase:", { tipo = "titulo" })
 		for _, r in ipairs(roles) do
-			L:Fila(r.nombre .. (r.clave == rol and Color("bueno", "  ← el que se usa") or ""), { sangria = 1 })
+			L:Fila(r.nombre .. (r.clave == rol and Color("bueno", "  (el que se usa)") or ""), { sangria = 1 })
 		end
 	end
 end

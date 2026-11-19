@@ -161,6 +161,20 @@ check(G.MambaBarrasDB.diag.rotacion.C_AssistedCombat is False, "diag rotación")
 check(G.MambaForma1.estados["0"][2] == 5487 and G.MambaForma3.estados["0"][1] == "empty", "formas llenas")
 check(G.MambaForma2.marcado is True, "forma activa marcada")
 
+# K99: las barras van en MEDIUM (en LOW la barra del juego mal escondida se comía los clics)
+check(G.MambaBarra1.estrato == "MEDIUM" and G.MambaBarraFormas.estrato == "MEDIUM" and G.MambaBarraMascota.estrato == "MEDIUM", "barras en MEDIUM")
+# K99: cada clic y cada hechizo soltado se cuentan en el diag
+G.MambaBoton1.scripts.PostClick(G.MambaBoton1, "LeftButton"); G.MambaBoton1.scripts.OnReceiveDrag(G.MambaBoton1)
+check(G.MambaBarrasDB.diag.cuenta.clics == 1 and G.MambaBarrasDB.diag.cuenta.soltados == 1, "diag cuenta clics y soltados")
+# K99: un tamaño y una separación para todas las barras
+M.TamanoTodas(0.6); M.SeparacionTodas(4)
+check(all(M.Config(i).escala == 0.6 and M.Config(i).separacion == 4 for i in range(1, 10)) and M.Config("formas").escala == 0.6, "tamaño y separación de todas")
+check(G.MambaBarra1.escala == 0.6 and G.MambaBarrasPJ.escalaTodas == 0.6, "aplicado a la barra")
+M.TamanoTodas(0.1)
+check(M.Config(2).escala == 0.3, "tamaño mínimo 30 %")
+M.TamanoTodas(0.75); M.SeparacionTodas(1.9)
+L.eval("function(M) M.Config(1).separacion = 1.9 end")(M)
+
 # ---------- 3. Combate: nada protegido se toca; se aplica al salir ----------
 L.execute('COMBATE = true')
 L.eval("function(M) local c = M.Config(1); c.escala = 1; c.botones = 6; M.FueraDeCombate('disponer1', function() M.Disponer(1) end) end")(M)
@@ -185,6 +199,15 @@ G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "LSHIFT")
 check(G.GUARDADO == 3, "una tecla sola de Mayús no se asigna")
 G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "ESCAPE")
 check(not M.asignando, "Esc termina")
+# la pelea empieza antes de que llegue PLAYER_REGEN_DISABLED: no se llama a SetBinding (protegida)
+check(M.EmpezarTeclas(), "vuelve a asignar")
+M.bajoRaton = G.MambaBoton3
+L.execute('COMBATE = true')
+G.MambaBarrasCaptura.scripts.OnKeyDown(G.MambaBarrasCaptura, "R")
+check(G.GUARDADO == 3 and not (G.BINDINGS["ACTIONBUTTON3"] and list(G.BINDINGS["ACTIONBUTTON3"].values())), "en combate no asigna teclas")
+check(not list(G.BLOQUEOS.values()), "en combate no se toca nada protegido al apretar una tecla")
+L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
+check(not M.asignando, "al salir de combate se cierra el modo de teclas")
 
 # ---------- 5. Mover ----------
 check(M.EmpezarMover(), "empieza mover")
@@ -223,6 +246,27 @@ check(G.MambaBarrasVentana.visible, "la pestaña ofrece apagar Bartender4")
 L, M = nuevo(con_copia=False)
 L.execute('Fire("PLAYER_LOGIN")')
 check(M.Config(1).punto == "BOTTOM" and M.Config(1).y == 40 and M.Config(2).mostrar is False, "por defecto")
+
+# ---------- 9b. K99: personaje que entró antes de que la instalación trajera la copia de Bartender ----------
+L, M = nuevo('MambaBarrasPJ = { version = 1, barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MambaBarrasPJ.version == 2 and G.MambaBarrasPJ.copiadoDe == "instalación" and M.Config(1).punto == "BOTTOM", "v1 sin copia: copia una vez")
+check(G.MambaBarrasPJ.anterior is not None and G.MambaBarrasPJ.anterior[1].x == 736, "lo de antes queda para Deshacer")
+check(L.eval("function(M) return M.avisoCopia end")(M) is True, "avisa en el chat que copió (y cómo deshacer)")
+L, M = nuevo('MambaBarrasPJ = { version = 2, copiadoDe = "instalación", barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(M.Config(1).x == 736, "ya copiado: no vuelve a pisar lo del jugador")
+L, M = nuevo('MambaBarrasPJ = { version = 1, barras = {} }', con_copia=False)
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MambaBarrasPJ.anterior is None and G.MambaBarrasPJ.copiadoDe is None, "sin copia disponible: queda igual")
+# revisión wow-addon-lua (tanda 3): sin copia NO se gasta la oportunidad; cuando llega la copia, se copia
+L, M = nuevo('MambaBarrasPJ = { version = 2, barras = { { mostrar = true, botones = 12, filas = 1, escala = 0.8, separacion = 2, alfa = 1, ver = "siempre", punto = "BOTTOMLEFT", x = 736, y = 0 } } }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MambaBarrasPJ.copiadoDe == "instalación" and G.MambaBarrasPJ.anterior[1].x == 736, "entró antes sin copia: copia cuando aparece")
 
 # ---------- 10. Prueba estática: nada decide ni lanza por el jugador ----------
 PROHIBIDO = re.compile(r"\b(CastSpell\w*|UseAction|RunMacroText|TargetUnit|CastShapeshiftForm|SpellStopCasting|"
@@ -271,5 +315,13 @@ check(G.MOVIBLES is not None and G.MOVIBLES["MambaBarrasVentana"] is True, "la v
 c1 = M.Config(1); c1.punto, c1.x, c1.y = "CENTER", 5, 5
 G.RESTABLECER()
 check(M.Config(1).punto == "BOTTOM" and abs(M.Config(1).x + 302.58) < 0.01, "Restablecer: la barra vuelve al lugar de Bartender")
+# K55 ampliado: el modo «Mover elementos» de Mamba pone las barras en su modo de mover
+L, M = nuevo('MambaAPI = { AlModoMover = function(fn) MODO_MOVER = fn end }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(G.MODO_MOVER is not None, "Barras se enganchan al modo Mover de Mamba")
+if G.MODO_MOVER is not None:
+    G.MODO_MOVER(True); check(M.moviendoBarras, "modo Mover: las barras muestran sus recuadros")
+    G.MODO_MOVER(False); check(not M.moviendoBarras, "al salir: las barras salen de su modo")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)

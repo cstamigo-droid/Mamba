@@ -251,6 +251,24 @@ check(b and b[0].tipo == "pnj", "un PNJ se busca por su nombre")
 okk, info = LL.Llevame("Karus")
 check(okk and info.punto.map == 1454, "Llevame('Karus') va a su aparición")
 
+# 13) Prueba en el juego, tanda 3: 9 tramos seguidos "Sigue el camino de salida (41 yd) ≈ 6 s" -> uno solo
+legs13 = [{"kind": "walk", "seconds": 6, "label": "Follow the path out", "yards": 41} for _ in range(9)]
+legs13 = [{"kind": "hearth", "seconds": 15, "label": "Hearth to Orgrimmar"}] + legs13 + [
+    {"kind": "walk", "seconds": 10, "label": "Walk to the flight master", "yards": 70},
+    {"kind": "fly", "seconds": 258, "label": "Fly to Thunder Bluff"},
+    {"kind": "walk", "seconds": 3, "label": "Walk", "via": True, "yards": 20},
+    {"kind": "walk", "seconds": 7, "yards": 50},
+    {"kind": "zeppelin", "seconds": 120, "label": "Take the zeppelin"},
+]
+G.AsistenteDB.viajes = L.table()  # sin medidas: los segundos de Polestar tal cual
+tr13 = lista(LL.Tramos(L.table_from([L.table_from(x) for x in legs13])))
+tipos13 = [t.tipo for t in tr13]
+check(tipos13 == ["hearth", "walk", "fly", "walk", "zeppelin"], f"caminatas seguidas = un tramo; solo el cambio de medio separa ({tipos13})")
+check(abs(tr13[1].seg - (9 * 6 + 10)) < 0.01 and abs(tr13[1].yardas - (9 * 41 + 70)) < 0.01, f"suma segundos y yardas ({tr13[1].seg}, {tr13[1].yardas})")
+check(tr13[1].texto.startswith("Walk to the flight master") and "439 yd" in tr13[1].texto, f"dice adónde va, con el total de yardas ({tr13[1].texto})")
+check(tr13[3].texto == "Caminar 70 yd", f"puntos de paso sin destino: «Caminar N yd» ({tr13[3].texto})")
+check(len([t for t in tr13 if "Follow the path" in t.texto]) == 0, "ningún «Sigue el camino» suelto")
+
 # 12) Lo que encontró la revisión fría (18-11)
 # a) al llegar (NAV_ARRIVED) el viaje termina, mide el último tramo y suelta la flecha
 L.execute("""

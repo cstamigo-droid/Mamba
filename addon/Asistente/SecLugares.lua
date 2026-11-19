@@ -228,12 +228,18 @@ Hub.Seccion({
 			if m and s.datos.ciudades[m] then est.ciudad = m end
 			if not est.ciudad then for um in pairs(s.datos.ciudades) do est.ciudad = est.ciudad or um end end
 		end
-		local x, y = s.PosicionJugador and s.PosicionJugador()
-		local enCiudad = posicion() == est.ciudad
+		-- (no "a and f()": eso corta a un solo valor y "y" quedaba nil: la columna Distancia salía vacía, 18-11)
+		local x, y
+		if s.PosicionJugador then x, y = s.PosicionJugador() end
+		local enCiudad = posicion() == est.ciudad or (A.MapaActual and A.MapaActual() == est.ciudad)
 		local clase = UnitClass and select(2, UnitClass("player")) or nil
 		local grupos = s.Grupos(est.ciudad, clase, enCiudad and x or nil, enCiudad and y or nil) or {}
 		if est.busqueda and est.busqueda ~= "" then grupos = s.Buscar(grupos, est.busqueda) end
 		if #grupos == 0 then V:Vacio("Sin resultados", "No encontré «" .. tostring(est.busqueda or "") .. "». Prueba con menos palabras.") return end
+		V:Botones({ { "Abrir la ventana de servicios", function() if _G.MambaAPI and _G.MambaAPI.AbrirServicios then _G.MambaAPI.AbrirServicios(est.ciudad) end end } },
+			"La ventana chica con la lista de esta ciudad, que se queda abierta mientras caminas.")
+		V:Interruptor("Abrirla sola al entrar a una ciudad", A.Ajuste("servicios", "abrirAlEntrar"),
+			function(v) A.FijarAjuste("servicios", "abrirAlEntrar", v and true or false) end)
 		if not enCiudad then V:Nota("No estás en esta ciudad: «Ir» te lleva desde donde estés, con la ruta de Polestar.") end
 		V:Columnas({ { "Servicio", 330 }, { "Quién", 300 }, { "Distancia", 150 } })
 		for _, g in ipairs(grupos) do

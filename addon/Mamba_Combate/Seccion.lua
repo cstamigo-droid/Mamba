@@ -68,8 +68,12 @@ function M.FilasMedidor()
 			Med.Dibujar(); M.RefrescarPanel()
 		end }
 	local s, motivo = Med.Sesion(e.sesion, e.tipo)
-	if not s then cab.linea2 = motivo; return {}, cab end
-	local out = {}
+	if not s then
+		cab.linea2 = motivo
+		return { { tipo = "Grupo", titulo = "Ranking del grupo", acciones = { { "Abrir el ranking", function() if M.Ranking then M.Ranking.Abrir() end end } } } }, cab
+	end
+	local out = { { tipo = "Grupo", titulo = "Ranking del grupo", detalle = "Una barra por jugador: daño, curación o daño recibido, de esta pelea, del total o de una anterior. Clic en una barra: sus hechizos.",
+		acciones = { { "Abrir el ranking", function() if M.Ranking then M.Ranking.Abrir() end end } } } }
 	for i, x in ipairs(s.filas) do
 		if i > 10 then break end
 		out[#out + 1] = { tipo = "#" .. i, titulo = x.nombre .. (x.yo and " (tú)" or ""),
@@ -144,6 +148,8 @@ local function dibujarAvisos(p, ancho)
 		I("Amenaza del grupo", "Solo en grupo.", "amenaza"),
 		I("Placas de nombre de Mamba", "Color por amenaza, élite o raro, y lanzamientos interrumpibles.", "placas"),
 		I("Medidor de combate en pantalla", "Clic: cambia qué mide. Clic derecho: esta pelea o el total.", "medidor"),
+		I("Abrir sola la ventana de enemigos cerca", "Cuando aparece un jugador de la otra facción (fuera de mazmorras). Silenciar la alerta también la deja quieta.", "cercanosSola"),
+		P.Boton(p, "Ver enemigos cerca y muertes", function() if M.Cercanos then M.Cercanos.Abrir() end end),
 		P.Deslizador(p, "Avisar con el maná bajo el", nil, 5, 60, 5, "%d %%", function() return d.avisoMana end, function(v) d.avisoMana = v end),
 		P.Deslizador(p, "Avisar con la amenaza sobre el", nil, 60, 110, 5, "%d %%", function() return d.avisoAmenaza end, function(v) d.avisoAmenaza = v end),
 	}, ancho, y)

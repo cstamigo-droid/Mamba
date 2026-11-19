@@ -252,7 +252,7 @@ function M.Pasos(e, r)
 	-- la guía es la columna: siempre primero, con lo que viene ("Entrega 2 misiones → vuela a ...")
 	local pp = M.Fuentes.ProximoPaso and M.Fuentes.ProximoPaso(4)
 	if pp and #pp.metas > 0 then
-		add(paso({ clave = "guia", tipo = "Ahora", titulo = table.concat(pp.metas, "  →  "),
+		add(paso({ clave = "guia", tipo = "Ahora", titulo = table.concat(pp.metas, "  ›  "),
 			detalle = ("%s · paso %s de %s"):format(pp.guia or "Tu guía", tostring(pp.paso), tostring(pp.total)),
 			accion = "guia", fijo = true }))
 	else

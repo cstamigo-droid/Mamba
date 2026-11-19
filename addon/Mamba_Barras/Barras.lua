@@ -31,6 +31,11 @@ M.DB, M.PJ = db, pj
 function M.Anotar(clave, valor)
 	db().diag[clave] = valor
 end
+function M.Contar(clave)
+	local d = db().diag
+	d.cuenta = d.cuenta or {}
+	d.cuenta[clave] = (d.cuenta[clave] or 0) + 1
+end
 function M.Falla(donde, err)
 	local d = db().diag
 	d.fallas = d.fallas or {}
@@ -118,16 +123,26 @@ function M.Config(id)
 end
 
 -- Primera vez de este personaje: si hay copia de Bartender, se usa; si no, el lugar por defecto.
+-- K99 (18-11): si al entrar no había copia (la instalación todavía no la traía), se vuelve a mirar en cada
+-- entrada hasta que aparezca, y se copia UNA sola vez; lo de antes queda para «Deshacer» y se avisa.
 local function primeraVez()
 	local p = pj()
-	if p.version then return end
-	p.version = 1
+	if p.copiadoDe then return end
 	local perfil, origen = M.CopiaBartender()
 	local conv = perfil and M.DeBartender(perfil)
-	if conv then
-		p.barras = conv
-		p.copiadoDe = origen
-		M.Anotar("copiaBartender", origen)
+	local yaEntro = p.version ~= nil
+	p.version = 2
+	if not conv then return end -- sin copia todavía: se vuelve a intentar la próxima vez
+	if yaEntro and p.barras then p.anterior = p.barras end
+	p.barras = conv
+	p.copiadoDe = origen
+	M.Anotar("copiaBartender", origen)
+	if yaEntro then
+		M.avisoCopia = true
+		local chat = _G.DEFAULT_CHAT_FRAME
+		if chat and chat.AddMessage then
+			chat:AddMessage("Mamba: copié tus barras de Bartender. Si preferías como estaban, en Mamba › Interfaz › Barras aprieta «Deshacer».")
+		end
 	end
 end
 
@@ -203,7 +218,9 @@ M.ConfigLAB = configLAB
 local function crearBarra(def)
 	local h = CreateFrame("Frame", "MambaBarra" .. def.id, UIParent, "SecureHandlerStateTemplate")
 	h.def = def
-	h:SetFrameStrata("LOW")
+	-- MEDIUM, como Bartender4: en LOW cualquier marco del juego en MEDIUM (la barra principal mal escondida
+	-- de la 1.ª tanda) quedaba encima y se comía los clics y el arrastre (K99).
+	h:SetFrameStrata("MEDIUM")
 	h:SetMovable(true)
 	h:SetClampedToScreen(true)
 	h.botones = {}
@@ -222,6 +239,9 @@ local function crearBarra(def)
 		end
 		h.botones[i] = b
 		M.botones[casilla] = b
+		-- K99: cuántos clics y cuántos hechizos soltados llegan de verdad a los botones (se lee en el diag)
+		b:HookScript("PostClick", function() M.Contar("clics") end)
+		b:HookScript("OnReceiveDrag", function() M.Contar("soltados") end)
 	end
 	if def.pagina then
 		local cond = M.ConductorActual()
@@ -309,6 +329,23 @@ end
 
 function M.DisponerTodo()
 	for id in pairs(M.marcos) do M.Disponer(id) end
+end
+
+-- K99: un tamaño (escala) y una separación para todas las barras de una vez, fuera de combate.
+local function todasLasBarras(campo, v)
+	for _, d in ipairs(M.BARRAS) do M.Config(d.id)[campo] = v end
+	for _, d in ipairs(M.ESPECIALES or {}) do M.Config(d.id)[campo] = v end
+	M.FueraDeCombate("disponer", M.DisponerTodo)
+end
+function M.TamanoTodas(esc)
+	esc = math.max(0.3, math.min(1.5, tonumber(esc) or 1))
+	pj().escalaTodas = esc
+	todasLasBarras("escala", esc)
+end
+function M.SeparacionTodas(sep)
+	sep = math.max(0, math.min(20, math.floor(tonumber(sep) or 2)))
+	pj().separacionTodas = sep
+	todasLasBarras("separacion", sep)
 end
 
 -- Grilla a la vista (modo mover) o solo los botones con algo.

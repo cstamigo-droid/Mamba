@@ -2,7 +2,7 @@
 ## Title: Mamba: bolsas
 ## Notes: Todas tus bolsas y el banco en una ventana de Mamba: barra de bolsas, una por una o todas juntas, espacio libre, filtros, buscador, ordenar, lo nuevo, mejoras y marcas, y lo que lleva cada uno de tus personajes.
 ## Author: Cristian Amigo
-## Version: 0.2.0
+## Version: 0.3.0
 ## X-License: GPL-3.0-only
 ## SavedVariables: MambaBolsasDB
 ## OptionalDeps: Polestar, Asistente, Tasador
@@ -17,4 +17,5 @@ Filtros.lua
 Ordenar.lua
 Ventana.lua
 Reemplazo.lua
+Banco.lua
 Opciones.lua

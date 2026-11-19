@@ -4623,6 +4623,8 @@ function W.ShellRail(f, items, bottom, active, onSelect)
 	for k = 1, #(bottom or {}) do
 		i = i + 1
 		place(bottom[k], i, y, true)
+		local pb = f.railButtons[i] -- Mamba (P12-riel): el pie siempre a tamaño completo, con su nombre
+		pb:SetHeight(RAIL_ROW); pb.Label:SetShown(true); pb.Icon:ClearAllPoints(); pb.Icon:SetPoint("TOP", pb, "TOP", 0, -10)
 		y = y + RAIL_ROW
 	end
 	local limit = f:GetHeight() - 2 - y -- the top of the bottom group

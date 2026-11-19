@@ -234,6 +234,11 @@ function N.Lineas()
 	add(lineaLlenas(e))
 	for _, l in ipairs(lineasProfesion(2)) do add(l) end
 	for _, l in ipairs(lineasFarmeo(M, e)) do add(l) end
+	-- K103: los avisos de oportunidad (Avisos.lua), ordenados con lo demás
+	if N.AplicarAvisos then
+		local ok, err = pcall(N.AplicarAvisos, out, e)
+		if not ok then N.Falla("Avisos", err) end
+	end
 	if N.PJ().soloSolo then
 		for i = #out, 1, -1 do if out[i].grupo then table.remove(out, i) end end
 	end
@@ -247,10 +252,10 @@ function N.Lineas()
 end
 
 ---------------------------------------------------------------- texto de la puntuación (K62)
--- "★★★ · ≈10 min · solo" (el ≈ dice que es estimación; sin minutos, no se inventan).
+-- "gran mejora · ≈10 min · solo" (el ≈ dice que es estimación; sin minutos, no se inventan).
 function N.Puntuacion(l)
 	local i = l.impacto or 1
-	local estrellas = i >= 4 and "★★★" or i >= 2 and "★★" or "★"
+	local estrellas = i >= 4 and "gran mejora" or i >= 2 and "mejora" or "poca mejora" -- sin ★: la letra del juego no la trae (cuadro vacío, visto en el juego 18-11)
 	local partes = { estrellas }
 	if l.minutos then partes[#partes + 1] = "≈" .. l.minutos .. " min" end
 	partes[#partes + 1] = l.grupo and "en grupo" or "solo"

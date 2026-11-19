@@ -132,6 +132,9 @@ local function ponerEnSubasta(id, precio)
 	return false, "No encontré la ventana de la subasta."
 end
 
+-- Para otros módulos (MambaAPI.PonerEnSubasta): deja la subasta lista con su precio; publicar lo aprieta el jugador.
+A.PonerEnSubasta = function(id, precio) return ponerEnSubasta(id, precio) end
+
 local aviso -- lo último que pasó con un botón, para mostrarlo arriba de la lista
 local function marcar(id, que)
 	local m = db()
@@ -236,7 +239,7 @@ local function filasOport(V, t, lista, tipo, max)
 			n = n + 1
 			local id = tonumber(tostring(o.link):match("item:(%d+)"))
 			V:Fila({ icono = id, item = o.link, celdas = {
-				{ tostring(o.link):gsub("[%[%]]", ""), o.tipo == "vendedor" and "subasta → vendedor" or "comprar para revender" },
+				{ tostring(o.link):gsub("[%[%]]", ""), o.tipo == "vendedor" and "subasta › vendedor" or "comprar para revender" },
 				{ o.unidades .. " a " .. A.Monedas(o.comprarHasta), "o menos, cada uno" },
 				{ A.Monedas(o.venta), o.tipo == "vendedor" and "lo paga el vendedor" or (floor(o.ventasDia or 0) .. " se venden al día") },
 				{ "|cff6bd999+" .. A.Monedas(o.ganancia) .. "|r", o.pct and A.Pct(o.pct * 100, 0) or "" },
@@ -387,6 +390,7 @@ ev:SetScript("OnEvent", function(_, e, boton)
 		if P and P.Get and P.Get("qol.sellJunk") and not (IsShiftKeyDown and IsShiftKeyDown()) then
 			-- nunca lo VITAL para tu plan (MambaPlan.MaterialDelPlan), aunque lo hayas marcado como basura
 			local MP = _G.MambaPlan
+			local cola = {}
 			for id, que in pairs(db()) do
 				local vital = false
 				if type(MP) == "table" and MP.MaterialDelPlan then
@@ -398,8 +402,20 @@ ev:SetScript("OnEvent", function(_, e, boton)
 					local ok2, t = pcall(MPr.Vital, id)
 					vital = ok2 and type(t) == "string" and t ~= ""
 				end
-				if que == "basura" and not vital then venderAlVendedor(id) end
+				if que == "basura" and not vital then cola[#cola + 1] = id end
 			end
+			-- de a 6 por tanda (como Polestar con los grises), solo lo que el vendedor compra y sin los grises
+			local info = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+			local function tanda(desde)
+				if not abierto.vendedor then return end
+				for n = desde, math.min(#cola, desde + 5) do
+					local id = cola[n]
+					local ok, _, _, q, _, _, _, _, _, _, _, precio = pcall(info, id)
+					if ok and (precio or 0) > 0 and (q or 1) > 0 then venderAlVendedor(id) end
+				end
+				if desde + 6 <= #cola then C_Timer.After(0.3, function() tanda(desde + 6) end) end
+			end
+			if #cola > 0 then C_Timer.After(0.5, function() tanda(1) end) end
 		end
 	elseif e == "MERCHANT_CLOSED" then abierto.vendedor = false
 	elseif e == "BAG_UPDATE_DELAYED" then bolsasCache = nil end

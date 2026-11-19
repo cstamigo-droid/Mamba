@@ -8,6 +8,7 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
+	cercanosSola = true,
 }
 
 function M.DB()
@@ -89,16 +90,48 @@ local oyentes = {}
 function M.AlCambiar(fn) oyentes[#oyentes + 1] = fn end
 function M.Cambio() for _, fn in ipairs(oyentes) do pcall(fn) end end
 
--- Un marco movible propio (K55), con la ventana de Mamba si está.
-function M.Movible(f, nombre)
+-- Un marco movible propio (K55): se registra en el modo «Mover elementos» de la ventana de Mamba
+-- (MambaAPI.Movible, K55 ampliado) con su nombre en español (etiqueta). Estos marcos no tienen barra de título:
+-- van con sinAsa = true, así solo se mueven en ese modo y no se arrastran por accidente al jugar; la posición y
+-- el tamaño quedan por personaje. Sin la ventana de Mamba, se arrastran enteros fuera de combate.
+function M.Movible(f, nombre, etiqueta)
 	local api = _G.MambaAPI
-	if api and api.Movible then pcall(api.Movible, f, nombre) else
+	if api and api.Movible then pcall(api.Movible, f, nombre, nil, { etiqueta = etiqueta, sinAsa = true }) else
 		f:SetMovable(true); f:EnableMouse(true); f:RegisterForDrag("LeftButton")
 		f:SetScript("OnDragStart", function(s) if not M.EnCombate() then s:StartMoving() end end)
-		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f:SetScript("OnDragStop", function(s) s:StopMovingOrSizing() end)
 	end
+	M.movibles[nombre] = etiqueta or nombre
 	return f
 end
+M.movibles = {} -- nombre del marco -> su nombre en español (lo que se puede mover)
+
+-- Mientras el modo «Mover elementos» está abierto, cada módulo muestra con datos de ejemplo sus marcos que
+-- están escondidos (para que el recuadro tenga a qué pegarse), y al cerrarlo los deja como estaban.
+-- El modo se cierra solo al entrar en combate (Ventanas.lua). fn(activo)
+local alMover = {}
+function M.AlModoMover(fn) alMover[#alMover + 1] = fn end
+function M.ModoMover(activo)
+	M.moviendo = activo and true or false
+	for _, fn in ipairs(alMover) do M.Proteger("mover", fn, M.moviendo) end
+end
+function M.ConectarMover()
+	local api = _G.MambaAPI
+	if M.moverConectado or not (api and api.AlModoMover) then return end
+	M.moverConectado = true
+	pcall(api.AlModoMover, M.ModoMover)
+end
+
+-- Los marcos que se arman recién cuando hacen falta se crean al entrar, ESCONDIDOS, para que «Mover elementos»
+-- los encuentre aunque todavía no hayan salido en pantalla.
+local precrear = {}
+function M.Precrear(fn) precrear[#precrear + 1] = fn end
+local fp = CreateFrame("Frame")
+M.Escuchar(fp, "PLAYER_LOGIN")
+fp:SetScript("OnEvent", function()
+	for _, fn in ipairs(precrear) do M.Proteger("precrear", fn) end
+	M.ConectarMover()
+end)
 
 -- Barra simple (estado + texto) para disparo, lanzamiento y amenaza.
 function M.Barra(padre, ancho, alto, nombre)

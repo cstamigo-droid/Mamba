@@ -98,32 +98,54 @@ end
 local v, filas
 Med.estado = { sesion = "Current", tipo = "DamageDone" }
 
+-- El marco se arma una vez (al entrar, escondido, para «Mover elementos»; o al dibujarlo).
+function Med.Crear()
+	if v then return v end
+	v = CreateFrame("Frame", "MambaMedidorCombate", UIParent)
+	v:SetSize(190, 16)
+	v:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -320, 220)
+	v:Hide()
+	v.titulo = CreateFrame("Button", nil, v)
+	v.titulo:SetAllPoints(v)
+	v.titulo.t = M.Piezas.Texto(v.titulo, "small", "text")
+	v.titulo.t:SetAllPoints(v.titulo)
+	v.titulo:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	v.titulo:SetScript("OnClick", function(_, boton)
+		local e = Med.estado
+		if boton == "RightButton" then
+			e.sesion = e.sesion == "Current" and "Overall" or "Current"
+		else
+			local i = 1
+			for k, t in ipairs(Med.TIPOS) do if t[1] == e.tipo then i = k end end
+			e.tipo = Med.TIPOS[i % #Med.TIPOS + 1][1]
+		end
+		Med.Dibujar()
+	end)
+	filas = {}
+	M.Movible(v, "MambaMedidorCombate", "Medidor de combate")
+	return v
+end
+M.Precrear(Med.Crear)
+M.AlModoMover(function(activo)
+	if not v then Med.Crear() end
+	if activo then
+		if not v:IsShown() then
+			v.ejemplo = true
+			v.titulo.t:SetText("Medidor de combate (ejemplo)")
+			v:Show()
+		end
+	elseif v.ejemplo then
+		v.ejemplo = nil
+		v:Hide()
+		Med.Dibujar()
+	end
+end)
+
 function Med.Dibujar()
+	if v and v.ejemplo then return end -- modo «Mover elementos»
 	local d = M.DB()
 	if not d.medidor then if v then v:Hide() end return end
-	if not v then
-		v = CreateFrame("Frame", "MambaMedidorCombate", UIParent)
-		v:SetSize(190, 16)
-		v:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -320, 220)
-		M.Movible(v, "MambaMedidorCombate")
-		v.titulo = CreateFrame("Button", nil, v)
-		v.titulo:SetAllPoints(v)
-		v.titulo.t = M.Piezas.Texto(v.titulo, "small", "text")
-		v.titulo.t:SetAllPoints(v.titulo)
-		v.titulo:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-		v.titulo:SetScript("OnClick", function(_, boton)
-			local e = Med.estado
-			if boton == "RightButton" then
-				e.sesion = e.sesion == "Current" and "Overall" or "Current"
-			else
-				local i = 1
-				for k, t in ipairs(Med.TIPOS) do if t[1] == e.tipo then i = k end end
-				e.tipo = Med.TIPOS[i % #Med.TIPOS + 1][1]
-			end
-			Med.Dibujar()
-		end)
-		filas = {}
-	end
+	if not v then Med.Crear() end
 	local e = Med.estado
 	local nombreT, nombreS = e.tipo, e.sesion
 	for _, t in ipairs(Med.TIPOS) do if t[1] == e.tipo then nombreT = t[2] end end

@@ -165,10 +165,10 @@ def revisar(nombre, minimo=3):
 
 # 1) registro: 4 entradas en el riel (Equipo, Oro, Ciudad y Errores al pie) con las 8 partes dentro
 R = G.REGISTRADAS
-grupos = ["MambaGrupoEquipo", "MambaGrupoOro", "MambaGrupoCiudad", "MambaGrupoErrores"]
+grupos = ["MambaGrupoEquipo", "MambaGrupoOro", "MambaGrupoIrA", "MambaGrupoCiudad", "MambaGrupoErrores"]
 for k in grupos:
     check(R[k] is not None, f"entrada del riel registrada: {k}")
-check([str(R[k].label) for k in grupos if R[k]] == ["Equipo", "Oro", "Ciudad", "Errores"], "nombres del riel")
+check([str(R[k].label) for k in grupos if R[k]] == ["Equipo", "Oro", "Ir a…", "Ciudad", "Errores"], "nombres del riel (Ir a… a la vista, con entrada propia)")
 check(R["MambaGrupoErrores"] is not None and R["MambaGrupoErrores"].foot is True, "Errores va al pie del riel")
 claves = ["MambaEquipo", "MambaSubasta", "MambaIrA", "MambaClase", "MambaServicios", "MambaCapa", "MambaMedidor", "MambaErrores"]
 for k in claves:
@@ -256,7 +256,7 @@ G.Polestar.UI.Picker.Render()
 v = textos()
 check(any(recn in x for x in v), "Ir a… sugiere la misma mazmorra recomendada")
 check(any("Ruta a" in x for x in v), "Ir a… muestra la ruta")
-R["MambaGrupoCiudad"].search("subasta")
+R["MambaGrupoIrA"].search("subasta")
 v = textos()
 check(any("subastas" in x.lower() for x in v), "buscar «subasta» encuentra la casa de subastas")
 check(any("≈ 7:00" in x for x in v), f"sin el parche P8 el tiempo total sale de Nav.API.Estimate (420 s = ≈ 7:00, R0) ({[x for x in v if 'otal' in x][:1]})")
@@ -272,7 +272,7 @@ Polestar.Nav.EstimateTravel = function(from, to, budgeted, noHearth, noFlights)
   return t, nil, legs
 end
 """)
-R["MambaGrupoCiudad"].search("banco")
+R["MambaGrupoIrA"].search("banco")
 v = textos()
 tx = " | ".join(v)
 check("1. Piedra de hogar a Cima del Trueno" in tx and "15 s" in tx, "Ir a…: tramo 1, la piedra con su tiempo")
@@ -282,9 +282,9 @@ check("El más cercano en tiempo" in tx, "Ir a…: el banco elegido es el más c
 check("Otras formas de llegar" in tx and "Sin piedra de hogar" in tx and "Sin piedra ni vuelos" in tx, "Ir a…: las alternativas sin piedra y sin piedra ni vuelos (la más rápida no vuela)")
 check("≈ 5:18" in tx, "la alternativa sin piedra da su total (20 + 258 + 40 s)")
 L.execute("Polestar.Nav.EstimateTravel = nil; Asistente.Llevame.OlvidarCache()")
-R["MambaGrupoCiudad"].search("zzzz qqq")
+R["MambaGrupoIrA"].search("zzzz qqq")
 check(any("Sin resultados" in x for x in textos()), "Ir a…: estado «Sin resultados»")
-R["MambaGrupoCiudad"].search("")
+R["MambaGrupoIrA"].search("")
 
 # 7) Subasta: interruptores conectados a Polestar (qol.sellJunk / qol.autoRepair)
 G.MambaAPI.Abrir("MambaSubasta")
@@ -411,6 +411,114 @@ r = VENT()
 check(r[0] is True and r[1] is True, "MambaAPI.Movible registra la ventana")
 check(r[2] is True, "el candado fija las ventanas (VentanasFijas)")
 check(r[3] is True, "«Restablecer posiciones» borra los lugares de este personaje")
+# en combate no se mueve ni se restablece nada (un ancla de marcos seguros quedaría bloqueada: veto del revisor, 18-11)
+COMB = L.eval("""function()
+  COMBATE = true
+  Asistente.Ventanas.Fijar(false)
+  local bloqueo = false
+  local orig = Polestar.StartDrag
+  local llamo = false
+  Polestar.StartDrag = Polestar.StartDrag
+  AsistenteDB.lugares[Asistente.Ventanas.Personaje()] = { prueba = { x = 1, y = 1 } }
+  Asistente.Ventanas.Restablecer()
+  local sigue = AsistenteDB.lugares[Asistente.Ventanas.Personaje()].prueba ~= nil
+  COMBATE = false
+  return sigue
+end""")
+check(COMB() is True, "«Restablecer posiciones» en combate espera a que termine el combate")
+
+# 10d) K108: la ventana de servicios cuando el jugador quiera
+G.MAPA = 1456
+check(G.MambaAPI.CiudadMasCercana() == 1456, "en Cima del Trueno, la ciudad más cercana es la misma")
+check(G.MambaAPI.AbrirServicios() is True, "MambaAPI.AbrirServicios abre la ventana en una ciudad")
+G.MAPA = 1413  # Los Baldíos: no es ciudad
+CMAS = G.MambaAPI.CiudadMasCercana()
+check(CMAS in (1454, 1456, 1458), f"fuera de una ciudad, CiudadMasCercana da una ciudad con lista ({CMAS})")
+check(G.MambaAPI.AbrirServicios() is True, "fuera de una ciudad, AbrirServicios abre la más cercana (sin «Aquí no hay lista»)")
+G.MAPA = 1456
+G.MambaAPI.Abrir("MambaServicios")
+v = textos()
+check(any("Abrir la ventana de servicios" in x for x in v), "Ciudad › Servicios tiene el botón «Abrir la ventana de servicios»")
+check(any("Abrirla sola al entrar a una ciudad" in x for x in v), "Ciudad › Servicios tiene el interruptor de abrirla sola")
+# la columna Distancia con las yardas (antes salía vacía: "x, y = a and f()" cortaba a un valor)
+L.execute("function UnitPosition() return -1280, 150, 0, 1 end")
+G.Polestar.UI.Picker.Render()
+v = textos()
+check(any(x.endswith("yardas") or x == "aquí" for x in v), f"Ciudad › Servicios: la columna Distancia muestra las yardas ({[x for x in v if 'yard' in x][:2]})")
+MED = L.eval("""function()
+  local abierto = 0
+  local orig = MambaAPI.AbrirServicios
+  MambaAPI.AbrirServicios = function() abierto = abierto + 1; return true end
+  MambaBotonMinimapa.scripts.OnClick(MambaBotonMinimapa, "MiddleButton")
+  MambaAPI.AbrirServicios = orig
+  return abierto
+end""")
+check(MED() == 1, "clic con la rueda en el botón del minimapa abre los servicios")
+
+# 10e) MambaAPI.PonerEnSubasta: sin el subastador abierto no hace nada y dice por qué
+PS_ = L.eval("function() return MambaAPI.PonerEnSubasta(9001, 100) end")
+r = PS_()
+check(r[0] is False and "subastador" in str(r[1]), f"PonerEnSubasta sin la subasta abierta: no hace nada y lo dice ({r[1]})")
+
+# 10f) modo «Mover elementos» (K55 ampliado): marcos sin título, rueda = tamaño, nada en combate
+MOV = L.eval("""function()
+  local W = Asistente.Ventanas
+  local f = CreateFrame("Frame", "MambaPruebaMedidor", UIParent)
+  f.GetScale = function(self) return self.escala or 1 end
+  f.SetScale = function(self, e) self.escala = e end
+  local ok1 = MambaAPI.Movible(f, "pruebaMedidor", { etiqueta = "Medidor de daño", sinAsa = true })
+  COMBATE = true
+  local enCombate, motivo = MambaAPI.ModoMover(true)
+  COMBATE = false
+  local entra = MambaAPI.ModoMover(true)
+  local visto = false
+  for _, f2 in ipairs(TODOS) do
+    if f2.nombre and type(f2.nombre) == "table" and tostring(f2.nombre.text or ""):find("Medidor de daño", 1, true) and f2:IsShown() then visto = f2 end
+  end
+  local escala
+  if visto and visto.scripts.OnMouseWheel then visto.scripts.OnMouseWheel(visto, 1); escala = f.escala end
+  Fire("PLAYER_REGEN_DISABLED")
+  local salio = not W.moviendo
+  return ok1, enCombate, tostring(motivo), entra, visto ~= false, escala, salio
+end""")
+r = MOV()
+check(r[0] is True, "MambaAPI.Movible acepta un marco sin título con opciones (sinAsa, etiqueta)")
+check(r[1] is False and "combate" in r[2], "en combate no se entra al modo Mover")
+check(r[3] is True and r[4] is True, "el modo Mover muestra cada elemento con su nombre")
+check(r[5] is not None and abs(r[5] - 1.05) < 0.001, f"la rueda cambia el tamaño del elemento ({r[5]})")
+check(r[6] is True, "si empieza un combate, se sale solo del modo Mover")
+check(G.REGISTRADAS["MambaGrupoMover"] is not None, "la entrada «Mover» está al pie del riel")
+
+# 10g) revisión wow-addon-lua (tanda 4): nunca atrapado en el modo Mover; reponer no mueve en combate
+MOV2 = L.eval("""function()
+  local W = Asistente.Ventanas
+  local v = CreateFrame("Frame", "MambaPruebaVentana", UIParent)
+  MambaAPI.Movible(v, "pruebaVentana", { yaArrastra = true, etiqueta = "Ventana que ya se arrastra" })
+  COMBATE = false
+  MambaAPI.ModoMover(true)
+  local tapada = false
+  for _, f2 in ipairs(TODOS) do
+    if f2.nombre and type(f2.nombre) == "table" and tostring(f2.nombre.text or ""):find("Ventana que ya se arrastra", 1, true) and f2:IsShown() then tapada = true end
+  end
+  local boton = MambaMoverTerminar and MambaMoverTerminar:IsShown()
+  if MambaMoverTerminar then MambaMoverTerminar:Hide() end
+  local salio = not W.moviendo
+  -- reponer en combate: queda pendiente y se hace al salir
+  local m = CreateFrame("Frame", "MambaPruebaAncla", UIParent)
+  MambaAPI.Movible(m, "pruebaAncla", { sinAsa = true })
+  local k = (UnitName("player") or "?") .. "-" .. (GetRealmName and GetRealmName() or ""); AsistenteDB.lugares[k] = AsistenteDB.lugares[k] or {}; AsistenteDB.lugares[k].pruebaAncla = { x = 10, y = 20 }
+  COMBATE = true
+  m:Hide(); m.point = nil; m:Show()
+  local movidoEnCombate = m.point ~= nil
+  COMBATE = false
+  Fire("PLAYER_REGEN_ENABLED")
+  local movidoDespues = m.point ~= nil
+  return tapada, boton and true or false, salio, movidoEnCombate, movidoDespues
+end""")
+r = MOV2()
+check(r[0] is False, "una ventana que ya se arrastra sola no lleva recuadro encima (no tapa sus botones)")
+check(r[1] is True and r[2] is True, "botón «Listo: terminar de mover» encima de todo; al cerrarlo (o con Escape) sale del modo")
+check(r[3] is False and r[4] is True, "en combate no se repone el lugar; se hace al salir del combate")
 
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:

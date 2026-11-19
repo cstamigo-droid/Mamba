@@ -35,6 +35,7 @@ end
 -- El botón de la fila: lo que más acerca a cumplirla (K61).
 function N.Accion(l)
 	if l.tramo then return nil end -- un tramo del viaje en curso: se lee, no se hace
+	if l.accion then return l.accion[1], l.accion[2] end -- un aviso con su propio botón (K103: «Publicar»)
 	if l.llevar then return "Llévame", function() pcall(l.llevar) end end
 	if l.lugar or (l.destino and N.PuedeLlevar()) then return "Llévame", function() N.Llevame(l) end end
 	if l.guia then return "Guía", function() N.AbrirGuiaDe(l) end end
@@ -53,6 +54,11 @@ local function menuDe(r)
 	if l.guia then items[#items + 1] = { text = "Abrir la guía en otra pestaña", icon = "plus", onClick = function() N.AbrirGuiaDe(l) end } end
 	if l.ver then items[#items + 1] = { text = l.ver == "macro" and "Crear la macro" or "Ver en Mamba", icon = "search", onClick = function() verAlgo(l) end } end
 	items[#items + 1] = { separator = true }
+	if l.aviso then
+		local tipo = l.aviso
+		items[#items + 1] = { text = "No avisar más de esto (" .. (N.TIPOS_AVISO[tipo] or tipo) .. ")", icon = "close",
+			onClick = function() N.Silenciar(tipo); N.Refrescar(true) end }
+	end
 	items[#items + 1] = { text = "Hecho", icon = "check", onClick = function() N.Hecho(l); N.Refrescar(true) end }
 	items[#items + 1] = { text = "No me interesa", icon = "close", onClick = function() N.Hecho(l, true); N.Refrescar(true) end }
 	w.ShowMenu(r, items)
@@ -86,14 +92,33 @@ local function construir(GF, body, PAD, UP_TOGGLE)
 	cab.Icon:SetPoint("RIGHT", cab, "RIGHT", -PAD, 0)
 	cab.Icon:SetTexture(th.Media("chevron-down"))
 	w.Color(cab.Icon, "textMuted")
+	-- K108: «Servicios de la ciudad» cuando el jugador quiera (MambaAPI.AbrirServicios, de la ventana de Mamba)
+	cab.Serv = CreateFrame("Button", nil, cab)
+	cab.Serv:SetSize(112, 18)
+	cab.Serv:SetPoint("RIGHT", cab.Icon, "LEFT", -10, 0)
+	cab.Serv.Label = T(cab.Serv, "small", "accent")
+	cab.Serv.Label:SetPoint("RIGHT", cab.Serv, "RIGHT", 0, 0)
+	cab.Serv.Label:SetText("Servicios de la ciudad")
+	cab.Serv:SetScript("OnClick", function() N.AbrirServicios() end)
+	cab.Serv:SetScript("OnEnter", function(self) w.Color(self.Label, "text")
+		w.Tooltip(self, "ANCHOR_LEFT", "Servicios de la ciudad", { { "Todo lo que hay en la ciudad donde estás (o la más cercana), con su Llévame.", th.Color("textDim") } }) end)
+	cab.Serv:SetScript("OnLeave", function(self) w.Color(self.Label, "accent"); w.HideTooltip(self) end)
+	cab.Serv:Hide()
 	cab:SetScript("OnClick", function(_, boton)
 		if boton == "RightButton" then
 			local pj = N.PJ()
-			w.ShowMenu(cab, {
+			local items = {
 				{ text = "Solo lo que puedo hacer solo", checked = pj.soloSolo and true or false,
 					onClick = function() pj.soloSolo = not pj.soloSolo; N.Refrescar(true) end },
 				{ text = "Abrir Mi plan", icon = "search", onClick = function() local M = _G.MambaPlan; if M and M.AbrirPlan then pcall(M.AbrirPlan, "ahora") end end },
-			})
+				{ separator = true },
+			}
+			-- K103: cada tipo de aviso se enciende y se apaga aquí (también deshace «No avisar más de esto»)
+			for _, tipo in ipairs({ "lugar", "subasta", "espacio", "botin" }) do
+				items[#items + 1] = { text = "Avisar: " .. (N.TIPOS_AVISO[tipo] or tipo), checked = not N.Silenciado(tipo),
+					onClick = function() N.Silenciar(tipo, N.Silenciado(tipo) == false); N.Refrescar(true) end }
+			end
+			w.ShowMenu(cab, items)
 			return
 		end
 		N.PJ().abierto = not N.PJ().abierto
@@ -154,6 +179,23 @@ local function fila(GF, i)
 	return r
 end
 
+---------------------------------------------------------------- alto de un texto
+-- En el juego, GetStringHeight puede quedar en una línea cuando el texto ya se partió en dos (se mide antes de
+-- que el texto se acomode): las filas se montaban entre sí y con lo de Polestar de abajo (captura de Entrañas,
+-- 18-11). El alto sale del ancho del texto, que no depende del acomodo, y se toma el mayor de los dos; además se
+-- fija en el texto, que así nunca se sale de su caja.
+local function alto(fs, ancho, maxl)
+	local lh = (fs.GetLineHeight and fs:GetLineHeight()) or 12
+	local uw = (fs.GetUnboundedStringWidth and fs:GetUnboundedStringWidth()) or fs:GetStringWidth() or 0
+	local txt = fs:GetText()
+	if not txt or txt == "" then fs:SetHeight(lh); return 0 end
+	local n = max(1, min(maxl, math.ceil(uw * 1.1 / max(1, ancho))))
+	local h = max(n * lh + (n - 1) * 2, min(fs:GetStringHeight() or 0, maxl * lh + (maxl - 1) * 2))
+	fs:SetHeight(h)
+	return h
+end
+N.AltoTexto = alto
+
 ---------------------------------------------------------------- el gancho de Polestar (parche P9)
 -- Polestar lo llama en cada acomodo de la ventana viva. Solo mide y ancla: los textos ya vienen armados.
 local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
@@ -166,6 +208,7 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 	cont:Show()
 	local abierto = N.PJ().abierto
 	cab.Label:SetText(abierto and "Mamba · tu plan" or ("Mamba · tu plan (" .. #ls .. ")"))
+	cab.Serv:SetShown(N.HayServicios())
 	local th = Theme()
 	cab.Icon:SetTexture(th.Media(abierto and "chevron-up" or "chevron-down"))
 	local y = -UP_TOGGLE
@@ -180,11 +223,24 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 		r.Ir:SetShown(txt ~= nil)
 		r.Text:SetText(l.titulo or "")
 		r.Sub:SetText(l.sub or "")
-		local tw = width - TEXT_X - 14 - PAD - BOTON_W - 6
+		-- el botón mide lo que mide su texto (nunca "Llévam"); si no deja al menos 120 px para el texto de la
+		-- línea, baja a una línea propia debajo del cómo, alineado con el texto
+		local bw = 0
+		if txt then
+			r.Ir.Label:SetWidth(0)
+			bw = floor(r.Ir.Label:GetStringWidth() + 0.5) + 2
+			r.Ir.Label:SetWidth(bw)
+			r.Ir:SetWidth(bw + 4)
+		end
+		local libre = width - TEXT_X - 14 - PAD
+		local abajo = txt ~= nil and (libre - bw - 10) < 120
+		local tw = abajo and libre or (libre - (txt and (bw + 10) or 0))
 		r.Text:SetWidth(tw)
 		r.Sub:SetWidth(tw)
 		local inset = max(0, (UP_ROW - r.Text:GetLineHeight()) / 2)
-		local h = max(UP_ROW, floor(inset * 2 + r.Text:GetStringHeight() + 2 + r.Sub:GetStringHeight() + 0.5))
+		local hT, hS = alto(r.Text, tw, 2), alto(r.Sub, tw, 2)
+		local h = max(UP_ROW, floor(inset * 2 + hT + (hS > 0 and (2 + hS) or 0) + 0.5))
+		if abajo then h = h + 20 end
 		r.Icon:ClearAllPoints()
 		r.Icon:SetPoint("LEFT", r, "TOPLEFT", TEXT_X - 2, -UP_ROW / 2)
 		r.Text:ClearAllPoints()
@@ -192,7 +248,16 @@ local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 		r.Sub:ClearAllPoints()
 		r.Sub:SetPoint("TOPLEFT", r.Text, "BOTTOMLEFT", 0, -2)
 		r.Ir:ClearAllPoints()
-		r.Ir:SetPoint("TOPRIGHT", r, "TOPRIGHT", -PAD, -(UP_ROW - 18) / 2)
+		if abajo then
+			r.Ir:SetPoint("TOPLEFT", r.Sub, "BOTTOMLEFT", 0, -2)
+			r.Ir.Label:ClearAllPoints()
+			r.Ir.Label:SetPoint("LEFT", r.Ir, "LEFT", 0, 0)
+		else
+			r.Ir:SetPoint("TOPRIGHT", r, "TOPRIGHT", -PAD, -(UP_ROW - 18) / 2)
+			r.Ir.Label:ClearAllPoints()
+			r.Ir.Label:SetPoint("RIGHT", r.Ir, "RIGHT", 0, 0)
+		end
+		r.psAbajo = abajo
 		r:SetHeight(h)
 		r:ClearAllPoints()
 		r:SetPoint("TOPLEFT", cont, "TOPLEFT", 0, y)
@@ -235,6 +300,17 @@ function N.LineasViaje()
 			titulo = t.texto or tipo, sub = tiempo(t.seg, t.estimado) or "" }
 	end
 	return out
+end
+
+---------------------------------------------------------------- K108
+function N.HayServicios()
+	local A = _G.MambaAPI
+	return A and A.AbrirServicios and true or false
+end
+
+function N.AbrirServicios()
+	local A = _G.MambaAPI
+	if A and A.AbrirServicios then return pcall(A.AbrirServicios) end
 end
 
 ---------------------------------------------------------------- refresco
@@ -297,13 +373,23 @@ local function enganchar()
 end
 
 local ev = CreateFrame("Frame")
-for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_LEVEL_UP", "PLAYER_MONEY", "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_TAB", "ZONE_CHANGED_NEW_AREA" }) do
+for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_LEVEL_UP", "PLAYER_MONEY", "BAG_UPDATE_DELAYED", "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_TAB",
+	"ZONE_CHANGED_NEW_AREA", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "AUCTION_HOUSE_SHOW", "AUCTION_HOUSE_CLOSED", "MERCHANT_SHOW",
+	"MERCHANT_CLOSED", "LOOT_READY" }) do
 	pcall(ev.RegisterEvent, ev, e)
 end
 ev:SetScript("OnEvent", function(_, e)
 	if e == "PLAYER_LOGIN" then
 		enganchar()
 		return N.Refrescar(true)
+	end
+	-- K103: dónde está el jugador y qué saqueó
+	if e == "AUCTION_HOUSE_SHOW" then N.estado.subasta = true; return N.Refrescar(true) end
+	if e == "AUCTION_HOUSE_CLOSED" then N.estado.subasta = false; return N.Refrescar(true) end
+	if e == "MERCHANT_SHOW" then N.estado.vendedor = true elseif e == "MERCHANT_CLOSED" then N.estado.vendedor = false end
+	if e == "LOOT_READY" and N.Saqueo then
+		local ok, err = pcall(N.Saqueo)
+		if not ok then N.Falla("Saqueo", err) end
 	end
 	N.Refrescar()
 end)

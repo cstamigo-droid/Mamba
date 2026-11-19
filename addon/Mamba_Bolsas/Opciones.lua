@@ -161,6 +161,7 @@ local function dibujar(p, ancho, alto)
 	interruptor("Bloquear la posición", "La ventana de bolsas y la del banco no se arrastran. El candado de Ajustes › Mamba › Ventanas también las fija.", "fija", function()
 		if M.AplicarFija then M.AplicarFija() end
 	end)
+	interruptor("Mostrar la fila de bolsas", "Arriba de las casillas: cada bolsa con sus casillas libres. Clic en una: verla sola.", "verBolsas")
 	interruptor("Separar las bolsas", "Con todas juntas, cada bolsa empieza en una fila nueva.", "separar")
 	interruptor("Bolsas al revés", "La mochila al final, como en la barra del juego.", "reves")
 	interruptor("Marcas sobre los objetos", "Basura, para vender, subastar o guardar (lo que marcas con Alt + clic derecho o Ctrl + Alt + clic) y los objetos de misión.", "marcas")

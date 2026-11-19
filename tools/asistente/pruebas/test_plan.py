@@ -162,7 +162,7 @@ G2 = L2.globals()
 L2.execute('Fire("PLAYER_LOGIN")')
 check(G2.MambaPlanInicio is not None and G2.MambaPlanInicio.visible, "primera vez: el asistente se abre solo")
 S = G2.SECCION
-check(S is not None and S.key == "MambaPlan" and S.order == 20, "sección Mi plan en el riel, lugar 20")
+check(S is not None and S.key == "MambaPlan" and S.order == 21, "sección Mi plan en el riel, lugar 20")
 items, activa = S.nav()
 check(len(list(items.values())) == 10 and activa == "ahora", "índice de Mi plan")
 padre = L2.eval('function() local f = CreateFrame("Frame", nil, UIParent); f.w, f.h = 700, 500; return f end')()
@@ -223,7 +223,7 @@ Polestar.Engine = { GetGuide = function() return { title = "Mulgore 1-12", steps
   GetLiveStep = function() return 1 end, StepNumber = function(i) return i end, StepTotal = function() return 2 end }
 Polestar.UI = Polestar.UI or {}; Polestar.UI.PlainGoalText = function(g) return g.text end''')
 pasos = list(M.Pasos(M.Estado(), G.MambaPlanPJ.respuestas).values())
-check(pasos[0].tipo == "Ahora" and pasos[0].titulo == "Entrega 2 misiones en Orgrimmar  →  Vuela a Molino Tarren",
+check(pasos[0].tipo == "Ahora" and pasos[0].titulo == "Entrega 2 misiones en Orgrimmar  ›  Vuela a Molino Tarren",
       "Ahora: el próximo paso de la guía, sin lo ya hecho: %s" % pasos[0].titulo)
 check("Mulgore 1-12 · paso 1 de 2" in pasos[0].detalle, "guía y número de paso")
 check(any(p.clave == "meta:entrenar40" or p.clave == "meta:montura40" for p in pasos), "al 39: entrenar y montura del 40 en Ahora")

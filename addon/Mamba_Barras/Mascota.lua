@@ -58,7 +58,7 @@ end
 function M.CrearMascota()
 	local h = CreateFrame("Frame", "MambaBarraMascota", UIParent, "SecureHandlerStateTemplate")
 	h.def = def
-	h:SetFrameStrata("LOW")
+	h:SetFrameStrata("MEDIUM")
 	h:SetMovable(true)
 	h:SetClampedToScreen(true)
 	h.botones = {}

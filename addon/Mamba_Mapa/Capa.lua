@@ -178,9 +178,24 @@ local function coords(mapa, unidad)
 	end
 end
 
+-- ¿Otro ya muestra coordenadas en el minimapa? (las de Polestar, maps.minimapCoords; Leatrix_Plus; MapUtils)
+-- Entonces Mamba no dibuja las suyas: se veían dos encimadas (captura de Cristian, 18-11).
+function M.OtrasCoords()
+	local p = _G.PolestarMinimapCoords
+	if p and p.IsShown and p:IsShown() then return "Polestar" end
+	local C = C_AddOns
+	if C and C.IsAddOnLoaded then
+		for _, n in ipairs({ "Leatrix_Plus", "MapUtils" }) do
+			if C.IsAddOnLoaded(n) then return n end
+		end
+	end
+end
+
+function M.TextoMini() return textoMini end
+
 function M.ActualizarCoords()
 	local d = db()
-	if Minimap and d.coords then
+	if Minimap and d.coords and not M.OtrasCoords() then
 		if not textoMini then
 			textoMini = M.Piezas.Texto(Minimap, "small", "text")
 			textoMini:SetPoint("TOP", Minimap, "BOTTOM", 0, -4)

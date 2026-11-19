@@ -35,8 +35,14 @@ corre mapa       python -I $P/test_mapa.py
 corre profesiones python -I $P/test_profesiones.py
 [ -f $P/test_combate.py ] && corre combate python -I $P/test_combate.py
 [ -f $P/test_raros.py ] && corre raros python -I $P/test_raros.py
-[ -f tests/mamba-panel.test.js ] && corre panel env LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-panel.test.js
-corre estetica   env LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test tests/mamba-estetica.test.js
+# todas las pruebas Node de Mamba (panel, estética, misiones, reemplazos y las que se sumen)
+for t in tests/mamba-*.test.js; do
+	n=$(basename "$t" .test.js)
+	corre "${n#mamba-}" env LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test "$t"
+done
+# las de Polestar que tocan los parches de Mamba (P13 Calabozos)
+for t in tests/dungeons*.test.js; do [ -f "$t" ] && corre "polestar-$(basename "$t" .test.js)" env LUA=lupa51 node --require ./tools/asistente/lua51/shim.js --test "$t"; done
+corre glifos     python -I $P/test_glifos.py addon
 echo "== 3. sintaxis de cada .lua (Lua 5.1)"
 corre sintaxis   python -I tools/asistente/sintaxis_lua.py addon
 echo "== 5. parches.py"

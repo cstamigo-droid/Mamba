@@ -21,5 +21,7 @@ Disparo.lua
 Amenaza.lua
 Avisos.lua
 Medidor.lua
+Ranking.lua
+Cercanos.lua
 DosBuilds.lua
 Seccion.lua

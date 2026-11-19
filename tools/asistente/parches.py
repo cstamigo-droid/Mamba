@@ -94,6 +94,9 @@ PARCHES = [
     ('P11-otra-pestana', 'Polestar/UI/Picker.lua',
      '\tif not (E and id) then return end\n\tif inNewTab and E.OpenTab then\n',
      '\tif not (E and id) then return end\n\t-- Mamba (PARCHES.md P11): another kind of guide (cooking, a dungeon...) never replaces the leveling guide: it opens\n\t-- in a new tab.\n\tif not inNewTab and E.OpenTab and E.GetGuide then\n\t\tlocal cur, new = E.GetGuide(), ns.Guides and ns.Guides.Get and ns.Guides.Get(id)\n\t\tif cur and new and (cur.category or "Leveling") == "Leveling" and (new.category or "Leveling") ~= "Leveling" then inNewTab = true end\n\tend\n\tif inNewTab and E.OpenTab then\n'),
+    ('P12-pie', 'Polestar/Theme/Widgets.lua',
+     '\t\tplace(bottom[k], i, y, true)\n\t\ty = y + RAIL_ROW\n',
+     '\t\tplace(bottom[k], i, y, true)\n\t\tlocal pb = f.railButtons[i] -- Mamba (P12-riel): el pie siempre a tamaño completo, con su nombre\n\t\tpb:SetHeight(RAIL_ROW); pb.Label:SetShown(true); pb.Icon:ClearAllPoints(); pb.Icon:SetPoint("TOP", pb, "TOP", 0, -10)\n\t\ty = y + RAIL_ROW\n'),
     # P12: la ventana de Mamba (riel que se achica, encabezado Mamba, cuadro del objeto con lista, título por sección).
     ('P12-cuadro', 'Polestar/Theme/Widgets.lua',
      '\tif extra then extra(tip) end\n\ttip:Show()',
@@ -107,6 +110,14 @@ PARCHES = [
     ('P12-titulo', 'Polestar/UI/Picker.lua',
      '\tW.ShellTabs(win, nil)\n\ts.render()',
      '\tW.ShellTabs(win, nil)\n\t-- Mamba: el título de la sección por defecto (su nombre); antes quedaba el de la sección anterior si la\n\t-- nueva no ponía el suyo ("Mejorar mi equipo" en Mi plan).\n\tW.ShellTitle(win, s.label or s.key, "")\n\ts.render()'),
+    # P13 (K100, Mamba_Panel/Misiones.lua): Calabozos › Misiones con lo que falta y «Guíame».
+    ('P13-misiones', 'Polestar/UI/Dungeons.lua',
+     '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\tb:Show()\nend',
+     '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\t-- Mamba (PARCHES.md P13): K100, what is still to do and «Guíame» (Mamba_Panel/Misiones.lua).\n\tif UI.MambaMision then pcall(UI.MambaMision, b, q, key, state, target, tlabel, fin) end\n\tb:Show()\nend'),
+    # P14 (Mamba_Panel, prueba de la coordinadora 18-11): la facción de una misión de mazmorra desde el Codex.
+    ('P14-faccion', 'Polestar/Dungeons/Dungeons.lua',
+     '\tp.attunement = p.attunement or {}\n\tlocalisePage(p)\n\topenKey, openPage = key, p\n\treturn p\nend',
+     '\tp.attunement = p.attunement or {}\n\t-- Mamba (PARCHES.md P14): a quest the page gives no side takes the Codex\'s (Raleigh\'s "In the Name of the\n\t-- Light" is Alliance), so the faction filter leaves it out for the Horde, its chains too.\n\tlocal Cx = ns.Codex\n\tif Cx and Cx.Quest then\n\t\tfor _, list in ipairs({ p.quests, p.chain }) do\n\t\t\tfor _, q in pairs(list) do\n\t\t\t\tif type(q) == "table" and q.faction == nil and q.id then\n\t\t\t\t\tlocal ok, r = pcall(Cx.Quest, q.id)\n\t\t\t\t\tif ok and type(r) == "table" and (r.faction == "A" or r.faction == "H") then q.faction = r.faction end\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\tend\n\tlocalisePage(p)\n\topenKey, openPage = key, p\n\treturn p\nend'),
 ]
 
 # Parches al código de forge (la herramienta de Polestar que construye los datos), relativos a la raíz.

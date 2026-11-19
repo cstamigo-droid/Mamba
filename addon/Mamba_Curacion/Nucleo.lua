@@ -38,7 +38,7 @@ M.LIMPIA = {
 	PALADIN = { Magic = true, Poison = true, Disease = true }, MAGE = { Curse = true },
 }
 
-M.DEFECTO = { mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
+M.DEFECTO = { mover = false, mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
 
 function M.DB()
 	MambaCuraDB = MambaCuraDB or {}
@@ -49,9 +49,14 @@ function M.DB()
 	return d
 end
 
+-- Cada lugar avisa UNA vez por sesión (las de OnUpdate se repetirían 4 veces por segundo); el resto solo se cuenta.
+local yaAviso = {}
 function M.Falla(donde, err)
 	local d = M.DB().diag
 	d.fallas = d.fallas or {}
+	d.repetidas = d.repetidas or {}
+	if yaAviso[donde] then d.repetidas[donde] = (d.repetidas[donde] or 0) + 1; return end
+	yaAviso[donde] = true
 	if #d.fallas < 30 then d.fallas[#d.fallas + 1] = (date and date("%d-%m %H:%M") or "") .. " " .. donde .. ": " .. tostring(err) end
 	if geterrorhandler then geterrorhandler()(err) end
 end

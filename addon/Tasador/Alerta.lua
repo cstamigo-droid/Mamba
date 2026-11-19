@@ -12,6 +12,29 @@ local ESPERA_PANTALLA = 3  -- límite GLOBAL de avisos grandes en pantalla: uno 
 local ultimoAviso = nil
 local cuentaVistos, TOPE_VISTOS = 0, 500
 
+-- API para la ventana «Enemigos cerca» de Mamba_Combate (K105): ella NO detecta, escucha a esta alerta.
+--   MambaAPI.AlVerEnemigo(fn)       fn({ nombre, nivel, clase, claseToken, gremio, momento }) con CADA vista
+--                                   (antes del freno de 60 s, para saber la última vez que se vio a cada uno)
+--   MambaAPI.SilenciarCercanos(si)  sin cartel en pantalla, sin sonido y sin chat; la lista se sigue llenando
+--   MambaAPI.CercanosSilenciados()  -> true | false
+local oyentes = {}
+local API = {}
+function API.AlVerEnemigo(fn) if type(fn) == "function" then oyentes[#oyentes + 1] = fn end end
+function API.SilenciarCercanos(si)
+	if not T.db then return end
+	T.db.ajustes = T.db.ajustes or {}
+	T.db.ajustes.alertaSilencio = si and true or nil
+end
+function API.CercanosSilenciados() return T.db and T.db.ajustes and T.db.ajustes.alertaSilencio == true or false end
+-- MambaAPI la crea Asistente/Grupos.lua (OptionalDeps: carga antes): aquí solo se le cuelgan las funciones,
+-- ahora y otra vez al entrar al juego. Sin Asistente no hay API (la alerta sigue igual).
+local function colgarAPI()
+	local api = _G.MambaAPI
+	if type(api) ~= "table" then return end
+	for k, fn in pairs(API) do api[k] = fn end
+end
+colgarAPI()
+
 local function Activa()
 	if T.db and T.db.ajustes and T.db.ajustes.alerta == false then return false end
 	local dentro = IsInInstance and T.Leer(IsInInstance())
@@ -49,6 +72,14 @@ local function Revisar(unidad)
 	local nombre = Pedir(UnitName, unidad)
 	if type(nombre) ~= "string" or nombre == "" then return end
 	local ahora = Numero(GetTime and GetTime()) or 0
+	if #oyentes > 0 then
+		local claseL, claseT = Pedir(UnitClass, unidad)
+		local gremio = GetGuildInfo and Pedir(GetGuildInfo, unidad)
+		local info = { nombre = nombre, nivel = Numero(Pedir(UnitLevel, unidad)), clase = type(claseL) == "string" and claseL or nil,
+			claseToken = type(claseT) == "string" and claseT or nil, gremio = type(gremio) == "string" and gremio or nil, momento = ahora }
+		for _, fn in ipairs(oyentes) do pcall(fn, info) end
+	end
+	if API.CercanosSilenciados() then return end
 	if vistos[nombre] and ahora - vistos[nombre] < ESPERA then return end
 	if not vistos[nombre] then
 		cuentaVistos = cuentaVistos + 1
@@ -84,7 +115,9 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 f:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 f:RegisterEvent("PLAYER_TARGET_CHANGED")
+f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(_, evento, unidad)
+	if evento == "PLAYER_LOGIN" then colgarAPI(); return end
 	if evento == "UPDATE_MOUSEOVER_UNIT" then unidad = "mouseover"
 	elseif evento == "PLAYER_TARGET_CHANGED" then unidad = "target" end
 	local ok, err = pcall(Revisar, unidad)

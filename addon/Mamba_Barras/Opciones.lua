@@ -38,10 +38,18 @@ local function filas(id, padre, ancho)
 	local function cambia(campo) return function(v) c()[campo] = v; aplicar(id) end end
 	local function lee(campo) return function() return c()[campo] end end
 
+	-- K99: "las casillas son muy grandes": un tamaño y una separación para TODAS las barras de una vez.
+	agregar(P.Deslizador(padre, "Tamaño de todas las barras", "Cambia el tamaño de las casillas de todas las barras a la vez.",
+		30, 150, 5, "%d %%",
+		function() return math.floor((M.PJ().escalaTodas or c().escala or 1) * 100 + 0.5) end,
+		function(v) M.TamanoTodas(v / 100) end))
+	agregar(P.Deslizador(padre, "Separación de todas", nil, 0, 20, 1, "%d",
+		function() return M.PJ().separacionTodas or c().separacion or 2 end,
+		function(v) M.SeparacionTodas(v) end))
 	agregar(P.Interruptor(padre, "Mostrar", nil, lee("mostrar"), cambia("mostrar")))
 	agregar(P.Deslizador(padre, "Botones", nil, 1, max, 1, "%d", lee("botones"), cambia("botones")))
 	agregar(P.Deslizador(padre, "Filas", nil, 1, max, 1, "%d", lee("filas"), cambia("filas")))
-	agregar(P.Deslizador(padre, "Tamaño", nil, 50, 150, 5, "%d %%",
+	agregar(P.Deslizador(padre, "Tamaño", nil, 30, 150, 5, "%d %%",
 		function() return math.floor((c().escala or 1) * 100 + 0.5) end,
 		-- el lugar se guarda en unidades de pantalla: la esquina de la barra no se mueve al cambiar el tamaño
 		function(v) c().escala = v / 100; aplicar(id) end))

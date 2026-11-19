@@ -61,12 +61,12 @@ test('K56: las líneas de Mi plan entran al panel de la guía, en su flujo, orde
 	assert.equal(out.padre, true, 'Polestar la apila en su flujo (parche P9)');
 	assert.equal(out.rotulo, 'Mamba · tu plan');
 	assert.ok(!out.claves.includes('guia'), 'el paso de la guía no se repite: la guía ya es el panel');
-	assert.equal(out.claves[0], 'montura40', 'la montura (★★★, a 2 min + viaje) va primero');
+	assert.equal(out.claves[0], 'montura40', 'la montura (gran mejora, a 2 min + viaje) va primero');
 	assert.ok(out.claves.indexOf('mazmorra:zf') > out.claves.indexOf('llenas'), 'la mazmorra (en grupo, ≈100 min) va después de vender');
 	assert.ok(out.claves.includes('llenas'), 'bolsas casi llenas: vender o guardar');
 	assert.equal(out.textos.length, 4, 'cuatro a la vista; el resto en Mi plan');
 	assert.equal(out.botones[0], 'Llévame', 'la línea con lugar trae Llévame');
-	assert.match(out.subs[0], /★★★ · ≈\d+ min · solo · Equitación/, 'la puntuación y el cómo, debajo');
+	assert.match(out.subs[0], /gran mejora · ≈\d+ min · solo · Equitación/, 'la puntuación y el cómo, debajo');
 });
 
 test('K61: Llévame pone la flecha de Polestar; la línea de profesión abre su guía', () => {
@@ -259,4 +259,165 @@ test('profesiones: MambaProfesiones.Recomendaciones entra con su cómo, su Llév
 	assert.equal(out.guia, 'forever/professions/cooking');
 	assert.equal(out.txt, 'Llévame');
 	assert.equal(out.llevo, true, 'Llévame usa el de Profesiones (flecha al farmeo y medición)');
+});
+
+// K103: avisos de oportunidad
+const AVISOS = `
+C_Map = C_Map or {}
+C_Map.GetBestMapForUnit = function() return 1412 end
+GetRealZoneText = function() return "Mulgore" end
+MambaAPI = MambaAPI or {}
+local publicado
+MambaAPI.PonerEnSubasta = function(id, precio) publicado = { id, precio }; return true end
+function PUBLICADO() return publicado end
+MambaAPI.Bolsas = function() return {
+	{ id = 4306, link = "|cffffffff|Hitem:4306::::::::|h[Paño de seda]|h|r", cantidad = 20, sug = "subastar", precio = 900, motivo = "Hoy se paga bien" },
+	{ id = 2589, link = "|cffffffff|Hitem:2589::::::::|h[Paño de lino]|h|r", cantidad = 5, sug = "subastar", precio = 40 },
+	{ id = 4865, link = "|cff9d9d9d|Hitem:4865::::::::|h[Garra rota]|h|r", cantidad = 3, sug = "basura", vendedor = 5 },
+	{ id = 2770, cantidad = 10, sug = "guardar", vendedor = 1 },
+} end
+`;
+
+test('K103: avisos de lugar, subasta (con Publicar), espacio y botín; cada tipo se silencia', () => {
+	const [out] = run(`${AVISOS}
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local mont
+		for _, l in ipairs(N.lineas) do if l.clave == "montura40" then mont = l end end
+		local lugar = mont.titulo
+		-- en la subasta
+		stub.fire("AUCTION_HOUSE_SHOW")
+		local sub, esp
+		for _, l in ipairs(N.lineas) do
+			if l.aviso == "subasta" and not sub then sub = l end
+			if l.aviso == "espacio" then esp = l end
+		end
+		local txt, fn = N.Accion(sub)
+		fn()
+		local nSub = 0
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then nSub = nSub + 1 end end
+		local hayLlenas = false
+		for _, l in ipairs(N.lineas) do if l.clave == "llenas" then hayLlenas = true end end
+		-- botín: un material que vale 1 o en la subasta
+		MambaAPI.PrecioObjeto = function(id) return 10000, "subasta" end
+		GetNumLootItems = function() return 1 end
+		GetLootSlotLink = function() return "|cffffffff|Hitem:3667::::::::|h[Carne de kodo]|h|r" end
+		UnitExists = function() return true end
+		UnitIsDead = function() return true end
+		UnitName = function(u) if u == "target" then return "Kodo de las llanuras" end return "Hope" end
+		UnitGUID = function(u) if u == "target" then return "Creature-0-1-2-3-4-5" end end
+		GetLootSourceInfo = function() return "Creature-0-1-2-3-4-5", 1 end
+		stub.fire("LOOT_READY")
+		N.Refrescar(true)
+		local bot
+		for _, l in ipairs(N.lineas) do if l.aviso == "botin" then bot = l end end
+		-- silenciar "subasta" y "lugar"
+		N.Silenciar("subasta"); N.Silenciar("lugar"); N.Refrescar(true)
+		local quedan = 0
+		local mont2
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then quedan = quedan + 1 end; if l.clave == "montura40" then mont2 = l end end
+		-- y se vuelve a encender
+		N.Silenciar("subasta", false); N.Refrescar(true)
+		local vuelven = 0
+		for _, l in ipairs(N.lineas) do if l.aviso == "subasta" then vuelven = vuelven + 1 end end
+		-- un botín que no es del objetivo no nombra al bicho
+		GetLootSourceInfo = function() return "Creature-otro", 1 end
+		N.botin = {}; stub.fire("LOOT_READY"); N.Refrescar(true)
+		local otro
+		for _, l in ipairs(N.lineas) do if l.aviso == "botin" then otro = l.titulo end end
+		emit({ vuelven = vuelven, otro = otro, lugar = lugar, sub = sub.titulo, txt = txt, pub = PUBLICADO(), nSub = nSub, esp = esp and esp.titulo, llenas = hayLlenas,
+			bot = bot and bot.titulo, quedan = quedan, mont2 = mont2.titulo, fallas = MambaPanelPJ.diag.fallas and #MambaPanelPJ.diag.fallas or 0 })`);
+	assert.match(out.lugar, /^Ya que estás en Mulgore: Montura al 40/, 'la línea con lugar en tu mapa se vuelve aviso');
+	assert.equal(out.sub, 'Ya que estás en la subasta: vende Paño de seda a 9 p', 'lo que más deja primero');
+	assert.equal(out.txt, 'Publicar');
+	assert.deepEqual(out.pub, [4306, 900], 'deja la subasta lista con su precio');
+	assert.equal(out.nSub, 2, 'a lo sumo dos avisos de subasta');
+	assert.equal(out.esp, 'Vende Garra rota (15 c) para hacer espacio', 'con las bolsas llenas dice QUÉ vender (lo que menos vale)');
+	assert.equal(out.llenas, false, 'el aviso de espacio reemplaza la línea genérica');
+	assert.equal(out.bot, 'Kodo de las llanuras da Carne de kodo: se vende a 1 o en la subasta');
+	assert.equal(out.quedan, 0, 'silenciado por tipo');
+	assert.equal(out.vuelven, 2, 'y se vuelve a encender');
+	assert.match(out.otro, /^Lo que matas aquí da Carne de kodo/, 'si el botín no es del objetivo, no se nombra al bicho');
+	assert.match(out.mont2, /^Montura al 40/, 'sin el aviso de lugar, la línea vuelve a la normal');
+	assert.equal(out.fallas, 0);
+});
+
+test('K103 control negativo: sin datos del Tasador ni subasta abierta, no hay avisos inventados', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local n = 0
+		for _, l in ipairs(N.lineas) do if l.aviso and l.aviso ~= "lugar" then n = n + 1 end end
+		emit({ n = n })`);
+	assert.equal(out.n, 0);
+});
+
+test('K108: el botón «Servicios de la ciudad» aparece solo si la ventana expone MambaAPI.AbrirServicios', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local _, cab = N._Piezas()
+		local antes = cab.Serv:IsShown()
+		local abierto
+		MambaAPI = MambaAPI or {}
+		MambaAPI.AbrirServicios = function() abierto = true end
+		N.Refrescar(true)
+		stub.RunScript(cab.Serv, "OnClick", "LeftButton")
+		emit({ antes = antes, despues = cab.Serv:IsShown(), abierto = abierto, texto = cab.Serv.Label:GetText() })`);
+	assert.equal(out.antes, false);
+	assert.equal(out.despues, true);
+	assert.equal(out.abierto, true);
+	assert.equal(out.texto, 'Servicios de la ciudad');
+});
+
+test('botones: miden su texto (nunca "Llévam"); en un panel angosto bajan a su propia línea', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local function medir(ancho)
+			N.LayoutLineas(GF, GF.parts.body, ancho, true, 14, 39, 24, 30)
+			local _, _, filas = N._Piezas()
+			local r = filas[1]
+			local lw, sw = r.Ir.Label:GetWidth(), r.Ir.Label:GetStringWidth()
+			local p = { r.Ir:GetPoint(1) }
+			return { texto = r.Ir.Label:GetText(), cabe = lw >= sw, abajo = r.psAbajo and true or false, ancla = p[1] }
+		end
+		emit({ ancho = medir(420), angosto = medir(230) })`);
+	assert.equal(out.ancho.texto, 'Llévame');
+	assert.equal(out.ancho.cabe, true, 'el texto entra entero');
+	assert.equal(out.ancho.abajo, false);
+	assert.equal(out.ancho.ancla, 'TOPRIGHT');
+	assert.equal(out.angosto.cabe, true);
+	assert.equal(out.angosto.abajo, true, 'en un panel angosto el botón baja');
+	assert.equal(out.angosto.ancla, 'TOPLEFT');
+});
+
+test('alto de las filas: con una medida vieja de una línea (como en el juego), las filas no se montan', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local _, _, filas = N._Piezas()
+		-- la medida vieja del cliente: una sola línea aunque el texto se parta
+		for _, r in ipairs(filas) do
+			r.Text.GetStringHeight = function(self) return self:GetLineHeight() end
+			r.Sub.GetStringHeight = function(self) return self:GetLineHeight() end
+		end
+		local cont = N.LayoutLineas(GF, GF.parts.body, 300, true, 14, 39, 24, 30)
+		local res, suma = {}, 30 + 6
+		for i, r in ipairs(filas) do
+			if r:IsShown() then
+				local _, _, _, _, y = r:GetPoint(1)
+				local unidades = math.ceil(r.Sub:GetUnboundedStringWidth() * 1.1 / r.Sub:GetWidth())
+				res[#res + 1] = { y = y, h = r:GetHeight(), sub = r.Sub:GetHeight(), lineas = math.min(2, unidades), lh = r.Sub:GetLineHeight() }
+				suma = suma + r:GetHeight()
+			end
+		end
+		emit({ filas = res, alto = cont:GetHeight(), suma = suma })`);
+	const f = out.filas;
+	assert.ok(f.length >= 2);
+	for (let i = 0; i < f.length; i++) {
+		assert.ok(f[i].sub >= f[i].lineas * f[i].lh, `fila ${i + 1}: el cómo tiene alto para sus ${f[i].lineas} líneas`);
+		if (i + 1 < f.length) assert.ok(f[i].y - f[i].h >= f[i + 1].y - 0.01, `fila ${i + 1} no pisa a la siguiente`);
+	}
+	assert.ok(out.alto >= out.suma - 0.01, 'la parte de Mamba mide lo que miden sus filas: no pisa lo de Polestar de abajo');
 });

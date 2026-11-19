@@ -60,16 +60,34 @@ end
 
 ---------------------------------------------------------------- el cartel
 local cartel
+function Av.CrearCartel()
+	if cartel then return end
+	cartel = CreateFrame("Frame", "MambaAviso", UIParent)
+	cartel:SetSize(420, 30)
+	cartel:SetPoint("TOP", UIParent, "TOP", 0, -180)
+	cartel:Hide()
+	M.Movible(cartel, "MambaAviso", "Avisos en pantalla")
+	cartel.texto = M.Piezas.Texto(cartel, "heading", "text")
+	cartel.texto:SetAllPoints(cartel)
+end
+M.Precrear(function() Av.CrearCartel() end)
+M.AlModoMover(function(activo)
+	Av.CrearCartel()
+	if activo then
+		if not cartel:IsShown() then
+			cartel.ejemplo = true
+			cartel.hasta = nil -- no se apaga solo mientras se mueve
+			cartel.texto:SetText(M.Piezas.Color("titulo", "Avisos en pantalla (ejemplo)"))
+			cartel:Show()
+		end
+	elseif cartel.ejemplo then
+		cartel.ejemplo = nil
+		cartel:Hide()
+	end
+end)
 local function mostrar(texto, rojo, control)
 	if not M.DB().avisos then return end
-	if not cartel then
-		cartel = CreateFrame("Frame", "MambaAviso", UIParent)
-		cartel:SetSize(420, 30)
-		cartel:SetPoint("TOP", UIParent, "TOP", 0, -180)
-		M.Movible(cartel, "MambaAviso")
-		cartel.texto = M.Piezas.Texto(cartel, "heading", "text")
-		cartel.texto:SetAllPoints(cartel)
-	end
+	if not cartel then Av.CrearCartel() end
 	cartel.texto:SetText(M.Piezas.Color(rojo and "dudoso" or "titulo", texto))
 	cartel.hasta = (GetTime and GetTime() or 0) + 3
 	cartel:Show()

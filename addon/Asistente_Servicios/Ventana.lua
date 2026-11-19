@@ -141,6 +141,10 @@ function S.Abrir(uiMap)
 	S.ciudadActual = uiMap or S.ciudadActual
 	local c = S.datos and S.datos.ciudades and S.datos.ciudades[S.ciudadActual]
 	if not c then
+		-- fuera de una ciudad: la más cercana con lista (MambaAPI.CiudadMasCercana, K108)
+		local api = _G.MambaAPI
+		local otra = api and api.CiudadMasCercana and api.CiudadMasCercana()
+		if otra and otra ~= S.ciudadActual and S.datos.ciudades[otra] then return S.Abrir(otra) end
 		A.Decir("Aquí no hay lista de servicios. Por ahora: Orgrimmar, Cima del Trueno y Entrañas.")
 		return false
 	end

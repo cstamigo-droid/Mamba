@@ -61,6 +61,9 @@ mt.SetValue = function(self, v) self.valor = v end
 mt.SetCooldown = function(self, a, b) self.cd = { a, b } end
 mt.SetHideCountdownNumbers = function() end
 mt.SetBindingClick = function() end
+mt.EnableMouse = function(self, v) self.raton = v end
+mt.RegisterForClicks = function(self, v) self.clics = v end
+MambaAPI = { Movible = function(f, n, asa) f.raton = true; if asa then asa.raton = true end end }
 '''
 
 
@@ -162,5 +165,35 @@ m = G.MambaInterfaz.modulos["curacion"]
 m.dibujar(padre, 620, 480)
 m.elegir("clics"); m.refrescar()
 check(len(list(G.ERRORES.values())) == 0, "paneles de Curación sin errores: %s" % list(G.ERRORES.values())[:3])
+# ---------- GATE 18-11: el ancla no se come los clics; se mueve con un asa fuera de combate
+check(G.MambaCuraAncla.raton is False, "el ancla de los marcos no recibe el ratón")
+asa = Cu.Asa()
+check(asa is not None and not asa.visible, "el asa está escondida por defecto")
+Cu.DB().mover = True; G.COMBATE = False; Cu.MostrarAsa()
+check(asa.visible, "Mover marcos: el asa se ve fuera de combate")
+G.COMBATE = False; L.execute('Fire("PLAYER_REGEN_DISABLED")'); G.COMBATE = True  # en el evento, InCombatLockdown() todavía da false
+check(not asa.visible, "en combate el asa se esconde")
+b2 = L.eval('CreateFrame("Button", "MambaCuraCabeceraUnitButton2", MambaCuraCabecera, "SecureActionButtonTemplate")')
+b2.attr["unit"] = "party2"
+cab.scripts["OnAttributeChanged"](cab, "child2", b2)
+check(b2.clics is None, "botón creado en combate: no toca RegisterForClicks")
+G.COMBATE = False; L.execute('Fire("PLAYER_REGEN_ENABLED")')
+check(b2.clics == "AnyUp" and asa.visible, "al salir de combate: todos los clics y el asa de vuelta")
+check(L.eval("MambaCuracion.BotonDe('party1') == MambaCuraCabeceraUnitButton1 and MambaCuracion.BotonDe('party2') == MambaCuraCabeceraUnitButton2"), "tabla unidad -> botón")
+b.vida.valor = None
+L.execute('Fire("UNIT_HEALTH", "party1")')
+check(b.vida.valor == 800, "UNIT_HEALTH de party1 repinta su botón")
+L.execute('ERRORES = {}')
+for _ in range(5): Cu.Falla("alcance", "x")
+check(len(list(G.ERRORES.values())) == 1 and Cu.DB().diag.repetidas["alcance"] == 4, "una falla repetida avisa una sola vez")
+# K55 ampliado: el modo «Mover elementos» de Mamba muestra el asa
+L = nuevo(); G = L.globals()
+L.execute('MambaAPI.AlModoMover = function(fn) MODO_MOVER = fn end')
+L.execute('Fire("PLAYER_LOGIN")')
+asa2 = L.eval("MambaCuracion.Asa()")
+check(G.MODO_MOVER is not None, "Curación se engancha al modo Mover de Mamba")
+if G.MODO_MOVER is not None and asa2 is not None:
+    G.MODO_MOVER(True); check(asa2.visible, "modo Mover: el asa se ve")
+    G.MODO_MOVER(False); check(not asa2.visible, "al salir del modo Mover: el asa se esconde")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
