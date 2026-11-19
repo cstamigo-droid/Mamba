@@ -80,13 +80,13 @@ end
 function M.Estado()
 	local e = {}
 	e.nombre = UnitName("player")
-	e.nivel = UnitLevel("player") or 1
+	-- nivel, oro y exp pueden venir secretos en Forever (K110): `secreto or 0` da error; se leen como "no sé"
+	local function legible(v) if issecretvalue and issecretvalue(v) then return nil end return v end
+	e.nivel = legible(UnitLevel("player")) or 1
 	e.claseNombre, e.clase = UnitClass("player")
 	e.razaNombre, e.raza = UnitRace("player")
 	e.bando = UnitFactionGroup and UnitFactionGroup("player") or "Horde"
-	e.oro = GetMoney and GetMoney() or 0
-	-- la exp puede venir secreta en Forever (K110): `secreto or 0` da error; se lee como "no sé"
-	local function legible(v) if issecretvalue and issecretvalue(v) then return nil end return v end
+	e.oro = legible(GetMoney and GetMoney()) or 0
 	e.xp, e.xpMax = legible(UnitXP and UnitXP("player")) or 0, legible(UnitXPMax and UnitXPMax("player")) or 1
 	e.profesiones = profesiones()
 	e.bolsas = bolsas()
