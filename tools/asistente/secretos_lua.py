@@ -33,8 +33,12 @@ API = [
     "C_UnitAuras.GetAuraDataByIndex", "C_UnitAuras.GetAuraDataBySlot", "C_UnitAuras.GetPlayerAuraBySpellID",
     "C_UnitAuras.GetAuraDataByAuraInstanceID", "C_UnitAuras.GetBuffDataByIndex", "C_UnitAuras.GetDebuffDataByIndex",
     "AuraUtil.FindAuraByName", "UnitGUID", "UnitName", "UnitLevel",
+    # sumadas el 19-11 (lista de local_e9f19608, modelo Midnight; NO VERIFICADO cuáles salen secretas en Forever)
+    "UnitCanAttack", "UnitIsPlayer", "UnitIsUnit", "UnitAffectingCombat", "UnitIsFriend", "UnitIsEnemy",
+    "UnitIsTapDenied", "UnitIsConnected", "UnitClass", "UnitClassification", "UnitReaction", "GetRaidTargetIndex",
+    "C_UnitAuras.GetAuraDataBySpellName", "C_Spell.IsSpellUsable", "GetComboPoints",
 ]
-SOLO_OTRAS = {"UnitName", "UnitLevel", "UnitGUID"}  # con "player" no se marcan
+SOLO_OTRAS = {"UnitName", "UnitLevel", "UnitGUID", "UnitAffectingCombat", "UnitClass"}  # con "player" no se marcan
 CARPETAS = re.compile(r"^(Asistente.*|Mamba_.*|Medidor|Tasador)$")
 OPS_DESPUES = re.compile(r"^\s*(and\b|or\b|then\b|do\b|==|~=|<=|>=|<|>|\+|-(?!-)|\*|/|%|\^)")
 # antes de la llamada: `x and API()` / `x or API()` NO prueban el resultado (lo devuelven tal cual), salvo que
@@ -171,7 +175,8 @@ def probar():
         "not": "if not UnitIsDeadOrGhost(u) then x() end",
         "variable": 'local nombre, _, _, _, _, _, _, noInt = UnitCastingInfo(u)\nif noInt then x() end',
         "nombre de otro": "if UnitName(u) == objetivo then x() end",
-        "dentro de un if con and": 'if guid and UnitIsDead("target") then x() end',
+        "sí/no de unidad ajena (K110)": 'if UnitIsPlayer(u) and UnitCanAttack("player", u) then x() end',
+        "dentro de un if con and":'if guid and UnitIsDead("target") then x() end',
         "guarda y or": 'local xp = UnitXP and UnitXP("player") or 0',
     }
     buenos = {
