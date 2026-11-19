@@ -26,7 +26,7 @@ G.CDS = {
 	[633] = { 3600, "defensa" }, [498] = { 300, "defensa" }, [20066] = { 60, "control" },
 	-- cazador
 	[1499] = { 15, "control" }, [19503] = { 30, "control" }, [19386] = { 120, "control" }, [19263] = { 300, "defensa" },
-	[5384] = { 30, "defensa" }, [19577] = { 60, "control" }, [19574] = { 120, "daño" }, [781] = { 5, "escape" },
+	[5384] = { 30, "defensa" }, [19577] = { 60, "control" }, [19574] = { 120, "daño" }, [781] = { 5, "amenaza" },
 	[3045] = { 300, "daño" },
 	-- pícaro
 	[408] = { 20, "control" }, [1776] = { 10, "control" }, [2094] = { 300, "control" }, [1766] = { 10, "cortar" },
@@ -85,7 +85,7 @@ G.CLASES = {
 -- Lo tuyo para responder, por tu clase (ids de rango 1; solo se muestra lo que sabes).
 G.MIOS = {
 	DRUID = { interrumpir = { 5211 }, control = { 339, 2637 }, defensa = { 22812, 22842 }, escapar = { 783, 768 } },
-	HUNTER = { interrumpir = { 19503 }, control = { 1499, 5116, 19386 }, defensa = { 19263, 5384 }, escapar = { 781, 5118 } },
+	HUNTER = { interrumpir = { 19503 }, control = { 1499, 5116, 19386 }, defensa = { 19263, 5384 }, escapar = { 2974, 5116, 19503 } }, -- Desconexión no te mueve en Classic; el guepardo te aturde si te pegan
 	WARRIOR = { interrumpir = { 6552, 72 }, control = { 5246, 1715, 12809 }, defensa = { 871, 20230 }, escapar = { 18499, 20252 } },
 	ROGUE = { interrumpir = { 1766 }, control = { 408, 1833, 1776, 2094 }, defensa = { 5277 }, escapar = { 2983, 1856 } },
 	MAGE = { interrumpir = { 2139 }, control = { 118, 122 }, defensa = { 11958, 11426, 1463 }, escapar = { 1953 } },

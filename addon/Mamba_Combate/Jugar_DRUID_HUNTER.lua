@@ -211,7 +211,7 @@ M.JUGAR.HUNTER = {
 			emergencia = { pasos = {
 				{ h = 5384, cuando = "{5384}", c = { { "vida<", 25 } } },
 				{ h = 19263, cuando = "{19263}", c = { { "vida<", 35 } } },
-				{ h = 5118, cuando = "Huir: {5118}", c = {} },
+				{ h = 2974, cuando = "Huir: {2974} lo frena y te alejas (el guepardo te aturde si te pegan)", c = {} },
 			}, nota = "" },
 		} },
 		{ clave = "punteria", nombre = "Puntería", arbol = 2, rol = "daño", usa = "bestias" },
