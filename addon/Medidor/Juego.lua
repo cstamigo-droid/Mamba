@@ -266,6 +266,7 @@ f:SetScript("OnUpdate", function(_, transcurrido)
 	if not M.listo then return end
 	reloj = reloj + transcurrido
 	if reloj >= 2 then reloj = 0; M.ActualizarClave() end
-	if M.pausa or UnitIsAFK("player") then return end
+	-- UnitIsAFK puede venir secreto en Forever: probarlo directo rompía en cada cuadro (32 mil errores el 19-11)
+	if M.pausa or Legible(UnitIsAFK("player")) then return end
 	M.Sumar("seg", math.min(transcurrido, M.MAX_PASO))
 end)

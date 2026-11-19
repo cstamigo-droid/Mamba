@@ -111,6 +111,10 @@ check(L.eval('MedidorDB.pj["Hope-Reino"].act') == "farmeo" and "desconocida" in 
 L.execute('SlashCmdList.MEDIDOR("pausa"); Tick(100); SlashCmdList.MEDIDOR("pausa"); P.afk = true; Tick(100); P.afk = false; Tick(60)')
 check(abs(L.eval(k2 + '.seg') - 305) < 1e-6, f"pausa/AFK/recorte: {L.eval(k2 + '.seg')}")
 
+# AFK secreto (Forever): no rompe ni corta el reloj; se lee como "no sé" y el tiempo corre (10 s se recortan a 5)
+L.execute('P.afk = SECRETO; Tick(10); P.afk = false')
+check(abs(L.eval(k2 + '.seg') - 310) < 1e-6, f"AFK secreto no detiene el reloj: {L.eval(k2 + '.seg')}")
+
 # Subir de nivel: UnitLevel se atrasa (sigue en 37) pero el evento trae 38: manda el evento
 L.execute('P.xp = 4900; Fire("PLAYER_XP_UPDATE"); P.xp = 100; P.max = 6000; Fire("PLAYER_LEVEL_UP", 38); Fire("PLAYER_XP_UPDATE"); Tick(3)')
 check(L.eval('MedidorDB.pj["Hope-Reino"].cubos["Tierras Inhóspitas|farmeo|38"].xp') == 200, "exp del salto (100 + 100) va al cubo del nivel 38 aunque UnitLevel se atrase")
