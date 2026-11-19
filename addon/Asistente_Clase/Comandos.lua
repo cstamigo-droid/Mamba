@@ -172,6 +172,8 @@ end
 
 -- La ventana de Mamba: M.Salida(fn) manda las líneas a fn (nil: al chat otra vez). M.Datos: las tablas.
 function M.Salida(fn) C.salida = fn end
+-- Las fuentes de los consejos de profesiones (Datos_Profesiones.lua), para las tarjetas de la ventana.
+function M.FuentesProf() return ns.FUENTES_PROF end
 M.C = C
 -- El nombre de la especialización de una build (b.spec es una clave de ns.BUILDS[clase].specs).
 function C.NombreSpec(clase, spec)

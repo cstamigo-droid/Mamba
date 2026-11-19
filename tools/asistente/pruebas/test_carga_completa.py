@@ -14,13 +14,15 @@
 #   - CHOQUES DE COMANDOS: dos claves SLASH_* con el mismo texto, una clave de SlashCmdList escrita por dos addons,
 #     o un comando que pisa uno del juego;
 #   - SECCIONES DEL HUB: claves repetidas en Polestar.UI.RegisterSection y empates de `order` en el riel (aviso).
+#   - RIEL SIN «PRÓXIMAMENTE» (K109): se abre cada sección del riel; ninguna puede mostrar «Próximamente» /
+#     «Coming soon» ni quedar sin un solo texto a la vista (FALLA).
 #
-# Sale con 1 si hay errores de Lua, globales pisadas o choques de comandos.
+# Sale con 1 si hay errores de Lua, globales pisadas, choques de comandos o una sección del riel en «Próximamente» o vacía.
 #
 # Uso (desde el repositorio Mamba):
 #   python -I tools/asistente/pruebas/test_carga_completa.py [carpeta paquete] [--pj REINO/PERSONAJE] [--romper] [--detalle]
 #   --romper: control negativo (agrega un addon falso que pisa SlashCmdList, repite /capa, engancha el cuadro dos
-#             veces y da un error): la prueba TIENE que fallar y nombrarlo.
+#             veces, da un error y suma al riel una sección que dice «Próximamente»): la prueba TIENE que fallar y nombrarlo.
 #   --detalle: además lista las globales con nombre de API que los addons leyeron y no existían en el simulado.
 #
 # Lo que el simulado NO hace (NO VERIFICADO aquí): marcos y plantillas definidos en XML (solo se cargan los
@@ -213,7 +215,8 @@ rawset(M, "GetTexCoord", function() return 0, 0, 0, 1, 1, 0, 1, 1 end)
 rawset(M, "GetVertexColor", function() return 1, 1, 1, 1 end)
 rawset(M, "GetBackdrop", function() return nil end)
 rawset(M, "GetStringWidth", function(self) return #tostring(self.text or "") * 6 end) -- el juego acepta SetText(número)
-rawset(M, "GetUnboundedStringWidth", function(self) return #(self.text or "") * 6 end); falto("FontString:GetUnboundedStringWidth")
+rawset(M, "GetUnboundedStringWidth", function(self) return #tostring(self.text or "") * 6 end); falto("FontString:GetUnboundedStringWidth")
+rawset(M, "GetNumLines", function(self) return 1 end); falto("FontString:GetNumLines (K109: abrir el hub)")
 rawset(M, "GetLineHeight", function() return 14 end)
 rawset(M, "IsTruncated", function() return false end)
 rawset(M, "GetNumRegions", function() return 0 end)
@@ -1240,12 +1243,16 @@ for h in ausentes:
     print(f"  (simulado) hooksecurefunc sobre {h.objetivo} — {h.extra}: {h.donde} [{h.addon}] (NO VERIFICADO)")
 
 # Riel
+# K109: la entrada «Talentos» de Polestar (T.SOON: «Próximamente») la reemplaza a propósito el planificador de Mamba.
+REEMPLAZOS_RIEL = {"Talents": "Asistente"}
 secs = lista(H.secciones)
 por_clave = {}
 for s in secs:
     por_clave.setdefault(str(s.clave), []).append(s)
 avisos_riel = []
 for k, v in por_clave.items():
+    if k in REEMPLAZOS_RIEL and [str(s.addon) for s in v][-1] == REEMPLAZOS_RIEL[k]:
+        continue  # reemplazo a propósito (abajo)
     if len({str(s.addon) for s in v}) > 1:
         avisos_riel.append(f"clave {k} registrada por varios addons: " + " · ".join(f"{s.donde} [{s.addon}]" for s in v))
     elif len(v) > 1:
@@ -1268,6 +1275,60 @@ print("  orden:", " › ".join(f"{k}({o})" + ("·pie" if pie else "") for k, o, 
 for a in avisos_riel:
     print("  -", a)
 
+# K109: ninguna sección visible del riel en «Próximamente» ni vacía. Se abre el hub y cada sección, como un clic.
+if ROMPER:
+    L.execute("""
+    H.actual = "ZZ_Romper"
+    if Polestar and Polestar.UI and Polestar.UI.RegisterSection then
+      Polestar.UI.RegisterSection({ key = "ZZFalsa", label = "Falsa", order = 999,
+        build = function(f) local t = f:CreateFontString(); t:SetText("Próximamente") end, render = function() end })
+    end
+    H.actual = "(prueba)"
+    """)
+L.execute(r"""
+function H.revisarRiel()
+  local out, noAbre, UI = {}, {}, Polestar and Polestar.UI
+  local P = UI and UI.Picker
+  if not (UI and UI.ShowPicker and P and P.Sections and P.ShowSection) then return out, false end
+  local ok, e = pcall(UI.ShowPicker)
+  if not ok then out[#out + 1] = { "(hub)", "no se abre: " .. tostring(e) } return out, true end
+  local function bajo(x, f)
+    local p = x
+    while p do if p == f then return true end p = p.padre end
+    return false
+  end
+  for _, s in ipairs(P.Sections()) do
+    if not s.builtin then
+      local ok2, e2 = pcall(P.ShowSection, s.key)
+      if not ok2 then
+        noAbre[#noAbre + 1] = { s.key, tostring(e2):sub(1, 160) }
+      elseif s.psFrame then
+        local n, malo = 0, nil
+        for _, x in ipairs(TODOS) do
+          local t = type(x.text) == "string" and x.text or nil
+          if t and t:gsub("%s", "") ~= "" and x:IsVisible() and bajo(x, s.psFrame) then
+            n = n + 1
+            if t:find("Próximamente", 1, true) or t:find("Coming soon", 1, true) then malo = t end
+          end
+        end
+        if malo then out[#out + 1] = { s.key, "muestra «" .. malo:sub(1, 60) .. "»" }
+        elseif n == 0 then out[#out + 1] = { s.key, "vacía: ningún texto a la vista" } end
+      end
+    end
+  end
+  H.rielNoAbre = noAbre
+  return out, true
+end
+""")
+riel_malas, riel_revisado = L.eval("function() local o, r = H.revisarRiel(); return o, r end")()
+riel_no_abre = [(str(x[1]), str(x[2])) for x in lista(H.rielNoAbre)] if H.rielNoAbre else []
+riel_malas = [(str(x[1]), str(x[2])) for x in lista(riel_malas)] if riel_malas else []
+print(f"\n== RIEL SIN «PRÓXIMAMENTE» NI VACÍAS (K109): {'revisado' if riel_revisado else 'NO REVISADO (sin el hub real)'} · fallas: {len(riel_malas)}")
+for k, m in riel_malas:
+    print(f"  - {k}: {m}")
+for k, m in riel_no_abre:
+    print(f"  (NO VERIFICADO) {k}: el simulado no la pudo abrir: {m}")
+
 falto = lista(G.FALTO)
 print(f"\n== AGREGADO AL SIMULADO EN ESTA PRUEBA ({len(falto)} entradas; los mocks compartidos no se tocaron):")
 print("  " + "; ".join(str(x) for x in falto))
@@ -1282,8 +1343,8 @@ else:
     print(f"  ({len(nil_leidas)} globales con nombre de API leídas y ausentes: --detalle las lista; la mayoría son addons opcionales)")
 print(f"  SavedVariables de addons fuera del paquete, no cargadas (como el cliente): {len(SV_FUERA)}")
 
-falla = len(errores) > 0 or len(pisadas) > 0 or len(cambiadas) > 0 or len(choques_cmd) > 0
+falla = len(errores) > 0 or len(pisadas) > 0 or len(cambiadas) > 0 or len(choques_cmd) > 0 or len(riel_malas) > 0
 print(f"\nRESULTADO: {len(ADDONS)} addons, {len(errores)} errores de Lua, {len(pisadas)} globales pisadas, "
-      f"{len(choques_cmd)} choques de comandos, {len(dup)} hooks duplicados (aviso), {len(avisos_riel)} avisos del riel"
+      f"{len(choques_cmd)} choques de comandos, {len(riel_malas)} secciones del riel en Próximamente o vacías, {len(dup)} hooks duplicados (aviso), {len(avisos_riel)} avisos del riel"
       f" → {'FALLA' if falla else 'OK'}" + (" [--romper]" if ROMPER else ""))
 sys.exit(1 if falla else 0)

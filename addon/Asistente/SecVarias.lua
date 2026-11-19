@@ -32,8 +32,6 @@ end
 local function Clase() return A.modulos and A.modulos.clase end
 
 local PESTANAS_CLASE = { { key = "resumen", label = "Resumen" }, { key = "talentos", label = "Talentos" }, { key = "prof", label = "Profesiones" } }
-local ROLES = { { key = "todos", label = "Todos los talentos" }, { key = "sanar", label = "Sanar" }, { key = "danio", label = "Daño" },
-	{ key = "tanque", label = "Tanque" }, { key = "jcj", label = "Contra jugadores" }, { key = "subir", label = "Para subir de nivel" } }
 
 Hub.Seccion({
 	clave = "MambaClase", nombre = "Clase", icono = "icon-train", orden = 130, addon = "Asistente_Clase",
@@ -42,9 +40,13 @@ Hub.Seccion({
 		local nombre = UnitClass and UnitClass("player") or ""
 		return "Tu clase", tostring(nombre) .. " · nivel " .. (UnitLevel and UnitLevel("player") or "?") .. " · talentos y profesiones que te convienen"
 	end,
+	-- K109: en Talentos, la barra lateral son las builds (con su nombre en español); el árbol lo dibuja SecTalentos.lua
 	nav = function(est)
-		if est.pestana ~= "talentos" then return {}, nil end
-		return ROLES, est.filtro or "todos"
+		if est.pestana ~= "talentos" or not A.ClaseVista then return {}, nil end
+		return A.ClaseVista.Nav(est)
+	end,
+	onNav = function(est, key)
+		if A.ClaseVista then A.ClaseVista.OnNav(est, key) end
 	end,
 	dibujar = function(est, V)
 		local M = Clase()
@@ -52,6 +54,8 @@ Hub.Seccion({
 		local C = M.C
 		local clase = C and C.MiClase()
 		local p = est.pestana or "resumen"
+		if p == "talentos" and A.ClaseVista then return A.ClaseVista.Talentos(est, V) end
+		if p == "prof" and A.ClaseVista then return A.ClaseVista.Profesiones(est, V) end
 		if p == "talentos" and est.build then
 			local b = est.build
 			V:Botones({ { "Volver a la lista", function() est.build = nil end }, { "Comparar con mis talentos", function() est.revisar = b end } })

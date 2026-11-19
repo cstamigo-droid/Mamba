@@ -23,6 +23,7 @@ SecEquipo.lua
 SecSubasta.lua
 SecLugares.lua
 SecVarias.lua
+SecTalentos.lua
 Grupos.lua
 Lugares.lua
 Llevame.lua

@@ -17,6 +17,7 @@ echo "== 1. árbol limpio"
 if [ -n "$(git status --porcelain -- addon tools PARCHES.md)" ]; then echo "FALLA cambios sin commit:"; git status --porcelain -- addon tools PARCHES.md | sed 's/^/      /'; fallas=$((fallas+1)); else echo "OK    git status limpio"; fi
 echo "== 2. suites"
 corre hub        python -I $P/test_hub.py addon
+[ -f $P/test_talentos.py ] && corre talentos python -I $P/test_talentos.py addon
 corre ventana    python -I $P/test_ventana.py addon
 corre equipo     python -I $P/test_equipo.py addon
 corre tasador    python -I $P/test_tasador.py addon/Tasador
