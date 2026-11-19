@@ -8,7 +8,7 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
-	cercanosSola = true, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre",
+	cercanosSola = true, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre",
 }
 
 function M.DB()
@@ -96,8 +96,14 @@ function M.Cambio() for _, fn in ipairs(oyentes) do pcall(fn) end end
 -- el tamaño quedan por personaje. Sin la ventana de Mamba, se arrastran enteros fuera de combate.
 function M.Movible(f, nombre, etiqueta)
 	local api = _G.MambaAPI
-	if api and api.Movible then pcall(api.Movible, f, nombre, nil, { etiqueta = etiqueta, sinAsa = true }) else
-		f:SetMovable(true); f:EnableMouse(true); f:RegisterForDrag("LeftButton")
+	if api and api.Movible then
+		-- si falla, que se vea en Errores (antes el pcall se lo tragaba)
+		local ok, err = pcall(api.Movible, f, nombre, nil, { etiqueta = etiqueta, sinAsa = true })
+		if not ok then M.Falla("movible:" .. tostring(nombre), err) end
+	else
+		-- sin la ventana de Mamba: se arrastra fuera de combate, pero el ratón solo se activa en marcos que ya
+		-- lo usan (un cartel en el centro no se come los clics al mundo; revisión wow-addon-lua, 19-11)
+		f:SetMovable(true); f:RegisterForDrag("LeftButton")
 		f:SetScript("OnDragStart", function(s) if not M.EnCombate() then s:StartMoving() end end)
 		f:SetScript("OnDragStop", function(s) s:StopMovingOrSizing() end)
 	end

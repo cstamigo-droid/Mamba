@@ -90,22 +90,24 @@ function M.CrearMacro(clave, sinCursor)
 	if not m then return false, "no existe" end
 	local nombre = nombreMacro(m)
 	local idx = GetMacroIndexByName and GetMacroIndexByName(nombre) or 0
+	local nueva = false
 	if not idx or idx == 0 then
 		local txt, completo = cuerpo(m)
 		if not completo then return false, "no conoces todos sus hechizos" end
 		local ok, r = pcall(CreateMacro, nombre, "INV_MISC_QUESTIONMARK", txt, true)
-		if not ok or not r then return false, "el juego no dejó crearla (¿lugares de macros llenos?)" end
-		idx = r
+		if not ok or not r then return false, "el juego no dejó crearla (¿lugares de macros llenos?)", "llenas" end
+		idx, nueva = r, true
 	end
 	local dg = diag()
 	local funciona = M.MacroFunciona(idx)
-	if funciona == false then
+	-- solo se saca la que Mamba acaba de crear: una que ya existía (quizá editada por el jugador) no se toca
+	if funciona == false and nueva then
 		-- el juego no reconoce ningún hechizo en ella: no sirve en Forever, se saca
 		if DeleteMacro then pcall(DeleteMacro, idx) end
 		dg.macrosMal[clave] = (date and date("%d-%m %H:%M") or "") .. " el juego no reconoce su hechizo"
 		dg.macrosBien[clave] = nil
 		M.Cambio()
-		return false, "el juego no la entiende en Forever: la saqué"
+		return false, "el juego no la entiende en Forever: la saqué", "mal"
 	end
 	if funciona then dg.macrosBien[clave] = date and date("%d-%m %H:%M") or true end
 	if PickupMacro and not sinCursor then pcall(PickupMacro, idx) end
@@ -117,12 +119,22 @@ end
 -- Todas las que te sirven, de una vez y sin cursor (A7: "creadas con un clic"). -> creadas, sacadas, motivo
 function M.CrearTodasLasMacros(e)
 	if InCombatLockdown and InCombatLockdown() then return 0, 0, "en combate no se puede" end
-	local creadas, sacadas = 0, 0
+	local creadas, sacadas, llenas = 0, 0, 0
 	for _, x in ipairs(M.TodasLasMacros(e)) do
-		if x.sabe and not x.mal then
-			local ok = M.CrearMacro(x.m.clave, true)
-			if ok then creadas = creadas + 1 else sacadas = sacadas + 1 end
+		if x.sabe and not x.mal and not x.creada then
+			local ok, _, por = M.CrearMacro(x.m.clave, true)
+			if ok then creadas = creadas + 1
+			elseif por == "llenas" then llenas = llenas + 1
+			elseif por == "mal" then sacadas = sacadas + 1 end
 		end
 	end
+	if llenas > 0 then return creadas, sacadas, ("Creadas: %d · sacadas: %d · %d no entraron: tus lugares de macros están llenos (Esc › Macros)"):format(creadas, sacadas, llenas) end
 	return creadas, sacadas
+end
+
+-- «Probar de nuevo»: olvida las rechazadas (por si el juego se actualizó o fue un falso negativo).
+function M.ReintentarMacros()
+	local dg = diag()
+	dg.macrosMal = {}
+	M.Cambio()
 end

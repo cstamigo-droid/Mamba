@@ -56,7 +56,7 @@ M.Precrear(function() A.Crear() end)
 M.AlModoMover(function(activo)
 	A.Crear()
 	if activo then
-		if not ventana:IsShown() then ventana.ejemplo = true; ventana:Show() end
+		if not ventana:IsShown() then ventana.ejemplo = true; ventana:SetHeight(4 * 13); ventana:Show() end
 	elseif ventana.ejemplo then
 		ventana.ejemplo = nil
 		ventana:Hide()
@@ -92,6 +92,8 @@ function A.Dibujar()
 			b:Show()
 		elseif b then b:Hide() end
 	end
+	-- el marco crece con las barras: el recuadro de «Mover elementos» las cubre todas
+	ventana:SetHeight(math.max(14, math.min(#lista, 6) * 13))
 	ventana:Show()
 end
 

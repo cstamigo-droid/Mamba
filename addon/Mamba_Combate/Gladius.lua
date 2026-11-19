@@ -58,7 +58,7 @@ G.CLASES = {
 		consejo = "Te persigue con {100} y te frena. Mantén la distancia: contrólalo y aléjate. Guarda una salida para {5246} (miedo)." },
 	PALADIN = { estilo = "Cuerpo a cuerpo, se cura", controles = { 853, 20066 }, defensas = { 642, 1022, 1044, 498 },
 		guarda = { "interrumpir", "control" },
-		consejo = "Con {642} es inmune un rato: no gastes nada fuerte ahí. Corta sus curaciones; {853} te aturde 6 s." },
+		consejo = "Con {642} es inmune un rato: no gastes nada fuerte ahí. Corta sus curaciones; {853} te aturde hasta 6 s." },
 	HUNTER = { estilo = "A distancia, con mascota", controles = { 1499, 19503, 19386, 19577 }, defensas = { 19263, 5384 },
 		guarda = { "escapar", "control" },
 		consejo = "Pégate a él: de cerca no dispara. Cuidado con la trampa en el suelo ({1499}) y con {19503}." },
@@ -84,7 +84,8 @@ G.CLASES = {
 
 -- Lo tuyo para responder, por tu clase (ids de rango 1; solo se muestra lo que sabes).
 G.MIOS = {
-	DRUID = { interrumpir = { 5211 }, control = { 339, 2637 }, defensa = { 22812, 22842 }, escapar = { 783, 768 } },
+	-- Hibernar solo duerme a druidas en forma animal y mascotas; Raíces no se lanza en interiores
+	DRUID = { interrumpir = { 5211 }, control = { 339 }, defensa = { 22812, 22842 }, escapar = { 1850, 783, 768 } },
 	HUNTER = { interrumpir = { 19503 }, control = { 1499, 5116, 19386 }, defensa = { 19263, 5384 }, escapar = { 2974, 5116, 19503 } }, -- Desconexión no te mueve en Classic; el guepardo te aturde si te pegan
 	WARRIOR = { interrumpir = { 6552, 72 }, control = { 5246, 1715, 12809 }, defensa = { 871, 20230 }, escapar = { 18499, 20252 } },
 	ROGUE = { interrumpir = { 1766 }, control = { 408, 1833, 1776, 2094 }, defensa = { 5277 }, escapar = { 2983, 1856 } },

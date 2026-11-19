@@ -161,7 +161,7 @@ if ROMPER_MACROS:
     L.execute('GetMacroSpell = function() return 774 end')
 L.execute('NO_ENTIENDE = { "/cast !" }')
 n0 = len(list(G.MACROS.values()))
-okb, mb = M.CrearMacro("druOso")
+okb, mb = M.CrearMacro("druOso")[:2]
 check(not okb and "no la entiende" in str(mb) and len(list(G.MACROS.values())) == n0, "A7: macro que el juego no entiende: se saca (fue %s)" % mb)
 check(M.DiagMacros().macrosMal["druOso"] is not None, "A7: queda anotada en diag.macrosMal")
 check(not any(x.clave == "druOso" for x in M.MacrosSugeridas(e).values()), "A7: la rechazada no se vuelve a sugerir")
@@ -172,6 +172,18 @@ check(c >= 2 and G.CURSOR is None, "A7: «Crear todas» crea varias sin dejar na
 check(all("/cast !" not in m[2] for m in G.MACROS.values()), "A7: ninguna macro que el juego no entiende queda guardada")
 todas = M.TodasLasMacros(e)
 check(any(x.mal for x in todas.values()) and any(x.bien for x in todas.values()), "A7: la lista dice cuáles funcionan y cuáles no")
+# una macro que YA existía con ese nombre (quizá editada por el jugador) no se borra aunque el juego no la entienda
+L.execute('table.insert(MACROS, { "M·druEscapar", "/cast !algo editado" })')
+n1 = len(list(G.MACROS.values()))
+M.CrearMacro("druEscapar")
+check(len(list(G.MACROS.values())) == n1, "A7: una macro que ya existía no se borra (revisión wow-addon-lua)")
+# «Crear todas» no vuelve a probar las creadas y distingue «lugares llenos»
+L.execute('CREAR_ORIG = CreateMacro; CreateMacro = function() return nil end; NO_ENTIENDE = {}')
+M.ReintentarMacros()
+r = tuple(M.CrearTodasLasMacros(e)) + (None, None, None)
+check(r[0] == 0 and r[1] == 0 and "llenos" in str(r[2]), "A7: con los lugares de macros llenos lo dice, sin contarlas como «no entiende» (%s)" % (r,))
+L.execute('CreateMacro = CREAR_ORIG; NO_ENTIENDE = { "/cast !" }')
+check(not any(x.mal for x in M.TodasLasMacros(e).values()), "A7: «Probar de nuevo» olvida las rechazadas")
 L.execute('GetMacroSpell = nil')
 okn, _ = M.CrearMacro("druLunarRaton")
 check(okn, "A7: sin GetMacroSpell (cliente sin la función) la macro igual se crea")

@@ -83,6 +83,10 @@ def nuevo():
         if ROMPER and n == "Gladius.lua":
             src = src.replace("local repetido = previo and math.abs(previo.fin - (t + e[1])) < 1.5", "local repetido = false")
             src = src.replace("if M.Secreto(id) then diag().secretos = diag().secretos + 1; return false end", "")
+        if ROMPER and n == "Medidor.lua":
+            src = src.replace("v:SetHeight(16 + vistas * 14)", "")                                           # el marco no crece: el recuadro de Mover solo cubre el título
+        if ROMPER and n == "BarraCerca.lua":
+            src = src.replace("if x and not reciente then", "if x then")                                    # avisa cada vez que lo ve
         if ROMPER and n == "Historial.lua":
             src = src.replace("(not t0) or ((x.visto or 0) - t0 > 120)", "true")                         # cuenta cada vez que lo ve
         cargar(src, n, M)
@@ -257,12 +261,52 @@ V.filas[1].scripts.OnMouseUp(V.filas[1], "RightButton")
 check(e.nota == "Peligroso", "clic derecho en la fila: nota")
 for i in range(320):
     Cz.Visto(L.eval('{ nombre = "X%d" }' % i))
+Cz.Dibujar()
+primero = str(V.filas[1].arriba.texto)
+V.lista.scripts.OnMouseWheel(V.lista, -1)
+check(str(V.filas[1].arriba.texto) != primero and C.Cercanos.desde == 3, "historial: la rueda recorre la lista (más de 12)")
 check(H.Contar() <= 300, "historial con tope de 300 (fue %d)" % H.Contar())
 Cz.Visto(L.eval('{ nombre = Secreto() }'))
 check(len(list(G.ERRORES.values())) == 0, "nombre secreto: no se anota ni rompe")
 
+# ---------- barra «Cerca: N» (como Spy, pedido de Cristian 19-11)
+Bc = C.BarraCerca
+BB = Bc.Barra()
+C.DB().historial = None
+Cz.vistos = L.eval("{}")
+L.execute('AVISOS = 0')
+G.RELOJ = 9000
+Bc.Dibujar()
+check(BB.visible and str(BB.titulo.t.texto).startswith("Cerca: 0"), "barra «Cerca: 0» a la vista sin enemigos (%s)" % BB.titulo.t.texto)
+check(C.movibles["MambaCercaBarra"] == "Barra «Cerca»", "la barra entra en «Mover elementos»")
+Cz.Visto(L.eval('{ nombre = "Thrall2", nivel = 40, clase = "Chamán", claseToken = "SHAMAN", gremio = "Tormenta" }'))
+check(str(BB.titulo.t.texto).startswith("Cerca: 1") and "Thrall2" in str(BB.filas[1].texto) and "Tormenta" in str(BB.filas[1].texto), "crece con el enemigo: %s / %s" % (BB.titulo.t.texto, BB.filas[1].texto))
+check(G.AVISOS == 1 and "Enemigo cerca" in str(C.Avisos.ultimo), "aviso en pantalla al llegar uno nuevo")
+G.RELOJ = 9010
+Cz.Visto(L.eval('{ nombre = "Thrall2" }'))
+check(G.AVISOS == 1, "el mismo enemigo visto otra vez al rato no vuelve a avisar (avisos %s)" % G.AVISOS)
+check(BB.h == 18 + 15, "la barra mide una fila más (alto %s)" % BB.h)
+C.DB().cercaBarra = "conEnemigos"; G.RELOJ = 9500; C.Cambio()
+check(not BB.visible, "«solo con enemigos»: escondida cuando ya no hay nadie cerca")
+C.DB().cercaBarra = "siempre"; C.Cambio()
+L.execute('CVARS = { nameplateShowEnemies = "0" }; GetCVar = function(k) return CVARS[k] end; SetCVar = function(k, v) CVARS[k] = v end')
+check(not Bc.PlacasEnemigas(), "placas de enemigos apagadas: se lee")
+Bc.EncenderPlacas(True)
+check(Bc.PlacasEnemigas(), "un clic las enciende")
+L.execute('COMBATE = true'); Bc.EncenderPlacas(False); L.execute('COMBATE = false')
+check(Bc.PlacasEnemigas(), "en combate no se tocan")
+
+# ---------- medidor: el marco cubre sus barras (el recuadro de «Mover» se pega a todo lo que se ve)
+Med = C.Medidor
+VM = G.MambaMedidorCombate
+L.execute('SESION = { combatSources = { { name = "Hope", totalAmount = 900, amountPerSecond = 30, classFilename = "DRUID", isLocalPlayer = true }, { name = "Otro", totalAmount = 400, amountPerSecond = 10, classFilename = "WARRIOR" } }, durationSeconds = 30 }')
+C.DB().medidor = True
+Med.Dibujar()
+vistas = sum(1 for i in range(1, 9) if L.eval('function(i) return MambaMedidorCombate and nil end')(i) is None)
+check(VM.h is not None and VM.h > 16, "medidor: el marco crece con sus barras (alto %s), no solo el título" % VM.h)
+
 # ---------- reglas
-src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua"))
+src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua"))
 check("SLASH_" not in src and "SlashCmdList" not in src, "sin comandos /")
 check(not re.search(r"\b(CastSpell\w*|UseAction|RunMacroText|TargetUnit|CastSpellByName|SpellStopCasting)\b", src), "nada lanza ni elige por el jugador")
 check("GameFont" not in src and "|cff" not in src and "SetTextColor(" not in src, "letra y colores de la apariencia")

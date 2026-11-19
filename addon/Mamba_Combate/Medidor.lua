@@ -106,7 +106,11 @@ function Med.Crear()
 	v:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -320, 220)
 	v:Hide()
 	v.titulo = CreateFrame("Button", nil, v)
-	v.titulo:SetAllPoints(v)
+	-- el título es solo la franja de arriba; las barras van DENTRO del marco y el marco crece con ellas, así el
+	-- recuadro de «Mover elementos» cubre todo lo que se ve (Cristian, 19-11: "no se mueve": arrastraba las barras)
+	v.titulo:SetPoint("TOPLEFT", v, "TOPLEFT", 0, 0)
+	v.titulo:SetPoint("TOPRIGHT", v, "TOPRIGHT", 0, 0)
+	v.titulo:SetHeight(16)
 	v.titulo.t = M.Piezas.Texto(v.titulo, "small", "text")
 	v.titulo.t:SetAllPoints(v.titulo)
 	v.titulo:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -132,6 +136,7 @@ M.AlModoMover(function(activo)
 		if not v:IsShown() then
 			v.ejemplo = true
 			v.titulo.t:SetText("Medidor de combate (ejemplo)")
+			v:SetHeight(16 + 4 * 14) -- el alto de unas barras, para que el recuadro se vea del tamaño real
 			v:Show()
 		end
 	elseif v.ejemplo then
@@ -158,7 +163,7 @@ function Med.Dibujar()
 		local x, b = lista[i], filas[i]
 		if not b then
 			b = M.Barra(v, 190, 13)
-			b:SetPoint("TOP", v, "BOTTOM", 0, -(i - 1) * 14)
+			b:SetPoint("TOP", v, "TOP", 0, -16 - (i - 1) * 14)
 			b:SetMinMaxValues(0, 1)
 			filas[i] = b
 		end
@@ -172,6 +177,9 @@ function Med.Dibujar()
 			b:SetValue(0); b.texto:SetText(motivo or ""); b:Show()
 		else b:Hide() end
 	end
+	local vistas = 0
+	for i = 1, 8 do if filas[i] and filas[i]:IsShown() then vistas = i end end
+	v:SetHeight(16 + vistas * 14)
 	v:Show()
 end
 

@@ -27,5 +27,6 @@ Medidor.lua
 Ranking.lua
 Cercanos.lua
 Historial.lua
+BarraCerca.lua
 DosBuilds.lua
 Seccion.lua

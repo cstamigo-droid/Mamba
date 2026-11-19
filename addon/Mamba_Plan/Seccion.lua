@@ -216,6 +216,10 @@ local function datos(e, r)
 				M.Cambio()
 			end } } or nil })
 		if M.ultimoMacros then add({ tipo = "Resultado", titulo = M.ultimoMacros }) end
+		local rechazadas = 0
+		for _, x in ipairs(todas) do if x.mal then rechazadas = rechazadas + 1 end end
+		if rechazadas > 0 then add({ tipo = "", titulo = ("%d que el juego no entendió"):format(rechazadas),
+			detalle = "Si crees que fue un error, pruébalas otra vez.", acciones = { { "Probar de nuevo", function() M.ReintentarMacros() end } } }) end
 		for _, x in ipairs(todas) do
 			local m = x.m
 			local tipo

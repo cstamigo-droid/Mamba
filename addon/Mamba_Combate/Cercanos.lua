@@ -290,6 +290,12 @@ local function crear()
 	v.lista:SetSize(ANCHO - 2 * v.margen, FILAS * ALTO_FILA)
 	v.filas = {}
 	for i = 1, FILAS do v.filas[i] = crearFila(i) end
+	-- la rueda recorre la lista (el historial guarda hasta 300; revisión wow-addon-lua, 19-11)
+	if v.lista.EnableMouseWheel then v.lista:EnableMouseWheel(true) end
+	v.lista:SetScript("OnMouseWheel", function(_, delta)
+		Cz.desde = math.max(0, math.min((Cz.total or 0) - FILAS, (Cz.desde or 0) - delta * 3))
+		M.Proteger("cercanos", Cz.Dibujar)
+	end)
 	v.vacio = P.Texto(v.lista, "body", "textMuted")
 	v.vacio:SetPoint("TOPLEFT", v.lista, "TOPLEFT", 4, -6)
 	v.vacio:SetPoint("RIGHT", v.lista, "RIGHT", -4, 0)
@@ -352,8 +358,11 @@ function Cz.Dibujar()
 		end
 		v.vacio:SetText(#lista == 0 and "Todavía no hay muertes contra jugadores anotadas." or "")
 	end
+	if Cz.vistaAntes ~= Cz.vista then Cz.desde, Cz.vistaAntes = 0, Cz.vista end
+	Cz.total = #filas
+	Cz.desde = math.max(0, math.min(Cz.desde or 0, #filas - FILAS))
 	for i = 1, FILAS do
-		local x, f = filas[i], v.filas[i]
+		local x, f = filas[i + Cz.desde], v.filas[i]
 		if x then
 			f.arriba:SetText(x.arriba); f.abajo:SetText(x.abajo); f.cuando:SetText(x.cuando); f.nombre = x.nombre; f:Show()
 		else f.nombre = nil; f:Hide() end

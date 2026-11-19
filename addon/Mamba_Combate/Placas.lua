@@ -149,7 +149,20 @@ function Pl.Color(unidad)
 	return 0.75, 0.18, 0.15, "hostil"
 end
 
+-- Otro addon de placas (Plater, Platynator, Kui, ThreatPlates…) ya dibuja las suyas: Mamba no dibuja encima ni
+-- toca el alfa de la placa del juego (revisión wow-addon-lua, 19-11).
+Pl.OTROS = { "Plater", "Platynator", "Kui_Nameplates", "TidyPlates_ThreatPlates", "NeatPlates" }
+function Pl.OtroAddon()
+	local cargado = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+	if not cargado then return nil end
+	for _, n in ipairs(Pl.OTROS) do
+		local ok, si = pcall(cargado, n)
+		if ok and si then return n end
+	end
+end
+
 function Pl.Pintar(unidad)
+	if Pl.OtroAddon() then return end
 	local N = C_NamePlate
 	local placa = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(unidad)
 	if not placa then return end
