@@ -1,0 +1,66 @@
+MAMBA - versión de prueba para el grupo (Horda, español)
+=========================================================
+
+Mamba es un addon para WoW Forever: guía de misiones con flecha, bolsas,
+barras, subasta, profesiones y más, todo en español.
+Es una versión de PRUEBA: si algo falla, avísale a Cristian (ver abajo).
+
+
+INSTALAR EN 5 PASOS
+-------------------
+
+1. CIERRA EL JUEGO.
+   Sal de World of Warcraft del todo (no basta con salir del personaje).
+
+2. DESCOMPRIME EL ZIP.
+   Clic derecho sobre el archivo Mamba_Horda_....zip  ->  "Extraer todo..."
+   ->  "Extraer". Se abre una carpeta nueva.
+   (No lo abras con doble clic sin extraer: así no funciona.)
+
+3. DOBLE CLIC EN  INSTALAR_MAMBA
+   Si Windows muestra un cartel azul "Windows protegió su PC":
+   clic en "Más información" y después en "Ejecutar de todas formas".
+   Si pregunta "¿Quieres permitir que esta aplicación haga cambios?": Sí.
+
+4. ESPERA EL MENSAJE "Listo: Mamba quedó instalada".
+   El instalador encuentra solo la carpeta del juego. Si no la encuentra,
+   te pide elegirla: elige la carpeta "World of Warcraft"
+   (la que tiene adentro "_forever_").
+   Antes de copiar nada, guarda una copia de lo que tenías.
+
+5. ABRE EL JUEGO Y REVISA LOS ADDONS.
+   En la pantalla de personajes, botón "AddOns" (abajo a la izquierda):
+   que estén marcados "Polestar" y todos los de la categoría "Mamba".
+   Entra con tu personaje: aparece el botón de Mamba junto al minimapa.
+
+
+SI ALGO NO TE GUSTA: VOLVER A COMO ESTABAS
+-------------------------------------------
+Cierra el juego y haz doble clic en  QUITAR_MAMBA  (en esta misma carpeta).
+Tus addons quedan como antes. Tus personajes, barras y ajustes no se tocan.
+(La copia también está en  World of Warcraft\_forever_\Interface\Mamba_respaldos,
+ con su propio VOLVER_ATRAS adentro.)
+
+
+CUANDO HAYA UNA VERSIÓN NUEVA
+-----------------------------
+Cristian deja el ZIP nuevo en el MISMO enlace de siempre.
+Bájalo y repite los pasos 1 a 5. No hace falta quitar la anterior.
+
+
+IMPORTANTE
+----------
+- Si usas la app de CurseForge, NO le des "Actualizar" a Polestar:
+  reemplazaría el Polestar de Mamba por el oficial y Mamba fallaría.
+  Si pasó (o la app lo actualizó sola), vuelve a hacer doble clic en
+  INSTALAR_MAMBA y queda arreglado.
+- Mamba es para la HORDA y para el juego en español (esMX / esES).
+- Si ves un error: en la ventana de Mamba, abajo a la izquierda, "Errores".
+  Sácale una captura (tecla Impr Pant) y mándasela a Cristian.
+
+
+LICENCIA
+--------
+Mamba es gratis y libre (GPL-3.0). Es un fork de Polestar (fitzforge/polestar)
+y NO es el Polestar oficial: los errores de Mamba van a Cristian, no a Polestar.
+Los créditos y licencias de todo lo que trae están en la carpeta LICENCIAS.
