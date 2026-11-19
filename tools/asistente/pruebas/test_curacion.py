@@ -101,7 +101,7 @@ check(at["spell5"] == "Recrecimiento", "rueda abajo = Recrecimiento")
 frag = cab.attr["initialConfigFunction"]
 compila = L.eval("function(s) return loadstring(s) ~= nil end")(frag)
 check(compila, "el fragmento seguro compila")
-check('"spell1", "Rejuvenecimiento"' in frag and "_onenter" in frag, "el fragmento copia el perfil y la rueda")
+check('"spell1", "Rejuvenecimiento"' in frag and cab.attr["_initialAttribute-_onenter"] is not None, "el fragmento copia el perfil y la cabecera, la rueda")
 
 # botón nuevo (lo crea la cabecera)
 b = L.eval('CreateFrame("Button", "MambaCuraCabeceraUnitButton1", MambaCuraCabecera, "SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate")')
@@ -109,7 +109,7 @@ b.attr["unit"] = "party1"
 cab.scripts["OnAttributeChanged"](cab, "child1", b)
 check(b.attr["_onenter"] is not None and b.attr["_onhide"] is not None, "el botón ata la rueda al pasar el ratón y la suelta al ocultarse")
 check(b.attr["useOnKeyDown"] is False and "RegisterForClicks" not in frag, "clic al soltar, sin RegisterForClicks en el fragmento")
-check("SHIFT-" in frag, "rueda con Mayús también")
+check("SHIFT-" in cab.attr["_initialAttribute-_onenter"], "rueda con Mayús también")
 check(b.vida is not None and b.vida.valor == 800, "pinta la vida")
 # valores secretos
 G.SECRETOS = True
@@ -195,5 +195,13 @@ check(G.MODO_MOVER is not None, "Curación se engancha al modo Mover de Mamba")
 if G.MODO_MOVER is not None and asa2 is not None:
     G.MODO_MOVER(True); check(asa2.visible, "modo Mover: el asa se ve")
     G.MODO_MOVER(False); check(not asa2.visible, "al salir del modo Mover: el asa se esconde")
+# ---------- 19-11, error del juego (275 veces): el código restringido no puede poner atributos con "_"
+import re as _re
+def prohibidos(fragmento):
+    return _re.findall(r'SetAttribute\("(_[^"]*)"', fragmento)
+frag2 = G.MambaCuraCabecera.attr["initialConfigFunction"]
+check(not prohibidos(frag2), "el fragmento seguro no pone atributos que empiezan con _: %s" % prohibidos(frag2))
+check(prohibidos('self:SetAttribute("_onenter", "x")') == ["_onenter"], "control negativo: el detector ve el atributo prohibido")
+check(G.MambaCuraCabecera.attr["_initialAttribute-_onenter"] is not None, "la rueda llega a los botones por _initialAttribute- de la cabecera")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

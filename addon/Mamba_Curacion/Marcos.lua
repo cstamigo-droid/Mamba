@@ -39,11 +39,8 @@ function M.FragmentoInicial(attrs)
 	for _, k in ipairs(claves) do
 		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format(k, attrs[k])
 	end
-	if usaRueda(attrs) then
-		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onenter", ENTRAR)
-		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onleave", SALIR)
-		t[#t + 1] = ("self:SetAttribute(%q, %q)"):format("_onhide", SALIR)
-	end
+	-- OJO: el código restringido NO puede poner atributos que empiezan con "_" (RestrictedFrames: "Invalid attribute
+	-- name", 275 veces en el juego el 19-11). Los fragmentos de la rueda van con "_initialAttribute-" en la cabecera.
 	return table.concat(t, "\n")
 end
 
@@ -219,6 +216,11 @@ function M.Aplicar()
 	cabecera:SetAttribute("altoBoton", d.alto)
 	cabecera:SetAttribute("showSolo", d.solo)
 	cabecera:SetAttribute("initialConfigFunction", M.FragmentoInicial(attrs))
+	-- la rueda: el código seguro de la cabecera copia estos atributos a cada botón nuevo (también en combate)
+	local r = usaRueda(attrs)
+	cabecera:SetAttribute("_initialAttribute-_onenter", r and ENTRAR or nil)
+	cabecera:SetAttribute("_initialAttribute-_onleave", r and SALIR or nil)
+	cabecera:SetAttribute("_initialAttribute-_onhide", r and SALIR or nil)
 	ancla:SetScale(d.escala or 1)
 	for i = 1, 40 do
 		local h = cabecera.GetAttribute and cabecera:GetAttribute("child" .. i)
