@@ -29,7 +29,10 @@ function A.Lista()
 			local ok, tanque, _, pct = pcall(UnitDetailedThreatSituation, u, "target")
 			pct = ok and M.Num(pct)
 			if pct then
-				out[#out + 1] = { nombre = UnitName(u) or u, pct = pct, tanque = (not M.Secreto(tanque)) and tanque or false, yo = u == "player" }
+				local n = UnitName(u)
+				-- K111: el nombre puede venir secreto en una mazmorra (y aquí va a un format): entonces "Tú" o "Compañero"
+				if M.Secreto(n) or type(n) ~= "string" then n = (u == "player") and "Tú" or "Compañero" end
+				out[#out + 1] = { nombre = n, pct = pct, tanque = (not M.Secreto(tanque)) and tanque or false, yo = u == "player" }
 			end
 		end
 	end

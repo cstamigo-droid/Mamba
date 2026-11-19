@@ -106,7 +106,9 @@ function M.Pintar(b)
 	b.vida:SetStatusBarColor(c and c.r or 0.3, c and c.g or 0.8, c and c.b or 0.3)
 	pcall(b.vida.SetMinMaxValues, b.vida, 0, UnitHealthMax(u))
 	pcall(b.vida.SetValue, b.vida, UnitHealth(u))
-	b.nombre:SetText(UnitName(u) or "")
+	-- K111: el nombre puede venir secreto en una mazmorra: SetText lo acepta tal cual, sin probarlo
+	local nombre = UnitName(u)
+	if secreto(nombre) then b.nombre:SetText(nombre) elseif type(nombre) == "string" then b.nombre:SetText(nombre) else b.nombre:SetText("") end
 	local conectado = UnitIsConnected and claro(UnitIsConnected(u))
 	if UnitIsDeadOrGhost and claro(UnitIsDeadOrGhost(u)) then b.estado:SetText("Muerto")
 	elseif conectado == false then b.estado:SetText("Desconectado")
