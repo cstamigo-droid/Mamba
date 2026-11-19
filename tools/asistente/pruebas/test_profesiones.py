@@ -231,13 +231,14 @@ check(len(list(G.ERRORES.values())) == 0, "sin SkillUp no da error")
 # ---------- K115: lo que nunca se vende ni es basura (una sola lista; la venta automática usa Vital)
 L.execute(r"""
 INFO = { [600] = { 12 }, [601] = { 13 }, [602] = { 15, 0, 15, 1 }, [603] = { 0, 10, 0, 1 }, [604] = { 4, 25, 4, 2 }, [605] = { 15, 7, 15, 4 } }
-NOMBRE = { [606] = "Saco de dormir" }
+NOMBRE = { [606] = "Bolsa de dormir acogedora" }
+Tasador = Tasador or {}; Tasador.MECANICAS = { [211527] = true }
 C_Item.GetItemInfoInstant = function(id) local i = INFO[id]; return id, "", "", "", 0, i and i[1] or 4 end
 C_Item.GetItemNameByID = function(id) return NOMBRE[id] or ("Obj" .. id) end
 GetItemInfo = function(id) local i = INFO[id] or { 4, 25, 4, 2 }; return "Obj" .. id, nil, 1, 1, 1, "", "", 20, "", 0, i[2] or 25, i[3] or 4, 0, i[4] or 2 end
 """)
 NV = G.MambaProfesiones.NoVender
-casos = {600: "misión", 601: "llave", 602: "no lo compra", 603: "utilidad", 605: "misión", 606: "Forever"}
+casos = {600: "misión", 601: "llave", 602: "no lo compra", 603: "utilidad", 605: "misión", 606: "Forever", 211527: "Forever"}
 for i, palabra in casos.items():
     m = NV(i)
     check(m is not None and palabra in m, "K115: objeto %d protegido (%s): %s" % (i, palabra, m))

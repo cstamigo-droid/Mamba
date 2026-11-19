@@ -183,11 +183,14 @@ end
 -- K115: la lista ÚNICA de "no vender" de Mamba (la usan el cuadro del objeto y la venta automática por medio de
 -- MambaProfesiones.Vital: todo texto que devuelve Vital protege el objeto). -> motivo o nil.
 -- Nombres de objetos de mecánicas de Forever que nunca se venden (sus ids: NO VERIFICADO; se reconocen por nombre).
-C.NO_VENDER_NOMBRES = { ["Saco de dormir"] = true, ["Sleeping Bag"] = true }
+C.NO_VENDER_NOMBRES = { ["Bolsa de dormir acogedora"] = true, ["Cozy Sleeping Bag"] = true }
 C.NO_VENDER_IDS = {} -- se suman aquí los ids comprobados en el juego
 function C.NoVender(id)
 	if not id then return nil end
-	if C.NO_VENDER_IDS[id] then return "objeto de una mecánica de Forever" end
+	-- fuente por id: la lista del Tasador (Tasador/Mecanicas.lua, 451 objetos de ForeverTDB, saco 211527); el nombre
+	-- solo como respaldo (los nombres esMX del cliente no son los ingleses de ForeverTDB)
+	local T = _G.Tasador
+	if (T and type(T.MECANICAS) == "table" and T.MECANICAS[id]) or C.NO_VENDER_IDS[id] then return "objeto de una mecánica de Forever" end
 	local nombre = C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
 	if nombre and C.NO_VENDER_NOMBRES[nombre] then return "objeto de una mecánica de Forever" end
 	local clase
