@@ -180,8 +180,43 @@ function C.ListaCompra(linea)
 end
 
 -- E8: ¿este material es VITAL para subir una profesión tuya? (te falta y está en el camino)
+-- K115: la lista ÚNICA de "no vender" de Mamba (la usan el cuadro del objeto y la venta automática por medio de
+-- MambaProfesiones.Vital: todo texto que devuelve Vital protege el objeto). -> motivo o nil.
+-- Nombres de objetos de mecánicas de Forever que nunca se venden (sus ids: NO VERIFICADO; se reconocen por nombre).
+C.NO_VENDER_NOMBRES = { ["Saco de dormir"] = true, ["Sleeping Bag"] = true }
+C.NO_VENDER_IDS = {} -- se suman aquí los ids comprobados en el juego
+function C.NoVender(id)
+	if not id then return nil end
+	if C.NO_VENDER_IDS[id] then return "objeto de una mecánica de Forever" end
+	local nombre = C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
+	if nombre and C.NO_VENDER_NOMBRES[nombre] then return "objeto de una mecánica de Forever" end
+	local clase
+	if C_Item and C_Item.GetItemInfoInstant then clase = select(6, C_Item.GetItemInfoInstant(id))
+	elseif GetItemInfoInstant then clase = select(6, GetItemInfoInstant(id)) end
+	if clase == 12 then return "objeto de misión" end
+	if clase == 13 then return "llave" end
+	if not GetItemInfo then return nil end
+	local n, _, _, _, _, _, _, _, _, _, venta, cl2, _, ligado = GetItemInfo(id)
+	if not n then return nil end -- sin datos aún: no se decide
+	if ligado == 4 then return "objeto de misión" end
+	if (venta or 0) == 0 then return "el vendedor no lo compra" end
+	-- ligado al recogerlo y de uso (consumible o varios): herramientas y objetos de utilidad
+	if ligado == 1 and (cl2 == 0 or cl2 == 15) then return "objeto ligado de utilidad" end
+	return nil
+end
+
+-- ¿Este objeto inicia una misión? (solo se sabe con su lugar en las bolsas)
+function C.IniciaMision(bolsa, ranura)
+	local Cc = C_Container
+	if not (Cc and Cc.GetContainerItemQuestInfo and bolsa and ranura) then return false end
+	local ok, q = pcall(Cc.GetContainerItemQuestInfo, bolsa, ranura)
+	return ok and type(q) == "table" and (q.questID or q.isQuestItem) and true or false
+end
+
 function C.Vital(id)
 	local lista = C.Profesiones()
+	local motivo = C.NoVender(id)
+	if motivo and not lista then return "NO VENDER: " .. motivo, 0 end
 	if not (lista and id) then return nil end
 	for _, e in ipairs(lista) do
 		for _, r in ipairs(e.reagents or {}) do
@@ -194,6 +229,7 @@ function C.Vital(id)
 			end
 		end
 	end
+	if motivo then return "NO VENDER: " .. motivo, 0 end
 end
 
 -- F7/O5/K79: recetas que sabes (leídas al abrir tu ventana de profesión) con su ganancia neta.

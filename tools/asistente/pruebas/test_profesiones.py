@@ -12,6 +12,7 @@ from lupa.lua51 import LuaRuntime
 AQUI = pathlib.Path(__file__).parent
 D = AQUI.parent.parent.parent / "addon" / "Mamba_Profesiones"
 ROMPER = "--romper" in sys.argv
+ROMPER_K115 = "--romper-k115" in sys.argv
 toc = (D / "Mamba_Profesiones.toc").read_text(encoding="utf-8")
 ARCHIVOS = [l.strip() for l in toc.splitlines() if l.strip().endswith(".lua")]
 ok = fail = 0
@@ -87,6 +88,8 @@ def nuevo():
         cargar((D / n).read_text(encoding="utf-8"), n, M)
     if ROMPER:
         L.execute("MambaProfesiones.C.ZONA_BANDO = {}")
+    if ROMPER_K115:
+        L.execute("MambaProfesiones.C.NoVender = function() return nil end")
     return L, M
 
 
@@ -225,5 +228,23 @@ check(lista is None and "SkillUp" in motivo, "sin SkillUp Forever dice qué falt
 s.onNav("compra"); s.render()
 check(len(list(G.ERRORES.values())) == 0, "sin SkillUp no da error")
 
+# ---------- K115: lo que nunca se vende ni es basura (una sola lista; la venta automática usa Vital)
+L.execute(r"""
+INFO = { [600] = { 12 }, [601] = { 13 }, [602] = { 15, 0, 15, 1 }, [603] = { 0, 10, 0, 1 }, [604] = { 4, 25, 4, 2 }, [605] = { 15, 7, 15, 4 } }
+NOMBRE = { [606] = "Saco de dormir" }
+C_Item.GetItemInfoInstant = function(id) local i = INFO[id]; return id, "", "", "", 0, i and i[1] or 4 end
+C_Item.GetItemNameByID = function(id) return NOMBRE[id] or ("Obj" .. id) end
+GetItemInfo = function(id) local i = INFO[id] or { 4, 25, 4, 2 }; return "Obj" .. id, nil, 1, 1, 1, "", "", 20, "", 0, i[2] or 25, i[3] or 4, 0, i[4] or 2 end
+""")
+NV = G.MambaProfesiones.NoVender
+casos = {600: "misión", 601: "llave", 602: "no lo compra", 603: "utilidad", 605: "misión", 606: "Forever"}
+for i, palabra in casos.items():
+    m = NV(i)
+    check(m is not None and palabra in m, "K115: objeto %d protegido (%s): %s" % (i, palabra, m))
+check(NV(604) is None, "K115: un objeto común con precio sí se puede vender")
+v = G.MambaProfesiones.Vital(606)
+check(v is not None and v[0].startswith("NO VENDER"), "K115: Vital lo protege (la venta automática no lo toca)")
+L.execute("Cc_q = nil; C_Container = C_Container or {}; C_Container.GetContainerItemQuestInfo = function(b, s) if b == 1 and s == 2 then return { questID = 77 } end return {} end")
+check(G.MambaProfesiones.IniciaMision(1, 2) is True and G.MambaProfesiones.IniciaMision(1, 3) is False, "K115: reconoce el que inicia una misión")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

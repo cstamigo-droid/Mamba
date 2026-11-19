@@ -17,6 +17,8 @@ M.VISTAS = {
 }
 
 M.Vital = function(id) return C.Vital(id) end
+M.NoVender = function(id) return C.NoVender(id) end
+M.IniciaMision = function(b, r) return C.IniciaMision(b, r) end
 function M.CentroNodos(obj, mapa)
 	local Mp = _G.MambaMapa
 	if Mp and Mp.CentroNodos then return Mp.CentroNodos(obj, mapa) end
