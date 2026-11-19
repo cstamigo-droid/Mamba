@@ -224,7 +224,7 @@ local function datos(e, r)
 			local m = x.m
 			local tipo
 			if x.mal then tipo = "No funciona"
-			elseif x.creada then tipo = x.bien and "Creada ✓" or "Creada"
+			elseif x.creada then tipo = x.bien and "Creada · funciona" or "Creada"
 			elseif not x.sabe then tipo = "Te falta un hechizo" else tipo = "" end
 			add({ tipo = tipo, titulo = m.titulo,
 				detalle = x.mal and "El juego no reconoce su hechizo en Forever: Mamba la sacó y no la vuelve a ofrecer." or (m.detalle or ""),

@@ -25,7 +25,7 @@ function A.Lista()
 	local out = {}
 	if not (UnitExists("target") and UnitDetailedThreatSituation) then return out end
 	for _, u in ipairs(A.Unidades()) do
-		if UnitExists(u) and not (UnitIsUnit and u ~= "player" and UnitIsUnit(u, "player")) then
+		if UnitExists(u) and not (UnitIsUnit and u ~= "player" and M.Si(UnitIsUnit(u, "player"))) then
 			local ok, tanque, _, pct = pcall(UnitDetailedThreatSituation, u, "target")
 			pct = ok and M.Num(pct)
 			if pct then

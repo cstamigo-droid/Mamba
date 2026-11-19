@@ -43,6 +43,12 @@ function M.Escuchar(f, ev, unidad)
 end
 
 function M.Secreto(v) return issecretvalue ~= nil and issecretvalue(v) end
+-- Sí/no del juego que puede venir SECRETO (en mazmorras y en combate, como en Midnight): probarlo con if/and/or
+-- da «attempt to perform boolean test on a secret boolean value» (K110). Secreto = no se sabe = false.
+function M.Si(v)
+	if v == nil or M.Secreto(v) then return false end
+	return v and true or false
+end
 -- Número que se puede usar en cuentas, o nil si el juego lo esconde.
 function M.Num(v)
 	if v == nil or M.Secreto(v) or type(v) ~= "number" then return nil end

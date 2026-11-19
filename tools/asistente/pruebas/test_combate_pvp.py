@@ -310,6 +310,17 @@ src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladi
 check("SLASH_" not in src and "SlashCmdList" not in src, "sin comandos /")
 check(not re.search(r"\b(CastSpell\w*|UseAction|RunMacroText|TargetUnit|CastSpellByName|SpellStopCasting)\b", src), "nada lanza ni elige por el jugador")
 check("GameFont" not in src and "|cff" not in src and "SetTextColor(" not in src, "letra y colores de la apariencia")
+# K110/K111: en mazmorras y en combate los sí/no del juego llegan SECRETOS y probarlos con if/and/or da
+# «boolean test on a secret boolean value». En Lua 5.1 no se puede simular ese error (no hay metamétodo de verdad):
+# se exige en el código que cada sí/no de una unidad pase por M.Si / leer / M.Secreto.
+BOOL = re.compile(r"\b(UnitIsPlayer|UnitCanAttack|UnitAffectingCombat|UnitIsUnit|UnitIsFriend|UnitIsEnemy|UnitIsDeadOrGhost|UnitIsDead|UnitIsTapDenied)\(")
+SEGURO = re.compile(r"M\.Si\(|leer\(|M\.Secreto\(|^\s*--|function |UnitAffectingCombat\(\"player\"\)")
+sueltos = []
+for f in sorted(D.glob("*.lua")):
+    for i, l in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+        if BOOL.search(l) and not SEGURO.search(l):
+            sueltos.append("%s:%d" % (f.name, i))
+check(not sueltos, "K110: ningún sí/no de unidad sin M.Si/leer (secretos en mazmorra): %s" % sueltos[:5])
 # un secreto no se prueba con «or» ni «if»: las lecturas del juego que pueden ser secretas pasan por tal()/leer()/M.Num
 for fn in ("UnitHealth(", "UnitHealthMax(", "UnitName("):
     malos = [l for l in (D / "Placas.lua").read_text(encoding="utf-8").splitlines() if fn in l and re.search(re.escape(fn) + r"[^)]*\)\s*or\b", l)]

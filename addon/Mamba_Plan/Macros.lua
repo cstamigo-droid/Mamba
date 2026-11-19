@@ -102,12 +102,27 @@ function M.CrearMacro(clave, sinCursor)
 	local funciona = M.MacroFunciona(idx)
 	-- solo se saca la que Mamba acaba de crear: una que ya existía (quizá editada por el jugador) no se toca
 	if funciona == false and nueva then
-		-- el juego no reconoce ningún hechizo en ella: no sirve en Forever, se saca
-		if DeleteMacro then pcall(DeleteMacro, idx) end
-		dg.macrosMal[clave] = (date and date("%d-%m %H:%M") or "") .. " el juego no reconoce su hechizo"
-		dg.macrosBien[clave] = nil
+		-- Recién creada, el juego puede no tenerla al día todavía (revisión wow-addon-lua, 19-11): se vuelve a
+		-- preguntar un segundo después y SOLO si sigue sin reconocer ningún hechizo se saca (no sirve en Forever).
+		local function revisar()
+			local i = GetMacroIndexByName and GetMacroIndexByName(nombre) or 0
+			if not i or i == 0 then return end
+			if M.MacroFunciona(i) ~= false then
+				dg.macrosBien[clave] = date and date("%d-%m %H:%M") or true
+				M.Cambio()
+				return
+			end
+			if DeleteMacro then pcall(DeleteMacro, i) end
+			dg.macrosMal[clave] = (date and date("%d-%m %H:%M") or "") .. " el juego no reconoce su hechizo"
+			dg.macrosBien[clave] = nil
+			M.ultimoMacros = "«" .. (m.titulo or clave) .. "»: el juego no la entiende en Forever, la saqué."
+			M.Cambio()
+		end
+		if C_Timer and C_Timer.After then C_Timer.After(1, function() pcall(revisar) end) else revisar() end
+		if dg.macrosMal[clave] then return false, "el juego no la entiende en Forever: la saqué", "mal" end
+		M.PJ().hechos["macro:" .. clave] = true
 		M.Cambio()
-		return false, "el juego no la entiende en Forever: la saqué", "mal"
+		return true, "creada; el juego la está revisando"
 	end
 	if funciona then dg.macrosBien[clave] = date and date("%d-%m %H:%M") or true end
 	if PickupMacro and not sinCursor then pcall(PickupMacro, idx) end

@@ -131,7 +131,7 @@ function Av.Lanzado(unidad, id)
 	local tipo = Av.TipoControl(id)
 	if t - (ultimoLanzado[tipo] or -99) < 3 then return end -- uno cada 3 s por tipo de control
 	ultimoLanzado[tipo] = t
-	if not (UnitCanAttack and UnitCanAttack("player", unidad)) then return end
+	if not (UnitCanAttack and M.Si(UnitCanAttack("player", unidad))) then return end
 	local quien = UnitName(unidad)
 	if M.Secreto(quien) then quien = "Un enemigo" end
 	mostrar(("%s usó %s"):format(quien or "Un enemigo", M.NombreHechizo(id)), true)

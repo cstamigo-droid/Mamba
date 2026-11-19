@@ -36,6 +36,7 @@ local function aura(unidad, id, filtro)
 		for i = 1, 40 do
 			local ok, a = pcall(A.GetAuraDataByIndex, unidad, i, filtro)
 			if not ok then return nil end
+			if M.Secreto(a) then return nil end
 			if not a then return false end
 			if M.Secreto(a.name) or M.Secreto(a.spellId) then return nil end
 			if a.name == nombre or a.spellId == id then return true end
@@ -52,7 +53,7 @@ function R.Enemigos()
 	local n = 0
 	for _, p in ipairs(N.GetNamePlates() or {}) do
 		local u = p.namePlateUnitToken or (p.UnitFrame and p.UnitFrame.unit)
-		if u and UnitCanAttack and UnitCanAttack("player", u) and UnitAffectingCombat and UnitAffectingCombat(u) then n = n + 1 end
+		if u and UnitCanAttack and M.Si(UnitCanAttack("player", u)) and UnitAffectingCombat and M.Si(UnitAffectingCombat(u)) then n = n + 1 end
 	end
 	return n
 end
@@ -91,7 +92,7 @@ function R.Listo(id)
 	local nombre = M.NombreHechizo(id)
 	if C_Spell and C_Spell.IsSpellUsable then
 		local ok, usable, sinMana = pcall(C_Spell.IsSpellUsable, nombre)
-		if ok and not M.Secreto(usable) and not usable then return false, sinMana and "mana" or "noUsable" end
+		if ok and not M.Secreto(usable) and not usable then return false, M.Si(sinMana) and "mana" or "noUsable" end
 	end
 	if C_Spell and C_Spell.GetSpellCooldown then
 		local ok, cd = pcall(C_Spell.GetSpellCooldown, nombre)
@@ -154,7 +155,7 @@ function R.ModoAuto()
 	local _, tipo
 	if IsInInstance then _, tipo = IsInInstance() end
 	if tipo == "pvp" or tipo == "arena" then return "jcj" end
-	if UnitExists("target") and UnitIsPlayer and UnitIsPlayer("target") and UnitCanAttack and UnitCanAttack("player", "target") then return "jcj" end
+	if UnitExists("target") and UnitIsPlayer and M.Si(UnitIsPlayer("target")) and UnitCanAttack and M.Si(UnitCanAttack("player", "target")) then return "jcj" end
 	if tipo == "party" or tipo == "raid" then
 		local nivel = UnitLevel and M.Num(UnitLevel("target"))
 		local clas = UnitClassification and UnitClassification("target")
