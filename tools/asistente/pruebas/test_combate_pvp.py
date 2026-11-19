@@ -305,6 +305,15 @@ Med.Dibujar()
 vistas = sum(1 for i in range(1, 9) if L.eval('function(i) return MambaMedidorCombate and nil end')(i) is None)
 check(VM.h == 16 + 8 * 14, "medidor: el marco cubre sus 8 barras, no solo el título (alto %s)" % VM.h)
 
+# ---------- K120: transparencia
+L.execute('local mt = getmetatable(CreateFrame("Frame")).__index; mt.SetAlpha = function(s, a) s.alfa = a end')
+C.DB().alfaMarcos = 60
+C.Cambio()
+check(abs((G.MambaMedidorCombate.alfa or 0) - 0.6) < 0.01 and abs((G.MambaCercaBarra.alfa or 0) - 0.6) < 0.01, "K120: transparencia 60 %% en medidor y barra Cerca (%s)" % G.MambaMedidorCombate.alfa)
+C.DB().alfaMarcos = 5
+check(abs(C.AplicarTransparencia() - 0.3) < 0.01, "K120: nunca menos de 30 % (no desaparece)")
+C.DB().alfaMarcos = 100; C.Cambio()
+
 # ---------- reglas
 src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua"))
 check("SLASH_" not in src and "SlashCmdList" not in src, "sin comandos /")

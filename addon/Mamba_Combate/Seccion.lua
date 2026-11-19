@@ -175,6 +175,8 @@ local function dibujarAvisos(p, ancho)
 		P.Interruptor(p, "Placas de nombre de enemigos (detectan antes)", "La tecla V del juego. Con ellas apagadas, Mamba solo ve a los enemigos que señalas con el ratón o eliges de objetivo. No se cambia en combate.",
 			function() return M.BarraCerca and M.BarraCerca.PlacasEnemigas() end, function(v) if M.BarraCerca then M.BarraCerca.EncenderPlacas(v) end end),
 		P.Boton(p, "Ver enemigos cerca y muertes", function() if M.Cercanos then M.Cercanos.Abrir() end end),
+		P.Deslizador(p, "Transparencia de medidor, amenaza, barra «Cerca», ranking y marcadores", "100 % = sin transparencia. El tamaño se cambia con la rueda del ratón en «Mover elementos».", 30, 100, 5, "%d %%",
+			function() return d.alfaMarcos end, function(v) d.alfaMarcos = v; M.AplicarTransparencia() end),
 		P.Deslizador(p, "Avisar con el maná bajo el", nil, 5, 60, 5, "%d %%", function() return d.avisoMana end, function(v) d.avisoMana = v end),
 		P.Deslizador(p, "Avisar con la amenaza sobre el", nil, 60, 110, 5, "%d %%", function() return d.avisoAmenaza end, function(v) d.avisoAmenaza = v end),
 	}, ancho, y)

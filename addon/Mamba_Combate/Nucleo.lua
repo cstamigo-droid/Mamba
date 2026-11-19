@@ -8,7 +8,7 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
-	cercanosSola = true, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre",
+	cercanosSola = true, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100,
 }
 
 function M.DB()
@@ -92,9 +92,25 @@ function M.BuscarInstructor()
 	if api and api.Abrir then pcall(api.Abrir, "MambaServicios") end
 end
 
+-- K120: transparencia de los marcos de combate que quedan siempre a la vista (el tamaño se cambia con la rueda en
+-- «Mover elementos»). 30-100 %.
+M.TRANSPARENTES = { "MambaMedidorCombate", "MambaAmenaza", "MambaCercaBarra", "MambaRanking", "MambaDisparo", "MambaMarcadores" }
+function M.AplicarTransparencia()
+	local a = (M.Num(M.DB().alfaMarcos) or 100) / 100
+	a = math.max(0.3, math.min(1, a))
+	for _, n in ipairs(M.TRANSPARENTES) do
+		local f = _G[n]
+		if f and f.SetAlpha then f:SetAlpha(a) end
+	end
+	return a
+end
+
 local oyentes = {}
 function M.AlCambiar(fn) oyentes[#oyentes + 1] = fn end
-function M.Cambio() for _, fn in ipairs(oyentes) do pcall(fn) end end
+function M.Cambio()
+	for _, fn in ipairs(oyentes) do pcall(fn) end
+	M.Proteger("transparencia", M.AplicarTransparencia)
+end
 
 -- Un marco movible propio (K55): se registra en el modo «Mover elementos» de la ventana de Mamba
 -- (MambaAPI.Movible, K55 ampliado) con su nombre en español (etiqueta). Estos marcos no tienen barra de título:
@@ -142,6 +158,7 @@ local fp = CreateFrame("Frame")
 M.Escuchar(fp, "PLAYER_LOGIN")
 fp:SetScript("OnEvent", function()
 	for _, fn in ipairs(precrear) do M.Proteger("precrear", fn) end
+	M.Proteger("transparencia", M.AplicarTransparencia)
 	M.ConectarMover()
 end)
 
