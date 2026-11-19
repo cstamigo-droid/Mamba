@@ -24,4 +24,5 @@ SecSubasta.lua
 SecLugares.lua
 SecVarias.lua
 Grupos.lua
+Lugares.lua
 Llevame.lua

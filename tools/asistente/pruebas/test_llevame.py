@@ -43,6 +43,10 @@ L.execute("MARCOS = {}")
 for k, v in marcos.items():
     G.MARCOS[k] = L.table_from(v)
 
+L.execute("""
+local lower0 = string.lower
+string.lower = function(s) return (tostring(s):gsub("%u", function(c) if c:byte() < 128 then return lower0(c) end return c end)) end
+""")  # como en el juego: string.lower no toca los bytes de UTF-8 (el de Windows con locale Latin-1 los rompe)
 L.execute((AQUI / "mock_polestar_nav.lua").read_text(encoding="utf-8"))
 ld = L.eval('function(src, name, addon, ns) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f(addon, ns) end')
 if ROMPER:
@@ -74,7 +78,7 @@ function UnitFactionGroup() return "Horde" end
 function UnitClass() return "Druida", "DRUID" end
 function InCombatLockdown() return COMBATE == true end
 C_AddOns = { IsAddOnLoaded = function() return true end }
-C_Map = { GetMapInfo = function(m) return ({ [1454] = { name = "Orgrimmar" }, [1456] = { name = "Cima del Trueno" }, [1458] = { name = "Entrañas" } })[m] end,
+C_Map = { GetMapInfo = function(m) return ({ [1454] = { name = "Orgrimmar" }, [1456] = { name = "Cima del Trueno" }, [1458] = { name = "Entrañas" }, [1443] = { name = "Desolace" } })[m] end,
   GetMapChildrenInfo = function(cont, tipo, todos)
     if cont == 1414 then return { { mapID = 1456, name = "Cima del Trueno" }, { mapID = 1454, name = "Orgrimmar" }, { mapID = 1413, name = "Los Baldíos" }, { mapID = 1412, name = "Mulgore" } } end
     return { { mapID = 1458, name = "Entrañas" } }
@@ -95,6 +99,7 @@ PIEDRA = "Thunder Bluff"
 sns = L.table()
 for f in ("Ciudades.lua", "Logica.lua"):
     ld((ADDON / "Asistente_Servicios" / f).read_text(encoding="utf-8"), f"Asistente_Servicios/{f}", "Asistente_Servicios", sns)
+ld((ADDON / "Asistente/Lugares.lua").read_text(encoding="utf-8"), "Asistente/Lugares.lua", "Asistente", L.table())
 ld((ADDON / "Asistente/Llevame.lua").read_text(encoding="utf-8"), "Asistente/Llevame.lua", "Asistente", L.table())
 LL = G.Asistente.Llevame
 check(LL is not None, "Llevame.lua carga y deja Asistente.Llevame")
@@ -318,6 +323,76 @@ check(api.Llevame and api.RutasA and api.RutaActual and api.AlCambiarRuta, "Mamb
 ra = api.RutasA("banco")
 check(ra.estado == "ok" and ra.rutas[1] is not None and ra.punto is not None, f"MambaAPI.RutasA('banco') da rutas sin poner la flecha ({ra.estado})")
 check(api.TiempoTexto(258, True) == "≈ 4:18", "MambaAPI.TiempoTexto (R0)")
+
+# 14) K118: buscar en español sin importar mayúsculas ni tildes (zonas, poblados, PNJ, misiones y objetos), cada uno
+# con su «Llévame». Con el buscador y el Codex REALES de Polestar y los nombres esMX de Polestar_esMX.
+L.execute("""
+GetLocale = function() return "esMX" end
+local C = Polestar.Compat
+C.GetQuestTitle = C.GetQuestTitle or function() return nil end
+C.GetItemName = C.GetItemName or function() return nil end
+C.GetPlayerFaction = C.GetPlayerFaction or function() return "Horde" end
+C.Readable = C.Readable or function(v) return v end
+C.MapName = C.MapName or function(m) return C.GetMapName(m) end
+Polestar.Guides = Polestar.Guides or { List = function() return {} end, All = function() return {} end }
+Polestar.After = Polestar.After or function() end
+Polestar.OnInit = Polestar.OnInit or function() end
+Polestar.Debug = Polestar.Debug or function() end
+Polestar.DB = Polestar.DB or function() return {} end
+Polestar.Search, Polestar.Codex = nil, nil
+""")
+PACKS = {}
+def pack(nombre):
+    if nombre not in PACKS:
+        archivos = ["Names.lua"] if nombre.startswith("Polestar_es") else [
+            l.strip() for l in (ADDON / nombre / f"{nombre}.toc").read_text(encoding="utf-8").splitlines() if l.strip().endswith(".lua")]
+        for f in archivos:
+            ld((ADDON / nombre / f).read_text(encoding="utf-8"), f"{nombre}/{f}", nombre, G.NS_POLESTAR)
+        PACKS[nombre] = True
+    return True
+G.PACK_PY = pack
+L.execute("Polestar.Data = { Pack = function(n) return PACK_PY(n) end }")
+for f in ("Core/LuaChunks.lua", "Core/Names.lua", "Lookup/Codex.lua", "Core/Search.lua"):
+    ld((ADDON / "Polestar" / f).read_text(encoding="utf-8"), f"Polestar/{f}", "Polestar", G.NS_POLESTAR)
+check(G.Polestar.Codex.Load() and G.Polestar.Names.Localised(), "Codex y nombres esMX de Polestar cargados")
+G.CHAR.flightTimes = L.table()
+L.execute("ACTIVO = false; RUTA = nil; CI = nil; Polestar.Nav.GetTarget = function() return nil end")
+
+# a) "Poblado Magram" (Desolace), con mayúsculas, sin ellas y sin tilde
+for q in ("Poblado Magram", "poblado magram", "POBLADO MAGRAM", "pobládo mágram"):
+    b = lista(LL.Buscar(q))
+    check(b and b[0].tipo == "zona" and b[0].area == 604 and b[0].map == 1443, f"«{q}» -> Poblado Magram, Desolace ({b and (b[0].nombre, b[0].sub)})")
+okk, info = LL.Llevame("poblado magram")
+nav = lista(G.NAVEGADO)
+check(okk and nav and nav[-1].map == 1443 and abs(nav[-1].x - 0.711) < 0.01 and abs(nav[-1].y - 0.73) < 0.01,
+      f"Llévame a Poblado Magram pone la flecha en Desolace 71,1 / 73,0 ({nav and (nav[-1].map, nav[-1].x, nav[-1].y)})")
+L.execute("ACTIVO = false")
+# b) "Gran bastón de los necrokhanes" (así lo escribió Cristian; el objeto es «…de los necrokhans»)
+for q in ("Gran bastón de los necrokhanes", "gran baston de los necrokhans", "NECROKHANS"):
+    b = [d for d in lista(LL.Buscar(q)) if d.tipo == "objeto"]
+    check(b and b[0].id == 271803, f"«{q}» -> el objeto 271803 ({b and b[0].nombre})")
+b = [d for d in lista(LL.Buscar("Gran bastón de los necrokhanes")) if d.id == 271803]
+if b:
+    print("  ", b[0].nombre, "·", b[0].sub)
+    check(b[0].spawns is not None and "Khan Jehn" in b[0].sub and "Poblado Magram" in b[0].sub,
+          "dice dónde se consigue: recompensa de «Khan Jehn», en Poblado Magram")
+okk, info = LL.Llevame("Gran bastón de los necrokhanes")
+check(okk and info.destino.id == 271803 and info.punto.map == 1443, f"Llévame al bastón va a Desolace ({okk}, {info})")
+L.execute("ACTIVO = false")
+# c) misiones y PNJ por su nombre, aunque la guía no los recomiende
+b = lista(LL.Buscar("khan jehn"))
+check(any(d.tipo == "mision" for d in b) or any(d.tipo == "pnj" for d in b), f"«khan jehn» trae la misión o el PNJ ({[(d.tipo, d.nombre) for d in b][:4]})")
+check(all(d.spawns is not None or d.map is not None for d in b if d.tipo in ("pnj", "mision")), "cada PNJ o misión que sale tiene lugar (su «Llévame»)")
+# el juego carga lo que dice el .toc: Lugares.lua tiene que estar, y antes de Llevame.lua (otra sesión lo pisó el 19-11)
+toc = [l.strip() for l in (ADDON / "Asistente/Asistente.toc").read_text(encoding="utf-8").splitlines()]
+check("Lugares.lua" in toc and "Llevame.lua" in toc and toc.index("Lugares.lua") < toc.index("Llevame.lua"),
+      "Asistente.toc carga Lugares.lua antes de Llevame.lua")
+# d) control negativo: sin Lugares.lua el poblado NO se encuentra; y algo que no existe da 0
+L.execute("GUARDA = Asistente_Lugares; Asistente_Lugares = nil; Asistente.Llevame.OlvidarSubzonas()")
+b = [d for d in lista(LL.Buscar("poblado magram")) if d.tipo == "zona"]
+check(len(b) == 0, "control negativo: sin la tabla de subzonas, «poblado magram» no aparece (la prueba mide la tabla)")
+L.execute("Asistente_Lugares = GUARDA; Asistente.Llevame.OlvidarSubzonas()")
+check(len(lista(LL.Buscar("xqzv poblado inexistente"))) == 0, "control negativo: un lugar inventado da 0 resultados")
 
 print(f"{ok} OK, {fail} fallas" + (" (control negativo)" if ROMPER else ""))
 sys.exit(1 if fail else 0)

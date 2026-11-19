@@ -44,8 +44,9 @@ local function deCiudad(s)
 end
 
 local ICONO = { mazmorra = "Interface\\Minimap\\Dungeon", servicio = "Interface\\Minimap\\Tracking\\None", ciudad = "Interface\\Minimap\\Tracking\\FlightMaster",
-	zona = "Interface\\Minimap\\Tracking\\FlightMaster", pnj = "Interface\\Minimap\\Tracking\\None", punto = "Interface\\Minimap\\Tracking\\None" }
-local COL = { mazmorra = "|cffa385ff", servicio = "|cff94c9ff", ciudad = "|cfff2d27a", zona = "|cffd8c7a0", pnj = "|cff9fe0a8", punto = "|cffd0d0d0" }
+	zona = "Interface\\Minimap\\Tracking\\FlightMaster", pnj = "Interface\\Minimap\\Tracking\\None", punto = "Interface\\Minimap\\Tracking\\None",
+	mision = "Interface\\GossipFrame\\AvailableQuestIcon", objeto = "Interface\\Icons\\INV_Misc_Bag_10" }
+local COL = { mazmorra = "|cffa385ff", servicio = "|cff94c9ff", ciudad = "|cfff2d27a", zona = "|cffd8c7a0", pnj = "|cff9fe0a8", punto = "|cffd0d0d0", mision = "|cfffad25a", objeto = "|cff0070dd" }
 
 local function normal(t)
 	local l = LL()
@@ -116,10 +117,11 @@ Hub.Seccion({
 	clave = "MambaIrA", nombre = "Ir a…", icono = "icon-goto", orden = 120, addon = "Asistente_Servicios",
 	pestanas = { { key = "buscar", label = "Buscar" }, { key = "recientes", label = "Recientes" } },
 	titulo = function() return "Ir a…", "Elige un lugar: Mamba te da la ruta más rápida, tramo por tramo, y pone la flecha" end,
-	buscar = { "Un servicio, una ciudad, una zona, una mazmorra o un PNJ", "Buscar un lugar", "Buscar" },
+	buscar = { "Un servicio, una ciudad, un poblado, una mazmorra, un PNJ, una misión o un objeto", "Buscar un lugar", "Buscar" },
 	nav = function(est)
 		return { { key = "todo", label = "Todo" }, { key = "servicio", label = "Servicios" }, { key = "ciudad", label = "Ciudades" },
-			{ key = "zona", label = "Zonas" }, { key = "mazmorra", label = "Mazmorras" }, { key = "pnj", label = "PNJ" } }, est.filtro or "todo"
+			{ key = "zona", label = "Zonas y lugares" }, { key = "mazmorra", label = "Mazmorras" }, { key = "pnj", label = "PNJ" },
+			{ key = "mision", label = "Misiones" }, { key = "objeto", label = "Objetos" } }, est.filtro or "todo"
 	end,
 	dibujar = function(est, V)
 		if not cargado("Asistente_Equipo") and A.Cargar then A.Cargar("Asistente_Equipo", function() Hub.Redibujar() end) end
@@ -191,8 +193,10 @@ Hub.Seccion({
 		V:Columnas({ { "", 600 }, { "", 200 } }, true)
 		for i, d in ipairs(vis) do
 			if i > 40 then V:Nota((#vis - 40) .. " más: escribe más palabras para afinar."); break end
+			-- cada resultado con su «Llévame», aunque la guía no lo recomiende (K118); un objeto sin lugar conocido, sin botón
+			local puede = not (d.tipo == "objeto" and not d.spawns)
 			V:Fila({ icono = ICONO[d.tipo], celdas = { { (COL[d.tipo] or "") .. d.nombre .. "|r" .. (d.clave == (sel and sel.clave) and "  |cff9ba2b9‹ elegido|r" or ""), d.sub } },
-				clic = function() est.sel = d.clave end })
+				clic = function() est.sel = d.clave end, ir = puede and function() est.sel = d.clave; llevar(est, d, "rapida") end or nil, irTexto = puede and "Llévame" or nil })
 		end
 	end,
 })

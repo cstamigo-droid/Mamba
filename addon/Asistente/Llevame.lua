@@ -530,24 +530,147 @@ function LL.Zonas()
 end
 function LL.OlvidarZonas() zonas = nil end
 
--- PNJ por su nombre, con el buscador de Polestar (el Codex). -> { destino, ... }
-function LL.BuscarPNJ(texto, max)
+-- Plurales y singulares: "necrokhanes" encuentra "necrokhans" (Cristian lo escribió así, K118).
+function LL.Raiz(w)
+	if #w > 5 and w:sub(-2) == "es" then return w:sub(1, -3) end
+	if #w > 4 and w:sub(-1) == "s" then return w:sub(1, -2) end
+	return w
+end
+local function raices(texto)
+	local t = {}
+	for w in LL.Normal(texto):gmatch("%S+") do t[#t + 1] = LL.Raiz(w) end
+	return table.concat(t, " ")
+end
+
+-- Subzonas y poblados ("Poblado Magram", "El Cruce"): Lugares.lua (generado de las tablas del cliente).
+local subzonas
+function LL.Subzonas()
+	if subzonas then return subzonas end
+	local out = {}
+	local D = _G.Asistente_Lugares
+	for _, a in ipairs(D and D.areas or {}) do
+		local id, map, x, y, es, en = a[1], a[2], a[3], a[4], a[5], a[6]
+		local nombre = es
+		if C_Map and C_Map.GetAreaInfo then
+			local ok, n = pcall(C_Map.GetAreaInfo, id)
+			if ok and type(n) == "string" and n ~= "" then nombre = n end
+		end
+		local zona = C_Map and C_Map.GetMapInfo and (C_Map.GetMapInfo(map) or {}).name
+		out[#out + 1] = { tipo = "zona", clave = "a:" .. id, nombre = nombre, sub = "Lugar" .. (zona and (" · " .. zona) or ""),
+			map = map, x = x, y = y, buscar = (es or "") .. " " .. (en or "") .. " poblado lugar", area = id }
+	end
+	subzonas = out
+	return out
+end
+
+local function nombreDe(Cx, kind, id)
+	if not (Cx and Cx.Name and id) then return nil end
+	local ok, n = pcall(Cx.Name, kind, id)
+	return ok and n or nil
+end
+local function spawnsDe(Cx, kind, id)
+	local f = kind == "object" and Cx.Object or Cx.Npc
+	if not (f and id) then return nil end
+	local ok, rec = pcall(f, id)
+	local sp = ok and rec and rec.spawns
+	return sp and #sp > 0 and sp or nil
+end
+-- Dónde se consigue un objeto: la mejor fuente con lugar (la caída más probable, el vendedor, la misión que lo
+-- da, el objeto del mundo) o, si el Codex no la trae, la misión de las guías que lo da de recompensa (Lugares.lua).
+-- -> spawns, texto | nil
+local function dondeObjeto(Cx, id)
+	local ok, rec = pcall(Cx.Item, id)
+	local mejor, txt, chance = nil, nil, -1
+	local function mision(q)
+		local okq, qr = pcall(Cx.Quest, q)
+		local fin = okq and qr and qr["end"] and qr["end"].npc and qr["end"].npc[1]
+		local ini = okq and qr and qr.start and qr.start.npc and qr.start.npc[1]
+		local sp = spawnsDe(Cx, "npc", fin) or spawnsDe(Cx, "npc", ini)
+		local titulo = okq and qr and qr.title or ("misión " .. tostring(q))
+		return sp, "recompensa de «" .. titulo .. "»" .. (fin and nombreDe(Cx, "npc", fin) and (": la entrega " .. nombreDe(Cx, "npc", fin)) or "")
+	end
+	for _, src in ipairs(ok and rec and rec.sources or {}) do
+		local sp, t, c
+		if src.type == "drop" and src.npc then
+			sp, c = spawnsDe(Cx, "npc", src.npc), src.chance or 0
+			t = "lo suelta " .. (nombreDe(Cx, "npc", src.npc) or "un PNJ") .. (src.chance and format(" (%s %%)", tostring(src.chance)) or "")
+		elseif src.type == "vendor" and src.npc then
+			sp, c, t = spawnsDe(Cx, "npc", src.npc), 101, "lo vende " .. (nombreDe(Cx, "npc", src.npc) or "un vendedor")
+		elseif src.type == "quest" and src.quest then
+			sp, t = mision(src.quest); c = 100
+		elseif src.type == "object" and src.object then
+			sp, c, t = spawnsDe(Cx, "object", src.object), src.chance or 0, "sale de " .. (nombreDe(Cx, "object", src.object) or "un objeto del mundo")
+		elseif (src.type == "gift" or src.type == "rep" or src.type == "pvp") and src.npc then
+			sp, c, t = spawnsDe(Cx, "npc", src.npc), 50, "lo da " .. (nombreDe(Cx, "npc", src.npc) or "un PNJ")
+		end
+		if sp and c > chance then mejor, txt, chance = sp, t, c end
+	end
+	if not mejor then
+		local D = _G.Asistente_Lugares
+		local r = D and D.recompensas and D.recompensas[id]
+		local q, area = type(r) == "table" and r[1] or r, type(r) == "table" and r[2] or 0
+		if q then
+			mejor, txt = mision(q)
+			-- la misión sin PNJ con lugar en el Codex: el centro del lugar donde se entrega (la nota de la guía)
+			if not mejor and area and area > 0 then
+				for _, a in ipairs(D.areas or {}) do
+					if a[1] == area then
+						mejor = { { map = a[2], x = a[3], y = a[4] } }
+						local n = a[5]
+						if C_Map and C_Map.GetAreaInfo then
+							local ok2, cn = pcall(C_Map.GetAreaInfo, area)
+							if ok2 and type(cn) == "string" and cn ~= "" then n = cn end
+						end
+						txt = txt .. " en " .. tostring(n)
+						break
+					end
+				end
+			end
+		end
+	end
+	return mejor, txt
+end
+
+-- PNJ, misiones y objetos por su nombre en español, con el buscador de Polestar (el Codex; sin importar mayúsculas
+-- ni tildes). Si no encuentra nada, prueba otra vez sin los plurales. -> { destino, ... } (cada uno con spawns)
+function LL.BuscarCodex(texto, max)
 	local p = P()
 	local Sr, Cx = p and p.Search, p and p.Codex
 	if not (Sr and Sr.Query and Cx and Cx.Npc) or #(texto or "") < 3 then return {} end
 	if Cx.IsLoaded and not Cx.IsLoaded() and Cx.Load and not enCombate() then pcall(Cx.Load) end
-	local ok, res = pcall(Sr.Query, texto, { kinds = { npc = true }, limit = max or 6, subtitles = false })
+	local kinds = { npc = true, rare = true, quest = true, item = true }
+	local ok, res = pcall(Sr.Query, texto, { kinds = kinds, limit = max or 12, subtitles = false })
+	if not (ok and res and #res > 0) then
+		local r = raices(texto)
+		if r ~= LL.Normal(texto) then ok, res = pcall(Sr.Query, r, { kinds = kinds, limit = max or 12, subtitles = false }) end
+	end
 	local out = {}
 	for _, r in ipairs(ok and res or {}) do
-		local okn, rec = pcall(Cx.Npc, r.id)
-		local spawns = okn and rec and rec.spawns
-		if spawns and #spawns > 0 then
-			out[#out + 1] = { tipo = "pnj", clave = "n:" .. tostring(r.id), nombre = r.title or rec.name, sub = "PNJ" .. (rec.subname and (" · " .. rec.subname) or ""),
-				spawns = spawns, id = r.id }
+		if r.kind == "npc" or r.kind == "rare" then
+			local okn, rec = pcall(Cx.Npc, r.id)
+			local spawns = okn and rec and rec.spawns
+			if spawns and #spawns > 0 then
+				out[#out + 1] = { tipo = "pnj", clave = "n:" .. tostring(r.id), nombre = r.title or rec.name, sub = "PNJ" .. (rec.subname and (" · " .. rec.subname) or ""),
+					spawns = spawns, id = r.id }
+			end
+		elseif r.kind == "quest" then
+			local okq, qr = pcall(Cx.Quest, r.id)
+			local da = okq and qr and qr.start and qr.start.npc and qr.start.npc[1]
+			local obj = okq and qr and qr.start and qr.start.object and qr.start.object[1]
+			local sp = spawnsDe(Cx, "npc", da) or spawnsDe(Cx, "object", obj)
+			if sp then
+				out[#out + 1] = { tipo = "mision", clave = "q:" .. tostring(r.id), nombre = r.title or (qr and qr.title) or "Misión",
+					sub = "Misión · la da " .. (nombreDe(Cx, da and "npc" or "object", da or obj) or "?"), spawns = sp, id = r.id }
+			end
+		elseif r.kind == "item" then
+			local sp, txt = dondeObjeto(Cx, r.id)
+			out[#out + 1] = { tipo = "objeto", clave = "i:" .. tostring(r.id), nombre = r.title or nombreDe(Cx, "item", r.id) or "Objeto",
+				sub = "Objeto · " .. (txt or "Mamba no sabe dónde se consigue"), spawns = sp, id = r.id }
 		end
 	end
 	return out
 end
+LL.BuscarPNJ = LL.BuscarCodex -- nombre de antes
 
 -- El punto de un PNJ: de sus apariciones, la más cercana (en línea recta en tu continente; si no, la primera).
 local function puntoPNJ(d)
@@ -581,7 +704,7 @@ function LL.Punto(d, presupuesto)
 		local c, no = LL.MasCercano(d.cat, d.det, presupuesto)
 		if not c then return nil, no end
 		return c, no
-	elseif d.tipo == "pnj" then
+	elseif d.spawns or d.tipo == "pnj" or d.tipo == "mision" or d.tipo == "objeto" then
 		local s = puntoPNJ(d)
 		if not s then return nil, "sin" end
 		return { map = s.map, x = s.x, y = s.y, f = s.f }
@@ -612,6 +735,7 @@ function LL.Destinos()
 		end
 	end
 	for _, z in ipairs(LL.Zonas()) do out[#out + 1] = z end
+	for _, z in ipairs(LL.Subzonas()) do out[#out + 1] = z end
 	local E = A.modulos and A.modulos.equipo
 	for _, m in ipairs(E and E.MAZMORRAS or {}) do
 		out[#out + 1] = { tipo = "mazmorra", clave = "m:" .. m.clave, nombre = m.nombre, m = m,
@@ -626,13 +750,13 @@ function LL.Calce(d, q)
 	q = LL.Normal(q)
 	if q == "" then return 0 end
 	local nombre = LL.Normal(d.nombre)
-	if nombre == q or nombre == q .. " mas cercano" then return 100 end
+	if nombre == q or nombre == q .. " mas cercano" or raices(nombre) == raices(q) then return 100 end
 	local base = LL.Normal(d.nombre .. " " .. (d.sub or "") .. " " .. (d.buscar or ""))
 	local util = 0
 	for w in q:gmatch("%S+") do
 		if not VACIAS[w] then
 			util = util + 1
-			if not base:find(w, 1, true) then return 0 end
+			if not (base:find(w, 1, true) or base:find(LL.Raiz(w), 1, true)) then return 0 end
 		end
 	end
 	if util == 0 then return 0 end
@@ -652,10 +776,13 @@ function LL.Buscar(texto)
 		local c = LL.Calce(d, q)
 		if c > 0 then d.calce = c; out[#out + 1] = d end
 	end
-	if #out < 6 then
-		for _, d in ipairs(LL.BuscarPNJ(texto, 6)) do d.calce = 40; out[#out + 1] = d end
+	-- PNJ, misiones y objetos (el Codex de Polestar): siempre, aunque la guía no los recomiende (K118)
+	for _, d in ipairs(LL.BuscarCodex(texto, 12)) do
+		local n = LL.Normal(d.nombre)
+		d.calce = (n == q or raices(n) == raices(q)) and 90 or 40
+		out[#out + 1] = d
 	end
-	local orden = { servicio = 1, ciudad = 2, zona = 3, mazmorra = 4, pnj = 5, punto = 6 }
+	local orden = { servicio = 1, ciudad = 2, zona = 3, mazmorra = 4, pnj = 5, mision = 6, objeto = 7, punto = 8 }
 	table.sort(out, function(a, b)
 		if a.calce ~= b.calce then return a.calce > b.calce end
 		if orden[a.tipo] ~= orden[b.tipo] then return (orden[a.tipo] or 9) < (orden[b.tipo] or 9) end
@@ -861,6 +988,7 @@ function LL.Llevame(destino, opciones)
 end
 
 LL._viaje = function() return viaje end -- para las pruebas
+function LL.OlvidarSubzonas() subzonas = nil; ultimaBusqueda = {} end
 
 ---------------------------------------------------------------- API pública (MambaAPI, Grupos.lua la crea)
 -- Para todas las secciones (Servicios, Mazmorras, Equipo, Mi plan, el panel de la guía):
