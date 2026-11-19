@@ -543,6 +543,11 @@ end""")
 r = ERRH()
 check(r[0] == 1 and "falla de prueba" in str(r[1]), f"Mamba_Errores anota los errores escuchando ScriptErrorsFrame:OnError ({r[1]})")
 
+# 10h) K115: UNA entrada para "no vender": MambaAPI.NoVender(id)
+nv = G.MambaAPI.NoVender(211527)
+check(nv is not None and "Forever" in str(nv), f"MambaAPI.NoVender: el saco de dormir no se vende ({nv})")
+check(G.MambaAPI.NoVender(4306) is None, "MambaAPI.NoVender: un paño de seda sí se puede vender")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

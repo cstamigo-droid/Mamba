@@ -200,3 +200,27 @@ end
 function API.ModoMover(si) if A.Ventanas then return A.Ventanas.ModoMover(si) end return false end
 function API.AlModoMover(fn) if A.Ventanas then A.Ventanas.AlModoMover(fn) end end
 
+-- K115: ¿se puede vender este objeto? -> motivo (texto) si NO, o nil. Una sola entrada para todos los módulos:
+-- la lista por id de ForeverTDB del Tasador (Tasador/Mecanicas.lua: saco de dormir, ecos, llaves...), la regla del
+-- Tasador (misión, llave, ligado de utilidad, si se pasa el objeto entero) y la de Profesiones (lo VITAL).
+function API.NoVender(id)
+	id = tonumber(id)
+	if not id then return nil end
+	local T = _G.Tasador
+	if T and T.MECANICAS and T.MECANICAS[id] then return "Lo usas tú (mecánica de Forever): no lo vendas." end
+	if T and T.Protegido then
+		local f = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+		local ok, _, _, _, _, _, _, _, _, _, _, _, clase, _, liga = pcall(f, id)
+		if ok and clase then
+			local m = T.Protegido({ id = id, clase = clase, liga = liga })
+			if m then return m end
+		end
+	end
+	local MP = _G.MambaProfesiones
+	if type(MP) == "table" and MP.NoVender then
+		local ok, m = pcall(MP.NoVender, id)
+		if ok and type(m) == "string" and m ~= "" then return m end
+	end
+	return nil
+end
+

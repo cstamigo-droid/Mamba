@@ -135,6 +135,30 @@ function T.AgregarLineas(tooltip, link, datos)
 		if ok and type(txt) == "string" and txt ~= "" then tooltip:AddLine(txt, VITAL[1], VITAL[2], VITAL[3], true) end
 	end
 
+	-- 3b) objeto de misión (K116): de qué misión es, si sigue en el registro, qué falta, o si ya se puede tirar
+	local Q = T.QuestDB and T.QuestDB()
+	if id and Q then
+		local okO, objs = pcall(Q.ObjectivesForItem, id)
+		if okO and type(objs) == "table" and #objs > 0 then
+			for i = 1, math.min(3, #objs) do
+				local o = objs[i]
+				local titulo = (o.entry and o.entry.title) or (Q.GetQuestTitle and Q.GetQuestTitle(o.q)) or ("misión " .. tostring(o.q))
+				local falta = (o.max or 1) - (o.cur or 0)
+				local estado = o.done and "listo" or (falta > 0 and ("faltan " .. falta .. " (" .. (o.cur or 0) .. "/" .. (o.max or 1) .. ")") or "listo")
+				tooltip:AddDoubleLine("Para la misión «" .. tostring(titulo) .. "»", estado, PLAN[1], PLAN[2], PLAN[3], TEXTO[1], TEXTO[2], TEXTO[3])
+			end
+			tooltip:AddLine("Está en tu registro · Alt + clic derecho: ver la misión y Llévame", GRIS[1], GRIS[2], GRIS[3], true)
+		elseif Q.ItemAheadList then
+			local okA, lista = pcall(Q.ItemAheadList, id)
+			if okA and type(lista) == "table" and lista[1] then
+				local t = Q.GetQuestTitle and Q.GetQuestTitle(lista[1].q) or tostring(lista[1].q)
+				tooltip:AddLine("Lo pide «" .. tostring(t) .. "», una misión de tu guía que todavía no tomaste: guárdalo.", PLAN[1], PLAN[2], PLAN[3], true)
+			elseif T.MisionVieja and T.MisionVieja(id) then
+				tooltip:AddLine("Su misión ya se entregó: se puede tirar.", GRIS[1], GRIS[2], GRIS[3], true)
+			end
+		end
+	end
+
 	-- 4) cuánto vale
 	local vend = (info.vendedor or 0) > 0 and T.Dinero(info.vendedor) or "no lo compra"
 	local sub = info.subasta and T.Dinero(info.subasta) or "sin datos aún"

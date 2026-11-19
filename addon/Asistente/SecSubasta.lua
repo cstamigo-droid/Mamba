@@ -164,6 +164,14 @@ function A.MenuObjeto(anchor, id)
 		items[#items + 1] = { text = txt, checked = o.elegido == k, onClick = function() marcar(id, k) end }
 	end
 	if o.elegido then items[#items + 1] = { text = "Volver a lo que sugiere Mamba", onClick = function() marcar(id, nil) end } end
+	-- K116: un objeto de misión lleva a su misión (Polestar la muestra con su paso y su flecha)
+	local Q = P.QuestDB
+	local okO, objs = pcall(function() return Q and Q.ObjectivesForItem and Q.ObjectivesForItem(id) end)
+	local q = okO and type(objs) == "table" and objs[1] and objs[1].q
+	local PK = P.UI and P.UI.Picker
+	if q and PK and PK.ShowQuest then
+		items[#items + 1] = { text = "Ver la misión y Llévame", onClick = function() PK.ShowQuest(q) end }
+	end
 	if abierto.subasta then items[#items + 1] = { text = "|cffe6ba66Poner en la subasta ahora|r", onClick = function() aviso = select(2, ponerEnSubasta(id, o.precio)) end } end
 	if abierto.vendedor and o.vendedor > 0 then items[#items + 1] = { text = "|cffe6ba66Venderlo ahora|r", onClick = function() aviso = select(2, venderAlVendedor(id)) end } end
 	pcall(W.ShowMenu, anchor, items, { point = "TOPLEFT", relPoint = "BOTTOMRIGHT", minWidth = 280 })

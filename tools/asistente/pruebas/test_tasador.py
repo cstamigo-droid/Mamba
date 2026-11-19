@@ -407,5 +407,28 @@ if not ROMPER_K115:
     check(L.eval("function(t) return t.MECANICAS ~= nil and t.MECANICAS[211527] == true and t.MECANICAS[6948] == true end")(T),
           "K115 la lista de ForeverTDB trae el saco de dormir y la piedra de hogar")
 
+# K116 (19-11): el cuadro de un objeto de misión dice de qué misión es, qué falta, o si ya se puede tirar
+ROMPER_K116 = "--romper-k116" in sys.argv
+L.execute("""
+Polestar = Polestar or {}
+Polestar.QuestDB = {
+  ObjectivesForItem = function(id) if id == 9201 then return { { q = 101, entry = { title = "Ojos de múrloc" }, cur = 3, max = 8, done = false } } end end,
+  IsObsoleteQuestItem = function(id) return id == 9202 end,
+  ItemAheadList = function(id) return nil end,
+  GetQuestTitle = function(q) return "misión " .. q end,
+}
+ITEMS[9201] = {name="Ojo de múrloc",q=1,sell=0,cls=12,sub=0,bind=4,loc="",stats={}}
+ITEMS[9202] = {name="Carta vieja",q=1,sell=0,cls=12,sub=0,bind=4,loc="",stats={}}
+""")
+if ROMPER_K116:
+    T.MisionVieja = L.eval("function() return false end")
+lines = lines_of(L.eval('ShowTip("|Hitem:9201|h[O]|h")'))
+check(any("Ojos de múrloc" in x and "faltan 5" in x for x in lines), f"K116 dice de qué misión es y qué falta {lines}")
+check(any("Guardar" in x and "Qué hacer" in x for x in lines), f"K116 mientras la misión sigue: Guardar {lines}")
+lines = lines_of(L.eval('ShowTip("|Hitem:9202|h[C]|h")'))
+check(any("se puede tirar" in x for x in lines) and not any("Qué hacer" in x and "Guardar" in x for x in lines),
+      f"K116 misión ya entregada: se puede tirar {lines}")
+L.execute("Polestar.QuestDB = nil")
+
 print(f"\n{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

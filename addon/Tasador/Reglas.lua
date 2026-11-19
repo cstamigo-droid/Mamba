@@ -96,8 +96,26 @@ function T.Protegido(info)
 	return nil
 end
 
+-- K116: la base de misiones de Polestar (Polestar_QuestDB), si está.
+function T.QuestDB()
+	local P = _G.Polestar
+	local Q = P and P.QuestDB
+	return type(Q) == "table" and Q or nil
+end
+
+-- Un objeto de misión que ya no sirve: todas sus misiones se entregaron (lo dice Polestar).
+function T.MisionVieja(id)
+	local Q = T.QuestDB()
+	if not (id and Q and Q.IsObsoleteQuestItem) then return false end
+	local ok, r = pcall(Q.IsObsoleteQuestItem, id)
+	return ok and r == true
+end
+
 function T.Evaluar(info, ajustes)
 	ajustes = ajustes or T.DEFAULTS
+	if info and info.id and (info.clase == T.CLASE_MISION or info.esMision) and T.MisionVieja(info.id) then
+		return { accion = T.ACCION.BOTAR, motivo = "La misión ya se entregó: se puede tirar." }
+	end
 	local protegido = T.Protegido(info)
 	if protegido then
 		return { accion = T.ACCION.GUARDAR, motivo = protegido, protegido = true }
