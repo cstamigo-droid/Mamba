@@ -177,6 +177,10 @@ def nuevo(antes=""):
             src = src.replace("if k then SetOverrideBindingClick(tecla, true, k, \"MambaBolsasTecla\") end", "")
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace('if que == "alternar" and debugstack then', 'if debugstack then')
+        if ROMPER and n == "Filtros.lua":
+            src = src.replace("if d and d.id and M.EsDeMision(d) then return nil end", "")
+        if ROMPER and n == "Reemplazo.lua":
+            src = src.replace("if ABRE[e] then M.AbrirInventario(true, true)", "if false then")
         if ROMPER and n == "Banco.lua":
             src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
@@ -486,6 +490,21 @@ L.execute('ToggleAllBags(); Correr()')
 check(not fi.visible, "un alternar desde un Manager se sigue ignorando")
 L.execute('debugstack = nil')
 check(any("ventana cerrada" in str(x) for x in G.MambaBolsasDB.diag.values()), "el diag anota cuando se cierra la ventana")
+
+# K121: vendedor, subasta, correo e intercambio abren y cierran las bolsas solas; lo que abriste tú queda
+for abre, cierra in [("MERCHANT_SHOW", "MERCHANT_CLOSED"), ("AUCTION_HOUSE_SHOW", "AUCTION_HOUSE_CLOSED"), ("MAIL_SHOW", "MAIL_CLOSED"), ("TRADE_SHOW", "TRADE_CLOSED")]:
+    L.execute('MambaBolsas.ventanas.inventario:Hide(); Fire("%s"); Correr()' % abre)
+    v1 = fi.visible
+    L.execute('Fire("%s"); Correr()' % cierra)
+    check(v1 and not fi.visible, "%s abre y %s cierra" % (abre, cierra))
+L.execute('MambaBolsas.ventanas.inventario:Hide(); MambaBolsasTecla.scripts.OnClick(MambaBolsasTecla); Fire("MERCHANT_SHOW"); Fire("MERCHANT_CLOSED"); Correr()')
+check(fi.visible, "las bolsas que abriste con B siguen abiertas al irte del vendedor")
+check(fi.oroTexto.texto == "841200c" or "c" in (fi.oroTexto.texto or ""), "el oro siempre a la vista (%s)" % fi.oroTexto.texto)
+# K115: un objeto de misión nunca es basura ni "para vender"
+L.execute('MARCAS = { [765] = "junk" }; MambaAPI = { Bolsas = function() return { { id = 765, sug = "vendedor" } } end }; MambaBolsas.RefrescarSugerencias()')
+check(M.Marca(L.eval('{ id = 765, calidad = 0 }')) is None, "objeto de misión: sin marca de basura ni de venta")
+check(not M.Pasa("basura", L.eval('{ id = 765, calidad = 0 }')), "y no aparece en el filtro Basura")
+L.execute('MARCAS = nil; MambaAPI = nil; MambaBolsas.RefrescarSugerencias()')
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.

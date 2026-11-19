@@ -148,6 +148,25 @@ local function enganchar()
 	end
 end
 
+-- K121: con el vendedor, el banco, la subasta, el correo o un intercambio las bolsas se abren solas y se cierran al
+-- terminar, aunque el juego no llame a OpenAllBags para alguno de ellos. Lo que abriste tú (B) no se cierra.
+do
+	local ABRE = { MERCHANT_SHOW = true, AUCTION_HOUSE_SHOW = true, MAIL_SHOW = true, TRADE_SHOW = true }
+	local CIERRA = { MERCHANT_CLOSED = true, AUCTION_HOUSE_CLOSED = true, MAIL_CLOSED = true, TRADE_CLOSED = true }
+	local ev = CreateFrame("Frame")
+	for e in pairs(ABRE) do pcall(ev.RegisterEvent, ev, e) end
+	for e in pairs(CIERRA) do pcall(ev.RegisterEvent, ev, e) end
+	ev:SetScript("OnEvent", function(_, e)
+		if not M.Activa() then return end
+		M.Anotar("servicio", e)
+		if ABRE[e] then M.AbrirInventario(true, true)
+		else
+			local f = M.ventanas.inventario
+			if f and f:IsShown() and f.porJuego then M.AbrirInventario(false) end
+		end
+	end)
+end
+
 table.insert(M.alCambiar, function(motivo)
 	if motivo == "banco-abierto" and M.Activa() then
 		local B = _G.BankFrame

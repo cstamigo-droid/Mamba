@@ -68,7 +68,10 @@ function M.RefrescarSugerencias()
 	for _, o in ipairs(lista) do if o.id then sugerencias[o.id] = o end end
 end
 
+-- K115: un objeto de misión (o de mecánica de Forever, que MambaAPI.Bolsas ya no sugiere vender) NUNCA se marca
+-- como basura ni para vender en las bolsas de Mamba, aunque sea gris o lo haya marcado alguien.
 function M.Marca(d)
+	if d and d.id and M.EsDeMision(d) then return nil end
 	local Ps = PS()
 	local Marks = Ps and Ps.QoL and Ps.QoL.Marks
 	if Marks and Marks.Get then
