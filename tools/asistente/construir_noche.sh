@@ -124,9 +124,10 @@ if [ $ENLACES = 1 ]; then
 	# se apartan las que no registró la prepare vigente y se quitan de la caché de la grilla (si no, forge
 	# rehace la grilla, prepare crea otra máscara y vuelve a fallar).
 	paso "máscaras de caminos" python -I "$RAIZ/tools/asistente/apartar_roads.py" D:/rust/forge-out
-	# Sin QuestieDB no hay ninguna misión de Zephras Isle: Skyborne no tiene inicio ("no Alliance start for
-	# race Skyborne", 17-11). Se construyen las 8 razas clásicas; Skyborne queda para la 1.1 (forever-db).
-	STARTS="${MAMBA_STARTS:-Orc,Troll,Tauren,Undead,Human,Dwarf,Gnome,NightElf}"
+	# Los 10 inicios: `guide publish` (compilar_addon.sh) exige todos ("publish takes every start", 18-11
+	# 23:37). Skyborne ya tiene inicio desde P7 (misiones de Zephras Isle de forever-db, 17-11 18:10); la 1.0
+	# se construyó así (carpetas Skyborne-* de forge-out, 18-11 02:38). Con 8 razas publish no publica nada.
+	STARTS="${MAMBA_STARTS:-Orc,Troll,Tauren,Undead,Human,Dwarf,Gnome,NightElf,Skyborne-horde,Skyborne-alliance}"
 	# Las ~126 misiones que ni forever-db tiene salen de las guías (NO VERIFICADO, informe en
 	# D:\rust\guias-mamba_SIN_FUENTE.md); forge lee esa copia en vez de guides/ (17-11).
 	GUIAS='D:\rust\guias-mamba'
