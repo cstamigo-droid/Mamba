@@ -14,12 +14,13 @@ INSTALAR EN 5 PASOS
 
 2. DESCOMPRIME EL ZIP.
    Clic derecho sobre el archivo Mamba_Horda_....zip  ->  "Extraer todo..."
-   ->  "Extraer". Se abre una carpeta nueva.
+   ->  "Extraer". Se abre una carpeta nueva con INSTALAR_MAMBA adentro.
    (No lo abras con doble clic sin extraer: así no funciona.)
 
 3. DOBLE CLIC EN  INSTALAR_MAMBA
    Si Windows muestra un cartel azul "Windows protegió su PC":
    clic en "Más información" y después en "Ejecutar de todas formas".
+   Si muestra "Advertencia de seguridad": clic en "Ejecutar".
    Si pregunta "¿Quieres permitir que esta aplicación haga cambios?": Sí.
 
 4. ESPERA EL MENSAJE "Listo: Mamba quedó instalada".
@@ -38,6 +39,7 @@ SI ALGO NO TE GUSTA: VOLVER A COMO ESTABAS
 -------------------------------------------
 Cierra el juego y haz doble clic en  QUITAR_MAMBA  (en esta misma carpeta).
 Tus addons quedan como antes. Tus personajes, barras y ajustes no se tocan.
+Si instalaste varias versiones, cada QUITAR retrocede una.
 (La copia también está en  World of Warcraft\_forever_\Interface\Mamba_respaldos,
  con su propio VOLVER_ATRAS adentro.)
 
@@ -63,4 +65,6 @@ LICENCIA
 --------
 Mamba es gratis y libre (GPL-3.0). Es un fork de Polestar (fitzforge/polestar)
 y NO es el Polestar oficial: los errores de Mamba van a Cristian, no a Polestar.
-Los créditos y licencias de todo lo que trae están en la carpeta LICENCIAS.
+Los créditos están en LICENCIAS\CREDITOS.txt, y la licencia de cada addon,
+dentro de su carpeta. El código fuente completo de esta versión está junto
+al ZIP, en el mismo enlace (Mamba_fuente_....zip).

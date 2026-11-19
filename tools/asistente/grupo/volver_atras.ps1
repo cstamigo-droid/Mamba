@@ -22,11 +22,11 @@ Decir '   MAMBA  -  volver a como estaba'
 Decir '  ==============================================='
 Decir ''
 
-function EsForever($p) { return ($p -and (Test-Path $p) -and ((Test-Path (Join-Path $p 'Wow.exe')) -or (Test-Path (Join-Path $p 'Interface')))) }
+function EsForever($p) { return ($p -and (Test-Path -LiteralPath $p) -and ((Test-Path -LiteralPath (Join-Path $p 'Wow.exe')) -or (Test-Path -LiteralPath (Join-Path $p 'Interface')))) }
 if (-not $Respaldo) {
     if (-not $Forever) {
         if (-not $Raices -or $Raices.Count -eq 0) {
-            $Raices = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -and (Test-Path $_.Root) } | ForEach-Object { $_.Root }
+            $Raices = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -and (Test-Path -LiteralPath $_.Root) } | ForEach-Object { $_.Root }
         }
         $relativas = @('Program Files (x86)\World of Warcraft', 'Program Files\World of Warcraft', 'World of Warcraft',
                        'Games\World of Warcraft', 'Juegos\World of Warcraft', 'Blizzard\World of Warcraft',
@@ -34,7 +34,7 @@ if (-not $Respaldo) {
                        'Blizzard Games\World of Warcraft', 'Program Files (x86)\Blizzard\World of Warcraft')
         foreach ($r in $Raices) { foreach ($rel in $relativas) {
             $c = Join-Path (Join-Path $r $rel) '_forever_'
-            if (-not $Forever -and (Test-Path (Join-Path $c 'Interface\Mamba_respaldos'))) { $Forever = (Resolve-Path $c).Path }
+            if (-not $Forever -and (Test-Path -LiteralPath (Join-Path $c 'Interface\Mamba_respaldos'))) { $Forever = (Resolve-Path -LiteralPath $c).Path }
         } }
     }
     if (-not $Forever -and -not $SinVentanas) {
@@ -49,19 +49,19 @@ if (-not $Respaldo) {
     }
     if (-not $Forever) { Aviso 'Mamba' 'No encontré la carpeta del juego con respaldos de Mamba. No se cambió nada.' 'OK' 'Error' | Out-Null; exit 3 }
     $base = Join-Path $Forever 'Interface\Mamba_respaldos'
-    $Respaldo = Get-ChildItem $base -Directory -ErrorAction SilentlyContinue |
-        Where-Object { (Test-Path (Join-Path $_.FullName 'respaldo.json')) -and -not (Test-Path (Join-Path $_.FullName 'YA_USADO.txt')) } |
+    $Respaldo = Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue |
+        Where-Object { (Test-Path -LiteralPath (Join-Path $_.FullName 'respaldo.json')) -and -not (Test-Path -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt')) } |
         Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
     if (-not $Respaldo) { Aviso 'Mamba' 'No quedan respaldos sin usar: tu carpeta AddOns ya está como antes de Mamba. No se cambió nada.' | Out-Null; exit 0 }
 }
-$Respaldo = (Resolve-Path $Respaldo).Path.TrimEnd('\')
+$Respaldo = (Resolve-Path -LiteralPath $Respaldo).Path.TrimEnd('\')
 $jf = Join-Path $Respaldo 'respaldo.json'
-if (-not (Test-Path $jf)) { Aviso 'Mamba' "Esta carpeta no es un respaldo de Mamba:`n$Respaldo" 'OK' 'Error' | Out-Null; exit 3 }
-$info = Get-Content $jf -Raw -Encoding UTF8 | ConvertFrom-Json
+if (-not (Test-Path -LiteralPath $jf)) { Aviso 'Mamba' "Esta carpeta no es un respaldo de Mamba:`n$Respaldo" 'OK' 'Error' | Out-Null; exit 3 }
+$info = Get-Content -LiteralPath $jf -Raw -Encoding UTF8 | ConvertFrom-Json
 # La carpeta del juego es la que está dos niveles arriba del respaldo (_forever_\Interface\Mamba_respaldos\<fecha>).
 $Forever = Split-Path (Split-Path (Split-Path $Respaldo))
 $AddOns = Join-Path $Forever 'Interface\AddOns'
-if (-not (Test-Path $AddOns)) { Aviso 'Mamba' "No encuentro $AddOns. No se cambió nada." 'OK' 'Error' | Out-Null; exit 3 }
+if (-not (Test-Path -LiteralPath $AddOns)) { Aviso 'Mamba' "No encuentro $AddOns. No se cambió nada." 'OK' 'Error' | Out-Null; exit 3 }
 
 $r = Aviso 'Mamba: volver atrás' "Voy a dejar tus AddOns como estaban el $($info.fecha), antes de instalar Mamba $($info.mamba).`n`nTus personajes, barras y ajustes (carpeta WTF) no se tocan.`n`n¿Sigo?" 'OKCancel' 'Question'
 if ($SinVentanas) { $r = 'OK' }
@@ -71,10 +71,19 @@ while (Get-Process -Name $ProcesoJuego -ErrorAction SilentlyContinue) {
     if ($r -ne 'Retry') { Decir 'Cancelado: el juego seguía abierto. No se cambió nada.'; exit 2 }
 }
 
+# ¿Podemos escribir en AddOns? (si el instalador pidió administrador, volver también lo necesita)
+$prueba = Join-Path $AddOns ".mamba_prueba_$PID"
+try { Set-Content -LiteralPath $prueba -Value 'x' -ErrorAction Stop; Remove-Item -Force -LiteralPath $prueba }
+catch {
+    if ($SinVentanas) { Decir "Sin permiso para escribir en $AddOns"; exit 4 }
+    Decir 'Windows no deja escribir en la carpeta del juego: pido permiso de administrador...'
+    Start-Process powershell -Verb RunAs -Wait -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Respaldo `"$Respaldo`""
+    exit 0
+}
 $fallas = @()
 foreach ($n in @($info.agregadas)) {
-    if ($n -and (Test-Path (Join-Path $AddOns $n))) {
-        try { Remove-Item -Recurse -Force (Join-Path $AddOns $n) } catch { $fallas += "borrar $n" }
+    if ($n -and (Test-Path -LiteralPath (Join-Path $AddOns $n))) {
+        try { Remove-Item -Recurse -Force -LiteralPath (Join-Path $AddOns $n) } catch { $fallas += "borrar $n" }
     }
 }
 foreach ($n in @($info.reemplazadas)) {
@@ -85,10 +94,10 @@ foreach ($n in @($info.reemplazadas)) {
 foreach ($n in @($info.apartadas)) {
     if (-not $n) { continue }
     $src = Join-Path $Respaldo "apartadas\$n"
-    if (Test-Path $src) {
+    if (Test-Path -LiteralPath $src) {
         try {
-            if (Test-Path (Join-Path $AddOns $n)) { Remove-Item -Recurse -Force (Join-Path $AddOns $n) }
-            Move-Item $src (Join-Path $AddOns $n)
+            if (Test-Path -LiteralPath (Join-Path $AddOns $n)) { Remove-Item -Recurse -Force -LiteralPath (Join-Path $AddOns $n) }
+            Move-Item -LiteralPath $src (Join-Path $AddOns $n)
         } catch { $fallas += "devolver $n" }
     }
 }
@@ -96,7 +105,13 @@ if ($fallas.Count) {
     Aviso 'Mamba' ("No pude terminar: " + ($fallas -join ', ') + "`n`nEl respaldo sigue intacto en:`n$Respaldo") 'OK' 'Error' | Out-Null
     exit 6
 }
-"Usado el $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content -Encoding UTF8 (Join-Path $Respaldo 'YA_USADO.txt')
+$marca = "Usado el $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+$marca | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Respaldo 'YA_USADO.txt')
+# Los respaldos MÁS NUEVOS que este guardan estados posteriores, que ya no existen: si se aplicaran después,
+# volverían a instalar Mamba. Se marcan como usados (revisor limpio, 19-11).
+$yo = Split-Path $Respaldo -Leaf
+Get-ChildItem -LiteralPath (Split-Path $Respaldo) -Directory | Where-Object { $_.Name -gt $yo -and (Test-Path -LiteralPath (Join-Path $_.FullName 'respaldo.json')) -and -not (Test-Path -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt')) } |
+    ForEach-Object { "$marca (anulado: se volvió a un respaldo anterior, $yo)" | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt') }
 Decir 'LISTO: AddOns quedó como antes.'
 Aviso 'Mamba' "Listo: tus AddOns quedaron como el $($info.fecha).`n`nSi habías instalado Mamba más de una vez, vuelve a hacer doble clic en QUITAR_MAMBA.bat para retroceder otra vez." | Out-Null
 exit 0

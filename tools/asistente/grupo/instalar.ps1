@@ -17,7 +17,7 @@ if (-not $Paquete) { $Paquete = Join-Path $PSScriptRoot 'Mamba' }
 $Terceros = @('ForeverCore', 'SkillUpForever', 'WhatsTraining', 'ForeverLootSparkles')
 $VersionMamba = 'sin versión'
 $vtxt = Join-Path $PSScriptRoot 'VERSION.txt'
-if (Test-Path $vtxt) { $VersionMamba = (Get-Content $vtxt -Encoding UTF8 | Select-Object -First 1).Trim() }
+if (Test-Path -LiteralPath $vtxt) { $VersionMamba = (Get-Content -LiteralPath $vtxt -Encoding UTF8 | Select-Object -First 1).Trim() }
 
 function Decir($t) { Write-Host $t }
 function Aviso($titulo, $texto, $botones = 'OK', $icono = 'Information') {
@@ -33,27 +33,27 @@ Decir "   MAMBA  -  instalador  ($VersionMamba)"
 Decir '  ==============================================='
 Decir ''
 
-if (-not (Test-Path (Join-Path $Paquete 'Polestar\Polestar.toc'))) {
+if (-not (Test-Path -LiteralPath (Join-Path $Paquete 'Polestar\Polestar.toc'))) {
     Aviso 'Mamba' "Falta la carpeta de Mamba junto al instalador.`n`nDescomprime el ZIP completo (clic derecho > Extraer todo) y vuelve a hacer doble clic en INSTALAR_MAMBA." 'OK' 'Error' | Out-Null
     Terminar 1
 }
 
 # ---------- 1. Encontrar _forever_ ----------
-function EsForever($p) { return ($p -and (Test-Path $p) -and ((Test-Path (Join-Path $p 'Wow.exe')) -or (Test-Path (Join-Path $p 'Interface')) -or (Test-Path (Join-Path $p 'WTF')))) }
+function EsForever($p) { return ($p -and (Test-Path -LiteralPath $p) -and ((Test-Path -LiteralPath (Join-Path $p 'Wow.exe')) -or (Test-Path -LiteralPath (Join-Path $p 'Interface')) -or (Test-Path -LiteralPath (Join-Path $p 'WTF')))) }
 function Normalizar($p) {
     # Acepta la carpeta World of Warcraft, la _forever_ o la AddOns.
     if (-not $p) { return $null }
     $p = $p.TrimEnd('\')
     if ((Split-Path $p -Leaf) -ieq 'AddOns') { $p = Split-Path (Split-Path $p) }
     if ((Split-Path $p -Leaf) -ieq 'Interface') { $p = Split-Path $p }
-    if ((Split-Path $p -Leaf) -ine '_forever_' -and (Test-Path (Join-Path $p '_forever_'))) { $p = Join-Path $p '_forever_' }
+    if ((Split-Path $p -Leaf) -ine '_forever_' -and (Test-Path -LiteralPath (Join-Path $p '_forever_'))) { $p = Join-Path $p '_forever_' }
     if (EsForever $p) { return $p } else { return $null }
 }
 if ($Forever) {
     $Forever = Normalizar $Forever
 } else {
     if (-not $Raices -or $Raices.Count -eq 0) {
-        $Raices = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -and (Test-Path $_.Root) } | ForEach-Object { $_.Root }
+        $Raices = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -and (Test-Path -LiteralPath $_.Root) } | ForEach-Object { $_.Root }
     }
     $relativas = @('Program Files (x86)\World of Warcraft', 'Program Files\World of Warcraft', 'World of Warcraft',
                    'Games\World of Warcraft', 'Juegos\World of Warcraft', 'Blizzard\World of Warcraft',
@@ -63,7 +63,7 @@ if ($Forever) {
     foreach ($r in $Raices) {
         foreach ($rel in $relativas) {
             $c = Join-Path (Join-Path $r $rel) '_forever_'
-            if (EsForever $c) { $hallados += (Resolve-Path $c).Path }
+            if (EsForever $c) { $hallados += (Resolve-Path -LiteralPath $c).Path }
         }
     }
     $hallados = @($hallados | Select-Object -Unique)
@@ -97,7 +97,7 @@ while (JuegoAbierto) {
 
 # ¿Podemos escribir? (si no, se vuelve a abrir como administrador)
 $prueba = Join-Path $AddOns ".mamba_prueba_$PID"
-try { Set-Content -Path $prueba -Value 'x' -ErrorAction Stop; Remove-Item $prueba -Force }
+try { Set-Content -LiteralPath $prueba -Value 'x' -ErrorAction Stop; Remove-Item $prueba -Force }
 catch {
     if ($SinVentanas) { Decir "Sin permiso para escribir en $AddOns"; Terminar 4 }
     Decir 'Windows no deja escribir en la carpeta del juego: pido permiso de administrador...'
@@ -108,8 +108,8 @@ catch {
 
 # ---------- Qué se copia, qué se salta, qué se aparta ----------
 function Version($toc) {
-    if (-not (Test-Path $toc)) { return $null }
-    $l = Select-String -Path $toc -Pattern '^## Version:\s*v?(.+)$' | Select-Object -First 1
+    if (-not (Test-Path -LiteralPath $toc)) { return $null }
+    $l = Select-String -LiteralPath $toc -Pattern '^## Version:\s*v?(.+)$' | Select-Object -First 1
     if ($l) { return $l.Matches[0].Groups[1].Value.Trim() } else { return $null }
 }
 function Comparar($a, $b) {
@@ -121,7 +121,7 @@ function Comparar($a, $b) {
     }
     return 0
 }
-$nuevas = @(Get-ChildItem $Paquete -Directory | Select-Object -ExpandProperty Name)
+$nuevas = @(Get-ChildItem -LiteralPath $Paquete -Directory | Select-Object -ExpandProperty Name)
 $copiar = @(); $saltar = @()
 foreach ($n in $nuevas) {
     if ($Terceros -contains $n) {
@@ -132,7 +132,7 @@ foreach ($n in $nuevas) {
 }
 # Módulos de Polestar que Mamba no trae (Alianza, otros idiomas, mapas viejos): se apartan al respaldo,
 # porque mezclados con el Polestar de Mamba darían errores. Vuelven con VOLVER_ATRAS.
-$apartar = @(Get-ChildItem $AddOns -Directory | Where-Object { $_.Name -like 'Polestar_*' -and ($nuevas -notcontains $_.Name) } | Select-Object -ExpandProperty Name)
+$apartar = @(Get-ChildItem -LiteralPath $AddOns -Directory | Where-Object { $_.Name -like 'Polestar_*' -and ($nuevas -notcontains $_.Name) } | Select-Object -ExpandProperty Name)
 
 # ---------- 3. Respaldo ----------
 $Fecha = Get-Date -Format 'yyyy-MM-dd_HHmmss'
@@ -142,32 +142,34 @@ Decir "Respaldo en: $Respaldo"
 $reemplazadas = @()
 foreach ($n in $copiar) {
     $src = Join-Path $AddOns $n
-    if (Test-Path $src) {
+    if (Test-Path -LiteralPath $src) {
         robocopy $src (Join-Path $Respaldo "AddOns\$n") /E /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null
         if ($LASTEXITCODE -ge 8) { Aviso 'Mamba' "No pude respaldar $n. No se instaló nada." 'OK' 'Error' | Out-Null; Terminar 5 }
         $reemplazadas += $n
     }
 }
-if (Test-Path $WTF) {
+if (Test-Path -LiteralPath $WTF) {
     robocopy $WTF (Join-Path $Respaldo 'WTF') /E /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null
     if ($LASTEXITCODE -ge 8) { Aviso 'Mamba' 'No pude respaldar la carpeta WTF. No se instaló nada.' 'OK' 'Error' | Out-Null; Terminar 5 }
 }
 $agregadas = @($copiar | Where-Object { $reemplazadas -notcontains $_ })
+# Justo antes de marcar el respaldo como válido y copiar: si el juego se abrió, se sale y el respaldo
+# queda sin respaldo.json (QUITAR no lo usa).
+if (JuegoAbierto) { Aviso 'Mamba' 'El juego se abrió mientras respaldaba. No se instaló nada: ciérralo y vuelve a empezar.' 'OK' 'Error' | Out-Null; Terminar 2 }
 $info = [ordered]@{
     mamba = $VersionMamba; fecha = $Fecha; forever = $Forever
     agregadas = $agregadas; reemplazadas = $reemplazadas; apartadas = $apartar; saltadas = $saltar
 }
-$info | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $Respaldo 'respaldo.json')
+$info | ConvertTo-Json | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Respaldo 'respaldo.json')
 # Su propio "volver atrás", dentro del respaldo (sirve aunque se borre la carpeta del ZIP).
-Copy-Item (Join-Path $PSScriptRoot 'volver_atras.ps1') (Join-Path $Respaldo 'volver_atras.ps1')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'volver_atras.ps1') (Join-Path $Respaldo 'volver_atras.ps1')
 $bat = "@echo off`r`ntitle Mamba - volver atras`r`npowershell -NoProfile -ExecutionPolicy Bypass -File `"%~dp0volver_atras.ps1`" -Respaldo `"%~dp0.`"`r`npause`r`n"
 [IO.File]::WriteAllText((Join-Path $Respaldo 'VOLVER_ATRAS.bat'), $bat, (New-Object Text.ASCIIEncoding))
 
 # ---------- 4. Copiar ----------
-if (JuegoAbierto) { Aviso 'Mamba' 'El juego se abrió mientras respaldaba. No se instaló nada: ciérralo y vuelve a empezar.' 'OK' 'Error' | Out-Null; Terminar 2 }
 $total = $copiar.Count; $i = 0
 try {
-    foreach ($n in $apartar) { Move-Item (Join-Path $AddOns $n) (Join-Path $Respaldo "apartadas\$n") -ErrorAction Stop }
+    foreach ($n in $apartar) { Move-Item -LiteralPath (Join-Path $AddOns $n) (Join-Path $Respaldo "apartadas\$n") -ErrorAction Stop }
     foreach ($n in $copiar) {
         $i++; Write-Progress -Activity 'Copiando Mamba' -Status $n -PercentComplete ([int](100 * $i / [Math]::Max(1, $total)))
         robocopy (Join-Path $Paquete $n) (Join-Path $AddOns $n) /MIR /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null
@@ -182,15 +184,15 @@ try {
 # ---------- 5. Comprobar ----------
 $malas = @()
 foreach ($n in $copiar) {
-    $a = @(Get-ChildItem (Join-Path $Paquete $n) -Recurse -File).Count
-    $b = @(Get-ChildItem (Join-Path $AddOns $n) -Recurse -File).Count
+    $a = @(Get-ChildItem -LiteralPath (Join-Path $Paquete $n) -Recurse -File).Count
+    $b = @(Get-ChildItem -LiteralPath (Join-Path $AddOns $n) -Recurse -File).Count
     if ($a -ne $b) { $malas += "$n ($b de $a archivos)" }
 }
 if ($malas.Count) {
     Aviso 'Mamba' ("Quedaron carpetas incompletas: " + ($malas -join ', ') + "`n`nHaz doble clic en VOLVER_ATRAS.bat, dentro de:`n$Respaldo") 'OK' 'Error' | Out-Null
     Terminar 7
 }
-"Mamba $VersionMamba instalada el $Fecha. Respaldo: $Respaldo" | Set-Content -Encoding UTF8 (Join-Path $Forever 'Interface\Mamba_respaldos\ULTIMA_INSTALACION.txt')
+"Mamba $VersionMamba instalada el $Fecha. Respaldo: $Respaldo" | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Forever 'Interface\Mamba_respaldos\ULTIMA_INSTALACION.txt')
 
 Decir ''
 Decir ("Copiadas: {0} carpetas." -f $copiar.Count)

@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
+import re
 import subprocess
 import sys
 import zipfile
@@ -54,29 +56,62 @@ BAT_QUITAR = (
 )
 
 
-def aviso_fuente(version: str, commit: str) -> str:
+def aviso_fuente(version: str, commit: str, fuente: str) -> str:
     return f"""CÓDIGO FUENTE DE MAMBA ({version}, commit {commit})
 ================================================
 
 Mamba es software libre: GPL-3.0-only (archivo LICENSE), con los permisos extra
 de Polestar (LICENSE-EXCEPTION.md). Es un fork de Polestar
 (https://github.com/fitzforge/polestar), de "The Polestar authors".
+No es el Polestar oficial.
 
 El código de los addons va tal cual en la carpeta archivos/Mamba (Lua y XML).
-Las herramientas y los datos de origen con que se generaron sus archivos de
-datos están en el repositorio de Mamba: https://github.com/cstamigo-droid/Mamba
-(rama asistente, commit {commit}).
-
-Oferta escrita (GPL-3.0, sección 6b): durante al menos tres años, cualquiera que
-tenga esta copia puede pedirle a Cristian Amigo el código fuente correspondiente
-completo de esta versión, gratis, por el mismo canal por el que la recibió.
+El código fuente correspondiente completo de esta versión (incluidas las
+herramientas y los datos de origen con que se generaron los archivos de datos)
+está en el archivo {fuente}, que se entrega en el MISMO lugar y por el
+mismo enlace que este ZIP, sin costo (GPL-3.0, sección 6d).
 
 Los addons de otros autores que van incluidos conservan su licencia y sus
-créditos dentro de su carpeta. Ver LICENCIAS_TERCEROS.md y THIRD_PARTY.md.
+créditos dentro de su carpeta; su único cambio es una línea en su .toc que
+avisa que van dentro de Mamba. Ver CREDITOS.txt, LICENCIAS_TERCEROS.md y
+THIRD_PARTY.md.
 
 World of Warcraft y Blizzard Entertainment son marcas de Blizzard Entertainment, Inc.
 Ni Mamba ni Polestar están hechos ni respaldados por Blizzard.
 """
+
+
+def creditos(paquete: Path) -> str:
+    inc = json.loads((RAIZ / "tools/asistente/incluidos.json").read_text("utf-8"))
+    l = ["CRÉDITOS DE LO QUE TRAE MAMBA", "=============================", "",
+         "Addons de otros autores, incluidos sin cambios de código (solo se agregó una",
+         "línea X-Mamba en su .toc). Su licencia va dentro de su carpeta:"]
+    for nombre, e in inc.items():
+        if (paquete / nombre).is_dir():
+            l.append(f"- {nombre} {e.get('version','')}: {e.get('autor','')}, {e.get('licencia','')}, {e.get('fuente','')}")
+    l += ["",
+          "Librerías dentro de Mamba_Barras/libs (detalle en Mamba_Barras/LICENCIAS.txt):",
+          "- LibActionButton-1.0 y LibButtonGlow-1.0, de Hendrik \"nevcairiel\" Leppkes: BSD de 3 cláusulas.",
+          "- CallbackHandler-1.0, del equipo de Ace3: licencia BSD de Ace3 (ver LICENCIAS_TERCEROS.md).",
+          "- LibStub: dominio público.",
+          "",
+          "Datos:",
+          "- Data from ForeverDB.net (https://foreverdb.net) — árboles y builds en Asistente_Clase",
+          "  (GPL-3.0 con término de crédito; ver Asistente_Clase/NOTICE-ForeverDB.txt).",
+          "- Builds de jugadores conocidos en Asistente_Clase: solo la repartición de puntos (un hecho),",
+          "  cada una con el enlace a su fuente (foreverdb.net, mobalytics.gg, leprestore.com,",
+          "  warcrafttavern.com, wowforeverbuilds.com, talentsforever.com, skill-capped.com, wowhead.com).",
+          "- forever-db (Polestar, GPL-3.0 / CC BY 4.0), CMaNGOS classic-db (GPL-3.0), pfQuest (MIT),",
+          "  ForeverLevelingBiS (MIT), wowsims (MIT), ForeverTDB (GPL-2.0, solo hechos) y tablas del",
+          "  cliente del juego (Blizzard): cada carpeta de datos lo detalla en su LICENSE-DATA.txt.",
+          "",
+          "Fuentes tipográficas (SIL OFL 1.1, texto junto a cada una): Inter, Open Sans, Fira Sans,",
+          "Barlow Semi Condensed. Polestar_Arcade: Freedoom Arcade (GPL-2.0) y Freedoom (BSD-3).",
+          "",
+          "Polestar, de \"The Polestar authors\" (Fitz y colaboradores): todo lo demás de las carpetas",
+          "Polestar*. Ver THIRD_PARTY.md.",
+          ""]
+    return "\n".join(l)
 
 
 def main() -> int:
@@ -87,6 +122,7 @@ def main() -> int:
     ap.add_argument("--commit", required=True)
     ap.add_argument("--fecha", default="2026-11-18")
     ap.add_argument("--salida", type=Path, required=True)
+    ap.add_argument("--fuente", action="store_true", help="también arma Mamba_fuente_<commit>.zip con git archive")
     a = ap.parse_args()
 
     if not (a.paquete / "Polestar" / "Polestar.toc").exists():
@@ -117,7 +153,7 @@ def main() -> int:
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         def poner(rel: str, datos: bytes):
             nonlocal n
-            z.writestr(f"{tope}/{rel}", datos)
+            z.writestr(rel, datos)
             n += 1
         poner("INSTALAR_MAMBA.bat", BAT_INSTALAR.encode("ascii"))
         poner("QUITAR_MAMBA.bat", BAT_QUITAR.encode("ascii"))
@@ -127,10 +163,22 @@ def main() -> int:
         poner("archivos/VERSION.txt", b"\xef\xbb\xbf" + version_txt.encode("utf-8") + b"\r\n")
         for lic in ("LICENSE", "LICENSE-EXCEPTION.md", "LICENCIAS_TERCEROS.md", "THIRD_PARTY.md"):
             poner(f"LICENCIAS/{lic}", (RAIZ / lic).read_bytes())
-        poner("LICENCIAS/CODIGO_FUENTE.txt", b"\xef\xbb\xbf" + crlf(aviso_fuente(a.version, a.commit)))
+        fuente = f"Mamba_fuente_{a.commit}.zip"
+        poner("LICENCIAS/CODIGO_FUENTE.txt", b"\xef\xbb\xbf" + crlf(aviso_fuente(a.version, a.commit, fuente)))
+        poner("LICENCIAS/CREDITOS.txt", b"\xef\xbb\xbf" + crlf(creditos(a.paquete)))
         for p in sorted(a.paquete.rglob("*")):
-            if p.is_file():
-                poner("archivos/Mamba/" + p.relative_to(a.paquete).as_posix(), p.read_bytes())
+            rel = p.relative_to(a.paquete).as_posix()
+            if not p.is_file() or "/.github/" in "/" + rel or p.name == ".gitignore":
+                continue
+            datos = p.read_bytes()
+            if p.name == "LICENSE-DATA.txt":  # rutas de la máquina donde se construyó: no son datos
+                datos = re.sub(rb"[A-Za-z]:/Users/[^/\s]+/Mamba/", b"<repo Mamba>/", datos)
+                datos = re.sub(rb"[A-Za-z]:/rust/", b"<construccion>/", datos)
+            poner("archivos/Mamba/" + rel, datos)
+    if a.fuente:
+        fz = a.salida / f"Mamba_fuente_{a.commit}.zip"
+        subprocess.run(["git", "-C", str(RAIZ), "archive", "--format=zip", "-o", str(fz), a.commit], check=True)
+        print(f"fuente: {fz} ({fz.stat().st_size / 1e6:.1f} MB)")
     h = hashlib.sha256(zpath.read_bytes()).hexdigest()
     (a.salida / (zpath.name + ".sha256")).write_text(f"{h}  {zpath.name}\n", "utf-8")
     print(f"ZIP: {zpath} ({zpath.stat().st_size / 1e6:.1f} MB, {n} archivos)\nsha256 {h}")
