@@ -288,9 +288,18 @@ function M.Pendiente() return pendiente end
 ---------------------------------------------------------------- eventos
 local ev = CreateFrame("Frame")
 for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "GROUP_ROSTER_UPDATE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_AURA",
-	"UNIT_CONNECTION", "ACTIVE_TALENT_GROUP_CHANGED", "SPELL_UPDATE_COOLDOWN", "LEARNED_SPELL_IN_TAB" }) do M.Escuchar(ev, e) end
+	"UNIT_CONNECTION", "ACTIVE_TALENT_GROUP_CHANGED", "SPELL_UPDATE_COOLDOWN", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED" }) do M.Escuchar(ev, e) end
 ev:SetScript("OnEvent", function(_, e, unidad)
-	if e == "PLAYER_LOGIN" or e == "ACTIVE_TALENT_GROUP_CHANGED" or e == "LEARNED_SPELL_IN_TAB" then
+	if e == "SPELLS_CHANGED" then
+		-- LEARNED_SPELL_IN_TAB no existe en Forever (diag 19-11): se usa SPELLS_CHANGED, solo si cambió el perfil
+		local k, at = {}, M.Atributos(M.Perfil())
+		for x, v in pairs(at) do k[#k + 1] = x .. "=" .. tostring(v) end
+		table.sort(k)
+		local firma = table.concat(k, ";")
+		if firma == M.firma then return end
+		M.firma = firma
+		M.Proteger("aplicar", M.Aplicar)
+	elseif e == "PLAYER_LOGIN" or e == "ACTIVE_TALENT_GROUP_CHANGED" or e == "LEARNED_SPELL_IN_TAB" then
 		M.Proteger("aplicar", M.Aplicar)
 	elseif e == "PLAYER_REGEN_ENABLED" or e == "PLAYER_REGEN_DISABLED" then
 		-- al entrar en combate InCombatLockdown() todavía da false: el asa se esconde SIEMPRE (y se corta el arrastre)
