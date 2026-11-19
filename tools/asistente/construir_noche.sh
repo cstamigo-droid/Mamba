@@ -135,6 +135,16 @@ if [ $ENLACES = 1 ]; then
 	# hechizos sin nombre…), con el arreglo que el propio mensaje de forge da; informe en
 	# D:/rust/guias-mamba_ARREGLOS.md (17-11).
 	paso "arreglos de guías" python -I "$RAIZ/tools/asistente/arreglar_guias.py" "$GUIAS"
+	# `guide publish` lee TODOS los inicios de $OUT/guides. Un inicio que esta corrida no construye (Skyborne
+	# de otra construcción, 18-11 02:38) trae rutas viejas y forge no publica nada ("the shared route differs
+	# between starts … Skyborne-horde", 18-11 21:04). Se apartan, sin borrar, a $OUT/guias_apartadas/<fecha>.
+	G=/d/rust/forge-out/guides; for d in "$G"/*/; do
+		s=$(basename "$d")
+		case ",$STARTS," in *",$s,"*) continue ;; esac
+		ap="/d/rust/forge-out/guias_apartadas/$(date +%Y%m%d_%H%M)"
+		mkdir -p "$ap" && mv "$d" "$ap/" && { [ ! -f "$G/$s.fixes.json" ] || mv "$G/$s.fixes.json" "$ap/"; } \
+			&& log "inicio $s no se construye: apartado a $ap" || fin "FALLÓ al apartar el inicio $s de $OUT/guides" 1
+	done
 	# Si forge rehace la grilla o prepare en esta misma corrida (forge nuevo, cliente actualizado), queda una
 	# máscara de caminos nueva junto a la vieja y walks falla con "expected one road mask tag" (17-11, dos
 	# veces). Entonces se aparta la vieja y forge build se repite una vez: grilla y prepare ya quedan en caché.
