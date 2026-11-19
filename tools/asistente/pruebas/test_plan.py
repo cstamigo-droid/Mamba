@@ -314,5 +314,15 @@ for n in ARCHIVOS:
     if n not in ("Piezas.lua",):
         check("|cff" not in src.lower() and not re.search(r"GameFont\w+", src), n + ": sin colores ni letras fijas (E2/E3)")
 
+# ---------- K119: «Llévame» usa la ruta de Ir a… (MambaAPI.Llevame); sin ella, la flecha
+L.execute('MambaAPI = MambaAPI or {}; LLEVADO = nil; MambaAPI.Llevame = function(d) LLEVADO = d; return true end')
+okl = M.Llevame(L.eval('{ mapa = 1456, x = 45.2, y = 60.1, npc = 3005 }'), "Instructor")
+check(okl and G.LLEVADO is not None and G.LLEVADO.map == 1456 and abs(G.LLEVADO.x - 45.2) < 0.01 and G.LLEVADO.nombre == "Instructor", "K119: Llévame pasa el lugar a MambaAPI.Llevame")
+L.execute('MambaAPI.Llevame = function() return false, "sin_ruta" end; FLECHA = nil')
+M.Flecha = L.eval('function(l, e) FLECHA = e; return true end')
+M.Llevame(L.eval('{ mapa = 1456, x = 45, y = 60 }'), "Banco")
+check(G.FLECHA == "Banco", "K119: sin ruta de Ir a…, queda la flecha")
+src_sec = (D / "Seccion.lua").read_text(encoding="utf-8") if (D / "Seccion.lua").exists() else ""
+check('"Flecha"' not in src_sec and src_sec.count('"Llévame"') >= 3, "K119: el botón dice «Llévame» en Ahora, Metas y Bolsas")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)

@@ -43,6 +43,17 @@ function M.Flecha(lugar, etiqueta)
 	return false
 end
 
+-- «Llévame» (K58/K61/K119): la ruta más rápida de Ir a… (MambaAPI.Llevame: tramos y flecha); sin ella, la flecha sola.
+function M.Llevame(lugar, etiqueta)
+	if not lugar then return false end
+	local api = _G.MambaAPI
+	if api and api.Llevame then
+		local ok, hecho = pcall(api.Llevame, { map = lugar.mapa, x = lugar.x, y = lugar.y, nombre = etiqueta or lugar.npc })
+		if ok and hecho then return true end
+	end
+	return M.Flecha(lugar, etiqueta)
+end
+
 local ACCION = {
 	guia = { "Ir a la guía", function() M.Fuentes.AbrirSeccion("Guides") end },
 	equipo = { "Ver en Equipo", function() M.Fuentes.AbrirSeccion("Equipo") end },
@@ -112,7 +123,7 @@ end
 local function accionesDePaso(p)
 	local a = {}
 	if p.accion and ACCION[p.accion] then a[#a + 1] = ACCION[p.accion] end
-	if p.lugar then a[#a + 1] = { "Flecha", function() M.Flecha(p.lugar, p.titulo) end } end
+	if p.lugar then a[#a + 1] = { "Llévame", function() M.Llevame(p.lugar, p.titulo) end } end
 	if p.accion == "macro" then a[#a + 1] = { "Crear macro", function() M.CrearMacro(p.macro) end } end
 	if not p.fijo then
 		a[#a + 1] = { "Hecho", function() M.PJ().hechos[p.clave] = true; M.Refrescar() end }
@@ -135,7 +146,7 @@ local function datos(e, r)
 		for _, m in ipairs(M.Metas(e)) do
 			add({ tipo = "Nivel " .. m.nivel, titulo = m.titulo .. ": " .. M.Dinero(m.costo),
 				detalle = m.detalle .. (m.falta > 0 and (" · te faltan " .. M.Dinero(m.falta) .. " si pagas en orden") or " · te alcanza"),
-				confianza = m.confianza, acciones = m.lugar and { { "Flecha", function() M.Flecha(m.lugar, m.titulo) end } } or nil })
+				confianza = m.confianza, acciones = m.lugar and { { "Llévame", function() M.Llevame(m.lugar, m.titulo) end } } or nil })
 		end
 		if vista == "dinero" then
 			for _, i in ipairs(M.ComoJuntar(e)) do
@@ -202,7 +213,8 @@ local function datos(e, r)
 			if i > 10 then break end
 			add({ tipo = (o == b.recomendada) and "Recomendada" or (o.familia ~= "bolsa" and o.familia or ""),
 				titulo = ("%s (%d casillas)"):format(o.nombre, o.casillas), detalle = table.concat(o.formas, " · "),
-				confianza = o.precioDias and ("precio de la subasta, hace " .. o.precioDias .. " día(s)") or "dato del juego" })
+				confianza = o.precioDias and ("precio de la subasta, hace " .. o.precioDias .. " día(s)") or "dato del juego",
+				acciones = o.lugar and { { "Llévame", function() M.Llevame(o.lugar, o.nombre) end } } or nil })
 		end
 	elseif vista == "macros" then
 		local todas = M.TodasLasMacros(e)
