@@ -1,8 +1,8 @@
 ## Interface: 16001
 ## Title: Mamba: combate
-## Notes: Cómo jugar tu clase en cada caso, sugerencia del próximo hechizo (solo muestra), modos de pelea, avisos, medidor de combate del juego, temporizador del disparo, barra de lanzamiento, amenaza y placas de nombre. Se ajusta en el menú de Polestar › Interfaz › Combate.
+## Notes: Cómo jugar tu clase en cada caso, sugerencia del próximo hechizo (solo muestra), modos de pelea, avisos, medidor de combate del juego, temporizador del disparo, barra de lanzamiento, amenaza, placas de nombre compactas, ficha del enemigo con sus enfriamientos (estilo Gladius), marcadores de banda e historial de enemigos. Se ajusta en el menú de Polestar › Interfaz › Combate.
 ## Author: Cristian Amigo
-## Version: 0.1.0
+## Version: 0.2.0
 ## X-License: GPL-3.0-only
 ## SavedVariablesPerCharacter: MambaCombateDB
 ## OptionalDeps: Polestar, Asistente, Mamba_Barras, Mamba_Curacion
@@ -19,9 +19,13 @@ Jugar_OTRAS.lua
 Rotacion.lua
 Disparo.lua
 Amenaza.lua
+Placas.lua
+Gladius.lua
+Marcadores.lua
 Avisos.lua
 Medidor.lua
 Ranking.lua
 Cercanos.lua
+Historial.lua
 DosBuilds.lua
 Seccion.lua

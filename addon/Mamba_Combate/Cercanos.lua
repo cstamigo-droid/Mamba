@@ -22,7 +22,7 @@ local RECIENTE = 120      -- «cerca ahora»: vistos en los últimos 2 minutos
 local TOPE_VISTOS = 200
 local TOPE_MUERTES = 50
 -- ancho: «Cerca ahora» y «Muertes» a la izquierda y «Activar alerta» a la derecha sin pisarse con Polestar
-local FILAS, ALTO_FILA, ANCHO = 12, 30, 380
+local FILAS, ALTO_FILA, ANCHO = 12, 30, 440
 
 Cz.vistos = {}            -- nombre -> { nombre, nivel, clase, claseToken, gremio, visto }
 
@@ -252,13 +252,21 @@ local function crearFila(i)
 	f.abajo = P.Texto(f, "small", "textDim")
 	f.abajo:SetPoint("TOPLEFT", f.arriba, "BOTTOMLEFT", 0, -1)
 	f.abajo:SetPoint("RIGHT", f, "RIGHT", -4, 0)
+	-- en «Historial»: clic = lista «Matar», clic derecho = nota (Historial.lua)
+	f:EnableMouse(true)
+	f:SetScript("OnMouseUp", function(s, boton)
+		local H = M.Historial
+		if Cz.vista ~= "historial" or not s.nombre or not H then return end
+		if boton == "RightButton" then H.Nota(s.nombre) else H.Matar(s.nombre) end
+		M.Proteger("cercanos", Cz.Dibujar)
+	end)
 	f.cuando = P.Texto(f, "small", "textMuted")
 	f.cuando:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -3)
 	if f.cuando.SetJustifyH then f.cuando:SetJustifyH("RIGHT") end
 	return f
 end
 
-Cz.vista = "cerca" -- "cerca" | "muertes"
+Cz.vista = "cerca" -- "cerca" | "muertes" | "historial"
 
 local function crear()
 	v = P.Ventana("MambaCercanos", "Enemigos cerca", ANCHO, 400)
@@ -270,6 +278,8 @@ local function crear()
 	v.bCerca:SetPoint("TOPLEFT", v, "TOPLEFT", v.margen, arriba)
 	v.bMuertes = P.Boton(v, "Muertes", function() Cz.vista = "muertes"; M.Proteger("cercanos", Cz.Dibujar) end)
 	v.bMuertes:SetPoint("LEFT", v.bCerca, "RIGHT", 4, 0)
+	v.bHistorial = P.Boton(v, "Historial", function() Cz.vista = "historial"; M.Proteger("cercanos", Cz.Dibujar) end)
+	v.bHistorial:SetPoint("LEFT", v.bMuertes, "RIGHT", 4, 0)
 	v.bSilencio = P.Boton(v, "Silenciar", function() Cz.Silenciar(not Cz.Silenciada()) end)
 	v.bSilencio:SetPoint("TOPRIGHT", v, "TOPRIGHT", -v.margen, arriba)
 	v.estado = P.Texto(v, "note", "textDim")
@@ -320,6 +330,11 @@ function Cz.Dibujar()
 			filas[#filas + 1] = { arriba = nombreColor(x.nombre, x.claseToken), abajo = table.concat(partes, " · "), cuando = hace(t - x.visto) }
 		end
 		v.vacio:SetText(#lista == 0 and "Nadie a la vista. Con las placas de nombre de enemigos encendidas (tecla V) se detectan antes." or "")
+	elseif Cz.vista == "historial" and M.Historial then
+		local H = M.Historial
+		filas = H.Filas(nombreColor, cuandoFue)
+		v.estado:SetText(("%d enemigos anotados. Clic: lista «Matar» (aviso fuerte al verlo). Clic derecho: nota."):format(#filas))
+		v.vacio:SetText(#filas == 0 and "Todavía no viste a nadie de la otra facción." or "")
 	else
 		local lista = db().muertesJcJ
 		local a, g, b = Cz.Cuenta()
@@ -340,8 +355,8 @@ function Cz.Dibujar()
 	for i = 1, FILAS do
 		local x, f = filas[i], v.filas[i]
 		if x then
-			f.arriba:SetText(x.arriba); f.abajo:SetText(x.abajo); f.cuando:SetText(x.cuando); f:Show()
-		else f:Hide() end
+			f.arriba:SetText(x.arriba); f.abajo:SetText(x.abajo); f.cuando:SetText(x.cuando); f.nombre = x.nombre; f:Show()
+		else f.nombre = nil; f:Hide() end
 	end
 end
 

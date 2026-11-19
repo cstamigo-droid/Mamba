@@ -1,4 +1,4 @@
--- Mamba_Combate: amenaza del grupo (K66) y placas de nombre propias (K67).
+-- Mamba_Combate: amenaza del grupo (K66). Las placas de nombre propias (K67) están en Placas.lua.
 --   Amenaza: UnitDetailedThreatSituation (Forever sí la deja leer: ALCANCE.md, comprobado en EllesmereUI). Una
 --   ventanita con tu % y el de tu grupo sobre tu objetivo, y aviso "vas a quitarle el objetivo al tanque".
 --   Placas: sobre la placa de cada enemigo, un borde del color de su amenaza contigo, una marca de élite o raro y su
@@ -106,109 +106,12 @@ function A.Peligro()
 	return pct >= (M.DB().avisoAmenaza or 90), pct
 end
 
----------------------------------------------------------------- placas propias
-local placas = {}
-local COLOR_AMENAZA = { [0] = { 0.3, 0.3, 0.3, 0 }, [1] = { 1, 1, 0.3, 0.9 }, [2] = { 1, 0.55, 0.1, 0.9 }, [3] = { 1, 0.1, 0.1, 0.9 } }
-
-local function capa(unidad)
-	local N = C_NamePlate
-	local placa = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(unidad)
-	if not placa then return nil end
-	local c = placas[placa]
-	if not c then
-		c = CreateFrame("Frame", nil, placa)
-		c:SetAllPoints(placa)
-		c.borde = {}
-		for i, l in ipairs({ { "TOPLEFT", "TOPRIGHT", true }, { "BOTTOMLEFT", "BOTTOMRIGHT", true } }) do
-			local t = c:CreateTexture(nil, "OVERLAY")
-			t:SetPoint(l[1], c, l[1], 0, i == 1 and -8 or 8)
-			t:SetPoint(l[2], c, l[2], 0, i == 1 and -8 or 8)
-			t:SetHeight(2)
-			c.borde[i] = t
-		end
-		c.clase = M.Piezas.Texto(c, "small", "text")
-		c.clase:SetPoint("RIGHT", c, "LEFT", 4, 0)
-		c.lanz = M.Barra(c, 110, 8)
-		c.lanz:SetPoint("TOP", c, "BOTTOM", 0, 4)
-		c.lanz:Hide()
-		placas[placa] = c
-	end
-	c.unidad = unidad
-	return c
-end
-
-function A.PintarPlaca(unidad)
-	if not M.DB().placas then return end
-	local c = capa(unidad)
-	if not c then return end
-	-- amenaza contigo
-	local st = UnitThreatSituation and UnitThreatSituation("player", unidad)
-	st = M.Num(st)
-	local col = COLOR_AMENAZA[st or 0] or COLOR_AMENAZA[0]
-	-- para el tanque, perder el enemigo es lo peligroso: se invierte
-	if M.Rotacion and M.Rotacion.Rol and M.Rotacion.Rol() == "tanque" and st and UnitAffectingCombat and UnitAffectingCombat(unidad) then
-		col = (st == 3) and { 0.2, 0.8, 0.2, 0.9 } or { 1, 0.1, 0.1, 0.9 }
-	end
-	for _, t in ipairs(c.borde) do t:SetColorTexture(col[1], col[2], col[3], col[4]) end
-	-- élite o raro
-	local cl = UnitClassification and UnitClassification(unidad)
-	if M.Secreto(cl) then cl = nil end
-	c.clase:SetText((cl == "elite" or cl == "worldboss") and M.Piezas.Color("titulo", "ÉLITE") or ((cl == "rare" or cl == "rareelite") and M.Piezas.Color("bueno", "RARO") or ""))
-	c:Show()
-end
-
-function A.LanzaPlaca(unidad)
-	if not M.DB().placas then return end
-	local c = capa(unidad)
-	if not c then return end
-	local nombre, ini, fin, noInt, _
-	if UnitCastingInfo then nombre, _, _, ini, fin, _, _, noInt = UnitCastingInfo(unidad) end
-	if not nombre and UnitChannelInfo then nombre, _, _, ini, fin, _, noInt = UnitChannelInfo(unidad) end
-	ini, fin = M.Num(ini), M.Num(fin)
-	if not (nombre and ini and fin) then c.lanz:Hide(); return end
-	c.lanz.ini, c.lanz.fin = ini / 1000, fin / 1000
-	local se = (not M.Secreto(noInt)) and (noInt == false or noInt == nil)
-	c.lanz:SetStatusBarColor(se and 0.95 or 0.5, se and 0.75 or 0.5, se and 0.2 or 0.5)
-	c.lanz.texto:SetText(se and "INTERRUMPIBLE" or "")
-	c.lanz:Show()
-end
-
-function A.TickPlacas(t)
-	for _, c in pairs(placas) do
-		local b = c.lanz
-		if b:IsShown() and b.fin then
-			local fr = (t - b.ini) / (b.fin - b.ini)
-			if fr >= 1 then b:Hide() else b:SetValue(fr) end
-		end
-	end
-end
-
 local f = CreateFrame("Frame")
 for _, e in ipairs({ "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE",
-	"PLAYER_TARGET_CHANGED", "GROUP_ROSTER_UPDATE", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_CHANNEL_START",
-	"UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_INTERRUPTED" }) do M.Escuchar(f, e) end
-f:SetScript("OnEvent", function(_, e, u)
-	if e == "NAME_PLATE_UNIT_REMOVED" then
-		local N = C_NamePlate
-		local p = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(u)
-		if p and placas[p] then placas[p].lanz:Hide() end
-		return
-	end
-	if type(u) == "string" and u:find("^nameplate") then
-		if e:find("SPELLCAST") then M.Proteger("lanzaPlaca", A.LanzaPlaca, u) else M.Proteger("placa", A.PintarPlaca, u) end
-	end
+	"PLAYER_TARGET_CHANGED", "GROUP_ROSTER_UPDATE" }) do M.Escuchar(f, e) end
+f:SetScript("OnEvent", function(_, e)
 	local t = GetTime and GetTime() or 0
 	if e:find("THREAT") and t < (A.proxAmenaza or 0) then return end -- como mucho 5 veces por segundo
-	if e:find("THREAT") or e == "PLAYER_TARGET_CHANGED" or e == "GROUP_ROSTER_UPDATE" then
-		A.proxAmenaza = t + 0.2
-		M.Proteger("amenaza", A.Dibujar)
-		local N = C_NamePlate
-		if N and N.GetNamePlates then
-			for _, p in ipairs(N.GetNamePlates() or {}) do
-				local uu = p.namePlateUnitToken or (p.UnitFrame and p.UnitFrame.unit)
-				if uu then M.Proteger("placa", A.PintarPlaca, uu) end
-			end
-		end
-	end
+	A.proxAmenaza = t + 0.2
+	M.Proteger("amenaza", A.Dibujar)
 end)
-f:SetScript("OnUpdate", function() M.Proteger("placasTick", A.TickPlacas, GetTime and GetTime() or 0) end)

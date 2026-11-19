@@ -60,6 +60,11 @@ function GetMacroIndexByName(n) for i, m in ipairs(MACROS) do if m[1] == n then 
 function CreateMacro(n, icono, cuerpo, pj) table.insert(MACROS, { n, cuerpo }); return #MACROS end
 CURSOR = nil
 function PickupMacro(i) CURSOR = i end
+-- el juego dice qué hechizo usaría la macro; nil = no entiende ninguno (lo que se simula con NO_ENTIENDE)
+NO_ENTIENDE = {}
+function GetMacroSpell(i) local m = MACROS[i]; if not m then return nil end
+  for _, pat in ipairs(NO_ENTIENDE) do if m[2]:find(pat, 1, true) then return nil end end; return 774 end
+function DeleteMacro(i) table.remove(MACROS, i) end
 C_Map = { GetMapInfo = function(id) return { name = "Zona " .. id } end, GetBestMapForUnit = function() return 1412 end }
 '''
 
@@ -149,6 +154,28 @@ L.execute('COMBATE = true')
 okm3, motivo3 = M.CrearMacro("druOso")
 check(not okm3 and "combate" in motivo3, "en combate no se crea")
 L.execute('COMBATE = false')
+# A7: el juego no entiende una macro (simulado: no reconoce «/cast !»): se saca, se anota y no se ofrece más
+import os
+ROMPER_MACROS = os.environ.get("ROMPER_MACROS") == "1"  # control negativo: el juego «entiende» todo
+if ROMPER_MACROS:
+    L.execute('GetMacroSpell = function() return 774 end')
+L.execute('NO_ENTIENDE = { "/cast !" }')
+n0 = len(list(G.MACROS.values()))
+okb, mb = M.CrearMacro("druOso")
+check(not okb and "no la entiende" in str(mb) and len(list(G.MACROS.values())) == n0, "A7: macro que el juego no entiende: se saca (fue %s)" % mb)
+check(M.DiagMacros().macrosMal["druOso"] is not None, "A7: queda anotada en diag.macrosMal")
+check(not any(x.clave == "druOso" for x in M.MacrosSugeridas(e).values()), "A7: la rechazada no se vuelve a sugerir")
+check(M.DiagMacros().macrosBien["druRejuRaton"] is not None, "A7: la que el juego entiende queda en diag.macrosBien")
+G.CURSOR = None
+c, sac = M.CrearTodasLasMacros(e)[:2]
+check(c >= 2 and G.CURSOR is None, "A7: «Crear todas» crea varias sin dejar nada en el cursor (creadas %s, sacadas %s)" % (c, sac))
+check(all("/cast !" not in m[2] for m in G.MACROS.values()), "A7: ninguna macro que el juego no entiende queda guardada")
+todas = M.TodasLasMacros(e)
+check(any(x.mal for x in todas.values()) and any(x.bien for x in todas.values()), "A7: la lista dice cuáles funcionan y cuáles no")
+L.execute('GetMacroSpell = nil')
+okn, _ = M.CrearMacro("druLunarRaton")
+check(okn, "A7: sin GetMacroSpell (cliente sin la función) la macro igual se crea")
+L.execute('NO_ENTIENDE = {}')
 for clase, lista in M.MACROS.items():
     for m in lista.values():
         for id_ in re.findall(r"\{(\d+)\}", m.cuerpo):

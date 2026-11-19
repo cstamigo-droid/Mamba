@@ -22,7 +22,7 @@ Av.SALIDAS = {
 	HUNTER = { raices = {}, lentitud = {}, miedo = {} },
 	ROGUE = {},
 	MAGE = { raices = { 1953 }, aturdir = { 1953 } },
-	WARRIOR = { miedo = { 18499 }, raices = {} },
+	WARRIOR = { raices = {} }, -- Ira rabiosa se pone ANTES: no saca del miedo
 	PRIEST = {}, -- Resguardo contra el miedo se pone ANTES: no saca del miedo
 	SHAMAN = {}, -- el tótem de tremor también va antes
 	PALADIN = { raices = { 1044 }, lentitud = { 1044 } }, -- Escudo divino no quita aturdir ni miedo
