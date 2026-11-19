@@ -274,6 +274,38 @@ S.onNav("ahora"); S.render()
 check(M2.ultimaVista == "ahora", "Ahora se dibuja aunque la sección esté oculta al llamar a render (visto en el juego: quedaba Equipo)")
 padre.visible = True
 
+# ---------- 8f. K119: bolsas solo con fuente real; misión > fabricar > comprar; del bando del jugador ----------
+check(M.BOLSAS[239148] is None, "la Bolsa tejida en alba carmesí (nadie la enseña) ya no está en los datos")
+for bid, b in M.BOLSAS.items():
+    if b.fabrica:
+        check(b.aprende in ("instructor", "receta del vendedor", "receta que cae de enemigos"), "bolsa %s fabricable: alguien la enseña" % bid)
+L.eval('''function(M)
+  M.BOLSAS = {
+    [990] = { nombre = "Sin fuente", casillas = 30, familia = "bolsa", nivel = 1, calidad = 1, precio = 0 },
+    [991] = { nombre = "De misión Horda", casillas = 10, familia = "bolsa", nivel = 1, calidad = 1, precio = 0,
+              misiones = { { id = 5000, titulo = "Bolsas para la Horda", nivel = 30, min = 25, lado = 2, da = { 1386 } } } },
+    [992] = { nombre = "De misión Alianza", casillas = 16, familia = "bolsa", nivel = 1, calidad = 1, precio = 0,
+              misiones = { { id = 5001, titulo = "Bolsas para la Alianza", nivel = 30, min = 25, lado = 1, da = { 7948 } } } },
+    [993] = { nombre = "Del vendedor", casillas = 14, familia = "bolsa", nivel = 1, calidad = 1, precio = 10000, vendedores = 1, quienVende = { 3685 } },
+  }
+  MambaAPI = MambaAPI or {}
+  MambaAPI.PrecioObjeto = function(id) if id == 990 then return 50000, "subasta", 0 end end
+end''')(M)
+bo = M.Bolsas(M.Estado())
+nom = [o.nombre for o in bo.opciones.values()]
+check(bo.recomendada is not None and bo.recomendada.nombre == "De misión Horda", "recomienda la de misión de la Horda antes que la del vendedor: %s" % (bo.recomendada and bo.recomendada.nombre))
+check(bo.recomendada.lugar is not None and bo.recomendada.lugar.zona, "la recomendada trae lugar para Llévame")
+check("De misión Alianza" not in nom, "la misión de la Alianza no sale para un tauren")
+check("Sin fuente" in nom and bo.recomendada.nombre != "Sin fuente", "la que solo está en la subasta se lista pero nunca se recomienda")
+# control negativo: la misión de la Horda ya hecha -> pasa a la del vendedor
+L.execute('C_QuestLog = { IsQuestFlaggedCompleted = function(q) return q == 5000 end }; ORO_ANTES = ORO; ORO = 500 * 10000')
+bo2 = M.Bolsas(M.Estado())
+check(bo2.recomendada is not None and bo2.recomendada.nombre == "Del vendedor", "misión hecha (y oro de sobra): recomienda la del vendedor (control negativo)")
+L.execute('ORO = 1000')
+bo3 = M.Bolsas(M.Estado())
+check(bo3.recomendada is None, "sin oro y sin misión: no recomienda comprar una que retrasa la montura")
+L.execute('C_QuestLog = nil; ORO = ORO_ANTES')
+
 # ---------- 9. Prueba estática ----------
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")

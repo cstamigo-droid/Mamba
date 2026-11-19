@@ -142,6 +142,61 @@ end
 
 -- Plan de bolsas: la mejor bolsa común que el jugador puede conseguir a su nivel, comparada con la más chica
 -- que tiene (una ranura vacía cuenta como bolsa de 0). Más las especiales de su clase o profesión.
+-- K119 (Cristian, 19-11): nunca una bolsa sin fuente real. Primero las que dan las MISIONES (su meta), después las
+-- que se FABRICAN (quién las hace y con qué) y al final las que se COMPRAN; cada una con su lugar para "Llévame".
+-- Cada fuente se filtra por el bando del jugador (misión de la Horda, vendedor de la Horda).
+local LADO = { Horde = 2, Alliance = 1 }
+
+local function misionHecha(q)
+	local Q = C_QuestLog
+	if Q and Q.IsQuestFlaggedCompleted then
+		local ok, r = pcall(Q.IsQuestFlaggedCompleted, q)
+		if ok then return r == true end
+	end
+	return false
+end
+
+-- Las fuentes de una bolsa que ESTE personaje puede usar: { tipo = "mision"|"fabrica"|"vendedor", texto, lugar, prio }
+function M.FuentesBolsa(e, b)
+	local out = {}
+	local lado = LADO[e.bando] or 2
+	for _, m in ipairs(b.misiones or {}) do
+		local delLado = (m.lado == 0 or m.lado == 3 or m.lado == lado)
+		if type(m) == "table" and delLado and not misionHecha(m.id) and (m.min or 0) <= e.nivel + 2 then
+			local lugar = M.LugarDe(m.da, e.bando)
+			out[#out + 1] = { tipo = "mision", prio = 1, lugar = lugar,
+				texto = ("Misión «%s» (nivel %d)%s"):format(m.titulo ~= "" and m.titulo or ("#" .. m.id), m.nivel or 0,
+					lugar and (" · la da alguien en " .. lugar.zona) or "") }
+		end
+	end
+	if b.fabrica then
+		local prof, hab = b.fabrica[1], b.fabrica[2]
+		local mia = M.Profesion(e, prof)
+		local mats = {}
+		for _, r in ipairs(b.reactivos or {}) do mats[#mats + 1] = r[2] .. " " .. (r[3] ~= "" and r[3] or ("objeto " .. r[1])) end
+		local quien = mia and ((mia.rango >= hab) and "la puedes hacer tú" or ("tú, con " .. prof .. " " .. hab .. " (tienes " .. mia.rango .. ")"))
+			or ("un " .. prof:lower() .. " de " .. hab .. " o más (pídesela a un compañero o en el chat de comercio)")
+		local donde = b.aprende == "instructor" and "la enseña el instructor" or (b.aprende ~= "" and b.aprende or "")
+		local lugar
+		local rg = M.RANGOS and M.RANGOS[prof]
+		if mia and rg then
+			for _, x in ipairs(rg) do if x.tope >= hab and x.instructor then lugar = M.LugarDe(x.quien, e.bando); break end end
+		end
+		out[#out + 1] = { tipo = "fabrica", prio = 2, lugar = lugar, materiales = mats,
+			texto = ("Se fabrica con %s %d: %s%s. Materiales: %s"):format(prof, hab, quien, donde ~= "" and (" · " .. donde) or "",
+				#mats > 0 and table.concat(mats, ", ") or "sin dato") }
+	end
+	if b.vendedores then
+		local lugar = M.LugarDe(b.quienVende, e.bando)
+		if lugar then -- solo si hay un vendedor de tu bando
+			out[#out + 1] = { tipo = "vendedor", prio = 3, lugar = lugar,
+				texto = ("La vende un vendedor en %s por %s"):format(lugar.zona, M.Dinero(b.precio)) }
+		end
+	end
+	table.sort(out, function(x, y) return x.prio < y.prio end)
+	return out
+end
+
 function M.Bolsas(e)
 	local menor = M.CasillasMasChica(e)
 	local tieneHierbas = M.Profesion(e, "Herboristería") ~= nil
@@ -150,32 +205,32 @@ function M.Bolsas(e)
 		local especial = b.familia ~= "bolsa"
 		local paraMi = not especial or FAMILIA_CLASE[b.familia] == e.clase or (b.familia == "hierbas" and tieneHierbas)
 		if paraMi and b.nivel <= e.nivel then
+			local fuentes = M.FuentesBolsa(e, b)
 			local precio, dias = M.Fuentes.Precio(id)
-			local formas = {}
-			if b.vendedores then formas[#formas + 1] = "vendedor " .. M.Dinero(b.precio) end
-			if b.fabrica then
-				local p = M.Profesion(e, b.fabrica[1])
-				formas[#formas + 1] = b.fabrica[1] .. " " .. b.fabrica[2] .. (p and (p.rango >= b.fabrica[2] and " (puedes)" or " (te falta)") or "")
+			if #fuentes > 0 or precio then
+				local formas = {}
+				for _, f in ipairs(fuentes) do formas[#formas + 1] = f.texto end
+				if precio then formas[#formas + 1] = "en tu subasta: " .. M.Dinero(precio) end
+				opciones[#opciones + 1] = { id = id, nombre = b.nombre, casillas = b.casillas, familia = b.familia,
+					precio = precio or (b.vendedores and b.precio) or nil, precioDias = dias, formas = formas, fuentes = fuentes,
+					prio = fuentes[1] and fuentes[1].prio or 4, lugar = fuentes[1] and fuentes[1].lugar,
+					mejora = (not especial) and (b.casillas - menor) or nil }
 			end
-			if b.misiones then formas[#formas + 1] = "misión" end
-			if precio then formas[#formas + 1] = "subasta " .. M.Dinero(precio) end
-			opciones[#opciones + 1] = { id = id, nombre = b.nombre, casillas = b.casillas, familia = b.familia,
-				precio = precio or (b.vendedores and b.precio) or nil, precioDias = dias, formas = formas,
-				mejora = (not especial) and (b.casillas - menor) or nil, misiones = b.misiones }
 		end
 	end
 	table.sort(opciones, function(a, b)
 		if (a.familia == "bolsa") ~= (b.familia == "bolsa") then return a.familia == "bolsa" end
+		if a.prio ~= b.prio then return a.prio < b.prio end
 		if a.casillas ~= b.casillas then return a.casillas > b.casillas end
 		return (a.precio or math.huge) < (b.precio or math.huge)
 	end)
-	-- la recomendada: la común más grande con precio conocido que no retrase la montura; si ninguna tiene
-	-- precio, la más grande que se pueda fabricar o sacar de una misión
+	-- la recomendada: la que mejora, con fuente para ti, en el orden misión > fabricar > comprar; una que se compra
+	-- no se recomienda si retrasa la montura. La subasta sola (sin fuente) nunca se recomienda.
 	local rec
 	for _, o in ipairs(opciones) do
-		if o.familia == "bolsa" and o.mejora and o.mejora > 0 then
-			if o.precio and not M.RetrasaMontura(e, o.precio) then rec = o; break end
-			if not rec and not o.precio and (#o.formas > 0) then rec = o end
+		if o.familia == "bolsa" and (o.mejora or 0) > 0 and #o.fuentes > 0 then
+			local compra = o.prio == 3
+			if not (compra and o.precio and M.RetrasaMontura(e, o.precio)) then rec = o; break end
 		end
 	end
 	return { opciones = opciones, recomendada = rec, menor = menor, vacias = e.bolsas.vacias }
@@ -298,7 +353,7 @@ function M.Pasos(e, r)
 		local o = b.recomendada
 		add(paso({ clave = "bolsa:" .. o.id, tipo = "Bolsas",
 			titulo = ("Cambia tu bolsa de %d por %s (%d casillas)"):format(b.menor, o.nombre, o.casillas),
-			detalle = table.concat(o.formas, " · "), item = o.id,
+			detalle = o.formas[1] or "", item = o.id, lugar = o.lugar,
 			confianza = o.precioDias and (o.precioDias <= 1 and "precio medido hoy" or ("precio de hace " .. o.precioDias .. " días")) or "dato del juego" }))
 	end
 	-- mazmorra que conviene repetir (de Equipo)

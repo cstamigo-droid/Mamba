@@ -74,6 +74,50 @@ def bolsas(db):
     for c in rew:
         for q, it in db.execute(f"select ID, {c} from quest_template where {c} in ({','.join(map(str, items))})"):
             items[it].setdefault("misiones", set()).add(q)
+    # K119 (Cristian, 19-11: Mi plan recomendó "Bolsa tejida en alba carmesí", que no se puede conseguir):
+    # una receta solo vale si algún instructor la enseña o existe un objeto de receta que se vende o cae.
+    craft = {d["fabrica"][2] for d in items.values() if d.get("fabrica")}
+    aprende = {}
+    for r in leer("SpellEffect.csv"):
+        if r["Effect"] == "36" and int(r["EffectTriggerSpell"] or 0) in craft:
+            aprende[int(r["SpellID"])] = int(r["EffectTriggerSpell"])
+    receta = {}
+    for r in leer("ItemEffect.csv"):
+        sp = int(r.get("SpellID") or 0)
+        if sp in aprende:
+            receta[aprende[sp]] = int(r.get("ParentItemID") or 0)
+        elif sp in craft and r.get("TriggerType") == "6":  # el objeto de receta enseña el hechizo directo
+            receta[sp] = int(r.get("ParentItemID") or 0)
+    reactivos = {}
+    for r in leer("SpellReagents.csv"):
+        sp = int(r["SpellID"])
+        if sp in craft:
+            reactivos[sp] = [(int(r[f"Reagent_{k}"]), int(r[f"ReagentCount_{k}"])) for k in range(8) if int(r[f"Reagent_{k}"] or 0) > 0]
+    for i, d in items.items():
+        f = d.get("fabrica")
+        if not f:
+            continue
+        sp = f[2]
+        enInstructor = db.execute("select count(*) from trainer_spell where SpellId=?", (sp,)).fetchone()[0] > 0
+        rec = receta.get(sp)
+        recVende = rec and db.execute("select count(*) from npc_vendor where item=?", (rec,)).fetchone()[0] > 0
+        recCae = rec and db.execute("select count(*) from creature_loot_template where Item=?", (rec,)).fetchone()[0] > 0
+        if not (enInstructor or recVende or recCae):
+            del d["fabrica"]  # nadie la enseña: no se puede fabricar
+            continue
+        d["aprende"] = "instructor" if enInstructor else ("receta del vendedor" if recVende else "receta que cae de enemigos")
+        d["receta"] = rec
+        d["reactivos"] = reactivos.get(sp, [])
+    # quién vende cada una (para la flecha) y quién da cada misión
+    for i, d in items.items():
+        if d.get("vendedores"):
+            d["quienVende"] = [c for (c,) in db.execute("select distinct entry from npc_vendor where item=? limit 12", (i,))]
+        if d.get("misiones"):
+            d["quienDa"] = {}
+            for q in d["misiones"]:
+                ids = [c for (c,) in db.execute("select id from creature_queststarter where quest=? limit 3", (q,))]
+                if ids:
+                    d["quienDa"][q] = ids
     out = {i: d for i, d in items.items() if d.get("vendedores") or d.get("fabrica") or d.get("misiones")}
     return out
 
@@ -228,7 +272,24 @@ def main():
     b = bolsas(db)
     por, equit = dinero(db)
     rg, instEquit, lug = rangos(db)
-    extra = set(n for d in mo.values() for n in d['quien']) - set(lug)
+    # K119: nombres de los materiales, títulos de misión en español, nivel y bando de cada misión
+    import json
+    reac = {it for d in b.values() for it, _ in d.get("reactivos", [])}
+    nombres = {}
+    for r in leer("ItemSparse.csv", "esMX"):
+        if int(r["ID"]) in reac:
+            nombres[int(r["ID"])] = r["Display_lang"]
+    qids = {q for d in b.values() for q in d.get("misiones", [])}
+    titulos = {q: t for q, t in db.execute(
+        f"select ID, LogTitle from quest_template_locale where locale='esMX' and ID in ({','.join(map(str, qids)) or 0})")}
+    quests = {}
+    for l in open(FDB / "quest.jsonl", encoding="utf-8"):
+        r = json.loads(l)
+        if r["id"] in qids:
+            quests[r["id"]] = r
+    npcsBolsas = set(n for d in b.values() for n in d.get("quienVende", [])) | \
+        set(n for d in b.values() for l in d.get("quienDa", {}).values() for n in l)
+    extra = (set(n for d in mo.values() for n in d['quien']) | npcsBolsas) - set(lug)
     lug.update(lugares_npc(extra))
     SALIDA.mkdir(parents=True, exist_ok=True)
     L = ["-- Generado por tools/asistente/plan/datos_plan.py. No editar: se rehace con ese script.",
@@ -244,11 +305,22 @@ def main():
                   f"nivel = {d['nivel']}", f"calidad = {d['calidad']}", f"precio = {d['precio']}"]
         if d.get("vendedores"):
             partes.append(f"vendedores = {d['vendedores']}")
+            partes.append("quienVende = { " + ", ".join(map(str, d.get("quienVende", []))) + " }")
         if d.get("fabrica"):
             p, s, sp = d["fabrica"]
             partes.append(f"fabrica = {{ {lua_str(p)}, {s}, {sp} }}")
+            partes.append(f"aprende = {lua_str(d.get('aprende', ''))}")
+            if d.get("receta"):
+                partes.append(f"receta = {d['receta']}")
+            partes.append("reactivos = { " + ", ".join(f"{{ {it}, {n}, {lua_str(nombres.get(it, ''))} }}" for it, n in d.get("reactivos", [])) + " }")
         if d.get("misiones"):
-            partes.append("misiones = { " + ", ".join(map(str, sorted(d["misiones"])[:6])) + " }")
+            mis = []
+            for q in sorted(d["misiones"])[:6]:
+                info = quests.get(q, {})
+                da = d.get("quienDa", {}).get(q, [])
+                mis.append(f"{{ id = {q}, titulo = {lua_str(titulos.get(q) or info.get('title', ''))}, nivel = {info.get('level', 0)}, "
+                           f"min = {info.get('min_level', 0)}, lado = {info.get('side', 0)}, da = {{ {', '.join(map(str, da))} }} }}")
+            partes.append("misiones = { " + ", ".join(mis) + " }")
         L.append(f"\t[{i}] = {{ {', '.join(partes)} }},")
     L.append("}")
     L.append("-- ENTRENAR[clase][nivel] = cobre que cuesta todo lo nuevo de ese nivel en el instructor de clase (máximo:")
