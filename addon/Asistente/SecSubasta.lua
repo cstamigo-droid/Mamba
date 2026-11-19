@@ -50,7 +50,8 @@ local function bolsas()
 			if not o then
 				local ok, r = pcall(t.Evaluar, x.info, a)
 				o = { id = id, link = x.info.link, cantidad = 0, calidad = x.info.calidad or 1, vendedor = x.info.vendedor or 0,
-					sug = ok and r and deAccion(t, r.accion) or "guardar", motivo = ok and r and r.motivo or "" }
+					sug = ok and r and deAccion(t, r.accion) or "guardar", motivo = ok and r and r.motivo or "",
+					protegido = ok and r and r.protegido or nil }
 				por[id] = o
 				orden[#orden + 1] = o
 			end
@@ -401,6 +402,12 @@ ev:SetScript("OnEvent", function(_, e, boton)
 				if not vital and type(MPr) == "table" and MPr.Vital then
 					local ok2, t = pcall(MPr.Vital, id)
 					vital = ok2 and type(t) == "string" and t ~= ""
+				end
+				-- K115: nunca lo protegido (misión, llave, mecánica de Forever...), aunque lo hayas marcado
+				local T2 = _G.Tasador
+				if not vital and T2 and T2.MECANICAS and T2.MECANICAS[id] then vital = true end
+				if not vital then
+					for _, o in ipairs(bolsas()) do if o.id == id and o.protegido then vital = true end end
 				end
 				if que == "basura" and not vital then cola[#cola + 1] = id end
 			end

@@ -80,8 +80,28 @@ end
 --   mejora (true si es mejora para ti), avisoPrecio (texto o nil)
 -- }
 -- Devuelve { accion, motivo, neto, nivel, aviso }
+-- K115 (18-11): lo que NUNCA se recomienda vender ni marcar como basura. -> motivo (texto) | nil
+--   objetos de misión (clase 12, o que pide una misión), los que inician una misión, llaves (clase 13),
+--   mecánicas de Forever (T.MECANICAS, de ForeverTDB: saco de dormir, ecos, apuntes...), lo ligado de
+--   utilidad (clase 15 ligada) y lo que el vendedor no compra y no se puede subastar.
+T.CLASE_LLAVE, T.CLASE_MISC = 13, 15
+function T.Protegido(info)
+	if not info then return nil end
+	if info.esMision or info.clase == T.CLASE_MISION or info.liga == T.LIGA_MISION then return "Objeto de misión: no lo botes." end
+	if info.inicia then return "Inicia una misión: no lo vendas." end
+	if info.clase == T.CLASE_LLAVE then return "Es una llave: no la vendas." end
+	if info.id and T.MECANICAS and T.MECANICAS[info.id] then return "Lo usas tú (mecánica de Forever): no lo vendas." end
+	local ligado = info.ligado or info.liga == T.LIGA_RECOGER
+	if ligado and info.clase == T.CLASE_MISC then return "Ligado y se usa: no lo vendas." end
+	return nil
+end
+
 function T.Evaluar(info, ajustes)
 	ajustes = ajustes or T.DEFAULTS
+	local protegido = T.Protegido(info)
+	if protegido then
+		return { accion = T.ACCION.GUARDAR, motivo = protegido, protegido = true }
+	end
 	local vendedor = info.vendedor or 0
 	local r = { neto = nil, nivel = nil, aviso = nil }
 

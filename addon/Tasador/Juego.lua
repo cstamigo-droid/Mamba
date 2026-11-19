@@ -437,6 +437,14 @@ function T.LeerBolsas()
 				local info = T.InfoDe(link, ligado)
 				if info then
 					info.cantidad = cantidad
+					-- de misión o inicia una misión (K115): lo dice el juego para cada casilla
+					if C.GetContainerItemQuestInfo then
+						local ok, q = pcall(C.GetContainerItemQuestInfo, bolsa, slot)
+						if ok and type(q) == "table" then
+							info.esMision = T.Leer(q.isQuestItem) == true or nil
+							info.inicia = T.Leer(q.questID) ~= nil or nil
+						end
+					end
 					info.mejora, info.duda = T.EsMejora(info)
 					lista[#lista + 1] = { info = info, cantidad = cantidad }
 				else

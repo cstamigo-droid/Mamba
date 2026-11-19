@@ -76,6 +76,11 @@ function T.AgregarLineas(tooltip, link, datos)
 	local ligado = T.LigadoEnTextos(T.TextosDeDatos(datos))
 	local info = T.InfoDe(link, ligado)
 	if not info then return end
+	-- K115: "Este objeto inicia una misión" en las líneas del cuadro
+	local inicia = ITEM_STARTS_QUEST or "Este objeto inicia una misión"
+	for _, l in ipairs(T.TextosDeDatos(datos) or {}) do
+		if type(l) == "string" and l:find(inicia, 1, true) then info.inicia = true end
+	end
 	local okM, mejoraTxt, esMejora = pcall(T.TextoMejora, info)
 	if not okM then mejoraTxt, esMejora = nil, false end
 	info.mejora = esMejora == true

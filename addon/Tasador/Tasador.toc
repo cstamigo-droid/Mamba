@@ -11,6 +11,7 @@
 ## Category-esES: Mamba
 
 Reglas.lua
+Mecanicas.lua
 Mejora.lua
 Mercado.lua
 Comercio.lua

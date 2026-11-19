@@ -383,5 +383,29 @@ L.execute('EQUIP[7] = 301; BAG={302}; STACK={1}; BOUND={false}; chat = {}; Slash
 chat = lines_of(L.eval('chat'))
 check(any("Raro" in c and "compáralo antes de vender" in c for c in chat), f"N1 aviso en bolsas {chat}")
 
+# K115 (18-11): NUNCA recomendar vender ni botar lo que se usa (el Tasador recomendaba vender el saco de dormir)
+ROMPER_K115 = "--romper-k115" in sys.argv
+if ROMPER_K115:
+    T.Protegido = L.eval("function() return nil end")
+L.execute('ITEMS[211527] = {name="Bolsa de dormir acogedora",q=3,sell=1717,cls=15,sub=0,bind=1,loc="",stats={}}')
+lines = lines_of(L.eval('ShowTip("|Hitem:211527|h[S]|h", {"Bolsa de dormir acogedora", "Ligado"})'))
+check(any("Qué hacer" in x and "Guardar" in x for x in lines) and not any("Vender al vendedor" in x or "basura" in x.lower() for x in lines),
+      f"K115 el saco de dormir: Guardar, nunca vender ni botar {lines}")
+L.execute('ITEMS[9101] = {name="Carta sellada",q=1,sell=50,cls=12,sub=0,bind=4,loc="",stats={}}')
+lines = lines_of(L.eval('ShowTip("|Hitem:9101|h[C]|h")'))
+check(any("Guardar" in x for x in lines) and not any("Vender al vendedor" in x for x in lines), f"K115 objeto de misión: Guardar {lines}")
+L.execute('ITEMS[9102] = {name="Llave de la cripta",q=1,sell=20,cls=13,sub=0,bind=0,loc="",stats={}}')
+lines = lines_of(L.eval('ShowTip("|Hitem:9102|h[L]|h")'))
+check(any("Guardar" in x and "llave" in x.lower() for x in lines), f"K115 llave: Guardar {lines}")
+L.execute('ITEMS[9103] = {name="Diario manchado",q=1,sell=30,cls=15,sub=0,bind=0,loc="",stats={}}')
+lines = lines_of(L.eval('ShowTip("|Hitem:9103|h[D]|h", {"Diario manchado", "Este objeto inicia una misión"})'))
+check(any("Guardar" in x and "misión" in x for x in lines), f"K115 inicia una misión: Guardar {lines}")
+L.execute('ITEMS[9104] = {name="Mandoble afilado",q=0,sell=6372,cls=2,sub=8,bind=0,loc="",stats={}}')
+lines = lines_of(L.eval('ShowTip("|Hitem:9104|h[M]|h")'))
+check(not any("Guardar" in x and "Qué hacer" in x for x in lines), f"K115 un gris común NO queda protegido {lines}")
+if not ROMPER_K115:
+    check(L.eval("function(t) return t.MECANICAS ~= nil and t.MECANICAS[211527] == true and t.MECANICAS[6948] == true end")(T),
+          "K115 la lista de ForeverTDB trae el saco de dormir y la piedra de hogar")
+
 print(f"\n{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
