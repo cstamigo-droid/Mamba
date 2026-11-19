@@ -228,6 +228,8 @@ function M.Aplicar()
 	cabecera:SetAttribute("_initialAttribute-_onenter", r and ENTRAR or nil)
 	cabecera:SetAttribute("_initialAttribute-_onleave", r and SALIR or nil)
 	cabecera:SetAttribute("_initialAttribute-_onhide", r and SALIR or nil)
+	-- SecureGroupHeaders copia a cada botón nuevo solo los nombres listados aquí (separados por comas)
+	cabecera:SetAttribute("_initialAttributeNames", r and "_onenter,_onleave,_onhide" or nil)
 	ancla:SetScale(d.escala or 1)
 	for i = 1, 40 do
 		local h = cabecera.GetAttribute and cabecera:GetAttribute("child" .. i)

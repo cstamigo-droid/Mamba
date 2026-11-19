@@ -243,6 +243,8 @@ for i, palabra in casos.items():
     m = NV(i)
     check(m is not None and palabra in m, "K115: objeto %d protegido (%s): %s" % (i, palabra, m))
 check(NV(604) is None, "K115: un objeto común con precio sí se puede vender")
+L.execute("INFO[607] = { 0, 0, 0, 2 }")
+check(NV(607) is None, "K115: agua o comida conjurada (consumible sin precio, no ligada): sin alarma")
 v = G.MambaProfesiones.Vital(606)
 check(v is not None and v[0].startswith("NO VENDER"), "K115: Vital lo protege (la venta automática no lo toca)")
 L.execute("Cc_q = nil; C_Container = C_Container or {}; C_Container.GetContainerItemQuestInfo = function(b, s) if b == 1 and s == 2 then return { questID = 77 } end return {} end")

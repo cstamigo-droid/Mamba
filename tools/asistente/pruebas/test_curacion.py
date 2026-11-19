@@ -204,7 +204,7 @@ def prohibidos(fragmento):
 frag2 = G.MambaCuraCabecera.attr["initialConfigFunction"]
 check(not prohibidos(frag2), "el fragmento seguro no pone atributos que empiezan con _: %s" % prohibidos(frag2))
 check(prohibidos('self:SetAttribute("_onenter", "x")') == ["_onenter"], "control negativo: el detector ve el atributo prohibido")
-check(G.MambaCuraCabecera.attr["_initialAttribute-_onenter"] is not None, "la rueda llega a los botones por _initialAttribute- de la cabecera")
+check(G.MambaCuraCabecera.attr["_initialAttribute-_onenter"] is not None and G.MambaCuraCabecera.attr["_initialAttributeNames"] == "_onenter,_onleave,_onhide", "la rueda llega a los botones por _initialAttribute- y _initialAttributeNames de la cabecera")
 # ---------- K110: vivo/muerto, conectado, existe y clase pueden venir secretos: nada de if con ellos
 L.execute("""
 VIEJOS = { UnitExists, UnitIsConnected, UnitIsDeadOrGhost, UnitClass, UnitIsUnit }

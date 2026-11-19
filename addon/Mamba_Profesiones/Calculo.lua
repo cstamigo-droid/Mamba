@@ -202,7 +202,8 @@ function C.NoVender(id)
 	local n, _, _, _, _, _, _, _, _, _, venta, cl2, _, ligado = GetItemInfo(id)
 	if not n then return nil end -- sin datos aún: no se decide
 	if ligado == 4 then return "objeto de misión" end
-	if (venta or 0) == 0 then return "el vendedor no lo compra" end
+	-- sin precio de venta: protege, salvo los consumibles (agua y comida conjuradas): ahí sería ruido
+	if (venta or 0) == 0 and cl2 ~= 0 then return "el vendedor no lo compra" end
 	-- ligado al recogerlo y de uso (consumible o varios): herramientas y objetos de utilidad
 	if ligado == 1 and (cl2 == 0 or cl2 == 15) then return "objeto ligado de utilidad" end
 	return nil
