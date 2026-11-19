@@ -175,6 +175,8 @@ def nuevo(antes=""):
             src = src.replace("if type(r) == \"table\" and r.Hide then r:Hide() end", "")
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace("if k then SetOverrideBindingClick(tecla, true, k, \"MambaBolsasTecla\") end", "")
+        if ROMPER and n == "Reemplazo.lua":
+            src = src.replace('if que == "alternar" and debugstack then', 'if debugstack then')
         if ROMPER and n == "Banco.lua":
             src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
@@ -474,6 +476,16 @@ check(fi.filtro == "nuevo" and "Nuevo" in (fi.filtroTexto.texto or ""), "clic iz
 L.eval('function(c) c.scripts.OnClick(c, "LeftButton") end')(pest)
 check(fi.filtro == "todo" and (fi.filtroTexto.texto or "") == "", "otro clic lo quita")
 check(len(list(G.MambaBolsasDB.diag.values())) > 0, "queda diagnóstico de la tecla y los filtros")
+
+# (diag del juego, 19-11) los "cerrar" que el juego hace desde un "...Manager" no se ignoran; el alternar sí
+L.execute('MambaBolsas.ventanas.inventario:Hide(); OpenAllBags(); Correr()')
+check(fi.visible and fi.porJuego, "el vendedor abre las bolsas")
+L.execute('function debugstack() return "Interface/AddOns/Blizzard_X/ContainerFrameSettingsManager.lua:10" end; CloseAllBags(); Correr()')
+check(not fi.visible, "el juego las cierra desde un Manager al irte del vendedor")
+L.execute('ToggleAllBags(); Correr()')
+check(not fi.visible, "un alternar desde un Manager se sigue ignorando")
+L.execute('debugstack = nil')
+check(any("ventana cerrada" in str(x) for x in G.MambaBolsasDB.diag.values()), "el diag anota cuando se cierra la ventana")
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.

@@ -849,6 +849,7 @@ function M.CrearVentanaBolsas(tipo)
 	if f.cabeza and f.cabeza.EnableMouse then f.cabeza:EnableMouse(not M.Op("fija")) end
 	f:HookScript("OnShow", function(self) M.Dibujar(self) end)
 	f:HookScript("OnHide", function(self)
+		if self.tipo == "inventario" then M.Anotar("ventana", "cerrada") end
 		self.sola, self.resalte = nil, nil
 		if self.tipo == "banco" and M.bancoAbierto then
 			local B = C_Bank

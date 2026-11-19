@@ -117,8 +117,10 @@ local function enganchar()
 	local function gancho(nombre, que)
 		if type(_G[nombre]) ~= "function" then return end
 		hooksecurefunc(nombre, function()
-			-- el juego también abre y cierra bolsas por dentro (modo edición, "...Manager"): eso no es del jugador
-			if debugstack then
+			-- el juego también ALTERNA bolsas por dentro (modo edición, "...Manager"): eso no es del jugador. Solo se
+			-- filtra el alternar: un "cerrar" del juego solo cierra lo que abrió el juego (porJuego), así que no hace
+			-- daño dejarlo pasar; filtrado, la ventana del vendedor o del banco quedaba abierta al irte (diag 19-11).
+			if que == "alternar" and debugstack then
 				local ok, pila = pcall(debugstack, 3)
 				if ok and type(pila) == "string" and pila:find("Manager") then M.Anotar(nombre, "ignorado (Manager)"); return end
 			end
