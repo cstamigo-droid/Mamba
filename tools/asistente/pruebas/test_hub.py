@@ -520,6 +520,29 @@ check(r[0] is False, "una ventana que ya se arrastra sola no lleva recuadro enci
 check(r[1] is True and r[2] is True, "botón «Listo: terminar de mover» encima de todo; al cerrarlo (o con Escape) sale del modo")
 check(r[3] is False and r[4] is True, "en combate no se repone el lugar; se hace al salir del combate")
 
+# 10g) K113: Mamba_Errores NO reemplaza el manejador de errores del juego (manchaba la interfaz del gremio);
+# escucha con hooksecurefunc sobre ScriptErrorsFrame:OnError
+src_err = (ADDON / "Mamba_Errores" / "Errores.lua").read_text(encoding="utf-8")
+import re as _re2
+_llamadas = [l for l in src_err.splitlines() if "seterrorhandler(" in l.split("--")[0]]
+check(not _llamadas, f"Mamba_Errores no llama a seterrorhandler (K113) {_llamadas}")
+ERRH = L.eval("""function()
+  if not hooksecurefunc then
+    function hooksecurefunc(t, k, fn)
+      local orig = t[k]
+      t[k] = function(...) local r = { orig(...) }; fn(...); return unpack(r) end
+    end
+  end
+  ScriptErrorsFrame = { OnError = function() end }
+  Fire("ADDON_LOADED", "Blizzard_DebugTools")
+  MambaErroresDB.lista = {}
+  ScriptErrorsFrame:OnError("Prueba/Archivo.lua:7: falla de prueba", false, true)
+  local l = MambaErroresDB.lista
+  return #l, l[1] and l[1].msg or ""
+end""")
+r = ERRH()
+check(r[0] == 1 and "falla de prueba" in str(r[1]), f"Mamba_Errores anota los errores escuchando ScriptErrorsFrame:OnError ({r[1]})")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

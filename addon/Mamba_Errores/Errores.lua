@@ -25,14 +25,23 @@ local function anotar(msg, pila, tipo)
 	while #db.lista > MAX do table.remove(db.lista, 1) end
 end
 
-local anterior = geterrorhandler and geterrorhandler()
-if seterrorhandler then
-	seterrorhandler(function(msg, ...)
-		local ok, pila = pcall(debugstack, 2, 12, 0)
+-- K113 (18-11): NO se reemplaza el manejador de errores del juego (seterrorhandler). Con nuestra función en el
+-- manejador, cuando la interfaz del gremio de Blizzard fallaba, la ejecución quedaba "manchada" por Mamba_Errores
+-- y el juego bloqueaba UpdateGuildLobby(), IsUserOAuthed()... a nombre de Mamba_Errores. Ahora se escucha con
+-- hooksecurefunc sobre ScriptErrorsFrame:OnError, que corre DESPUÉS de Blizzard y no mancha a quien llama.
+local enganchado = false
+local function engancharErrores()
+	if enganchado then return true end
+	local sef = _G.ScriptErrorsFrame
+	if not (sef and type(sef.OnError) == "function" and hooksecurefunc) then return false end
+	hooksecurefunc(sef, "OnError", function(_, msg)
+		local ok, pila = pcall(debugstack, 4, 12, 0)
 		pcall(anotar, msg, ok and pila or nil, "lua")
-		if anterior then return anterior(msg, ...) end
 	end)
+	enganchado = true
+	return true
 end
+engancharErrores()
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -40,6 +49,8 @@ f:RegisterEvent("ADDON_ACTION_BLOCKED")
 f:RegisterEvent("ADDON_ACTION_FORBIDDEN")
 f:SetScript("OnEvent", function(_, evento, a, b)
 	if evento == "ADDON_LOADED" then
+		-- ScriptErrorsFrame puede llegar con un addon de Blizzard que se carga después
+		if not enganchado then engancharErrores() end
 		if a ~= "Mamba_Errores" then return end
 		MambaErroresDB = type(MambaErroresDB) == "table" and MambaErroresDB or {}
 		db = MambaErroresDB
