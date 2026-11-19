@@ -548,6 +548,27 @@ nv = G.MambaAPI.NoVender(211527)
 check(nv is not None and "Forever" in str(nv), f"MambaAPI.NoVender: el saco de dormir no se vende ({nv})")
 check(G.MambaAPI.NoVender(4306) is None, "MambaAPI.NoVender: un paño de seda sí se puede vender")
 
+# 10i) P14: la venta de basura de Polestar (QoL/Vendor.lua junkAt) salta lo que MambaAPI.NoVender protege
+VEND = L.eval("""function(src)
+  local ns = { L = setmetatable({}, { __index = function(_, k) return k end }), QoL = {},
+    RegisterEvent = function() end, On = function() end }
+  ns.QoL.Client = {
+    QUALITY_POOR = 0,
+    SlotInfo = function(bag, slot) return ({ [1] = { itemID = 211527, quality = 3, stackCount = 1 }, [2] = { itemID = 9104, quality = 0, stackCount = 1 } })[slot] end,
+    SlotQuest = function() return false end,
+    SellPrice = function(id) return 100 end,
+  }
+  ns.QoL.Marks = { Protected = function() return false end, Junk = function(id) return id == 211527 end }
+  local f = assert(loadstring(src, "@Polestar/QoL/Vendor.lua"))
+  f("Polestar", ns)
+  local J = ns.QoL.Vendor.JunkAt
+  return J(0, 1), J(0, 2)
+end""")
+src_v = (ADDON / "Polestar" / "QoL" / "Vendor.lua").read_text(encoding="utf-8")
+r = VEND(src_v)
+check(r[0] is None, f"P14: el saco marcado a mano como basura NO lo vende Polestar ({r[0]})")
+check(r[1] == 9104, f"P14: un gris común sí lo vende ({r[1]})")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

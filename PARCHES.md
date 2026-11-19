@@ -34,6 +34,7 @@ Pruebas de Polestar que fijan esos mismos valores y se ajustan junto con el parc
 | P1 | `rust/crates/forge-addontest/tests/addontest/ui-welcome.rs` | el texto del enlace es el de Mamba |
 | P2 | `rust/crates/forge-addontest/tests/addontest/ui-update.rs` | el enlace del release es el de Mamba |
 | P3 | `rust/crates/forge-addontest/tests/addontest/nav-journey.rs` | la prueba "off by default" espera encendido |
+| P14 | `addon/Polestar/QoL/Vendor.lua` | `junkAt` no vende lo que `MambaAPI.NoVender(id)` dice que no se vende (mecánicas de Forever de ForeverTDB, llaves, misión, ligado de utilidad), aunque esté marcado a mano como basura | Revisor de la tanda 5 (19-11): una montura marcada como basura se vendía. Prueba: `test_hub.py` (10i) |
 
 **No verificado:** las pruebas en Rust (`forge-addontest`), porque en este PC no hay Rust. Las de Node sí se corrieron (ver `MAMBA.md`, "Pruebas").
 

@@ -97,6 +97,9 @@ PARCHES = [
     ('P12-pie', 'Polestar/Theme/Widgets.lua',
      '\t\tplace(bottom[k], i, y, true)\n\t\ty = y + RAIL_ROW\n',
      '\t\tplace(bottom[k], i, y, true)\n\t\tlocal pb = f.railButtons[i] -- Mamba (P12-riel): el pie siempre a tamaño completo, con su nombre\n\t\tpb:SetHeight(RAIL_ROW); pb.Label:SetShown(true); pb.Icon:ClearAllPoints(); pb.Icon:SetPoint("TOP", pb, "TOP", 0, -10)\n\t\ty = y + RAIL_ROW\n'),
+    ('P14-no-vender', 'Polestar/QoL/Vendor.lua',
+     "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n",
+     "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n\t-- Mamba (PARCHES.md P14): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,\n\t-- quest items, bound utility) goes, even when marked as junk by hand.\n\tlocal mamba = _G.MambaAPI\n\tif mamba and mamba.NoVender and mamba.NoVender(id) then return nil end\n"),
     # P12: la ventana de Mamba (riel que se achica, encabezado Mamba, cuadro del objeto con lista, título por sección).
     ('P12-cuadro', 'Polestar/Theme/Widgets.lua',
      '\tif extra then extra(tip) end\n\ttip:Show()',

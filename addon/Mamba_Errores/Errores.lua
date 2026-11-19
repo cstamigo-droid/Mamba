@@ -22,6 +22,7 @@ local function anotar(msg, pila, tipo)
 		end
 	end
 	db.lista[#db.lista + 1] = e
+	if db.diag then db.diag.anotados = (db.diag.anotados or 0) + 1 end
 	while #db.lista > MAX do table.remove(db.lista, 1) end
 end
 
@@ -39,7 +40,21 @@ local function engancharErrores()
 		pcall(anotar, msg, ok and pila or nil, "lua")
 	end)
 	enganchado = true
+	if db and db.diag then db.diag.enganchado = true end
 	return true
+end
+-- Respaldo con BugGrabber: si está, el manejador de errores es suyo y nos avisa por su callback (no mancha más
+-- de lo que ya mancha BugGrabber). Se cuenta en el diag para ver en el juego si llegan.
+local conBugGrabber = false
+local function engancharBugGrabber()
+	if conBugGrabber then return end
+	local BG = _G.BugGrabber
+	if type(BG) == "table" and BG.RegisterCallback then
+		local ok = pcall(BG.RegisterCallback, {}, "BugGrabber_BugGrabbed", function(_, err)
+			if type(err) == "table" then pcall(anotar, err.message, err.stack, "lua") end
+		end)
+		conBugGrabber = ok and true or false
+	end
 end
 engancharErrores()
 
@@ -51,11 +66,15 @@ f:SetScript("OnEvent", function(_, evento, a, b)
 	if evento == "ADDON_LOADED" then
 		-- ScriptErrorsFrame puede llegar con un addon de Blizzard que se carga después
 		if not enganchado then engancharErrores() end
+		engancharBugGrabber()
 		if a ~= "Mamba_Errores" then return end
 		MambaErroresDB = type(MambaErroresDB) == "table" and MambaErroresDB or {}
 		db = MambaErroresDB
 		db.lista = type(db.lista) == "table" and db.lista or {}
 		db.sesion = (db.sesion or 0) + 1
+		-- diag de esta sesión: si el enganche quedó puesto y cuántos errores llegaron (para ver si Errores quedó mudo)
+		db.diag = { sesion = db.sesion, enganchado = enganchado, bugGrabber = conBugGrabber, anotados = 0,
+			scriptErrors = GetCVar and GetCVar("scriptErrors") or "?" }
 		for _, e in ipairs(pendientes) do anotar(e.msg, e.pila, e.tipo) end
 		pendientes = {}
 	else
