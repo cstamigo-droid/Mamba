@@ -104,7 +104,15 @@ function M.CrearMacro(clave, sinCursor)
 	if funciona == false and nueva then
 		-- Recién creada, el juego puede no tenerla al día todavía (revisión wow-addon-lua, 19-11): se vuelve a
 		-- preguntar un segundo después y SOLO si sigue sin reconocer ningún hechizo se saca (no sirve en Forever).
-		local function revisar()
+		local revisar
+		revisar = function()
+			-- DeleteMacro en combate da «acción bloqueada» (el pcall no lo evita): se espera a salir de la pelea
+			if InCombatLockdown and InCombatLockdown() then
+				local f = CreateFrame("Frame")
+				f:RegisterEvent("PLAYER_REGEN_ENABLED")
+				f:SetScript("OnEvent", function(s) s:UnregisterAllEvents(); pcall(revisar) end)
+				return
+			end
 			local i = GetMacroIndexByName and GetMacroIndexByName(nombre) or 0
 			if not i or i == 0 then return end
 			if M.MacroFunciona(i) ~= false then

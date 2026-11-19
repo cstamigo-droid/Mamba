@@ -125,9 +125,12 @@ function M.Movible(f, nombre, etiqueta)
 	else
 		-- sin la ventana de Mamba: se arrastra fuera de combate, pero el ratón solo se activa en marcos que ya
 		-- lo usan (un cartel en el centro no se come los clics al mundo; revisión wow-addon-lua, 19-11)
-		f:SetMovable(true); f:RegisterForDrag("LeftButton")
-		f:SetScript("OnDragStart", function(s) if not M.EnCombate() then s:StartMoving() end end)
-		f:SetScript("OnDragStop", function(s) s:StopMovingOrSizing() end)
+		-- Si el marco tiene una franja de título con ratón (medidor, barra Cerca), se arrastra desde ella.
+		f:SetMovable(true)
+		local asa = (f.titulo and f.titulo.RegisterForDrag) and f.titulo or f
+		asa:RegisterForDrag("LeftButton")
+		asa:SetScript("OnDragStart", function() if not M.EnCombate() then f:StartMoving() end end)
+		asa:SetScript("OnDragStop", function() f:StopMovingOrSizing() end)
 	end
 	M.movibles[nombre] = etiqueta or nombre
 	return f

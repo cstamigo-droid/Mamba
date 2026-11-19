@@ -324,5 +324,21 @@ M.Llevame(L.eval('{ mapa = 1456, x = 45, y = 60 }'), "Banco")
 check(G.FLECHA == "Banco", "K119: sin ruta de Ir a…, queda la flecha")
 src_sec = (D / "Seccion.lua").read_text(encoding="utf-8") if (D / "Seccion.lua").exists() else ""
 check('"Flecha"' not in src_sec and src_sec.count('"Llévame"') >= 3, "K119: el botón dice «Llévame» en Ahora, Metas y Bolsas")
+# ---------- revisor limpio tanda 5: si la pelea empieza antes de la segunda pregunta, la macro se saca al salir
+L.execute("""PENDIENTE = nil; C_Timer_orig = C_Timer; C_Timer = { After = function(_, fn) PENDIENTE = fn end }
+NO_ENTIENDE = { "/cast !" }; COMBATE = false
+GetMacroSpell = function(i) local m = MACROS[i]; if not m then return nil end
+  for _, pat in ipairs(NO_ENTIENDE) do if m[2]:find(pat, 1, true) then return nil end end; return 774 end""")
+M.ReintentarMacros()
+for x in M.TodasLasMacros(e).values():
+    pass
+L.execute('local i = GetMacroIndexByName("M·druGato"); if i > 0 then table.remove(MACROS, i) end')
+okc = M.CrearMacro("druGato", True)
+n_antes = len(list(G.MACROS.values()))
+L.execute('COMBATE = true; PENDIENTE()')
+check(len(list(G.MACROS.values())) == n_antes and len(list(G.BLOQUEOS.values())) == 0, "macros: en combate no se borra (se espera a salir)")
+L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
+check(len(list(G.MACROS.values())) == n_antes - 1, "macros: al salir de combate se saca la que el juego no entiende")
+L.execute('C_Timer = C_Timer_orig; NO_ENTIENDE = {}')
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)
