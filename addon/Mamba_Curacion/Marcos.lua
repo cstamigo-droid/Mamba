@@ -17,6 +17,9 @@ local botones = {}
 local pendiente = false
 local function enCombate() return InCombatLockdown and InCombatLockdown() end
 local function secreto(v) return issecretvalue and issecretvalue(v) end
+-- K110: un valor que se usa en un if o una cuenta pasa antes por aquí (secreto = como si no se supiera)
+local function claro(v) if secreto(v) then return nil end return v end
+M.Claro = claro
 
 -- Fragmento seguro: al entrar el ratón ata la rueda a este botón; al salir la suelta.
 local ENTRAR = [[
@@ -94,17 +97,19 @@ end
 
 function M.Pintar(b)
 	local u = b.GetAttribute and b:GetAttribute("unit")
-	if not (u and UnitExists and UnitExists(u)) then return end
+	if not (u and UnitExists and claro(UnitExists(u))) then return end
 	crearCuerpo(b)
 	local d = M.DB()
 	local _, clase = UnitClass(u)
+	clase = claro(clase)
 	local c = clase and RAID_CLASS_COLORS and RAID_CLASS_COLORS[clase]
 	b.vida:SetStatusBarColor(c and c.r or 0.3, c and c.g or 0.8, c and c.b or 0.3)
 	pcall(b.vida.SetMinMaxValues, b.vida, 0, UnitHealthMax(u))
 	pcall(b.vida.SetValue, b.vida, UnitHealth(u))
 	b.nombre:SetText(UnitName(u) or "")
-	if UnitIsDeadOrGhost and UnitIsDeadOrGhost(u) then b.estado:SetText("Muerto")
-	elseif UnitIsConnected and not UnitIsConnected(u) then b.estado:SetText("Desconectado")
+	local conectado = UnitIsConnected and claro(UnitIsConnected(u))
+	if UnitIsDeadOrGhost and claro(UnitIsDeadOrGhost(u)) then b.estado:SetText("Muerto")
+	elseif conectado == false then b.estado:SetText("Desconectado")
 	else b.estado:SetText("") end
 	M.Alcance(b)
 	-- mis HoT con su cuenta regresiva (K13)
@@ -323,7 +328,7 @@ ev:SetScript("OnEvent", function(_, e, unidad)
 		elseif not unidad or unidad == "player" then
 			for _, x in ipairs(botones) do
 				local u = x.GetAttribute and x:GetAttribute("unit")
-				if not unidad or (u and UnitIsUnit and UnitIsUnit(u, unidad)) then M.Proteger("pintar", M.Pintar, x) end
+				if not unidad or (u and UnitIsUnit and claro(UnitIsUnit(u, unidad))) then M.Proteger("pintar", M.Pintar, x) end
 			end
 		end
 	end

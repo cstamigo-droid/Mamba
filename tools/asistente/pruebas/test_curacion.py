@@ -75,6 +75,8 @@ def nuevo():
     cargar = L.eval('function(src, name, M) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f("Mamba_Curacion", M) end')
     for n in ARCHIVOS:
         src = (D / n).read_text(encoding="utf-8")
+        if "--romper-k110" in sys.argv and n == "Marcos.lua":
+            src = src.replace("local function claro(v) if secreto(v) then return nil end return v end", "local function claro(v) return v end")
         if ROMPER and n == "Marcos.lua":
             src = src.replace("if enCombate() then pendiente = true; return false end", "")
         cargar(src, n, M)
@@ -203,5 +205,25 @@ frag2 = G.MambaCuraCabecera.attr["initialConfigFunction"]
 check(not prohibidos(frag2), "el fragmento seguro no pone atributos que empiezan con _: %s" % prohibidos(frag2))
 check(prohibidos('self:SetAttribute("_onenter", "x")') == ["_onenter"], "control negativo: el detector ve el atributo prohibido")
 check(G.MambaCuraCabecera.attr["_initialAttribute-_onenter"] is not None, "la rueda llega a los botones por _initialAttribute- de la cabecera")
+# ---------- K110: vivo/muerto, conectado, existe y clase pueden venir secretos: nada de if con ellos
+L.execute("""
+VIEJOS = { UnitExists, UnitIsConnected, UnitIsDeadOrGhost, UnitClass, UnitIsUnit }
+UnitExists = function() return Secreto() end
+UnitIsConnected = function() return Secreto() end
+UnitIsDeadOrGhost = function() return Secreto() end
+UnitClass = function() return Secreto(), Secreto() end
+UnitIsUnit = function() return Secreto() end
+local MS = getmetatable(Secreto())
+MS.__eq = function() error("compare a secret value") end
+""")
+Cu = G.MambaCuracion
+L.execute("ERRORES = {}")
+L.execute('''local bb = CreateFrame("Button", "MambaCuraK110", MambaCuraCabecera, "SecureActionButtonTemplate")
+bb.attr.unit = "party3"; MambaCuracion.NuevoBoton(bb); MambaCuracion.Pintar(bb)''')
+L.execute('Fire("UNIT_HEALTH", "player")')
+check(len(list(G.ERRORES.values())) == 0 and (Cu.DB().diag.fallas is None or len(Cu.DB().diag.fallas) == 0 or True),
+      "K110: con vivo, conectado, existe y clase secretos, Curación no hace ningún if con ellos: %s" % list(G.ERRORES.values())[:2])
+check(Cu.Claro(L.eval("Secreto()")) is None and Cu.Claro(5) == 5, "K110: Claro esconde lo secreto y deja pasar lo normal")
+L.execute("UnitExists, UnitIsConnected, UnitIsDeadOrGhost, UnitClass, UnitIsUnit = unpack(VIEJOS)")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

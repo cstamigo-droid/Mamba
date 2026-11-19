@@ -74,6 +74,8 @@ def nuevo():
     cargar = L.eval('function(src, name, M) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f("Mamba_Mapa", M) end')
     for n in ARCHIVOS:
         src = (D / n).read_text(encoding="utf-8")
+        if "--romper-k110" in sys.argv and n == "Nucleo.lua":
+            src = src.replace("if issecretvalue and issecretvalue(v) then return nil end", "")
         if ROMPER and n == "Nucleo.lua":
             src = src.replace("while mejoro and vueltas < 20 do", "while false do")
         cargar(src, n, M)
@@ -157,5 +159,23 @@ L.execute('PolestarMinimapCoords = CreateFrame("Frame", "PolestarMinimapCoords",
 check(Mp.OtrasCoords() == "Polestar", "detecta las coordenadas de Polestar en el minimapa")
 Mp.ActualizarCoords()
 check(Mp.TextoMini() is not None and not Mp.TextoMini().visible, "con las de Polestar, Mamba esconde las suyas (no se ven dos)")
+# ---------- K110: posición y ángulo secretos (en instancias): sin cuentas ni comparaciones
+L.execute("""
+local MS = { __sub = function() error("arithmetic on a secret value") end, __add = function() error("arithmetic on a secret value") end,
+  __mul = function() error("arithmetic on a secret value") end, __div = function() error("arithmetic on a secret value") end,
+  __lt = function() error("compare a secret value") end, __le = function() error("compare a secret value") end,
+  __unm = function() error("arithmetic on a secret value") end }
+function Secreto() return setmetatable({}, MS) end
+function issecretvalue(v) return type(v) == "table" and getmetatable(v) == MS end
+UnitPosition = function() return Secreto(), Secreto(), 0, 1 end
+GetPlayerFacing = function() return Secreto() end
+CVARS = { rotateMinimap = "1" }
+C_Map.GetPlayerMapPosition = function() return CreateVector2D(Secreto(), Secreto()) end
+ERRORES = {}
+""")
+Mp.DibujarMinimapa(); Mp.ActualizarCoords(); Mp.TickRuta(); Mp.RutaDe(1411, L.eval("{ {x=1,y=1}, {x=2,y=2} }"))
+check(len(list(G.ERRORES.values())) == 0 and (Mp.DB().diag.fallas is None),
+      "K110: posición, ángulo y coordenadas secretos no rompen el mapa: " + str((list(G.ERRORES.values())[:2], Mp.DB().diag.fallas and list(Mp.DB().diag.fallas.values())[:2])))
+check(Mp.XY(L.eval("CreateVector2D(Secreto(), 2)")) is None, "K110: un vector con una parte secreta no da coordenadas")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

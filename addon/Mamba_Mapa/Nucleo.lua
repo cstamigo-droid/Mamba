@@ -168,6 +168,20 @@ function M.MinutosVuelta(largo, nodos, montura)
 	return (largo / (montura and 10.5 or 7) + nodos * 4) / 60
 end
 
+-- K110: posición o ángulo que Forever puede esconder (valor secreto): nil, como si no se supiera
+function M.Claro(v)
+	if issecretvalue and issecretvalue(v) then return nil end
+	return v
+end
+-- x, y de un vector del juego, o nil si alguno es secreto
+function M.XY(v)
+	if not (v and v.GetXY) then return nil end
+	local x, y = v:GetXY()
+	x, y = M.Claro(x), M.Claro(y)
+	if type(x) ~= "number" or type(y) ~= "number" then return nil end
+	return x, y
+end
+
 local oyentes = {}
 function M.AlCambiar(fn) oyentes[#oyentes + 1] = fn end
 function M.Cambio() for _, fn in ipairs(oyentes) do pcall(fn) end end

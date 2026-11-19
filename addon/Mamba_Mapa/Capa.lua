@@ -118,7 +118,8 @@ local function prepararZona(mapa)
 	for _, p in ipairs(M.NodosDe(mapa, M.Filtro())) do
 		local ok, _, v = pcall(C_Map.GetWorldPosFromMapPos, mapa, CreateVector2D(p.x / 100, p.y / 100))
 		if ok and v then
-			local wx, wy = v:GetXY()
+			local wx, wy = M.XY(v)
+			if not wx then break end
 			mundoZona.puntos[#mundoZona.puntos + 1] = { wx, wy, p.tipo }
 		end
 	end
@@ -145,12 +146,13 @@ function M.DibujarMinimapa()
 		local mapa = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
 		if mapa and (not mundoZona or mundoZona.mapa ~= mapa) then prepararZona(mapa) end
 		local py, px = UnitPosition("player") -- y = norte, x = oeste en UnitPosition: (posY, posX)
+		py, px = M.Claro(py), M.Claro(px)
 		if mundoZona and px and py then
 			local zoom = mini.GetZoom and mini:GetZoom() or 0
 			local adentro = GetCVar and GetCVar("minimapInsideZoom") ~= nil and IsIndoors and IsIndoors()
 			local diam = (adentro and DIAM_ADENTRO or DIAM_AFUERA)[zoom] or 466
 			local radio = (mini:GetWidth() or 140) / 2
-			local ang = (GetCVar and GetCVar("rotateMinimap") == "1" and GetPlayerFacing) and -(GetPlayerFacing() or 0) or 0
+			local ang = (GetCVar and GetCVar("rotateMinimap") == "1" and GetPlayerFacing) and -(M.Claro(GetPlayerFacing()) or 0) or 0
 			for _, p in ipairs(mundoZona.puntos) do
 				local x, y = M.EnMinimapa(py, px, p[1], p[2], diam, radio, ang)
 				if x then
@@ -173,7 +175,7 @@ local function coords(mapa, unidad)
 	if not (C_Map and C_Map.GetPlayerMapPosition and mapa) then return nil end
 	local ok, v = pcall(C_Map.GetPlayerMapPosition, mapa, unidad or "player")
 	if ok and v and v.GetXY then
-		local x, y = v:GetXY()
+		local x, y = M.XY(v)
 		if x and y and (x > 0 or y > 0) then return x * 100, y * 100 end
 	end
 end
@@ -302,7 +304,9 @@ function M.RutaDe(mapa, pts)
 	local mp = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
 	if mp == mapa and C_Map.GetPlayerMapPosition then
 		local ok, v = pcall(C_Map.GetPlayerMapPosition, mapa, "player")
-		if ok and v then local x, y = v:GetXY(); yo = { x = x * 100, y = y * 100 } end
+		local x, y
+		if ok then x, y = M.XY(v) end
+		if x then yo = { x = x * 100, y = y * 100 } end
 	end
 	local orden, largo = M.Ruta(pts, w, h, yo)
 	return { mapa = mapa, orden = orden, largo = largo, yardas = w ~= nil, minutos = w and M.MinutosVuelta(largo, #orden) or nil, i = 1 }
@@ -342,7 +346,8 @@ function M.TickRuta()
 	if not p or mapa ~= r.mapa then return end
 	local ok, v = pcall(C_Map.GetPlayerMapPosition, mapa, "player")
 	if not (ok and v) then return end
-	local x, y = v:GetXY()
+	local x, y = M.XY(v)
+	if not x then return end
 	local w, h = M.Yardas(mapa)
 	w, h = w or 1000, h or 1000
 	local d = math.sqrt(((x * 100 - p.x) * w / 100) ^ 2 + ((y * 100 - p.y) * h / 100) ^ 2)
