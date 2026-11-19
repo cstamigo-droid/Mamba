@@ -19,6 +19,7 @@ Escaneo.lua
 Juego.lua
 Tooltip.lua
 Cuadro.lua
+Recompensa.lua
 Alerta.lua
 Recetas.lua
 Oportunidades.lua

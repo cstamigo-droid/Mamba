@@ -47,8 +47,9 @@ local function objetivos()
 	return { rol = r and claveDe(r.rol, r.arbol), rol2 = r and r.rol2 and claveDe(r.rol2, nil), jcj = est.jcj, jce = est.jce }
 end
 
--- Veredicto contra lo puesto con los pesos de OTRO rol: «+8 %» / «-3 %» / nil
-local function veredictoConRol(link, rol)
+-- La mejora contra lo puesto con los pesos de OTRO rol, en número: pct (%), vacia (llena una ranura vacía), ranura.
+-- nil si no se puede medir. La usan el cuadro (abajo) y las recompensas de misión (Recompensa.lua, K101).
+local function mejoraConRol(link, rol)
 	local g = G()
 	if not (g and g.WeightsFor and g.GetItemInfo and g.ScoreWith and g.CompareToEquipped) then return nil end
 	local p = g.GetPlayer and g.GetPlayer()
@@ -62,10 +63,44 @@ local function veredictoConRol(link, rol)
 	if not nuevo then return nil end
 	local a = g.ScoreWith(nuevo, w, r.slot == 17)
 	local b = viejo and g.ScoreWith(viejo, w, r.slot == 17) or 0
-	if b <= 0 then return a > 0 and "llena una ranura vacía" or nil, a > 0 end
-	local pct = (a - b) / b * 100
+	if b <= 0 then
+		if a > 0 then return nil, true, r.slot end
+		return nil
+	end
+	return (a - b) / b * 100, false, r.slot
+end
+T.MejoraConRol = mejoraConRol
+
+-- Veredicto contra lo puesto con los pesos de OTRO rol: «+8 %» / «-3 %» / nil
+local function veredictoConRol(link, rol)
+	local pct, vacia = mejoraConRol(link, rol)
+	if vacia then return "llena una ranura vacía", true end
+	if not pct then return nil end
 	if math.abs(pct) < 0.5 then return "igual que lo tuyo", nil end
 	return string.format("%+d %%", math.floor(pct + (pct > 0 and 0.5 or -0.5))), pct > 0
+end
+
+-- K101: la mejora de un objeto para CADA build de «Mi plan» (K59), con los mismos números del bloque E8:
+-- la principal, el de Polestar (Gear.CompareToEquipped, el mismo del cuadro); la segunda, mejoraConRol.
+-- -> lista de { nombre = "Equilibrio" | nil (sin plan), pct, vacia, ranura, despues = nivel (aún no la puede usar) }
+function T.MejorasDeBuilds(link)
+	local g = G()
+	local out = {}
+	if not (g and g.CompareToEquipped and link) then return out end
+	local ob = objetivos()
+	local r = g.CompareToEquipped(link)
+	if r and r.usable and not r.equipped and r.slot then
+		local nivel = g.PlayerLevel and g.PlayerLevel() or (UnitLevel and UnitLevel("player")) or 0
+		local despues = (r.minLevel or 0) > nivel and r.minLevel or nil
+		local vacia = r.empty and (r.delta or 0) >= 0 or false
+		out[#out + 1] = { nombre = ob.rol and NOMBRE_ROL[ob.rol] or nil, pct = (not r.empty) and r.pct or nil, vacia = vacia,
+			ranura = r.slot, despues = despues }
+	end
+	if ob.rol2 and ob.rol2 ~= ob.rol then
+		local pct, vacia, ranura = mejoraConRol(link, ob.rol2)
+		if pct or vacia then out[#out + 1] = { nombre = NOMBRE_ROL[ob.rol2] or ob.rol2, pct = pct, vacia = vacia, ranura = ranura } end
+	end
+	return out
 end
 
 local ACCION = {

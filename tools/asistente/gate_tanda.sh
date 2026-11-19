@@ -20,6 +20,7 @@ corre hub        python -I $P/test_hub.py addon
 corre ventana    python -I $P/test_ventana.py addon
 corre equipo     python -I $P/test_equipo.py addon
 corre tasador    python -I $P/test_tasador.py addon/Tasador
+corre recompensa python -I $P/test_recompensa.py addon/Tasador
 corre escaneo    python -I $P/test_escaneo.py addon/Tasador
 corre comercio   python -I $P/test_comercio.py addon/Tasador
 corre medidor    python -I $P/test_medidor.py addon/Medidor
