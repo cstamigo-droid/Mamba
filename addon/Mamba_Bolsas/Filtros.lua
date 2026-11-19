@@ -72,6 +72,9 @@ end
 -- como basura ni para vender en las bolsas de Mamba, aunque sea gris o lo haya marcado alguien.
 function M.Marca(d)
 	if d and d.id and M.EsDeMision(d) then return nil end
+	-- mecánicas de Forever (saco de dormir, piedra de hogar...): la lista única del Tasador, de ForeverTDB
+	local Tz = _G.Tasador
+	if d and d.id and Tz and type(Tz.MECANICAS) == "table" and Tz.MECANICAS[d.id] then return nil end
 	local Ps = PS()
 	local Marks = Ps and Ps.QoL and Ps.QoL.Marks
 	if Marks and Marks.Get then

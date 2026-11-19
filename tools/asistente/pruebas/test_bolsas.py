@@ -179,6 +179,7 @@ def nuevo(antes=""):
             src = src.replace('if que == "alternar" and debugstack then', 'if debugstack then')
         if ROMPER and n == "Filtros.lua":
             src = src.replace("if d and d.id and M.EsDeMision(d) then return nil end", "")
+            src = src.replace("Tz.MECANICAS[d.id] then return nil end", "false then return nil end")
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace("if ABRE[e] then M.AbrirInventario(true, true)", "if false then")
         if ROMPER and n == "Banco.lua":
@@ -505,6 +506,11 @@ L.execute('MARCAS = { [765] = "junk" }; MambaAPI = { Bolsas = function() return 
 check(M.Marca(L.eval('{ id = 765, calidad = 0 }')) is None, "objeto de misión: sin marca de basura ni de venta")
 check(not M.Pasa("basura", L.eval('{ id = 765, calidad = 0 }')), "y no aparece en el filtro Basura")
 L.execute('MARCAS = nil; MambaAPI = nil; MambaBolsas.RefrescarSugerencias()')
+# K115: una mecánica de Forever (saco de dormir 211527, lista Tasador.MECANICAS) tampoco es basura, aunque la marque el jugador
+L.execute('Tasador = { MECANICAS = { [211527] = true } }; MARCAS = { [211527] = "junk" }')
+check(M.Marca(L.eval('{ id = 211527, calidad = 0 }')) is None, "saco de dormir: sin marca de basura")
+check(not M.Pasa("basura", L.eval('{ id = 211527, calidad = 0 }')), "y no aparece en el filtro Basura")
+L.execute('Tasador = nil; MARCAS = nil')
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.
