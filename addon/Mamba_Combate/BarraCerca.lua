@@ -19,7 +19,7 @@ function B.Modo() return M.DB().cercaBarra or "siempre" end
 function B.Crear()
 	if barra then return barra end
 	barra = CreateFrame("Frame", "MambaCercaBarra", UIParent)
-	barra:SetSize(ANCHO, 18)
+	barra:SetSize(ANCHO, 18 + FILAS * ALTO) -- alto fijo: ver B.Dibujar
 	barra:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -230, -220)
 	barra:Hide()
 	barra.fondo = barra:CreateTexture(nil, "BACKGROUND")
@@ -47,7 +47,7 @@ M.Precrear(function() B.Crear() end)
 M.AlModoMover(function(activo)
 	B.Crear()
 	if activo then
-		if not barra:IsShown() then barra.ejemplo = true; barra.titulo.t:SetText("Cerca: 0 (ejemplo)"); barra:SetHeight(18 + 2 * ALTO); barra:Show() end
+		if not barra:IsShown() then barra.ejemplo = true; barra.titulo.t:SetText("Cerca: 0 (ejemplo)"); barra:Show() end
 	elseif barra.ejemplo then
 		barra.ejemplo = nil
 		barra:Hide()
@@ -76,7 +76,12 @@ function B.Dibujar()
 		local x = lista[i]
 		if x then t:SetText(B.Texto(x)); t:Show() else t:Hide() end
 	end
-	barra:SetHeight(18 + math.min(#lista, FILAS) * ALTO)
+	-- el fondo crece hacia abajo con la lista; el marco (lo que se guarda y se mueve) tiene alto fijo
+	barra.fondo:ClearAllPoints()
+	barra.fondo:SetPoint("TOPLEFT", barra, "TOPLEFT", 0, 0)
+	barra.fondo:SetPoint("TOPRIGHT", barra, "TOPRIGHT", 0, 0)
+	barra.fondo:SetHeight(18 + math.min(#lista, FILAS) * ALTO)
+	barra.altoVisto = 18 + math.min(#lista, FILAS) * ALTO
 	barra:Show()
 	-- quien deja de estar cerca (2 min) sale solo: un reloj de 5 s, solo mientras haya alguien
 	B.Reloj(#lista > 0)

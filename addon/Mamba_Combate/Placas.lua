@@ -152,7 +152,15 @@ end
 -- Otro addon de placas (Plater, Platynator, Kui, ThreatPlates…) ya dibuja las suyas: Mamba no dibuja encima ni
 -- toca el alfa de la placa del juego (revisión wow-addon-lua, 19-11).
 Pl.OTROS = { "Plater", "Platynator", "Kui_Nameplates", "TidyPlates_ThreatPlates", "NeatPlates" }
+local otroVisto, otroCual
 function Pl.OtroAddon()
+	if otroVisto then return otroCual end
+	otroVisto = true
+	otroCual = Pl.BuscarOtro()
+	return otroCual
+end
+-- se mira una vez por sesión (los addons no se cargan a mitad de juego)
+function Pl.BuscarOtro()
 	local cargado = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
 	if not cargado then return nil end
 	for _, n in ipairs(Pl.OTROS) do

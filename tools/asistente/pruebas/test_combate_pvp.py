@@ -84,7 +84,7 @@ def nuevo():
             src = src.replace("local repetido = previo and math.abs(previo.fin - (t + e[1])) < 1.5", "local repetido = false")
             src = src.replace("if M.Secreto(id) then diag().secretos = diag().secretos + 1; return false end", "")
         if ROMPER and n == "Medidor.lua":
-            src = src.replace("v:SetHeight(16 + vistas * 14)", "")                                           # el marco no crece: el recuadro de Mover solo cubre el título
+            src = src.replace("v:SetHeight(16 + 8 * 14)\n", "")                                           # el marco no crece: el recuadro de Mover solo cubre el título
         if ROMPER and n == "BarraCerca.lua":
             src = src.replace("if x and not reciente then", "if x then")                                    # avisa cada vez que lo ve
         if ROMPER and n == "Historial.lua":
@@ -285,7 +285,7 @@ check(G.AVISOS == 1 and "Enemigo cerca" in str(C.Avisos.ultimo), "aviso en panta
 G.RELOJ = 9010
 Cz.Visto(L.eval('{ nombre = "Thrall2" }'))
 check(G.AVISOS == 1, "el mismo enemigo visto otra vez al rato no vuelve a avisar (avisos %s)" % G.AVISOS)
-check(BB.h == 18 + 15, "la barra mide una fila más (alto %s)" % BB.h)
+check(BB.altoVisto == 18 + 15 and BB.h == 18 + 8 * 15, "el fondo crece una fila; el marco tiene alto fijo (fondo %s, marco %s)" % (BB.altoVisto, BB.h))
 C.DB().cercaBarra = "conEnemigos"; G.RELOJ = 9500; C.Cambio()
 check(not BB.visible, "«solo con enemigos»: escondida cuando ya no hay nadie cerca")
 C.DB().cercaBarra = "siempre"; C.Cambio()
@@ -303,7 +303,7 @@ L.execute('SESION = { combatSources = { { name = "Hope", totalAmount = 900, amou
 C.DB().medidor = True
 Med.Dibujar()
 vistas = sum(1 for i in range(1, 9) if L.eval('function(i) return MambaMedidorCombate and nil end')(i) is None)
-check(VM.h is not None and VM.h > 16, "medidor: el marco crece con sus barras (alto %s), no solo el título" % VM.h)
+check(VM.h == 16 + 8 * 14, "medidor: el marco cubre sus 8 barras, no solo el título (alto %s)" % VM.h)
 
 # ---------- reglas
 src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua"))

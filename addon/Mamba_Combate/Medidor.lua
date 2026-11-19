@@ -136,7 +136,7 @@ M.AlModoMover(function(activo)
 		if not v:IsShown() then
 			v.ejemplo = true
 			v.titulo.t:SetText("Medidor de combate (ejemplo)")
-			v:SetHeight(16 + 4 * 14) -- el alto de unas barras, para que el recuadro se vea del tamaño real
+			v:SetHeight(16 + 8 * 14) -- el alto real, para que el recuadro se vea del tamaño que ocupa
 			v:Show()
 		end
 	elseif v.ejemplo then
@@ -177,9 +177,8 @@ function Med.Dibujar()
 			b:SetValue(0); b.texto:SetText(motivo or ""); b:Show()
 		else b:Hide() end
 	end
-	local vistas = 0
-	for i = 1, 8 do if filas[i] and filas[i]:IsShown() then vistas = i end end
-	v:SetHeight(16 + vistas * 14)
+	-- alto FIJO al máximo: si creciera con las barras, el lugar se guarda por el centro y el título saltaría (revisión limpia, 19-11)
+	v:SetHeight(16 + 8 * 14)
 	v:Show()
 end
 
