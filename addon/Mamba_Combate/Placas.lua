@@ -169,6 +169,21 @@ function Pl.BuscarOtro()
 	end
 end
 
+-- K123: borde naranja o rojo en la placa del bicho que estás por atraer (nivel = "rojo" | "amarillo" | nil).
+-- El objetivo conserva su borde blanco.
+function Pl.MarcarAgro(unidad, nivel)
+	local N = C_NamePlate
+	local placa = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(unidad)
+	local c = placa and placas[placa]
+	if not c or not c:IsShown() or c.objetivo then return end
+	c.agro = nivel
+	for _, t in ipairs(c.borde) do
+		if nivel == "rojo" then t:SetColorTexture(1, 0.2, 0.1, 1)
+		elseif nivel == "amarillo" then t:SetColorTexture(1, 0.65, 0.1, 1)
+		else t:SetColorTexture(0, 0, 0, 1) end
+	end
+end
+
 function Pl.Pintar(unidad)
 	if Pl.OtroAddon() then return end
 	local N = C_NamePlate

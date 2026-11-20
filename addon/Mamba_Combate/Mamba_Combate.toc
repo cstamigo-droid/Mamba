@@ -20,6 +20,7 @@ Rotacion.lua
 Disparo.lua
 Amenaza.lua
 Placas.lua
+Agro.lua
 Gladius.lua
 Marcadores.lua
 Avisos.lua

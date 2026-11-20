@@ -87,6 +87,9 @@ def nuevo():
             src = src.replace("v:SetHeight(16 + 8 * 14)\n", "")                                           # el marco no crece: el recuadro de Mover solo cubre el título
         if ROMPER and n == "BarraCerca.lua":
             src = src.replace("if x and not reciente then", "if x then")                                    # avisa cada vez que lo ve
+        if ROMPER and n == "Agro.lua":
+            src = src.replace("if not r or r > 3 then return false end", "")                              # avisa también con neutrales
+            src = src.replace("if hi and hi <= R then return \"rojo\", R, lo, hi end", "")               # nunca rojo
         if ROMPER and n == "Historial.lua":
             src = src.replace("(not t0) or ((x.visto or 0) - t0 > 120)", "true")                         # cuenta cada vez que lo ve
         cargar(src, n, M)
@@ -314,8 +317,66 @@ C.DB().alfaMarcos = 5
 check(abs(C.AplicarTransparencia() - 0.3) < 0.01, "K120: nunca menos de 30 % (no desaparece)")
 C.DB().alfaMarcos = 100; C.Cambio()
 
+# ---------- K123: indicador de agro al acercarse
+Ag = C.Agro
+check(Ag.Radio(39, 39) == 20 and Ag.Radio(42, 39) == 23 and Ag.Radio(30, 39) == 11, "K123: radio ≈20 yd a tu nivel, ±1 por nivel")
+check(Ag.Radio(10, 39) == 5 and Ag.Radio(70, 39) == 45 and Ag.Radio(-1, 39) == 45, "K123: radio entre 5 y 45 (calavera 45)")
+check(Ag.Radio(L.eval("Secreto()"), 39) is None, "K123: nivel secreto: no se adivina")
+# sondas: CheckInteractDistance (duelo 9,9 / seguir 28) y el alcance real de tus hechizos (Cólera 30 yd)
+L.execute("""
+DIST = {}
+function CheckInteractDistance(u, i) local d = DIST[u]; if d == nil then return nil end
+  local yd = ({ [3] = 9.9, [2] = 11.11, [4] = 28 })[i]; return d <= yd end
+C_Spell.GetSpellInfo = function(id) local alc = ({ [5176] = 30, [8921] = 30, [339] = 30, [1082] = 5 })[id]; if alc then return { name = NOMBRES[id], maxRange = alc } end end
+C_Spell.IsSpellHarmful = function(id) return id ~= 774 and id ~= 8936 and id ~= 5185 end
+C_Spell.IsSpellInRange = function(n, u) local d = DIST[u]; if d == nil then return nil end
+  for id, nom in pairs(NOMBRES) do if nom == n then local alc = ({ [5176] = 30, [8921] = 30, [339] = 30, [1082] = 5 })[id]; if alc then return d <= alc end end end end
+UNIDADES.nameplate5 = { jugador = false, enemigo = true, nombre = "Lobo", guid = "G-lobo", nivel = 39, reaccion = 2 }
+UNIDADES.nameplate6 = { jugador = false, enemigo = true, nombre = "Jabalí", guid = "G-jab2", nivel = 39, reaccion = 4 }
+EN_COMBATE = false; COMBATE = false
+AFECTA_ORIG = UnitAffectingCombat
+UnitAffectingCombat = function(u) if u == "player" then return EN_COMBATE end; return u ~= "nameplate5" and u ~= "nameplate6" end
+""")
+Ag.Olvidar()
+G.DIST.nameplate5 = 8
+niv, R, lo, hi = Ag.Peligro("nameplate5")
+check(niv == "rojo" and R == 20 and hi == 9.9, "K123: a 8 yd de un lobo de tu nivel: rojo (%s, hi %s)" % (niv, hi))
+G.DIST.nameplate5 = 20
+niv = Ag.Peligro("nameplate5")[0]
+check(niv == "amarillo", "K123: entre 11 y 28 yd: amarillo, puede estar dentro (%s)" % niv)
+G.DIST.nameplate5 = 40
+niv = Ag.Peligro("nameplate5")[0]
+check(niv == "verde", "K123: más lejos que 30 yd: verde (%s)" % niv)
+check(not Ag.EsAgresivo("nameplate6"), "K123: el neutral amarillo no cuenta")
+L.execute("UNIDADES.nameplate5.reaccion = Secreto()")
+check(not Ag.EsAgresivo("nameplate5"), "K123: reacción secreta: no se cuenta (no rompe)")
+L.execute("UNIDADES.nameplate5.reaccion = 2")
+# la barrita: un lobo a 8 yd a la izquierda de la pantalla
+L.execute("""PLACAS = {}""")
+placa(L, "nameplate5")
+L.execute('PLACAS[1].GetCenter = function() return 300, 500 end')
+G.DIST.nameplate5 = 8
+C.DB().agro = True
+Ag.Dibujar()
+AB = Ag.Barra()
+check(AB.visible and Ag.ultimo.peor == "rojo", "K123: la barrita aparece en rojo")
+lado = Ag.ultimo.lista[1].lado
+check(lado is not None and lado < -0.5 and AB.marcas[1].visible, "K123: la marca va hacia la izquierda, donde está el lobo (%s)" % lado)
+G.DIST.nameplate5 = 60
+Ag.Dibujar()
+check(not AB.visible, "K123: sin peligro, la barrita se esconde (discreta)")
+G.DIST.nameplate5 = 8
+L.execute('EN_COMBATE = true; COMBATE = true')
+Ag.Dibujar()
+check(not AB.visible, "K123: en combate no se muestra")
+L.execute('EN_COMBATE = false; COMBATE = false')
+d_ag = C.DB().diag.agro
+check(d_ag.interaccion > 0 and d_ag.hechizo > 0, "K123: diag cuenta qué sondas responden (interacción %s, hechizo %s)" % (d_ag.interaccion, d_ag.hechizo))
+check(C.movibles["MambaAgro"] == "Indicador de agro", "K123: entra en «Mover elementos»")
+L.execute("UnitAffectingCombat = AFECTA_ORIG")
+
 # ---------- reglas
-src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua"))
+src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua", "Agro.lua"))
 check("SLASH_" not in src and "SlashCmdList" not in src, "sin comandos /")
 check(not re.search(r"\b(CastSpell\w*|UseAction|RunMacroText|TargetUnit|CastSpellByName|SpellStopCasting)\b", src), "nada lanza ni elige por el jugador")
 check("GameFont" not in src and "|cff" not in src and "SetTextColor(" not in src, "letra y colores de la apariencia")

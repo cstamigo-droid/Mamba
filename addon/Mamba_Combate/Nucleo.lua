@@ -8,7 +8,7 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
-	cercanosSola = false, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100,
+	cercanosSola = false, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100, agro = true, agroSiempre = false, agroPlacas = true,
 }
 
 function M.DB()
@@ -117,7 +117,7 @@ end
 
 -- K120: transparencia de los marcos de combate que quedan siempre a la vista (el tamaño se cambia con la rueda en
 -- «Mover elementos»). 30-100 %.
-M.TRANSPARENTES = { "MambaMedidorCombate", "MambaAmenaza", "MambaCercaBarra", "MambaRanking", "MambaDisparo", "MambaMarcadores" }
+M.TRANSPARENTES = { "MambaAgro", "MambaMedidorCombate", "MambaAmenaza", "MambaCercaBarra", "MambaRanking", "MambaDisparo", "MambaMarcadores" }
 function M.AplicarTransparencia()
 	local a = (M.Num(M.DB().alfaMarcos) or 100) / 100
 	a = math.max(0.3, math.min(1, a))
