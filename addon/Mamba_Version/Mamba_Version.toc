@@ -1,0 +1,13 @@
+## Interface: 16001
+## Title: Mamba · Versión
+## Notes: Avisa cuando alguien de tu grupo tiene una versión más nueva de Mamba. Compara versiones solo entre jugadores con Mamba (su propio prefijo de mensajes); no molesta a quien usa el Polestar oficial.
+## Author: Cristian Amigo
+## Version: 0.1.0
+## X-License: GPL-3.0-only
+## SavedVariables: MambaVersionDB
+## Category: Mamba
+## Category-esMX: Mamba
+## Category-esES: Mamba
+
+Sello.lua
+Version.lua

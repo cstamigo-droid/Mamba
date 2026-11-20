@@ -1,0 +1,131 @@
+"""Pruebas de Mamba_Version (aviso de versión nueva entre compañeros), con Lua 5.1 (lupa). 19-11-2026.
+Uso: python test_version.py [carpeta addon] [--romper]
+--romper: control negativo; carga una Version.lua que nunca avisa. Las pruebas del aviso tienen que fallar."""
+import pathlib
+import sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+from lupa.lua51 import LuaRuntime
+
+AQUI = pathlib.Path(__file__).parent
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+ROMPER = "--romper" in sys.argv
+BASE = pathlib.Path(args[0]) if args else AQUI.parents[2] / "addon"
+ok = fail = 0
+
+
+def check(cond, msg):
+    global ok, fail
+    if cond:
+        ok += 1
+    else:
+        fail += 1
+        print("FALLA:", msg)
+
+
+ENTORNO = r'''
+chat, errores, handlers, enviados, prefijos = {}, {}, {}, {}, {}
+DEFAULT_CHAT_FRAME = { AddMessage = function(_, m) table.insert(chat, m) end }
+UIErrorsFrame = { AddMessage = function(_, m) table.insert(errores, m) end }
+T = 100
+function GetTime() return T end
+GRUPO, BANDA, BLOQUEO = true, false, false
+LE_PARTY_CATEGORY_INSTANCE = 2
+function IsInGroup(cat) if cat == 2 then return false end return GRUPO end
+function IsInRaid() return BANDA end
+function UnitName() return "Yo" end
+function Ambiguate(n) return (n:gsub("%-.*", "")) end
+C_ChatInfo = {
+  RegisterAddonMessagePrefix = function(p) prefijos[p] = true end,
+  InChatMessagingLockdown = function() return BLOQUEO end,
+  SendAddonMessage = function(p, m, c, d) table.insert(enviados, { p = p, m = m, c = c, d = d }) end,
+}
+function CreateFrame()
+  local f = { ev = {} }
+  function f:RegisterEvent(e) self.ev[e] = true end
+  function f:SetScript(_, fn) table.insert(handlers, { f = self, fn = fn }) end
+  return f
+end
+function Fire(e, ...) for _, h in ipairs(handlers) do if h.f.ev[e] then h.fn(h.f, e, ...) end end end
+'''
+
+ROTA = 'MambaVersion = { Recibir = function() end, Codificar = function() return "" end, Decodificar = function() end }'
+
+
+def nuevo(build, db=None):
+    L = LuaRuntime(unpack_returned_tuples=True)
+    L.execute(ENTORNO)
+    if db:
+        L.execute(db)
+    cargar = L.eval('function(src, name) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f("Mamba_Version", {}) end')
+    cargar((BASE / "Mamba_Version" / "Sello.lua").read_text(encoding="utf-8"), "Sello.lua")
+    L.execute(f'MambaSello.build = {build}; MambaSello.texto = "beta {build}"')
+    src = ROTA if ROMPER else (BASE / "Mamba_Version" / "Version.lua").read_text(encoding="utf-8")
+    cargar(src, "Version.lua")
+    L.execute('Fire("PLAYER_LOGIN")')
+    return L
+
+
+toc = (BASE / "Mamba_Version" / "Mamba_Version.toc").read_text(encoding="utf-8")
+check(toc.splitlines()[0].startswith("## Interface: 16001"), "el .toc es para el cliente de Forever (16001)")
+check("Sello.lua" in toc and toc.index("Sello.lua") < toc.index("Version.lua"), "Sello.lua carga antes que Version.lua")
+check("## Category: Mamba" in toc, "va en la categoría Mamba de la lista de addons")
+
+# 1. Al entrar a un grupo manda su sello con su prefijo propio
+L = nuevo(202611191200)
+check(L.eval("prefijos.MAMBAver") is True, "registra el prefijo MAMBAver")
+L.execute('Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 1 and L.eval("enviados[1].p") == "MAMBAver" and L.eval("enviados[1].c") == "PARTY",
+      "manda su versión al grupo")
+check(L.eval("enviados[1] and enviados[1].m") == "V1|202611191200|beta 202611191200", "el mensaje lleva build y texto")
+L.execute('Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 1, "no repite el envío antes de 30 s")
+L.execute('T = 140; Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 2, "pasados 30 s vuelve a mandar")
+L.execute('T = 200; BANDA = true; Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("enviados[#enviados] and enviados[#enviados].c") == "RAID", "en banda usa RAID")
+
+# 2. Recibe una más nueva: avisa UNA vez y lo recuerda
+L = nuevo(202611191200)
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611221800|beta 3", "PARTY", "Kud-Forever")')
+check(L.eval("#chat") == 1 and "versión nueva" in (L.eval("chat[1]") or ""), "avisa en el chat que hay versión nueva")
+check("Kud" in (L.eval("chat[1]") or "") and "beta 3" in (L.eval("chat[1]") or ""), "el aviso dice quién la tiene y cuál es")
+check(L.eval("#errores") == 1, "también lo muestra en el centro de la pantalla")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611231800|beta 4", "PARTY", "Otro")')
+check(L.eval("#chat") == 1, "avisa una sola vez por sesión")
+check(L.eval("MambaVersionDB and MambaVersionDB.masNueva") == 202611231800, "guarda la más nueva vista")
+
+# 3. Al volver a entrar con la vieja, recuerda; con la nueva instalada, no
+L = nuevo(202611191200, 'MambaVersionDB = { masNueva = 202611221800, texto = "beta 3", quien = "Kud" }')
+check(L.eval("#chat") == 1, "al entrar con la vieja, recuerda que hay una nueva")
+L = nuevo(202611221800, 'MambaVersionDB = { masNueva = 202611221800, texto = "beta 3", quien = "Kud" }')
+check(L.eval("#chat") == 0, "ya actualizado: no avisa")
+
+# 4. Recibe una más vieja: no avisa y le responde al atrasado por susurro (una vez por minuto)
+L = nuevo(202611221800)
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Atrasado-Forever")')
+check(L.eval("#chat") == 0, "una versión más vieja no genera aviso")
+check(L.eval("#enviados") == 1 and L.eval("enviados[1].c") == "WHISPER" and L.eval("enviados[1].d") == "Atrasado",
+      "le responde al atrasado para que él vea el aviso")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Atrasado-Forever")')
+check(L.eval("#enviados") == 1, "no le responde dos veces seguidas")
+
+# 5. Lo que no debe hacer
+L = nuevo(202611191200)
+L.execute('Fire("CHAT_MSG_ADDON", "Polestar", "V1|209999999999|x", "PARTY", "Oficial")')
+check(L.eval("#chat") == 0, "ignora los mensajes de otros prefijos (Polestar oficial)")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "basura", "PARTY", "X")')
+check(L.eval("#chat") == 0, "ignora mensajes mal formados")
+L.execute('BLOQUEO = true; T = 999; Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 0, "con el chat de addons bloqueado (mazmorra) no manda")
+L = nuevo(0)
+L.execute('Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 0, "una copia sin sellar no anuncia")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X")')
+check(L.eval("#chat") == 1, "una copia sin sellar sí escucha (y avisa)")
+L = nuevo(202611191200)
+L.execute('GRUPO = false; Fire("PLAYER_ENTERING_WORLD")')
+check(L.eval("#enviados") == 0, "solo, sin grupo, no manda nada")
+
+print(f"{ok} OK, {fail} fallas")
+sys.exit(1 if fail else 0)

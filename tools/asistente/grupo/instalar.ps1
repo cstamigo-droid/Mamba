@@ -11,7 +11,7 @@
 #   -SinVentanas                   sin ventanas de Windows (responde "cancelar" donde habría que elegir)
 #   -ProcesoJuego <nombre>         nombre del proceso del juego (por defecto Wow)
 param([string]$Forever = '', [string[]]$Raices = @(), [switch]$SinVentanas, [string]$ProcesoJuego = 'Wow',
-      [string]$Paquete = '')
+      [string]$Paquete = '', [string]$Escritorio = '', [switch]$SinTarea)
 $ErrorActionPreference = 'Stop'
 if (-not $Paquete) { $Paquete = Join-Path $PSScriptRoot 'Mamba' }
 $Terceros = @('ForeverCore', 'SkillUpForever', 'WhatsTraining', 'ForeverLootSparkles')
@@ -194,10 +194,41 @@ if ($malas.Count) {
 }
 "Mamba $VersionMamba instalada el $Fecha. Respaldo: $Respaldo" | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Forever 'Interface\Mamba_respaldos\ULTIMA_INSTALACION.txt')
 
+
+# ---------- 6. El actualizador (19-11): "Actualizar Mamba" en el escritorio y una revisión al iniciar sesión ----------
+# Va fuera de AddOns (el juego no lo carga) y se reescribe en cada instalación, así se actualiza solo.
+$Act = Join-Path $Forever 'Interface\Mamba_actualizador'
+$avisoAct = ''
+try {
+    New-Item -ItemType Directory -Force $Act | Out-Null
+    foreach ($f in 'actualizar.ps1', 'canal.json') {
+        $src = Join-Path $PSScriptRoot $f
+        if (Test-Path -LiteralPath $src) { Copy-Item -LiteralPath $src (Join-Path $Act $f) -Force }
+    }
+    $vj = Join-Path $PSScriptRoot 'VERSION.json'
+    if (Test-Path -LiteralPath $vj) { Copy-Item -LiteralPath $vj (Join-Path $Act 'instalada.json') -Force }
+    if (Test-Path -LiteralPath (Join-Path $Act 'actualizar.ps1')) {
+        if (-not $Escritorio) { $Escritorio = [Environment]::GetFolderPath('Desktop') }
+        $ws = New-Object -ComObject WScript.Shell
+        $lnk = $ws.CreateShortcut((Join-Path $Escritorio 'Actualizar Mamba.lnk'))
+        $lnk.TargetPath = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        $lnk.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $Act 'actualizar.ps1')`""
+        $lnk.WorkingDirectory = $Act
+        $lnk.Description = 'Baja e instala la última versión de Mamba (con el juego cerrado)'
+        $lnk.Save()
+        if (-not $SinTarea) {
+            $acc = New-ScheduledTaskAction -Execute $lnk.TargetPath -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$(Join-Path $Act 'actualizar.ps1')`" -SoloRevisar"
+            $dis = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
+            $aj = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+            Register-ScheduledTask -TaskName 'Mamba - revisar version nueva' -Action $acc -Trigger $dis -Settings $aj -Force | Out-Null
+        }
+    }
+} catch { $avisoAct = "`n`n(No pude dejar el acceso directo «Actualizar Mamba»: $($_.Exception.Message). Mamba quedó instalada igual.)" }
+
 Decir ''
 Decir ("Copiadas: {0} carpetas." -f $copiar.Count)
 if ($saltar.Count) { Decir ("No se tocaron (ya tenías una igual o más nueva): " + ($saltar -join '; ')) }
 if ($apartar.Count) { Decir ("Apartadas al respaldo (vuelven con VOLVER_ATRAS): " + ($apartar -join ', ')) }
 Decir 'LISTO.'
-Aviso 'Mamba instalada' ("Listo: Mamba $VersionMamba quedó instalada.`n`nAbre el juego y, en la pantalla de personajes, entra a «AddOns» y revisa que estén marcados Polestar y los de la categoría Mamba.`n`nSi algo no te gusta, para volver a como estabas: doble clic en QUITAR_MAMBA.bat (en la carpeta del ZIP) o en VOLVER_ATRAS.bat dentro de:`n$Respaldo") | Out-Null
+Aviso 'Mamba instalada' ("Listo: Mamba $VersionMamba quedó instalada.`n`nAbre el juego y, en la pantalla de personajes, entra a «AddOns» y revisa que estén marcados Polestar y los de la categoría Mamba.`n`nSi algo no te gusta, para volver a como estabas: doble clic en QUITAR_MAMBA.bat (en la carpeta del ZIP) o en VOLVER_ATRAS.bat dentro de:`n$Respaldo$avisoAct") | Out-Null
 Terminar 0

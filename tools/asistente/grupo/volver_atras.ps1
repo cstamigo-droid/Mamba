@@ -7,7 +7,7 @@
 # los cambios de barras, macros y ajustes hechos después de instalar. Su copia queda en el respaldo.
 # Parámetros solo para probar: -Forever, -Raices, -SinVentanas, -ProcesoJuego (como en instalar.ps1).
 param([string]$Respaldo = '', [string]$Forever = '', [string[]]$Raices = @(), [switch]$SinVentanas,
-      [string]$ProcesoJuego = 'Wow')
+      [string]$ProcesoJuego = 'Wow', [string]$Escritorio = '')
 $ErrorActionPreference = 'Stop'
 function Decir($t) { Write-Host $t }
 function Aviso($titulo, $texto, $botones = 'OK', $icono = 'Information') {
@@ -112,6 +112,16 @@ $marca | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Respaldo 'YA_USADO.
 $yo = Split-Path $Respaldo -Leaf
 Get-ChildItem -LiteralPath (Split-Path $Respaldo) -Directory | Where-Object { $_.Name -gt $yo -and (Test-Path -LiteralPath (Join-Path $_.FullName 'respaldo.json')) -and -not (Test-Path -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt')) } |
     ForEach-Object { "$marca (anulado: se volvió a un respaldo anterior, $yo)" | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt') }
+# Si ya no queda ningún respaldo sin usar, Mamba quedó quitada del todo: se quita también el actualizador
+# (acceso directo, revisión al iniciar sesión y su carpeta), para que no vuelva a ofrecer versiones nuevas.
+$base = Split-Path $Respaldo
+$quedan = @(Get-ChildItem -LiteralPath $base -Directory | Where-Object { (Test-Path -LiteralPath (Join-Path $_.FullName 'respaldo.json')) -and -not (Test-Path -LiteralPath (Join-Path $_.FullName 'YA_USADO.txt')) })
+if ($quedan.Count -eq 0) {
+    if (-not $Escritorio) { $Escritorio = [Environment]::GetFolderPath('Desktop') }
+    Remove-Item -Force -LiteralPath (Join-Path $Escritorio 'Actualizar Mamba.lnk') -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force -LiteralPath (Join-Path $Forever 'Interface\Mamba_actualizador') -ErrorAction SilentlyContinue
+    try { Unregister-ScheduledTask -TaskName 'Mamba - revisar version nueva' -Confirm:$false -ErrorAction Stop } catch {}
+}
 Decir 'LISTO: AddOns quedó como antes.'
 Aviso 'Mamba' "Listo: tus AddOns quedaron como el $($info.fecha).`n`nSi habías instalado Mamba más de una vez, vuelve a hacer doble clic en QUITAR_MAMBA.bat para retroceder otra vez." | Out-Null
 exit 0
