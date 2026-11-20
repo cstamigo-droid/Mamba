@@ -16,3 +16,4 @@ Piezas.lua
 DatosNodos.lua
 Capa.lua
 Seccion.lua
+Interruptores.lua

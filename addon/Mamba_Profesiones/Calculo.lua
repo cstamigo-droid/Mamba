@@ -220,6 +220,8 @@ end
 function C.Vital(id)
 	local lista = C.Profesiones()
 	local motivo = C.NoVender(id)
+	-- K124: apagado "marcar VITALES", queda solo la protección de lo que nunca se vende
+	if M.DB().sin_vital then return motivo and ("NO VENDER: " .. motivo) or nil, motivo and 0 or nil end
 	if motivo and not lista then return "NO VENDER: " .. motivo, 0 end
 	if not (lista and id) then return nil end
 	for _, e in ipairs(lista) do

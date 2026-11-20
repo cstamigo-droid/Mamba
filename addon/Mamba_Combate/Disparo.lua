@@ -198,3 +198,16 @@ f:SetScript("OnEvent", function(_, e, a, b, c)
 end)
 f:SetScript("OnUpdate", function() M.Proteger("disparoTick", D.Tick) end)
 M.AlCambiar(function() M.Proteger("cd", D.NumerosCD) end)
+
+-- K124: al apagarlos desde Opciones se esconden en el momento (no al terminar el golpe o el lanzamiento).
+function D.Refrescar()
+	local d = M.DB()
+	if not d.disparo then
+		for _, b in pairs(barras) do b:Hide() end
+		if ancla and not ancla.ejemplo then ancla:Hide() end
+	end
+	if not d.lanzamiento then
+		if lanz and not lanz.ejemplo then lanz:Hide() end
+		if gcd then gcd:Hide() end
+	end
+end

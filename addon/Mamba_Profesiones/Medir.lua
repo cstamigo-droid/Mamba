@@ -17,8 +17,10 @@ local function cuenta(id) return GetItemCount and GetItemCount(id) or 0 end
 local function ahora() return GetTime and GetTime() or 0 end
 
 function Med.Empezar(id, mapa)
+	if M.DB().sin_medir then actual = nil; return end -- K124: medir apagado en Opciones
 	actual = { id = id, mapa = mapa, cuenta = cuenta(id), t = ahora() }
 end
+function Med.Parar() actual = nil end
 function Med.Actual() return actual end
 
 -- Suma lo medido desde la última vez (solo si sigues en el mapa y no pasó más de 10 min sin novedades).
@@ -39,6 +41,7 @@ end
 
 -- Lee la ventana de profesión abierta con C_TradeSkillUI (la API que trae Forever; la usa SkillUp Forever).
 function Med.LeerRecetas()
+	if M.DB().sin_recetas then return 0 end -- K124: apagado en Opciones
 	local T = C_TradeSkillUI
 	if not (T and T.GetAllRecipeIDs and T.GetRecipeInfo and T.GetRecipeSchematic) then return 0 end
 	if (T.IsTradeSkillLinked and T.IsTradeSkillLinked()) or (T.IsTradeSkillGuild and T.IsTradeSkillGuild()) then return 0 end

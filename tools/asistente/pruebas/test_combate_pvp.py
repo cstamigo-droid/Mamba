@@ -375,6 +375,25 @@ check(d_ag.interaccion > 0 and d_ag.hechizo > 0, "K123: diag cuenta qué sondas 
 check(C.movibles["MambaAgro"] == "Indicador de agro", "K123: entra en «Mover elementos»")
 L.execute("UnitAffectingCombat = AFECTA_ORIG")
 
+# ---------- K124: cada parte de combate se apaga desde Opciones (MambaAPI.Interruptor), en el momento
+specs = G.MambaInterruptoresPendientes
+ids = [x.id for x in specs.values() if x.addon == "Mamba_Combate"]
+check(len(ids) >= 14 and "combate.agro" in ids and "combate.placas" in ids and "combate.cercaBarra" in ids, "K124: interruptores publicados (%d)" % len(ids))
+mal = []
+for x in specs.values():
+    if x.addon != "Mamba_Combate": continue
+    v0 = x.get()
+    if not isinstance(v0, bool): mal.append(x.id + " get no booleano"); continue
+    x.set(not v0)
+    if x.get() != (not v0): mal.append(x.id + " set no cambia")
+    x.set(v0)
+    if x.get() != v0: mal.append(x.id + " no se restaura")
+check(not mal, "K124: contrato get/set de cada interruptor: %s" % mal[:3])
+ag = [x for x in specs.values() if x.id == "combate.agro"][0]
+G.DIST.nameplate5 = 8; L.execute('UnitAffectingCombat = function(u) if u == "player" then return false end; return u ~= "nameplate5" end'); C.Agro.Dibujar()
+ag.set(False)
+check(not C.Agro.Barra().visible, "K124: apagar el agro desde Opciones lo esconde en el momento")
+ag.set(True)
 # ---------- reglas
 src = "".join((D / n).read_text(encoding="utf-8") for n in ("Placas.lua", "Gladius.lua", "Marcadores.lua", "Historial.lua", "BarraCerca.lua", "Agro.lua"))
 check("SLASH_" not in src and "SlashCmdList" not in src, "sin comandos /")

@@ -31,3 +31,4 @@ Historial.lua
 BarraCerca.lua
 DosBuilds.lua
 Seccion.lua
+Interruptores.lua
