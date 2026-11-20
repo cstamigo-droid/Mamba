@@ -386,7 +386,8 @@ local function guardarPaginas(parcial)
 		T.Decir("La subasta no devolvió nada por páginas: no se guardó nada.")
 		return
 	end
-	local dias = marcarDia(dia)
+	-- Revisor t13: un escaneo incompleto no marca el día (si no, BasePrecios preferiría datos casi vacíos a Auctionator)
+	local dias = parcial and 0 or marcarDia(dia)
 	anotar(parcial and "paginas incompleto" or "paginas", n)
 	local falta = T.FaltaEspera(T.db.pedidaCompleta, ahora(), T.ESPERA_COMPLETO)
 	T.Decir(string.format("Escaneo por páginas listo%s: %d objetos con su precio más bajo y cantidad (días escaneados: %d). "

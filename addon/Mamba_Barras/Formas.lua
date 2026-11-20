@@ -40,8 +40,12 @@ end
 -- A3: el clic (ratón o tecla, que llega como LeftButton) usa "*type1"/"*macrotext1" (el * = con cualquier
 -- modificador: las teclas de forma del juego son CTRL-F1...), que el botón seguro mira antes que "type"; la
 -- librería solo reescribe "type", así el ícono y el cuadro siguen siendo los suyos.
+-- Revisor t13: solo el druida (y el Lobo fantasma del chamán). El Sigilo del pícaro y la Forma de las
+-- Sombras se quitan volviendo a lanzar el hechizo, y /cancelform no los quita: para ellos queda el "spell".
+local CLASES_FORMA = { DRUID = true, SHAMAN = true }
 local function salidaDeForma(b, i, hechizo)
-	local texto = hechizo and M.MacroForma(i, nombreHechizo(hechizo))
+	local _, clase = UnitClass("player")
+	local texto = CLASES_FORMA[clase] and hechizo and M.MacroForma(i, nombreHechizo(hechizo)) or nil
 	b:SetAttribute("*type1", texto and "macro" or nil)
 	b:SetAttribute("*macrotext1", texto)
 end
