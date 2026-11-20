@@ -46,9 +46,11 @@ function M.Enviar(destino)
 	return ok
 end
 
+-- Devuelve true solo si de verdad mandó el mensaje.
 local function anunciar(forzar)
-	if not forzar and ahora() - ultimoEnvio < ESPERA_ENVIO then return end
-	if M.Enviar() then ultimoEnvio = ahora() end
+	if not forzar and ahora() - ultimoEnvio < ESPERA_ENVIO then return false end
+	if M.Enviar() then ultimoEnvio = ahora(); return true end
+	return false
 end
 
 function M.Avisar(build, texto, quien)
@@ -74,13 +76,13 @@ function M.Recibir(msg, quien, nombre)
 		M.Avisar(build, texto, nombre or quien)
 	elseif build < mio and quien and mio > 0 then
 		-- El otro está atrasado: se le responde (por susurro de addon) para que vea el aviso.
+		-- Las esperas se marcan SOLO si de verdad salió un mensaje (revisor t7): si no salió (tope, chat de
+		-- addons bloqueado), el próximo mensaje de ese jugador vuelve a intentarlo.
 		if ahora() - (respondido[quien] or -1e9) < ESPERA_RESPUESTA then return end
-		respondido[quien] = ahora()
 		if ahora() - ultimaRespuesta >= ESPERA_GLOBAL then
-			ultimaRespuesta = ahora()
-			M.Enviar(quien)
-		else
-			anunciar(false) -- muchos atrasados a la vez: un solo mensaje a todo el grupo (con su propia espera)
+			if M.Enviar(quien) then ultimaRespuesta, respondido[quien] = ahora(), ahora() end
+		elseif anunciar(false) then -- muchos atrasados a la vez: un solo mensaje a todo el grupo
+			respondido[quien] = ahora()
 		end
 	end
 end

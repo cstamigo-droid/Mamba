@@ -22,15 +22,24 @@ PLANTILLA = '''-- Sello de la versión de este armado de Mamba. Lo reescribe too
 -- build = AAAAMMDDHHMM del armado: el número más alto es el más nuevo. 0 = sin sellar (copia de desarrollo).
 MambaSello = {{ build = {build}, texto = "{texto}", commit = "{commit}" }}
 '''
-PATRON = re.compile(r'MambaSello = \{ build = (\d+), texto = "([^"]*)", commit = "([^"]*)" \}')
+# Tolera BOM y espacios de más (revisor t7): lo que importa es build, texto y commit.
+PATRON = re.compile(r'MambaSello\s*=\s*\{\s*build\s*=\s*(\d+)\s*,\s*texto\s*=\s*"([^"]*)"\s*,'
+                    r'\s*commit\s*=\s*"([^"]*)"\s*,?\s*\}')
+
+
+def leer_con_motivo(carpeta: Path) -> tuple[dict | None, str]:
+    """(sello, motivo). Sin sello, motivo dice cuál de los dos falló: que falte el archivo o que no se entienda."""
+    p = carpeta / "Mamba_Version" / "Sello.lua"
+    if not p.exists():
+        return None, f"falta {p}"
+    m = PATRON.search(p.read_text("utf-8-sig"))
+    if not m:
+        return None, f"{p} existe pero no se entiende (se espera MambaSello = {{ build = N, texto = \"…\", commit = \"…\" }})"
+    return {"build": int(m.group(1)), "texto": m.group(2), "commit": m.group(3)}, "ok"
 
 
 def leer(carpeta: Path) -> dict | None:
-    p = carpeta / "Mamba_Version" / "Sello.lua"
-    if not p.exists():
-        return None
-    m = PATRON.search(p.read_text("utf-8"))
-    return {"build": int(m.group(1)), "texto": m.group(2), "commit": m.group(3)} if m else None
+    return leer_con_motivo(carpeta)[0]
 
 
 def sellar(carpeta: Path, texto: str, commit: str, build: int) -> Path:

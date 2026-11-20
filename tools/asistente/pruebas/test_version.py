@@ -137,6 +137,22 @@ check(L.eval("(function() local n = 0 for _, e in ipairs(enviados) do if e.c == 
       "y un solo anuncio a la banda, que les llega a todos los demás")
 L.execute('T = T + 3; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "RAID", "Nuevo-Forever")')
 check(L.eval("enviados[#enviados] and enviados[#enviados].d") == "Nuevo-Forever", "pasados 2 s vuelve a susurrar")
+# 7. Las esperas se marcan solo si salió algo (revisor t7)
+L = nuevo(202611221800)
+L.execute('BLOQUEO = true; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X-Forever")')
+check(L.eval("#enviados") == 0, "con el chat de addons bloqueado no sale el susurro")
+L.execute('BLOQUEO = false; T = T + 1; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X-Forever")')
+check(L.eval("#enviados") == 1 and L.eval("enviados[1].d") == "X-Forever",
+      "al levantarse el bloqueo, a X se le responde enseguida (no quedó 60 s marcado sin aviso)")
+L = nuevo(202611221800)
+L.execute('Fire("GROUP_ROSTER_UPDATE")')  # anuncio al grupo: la espera de 30 s del grupo queda corriendo
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "A-Forever")')  # susurro: tope global
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "B-Forever")')  # tope y anuncio en espera
+n = L.eval("#enviados")
+L.execute('T = T + 3; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "B-Forever")')
+check(L.eval("#enviados") == n + 1 and L.eval("enviados[#enviados].d") == "B-Forever",
+      "a B, que no recibió nada por el tope, se le responde en cuanto pasa el tope (no 60 s después)")
+
 L = nuevo(202611191200)
 L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611221800|beta 3", "PARTY", "Kud-OtroReino")')
 check("Kud" in (L.eval("chat[1]") or "") and "OtroReino" not in (L.eval("chat[1]") or ""), "el aviso muestra el nombre corto")

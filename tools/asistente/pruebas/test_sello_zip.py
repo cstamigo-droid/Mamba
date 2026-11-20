@@ -62,12 +62,29 @@ with tempfile.TemporaryDirectory() as t:
                     "--fecha", "2026-11-19", "--salida", str(tmp / salida)] + extra
         return A.main()
 
+    # Revisor t7: el sello se lee con BOM y espacios de más, y el motivo dice qué falló
+    (paq / "Mamba_Version" / "Sello.lua").write_text(
+        "﻿MambaSello  =  {build=202611191400 ,  texto = \"b\",commit = \"c\" }", "utf-8")
+    check((S.leer(paq) or {}).get("build") == 202611191400, "lee un Sello.lua con BOM y espacios de más")
+    (paq / "Mamba_Version" / "Sello.lua").write_text("MambaSello = basura", "utf-8")
+    check("no se entiende" in S.leer_con_motivo(paq)[1], "el motivo dice que el Sello.lua no se entiende")
+    check("falta" in S.leer_con_motivo(tmp / "nada")[1], "el motivo dice que falta el Sello.lua")
+    (paq / "Mamba_Version" / "Sello.lua").write_text(S.PLANTILLA.format(build=0, texto="x", commit="y"), "utf-8")
+
     check(armar(["--build", "202611191500"], "s1") == 0, "un armado sin sellar + --build sí se arma")
     zs = list((tmp / "s1").glob("Mamba_Horda_*.zip"))
     check(len(zs) == 1 and A.verificar_sello(zs[0]) == 202611191500, "y el ZIP lleva ese build, no 0")
     (paq / "Mamba_Version" / "Sello.lua").unlink()
     check(armar(["--build", "202611191500"], "s2") == 1, "sin Sello.lua NO se arma")
     check(not list((tmp / "s2").glob("*.zip")), "y no queda ningún ZIP")
+    # Revisor t7: una corrida que falla no deja a la vista lo de una corrida anterior en la misma salida
+    s1 = tmp / "s1"
+    (paq / "Mamba_Version" / "Sello.lua").write_text(S.PLANTILLA.format(build=0, texto="x", commit="y"), "utf-8")
+    A.verificar_sello = lambda z: 0  # simula un ZIP que sale sin sellar
+    check(armar(["--build", "202611191500"], "s1") == 1, "un ZIP que sale sin sellar hace fallar el armado")
+    check(not list(s1.glob("*.zip")) and not list(s1.glob("*.sha256")), "no quedan el ZIP ni el .sha256 viejos")
+    check(not (s1 / "canal" / "Mamba_Horda.zip").exists() and not (s1 / "canal" / "mamba_grupo.json").exists(),
+          "no quedan el canal/Mamba_Horda.zip ni el mamba_grupo.json viejos")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

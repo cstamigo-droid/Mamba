@@ -130,7 +130,7 @@ def verificar_sello(zpath: Path) -> int:
     import sellar_version
     with zipfile.ZipFile(zpath) as z:
         try:
-            texto = z.read("archivos/Mamba/Mamba_Version/Sello.lua").decode("utf-8")
+            texto = z.read("archivos/Mamba/Mamba_Version/Sello.lua").decode("utf-8-sig")
         except KeyError:
             return 0
     m = sellar_version.PATRON.search(texto)
@@ -143,7 +143,7 @@ def main() -> int:
     ap.add_argument("--manifiesto", type=Path, required=True)
     ap.add_argument("--version", required=True, help='por ejemplo "beta 1"')
     ap.add_argument("--commit", required=True)
-    ap.add_argument("--fecha", default="2026-11-18")
+    ap.add_argument("--fecha", default=dt.date.today().isoformat())
     ap.add_argument("--salida", type=Path, required=True)
     ap.add_argument("--fuente", action="store_true", help="también arma Mamba_fuente_<commit>.zip con git archive")
     ap.add_argument("--build", type=int, help="AAAAMMDDHHMM; solo si el armado no viene sellado (sellar_version.py)")
@@ -164,11 +164,11 @@ def main() -> int:
 
     sys.path.insert(0, str(AQUI))
     import sellar_version
-    sello = sellar_version.leer(a.paquete)
+    sello, motivo = sellar_version.leer_con_motivo(a.paquete)
     sello_zip = None  # contenido de Sello.lua que va en el ZIP si el armado no venía sellado
     if sello is None:
         # Revisor t6: sin Mamba_Version (o con un Sello.lua que no se entiende) nadie avisa nunca y no hay error.
-        print("NO SE ARMA: el armado no trae Mamba_Version/Sello.lua legible; sin él no hay aviso de versión nueva")
+        print(f"NO SE ARMA: {motivo}; sin el sello no hay aviso de versión nueva")
         return 1
     elif sello["build"] > 0:
         build = sello["build"]
@@ -187,6 +187,10 @@ def main() -> int:
     tope = f"Mamba_Horda_{nombre_v}"
     a.salida.mkdir(parents=True, exist_ok=True)
     zpath = a.salida / f"{tope}_{a.fecha}.zip"
+    # Nada de otra corrida puede quedar como si fuera de esta (revisor t7): se borra antes de armar.
+    for viejo in (zpath, zpath.with_name(zpath.name + ".sha256"), a.salida / "canal" / ZIP_FIJO,
+                  a.salida / "canal" / "mamba_grupo.json"):
+        viejo.unlink(missing_ok=True)
     version_txt = f"{a.version} ({a.fecha}, commit {a.commit})"
 
     def ps1(p: Path) -> bytes:  # PowerShell 5.1 lee como ANSI un .ps1 sin BOM: va con BOM
