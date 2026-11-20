@@ -29,20 +29,42 @@ end
 -- K113 (18-11): NO se reemplaza el manejador de errores del juego (seterrorhandler). Con nuestra función en el
 -- manejador, cuando la interfaz del gremio de Blizzard fallaba, la ejecución quedaba "manchada" por Mamba_Errores
 -- y el juego bloqueaba UpdateGuildLobby(), IsUserOAuthed()... a nombre de Mamba_Errores. Ahora se escucha con
--- hooksecurefunc sobre ScriptErrorsFrame:OnError, que corre DESPUÉS de Blizzard y no mancha a quien llama.
+-- hooksecurefunc (corre DESPUÉS de Blizzard y no mancha a quien llama); dónde, más abajo.
 local enganchado = false
 local conBugGrabber = false -- se pone en true cuando BugGrabber nos avisa (engancharBugGrabber)
+-- Dónde escuchar (código de Blizzard, Gethe/wow-ui-source classic_era, Blizzard_ScriptErrors y
+-- Blizzard_ScriptErrorsFrame): el manejador del juego (HandleLuaError) pasa cada error a los manejadores
+-- registrados con AddLuaErrorHandler (solo código seguro): el de ScriptErrorsFrame llama a
+-- ScriptErrorsFrame:DisplayMessageInternal(msg, tipo, pila, locales) SIEMPRE; el CVar scriptErrors solo decide
+-- si la ventana se muestra. Sin manejadores, va a ScriptErrors:AddUnhandledError(msg, pila, locales).
+-- ScriptErrorsFrame NO tiene OnError en este cliente: ese enganche (19-11) nunca se ponía y Errores quedó mudo.
+local via = nil
+local function anotarDeBlizzard(msg, pila)
+	if conBugGrabber then return end -- ya llega por BugGrabber: no contarlo dos veces (revisor t5)
+	pcall(anotar, msg, type(pila) == "string" and pila or nil, "lua")
+end
 local function engancharErrores()
-	if enganchado then return true end
+	if enganchado or not hooksecurefunc then return enganchado end
 	local sef = _G.ScriptErrorsFrame
-	if not (sef and type(sef.OnError) == "function" and hooksecurefunc) then return false end
-	hooksecurefunc(sef, "OnError", function(_, msg)
-		if conBugGrabber then return end -- ya llega por BugGrabber: no contarlo dos veces (revisor t5)
-		local ok, pila = pcall(debugstack, 4, 12, 0)
-		pcall(anotar, msg, ok and pila or nil, "lua")
-	end)
+	local se = _G.ScriptErrors
+	if sef and type(sef.DisplayMessageInternal) == "function" then
+		-- (self, mensaje, tipo, pila, locales): el tipo de advertencia (LUA_WARNING) no es un error de Lua
+		hooksecurefunc(sef, "DisplayMessageInternal", function(_, msg, tipo, pila)
+			if tipo ~= nil and _G.WarningMessageType ~= nil and tipo == _G.WarningMessageType then return end
+			anotarDeBlizzard(msg, pila)
+		end)
+		via = "ScriptErrorsFrame:DisplayMessageInternal"
+	elseif sef and type(sef.OnError) == "function" then -- clientes más viejos
+		hooksecurefunc(sef, "OnError", function(_, msg) anotarDeBlizzard(msg, nil) end)
+		via = "ScriptErrorsFrame:OnError"
+	elseif type(se) == "table" and type(se.AddUnhandledError) == "function" then
+		hooksecurefunc(se, "AddUnhandledError", function(_, msg, pila) anotarDeBlizzard(msg, pila) end)
+		via = "ScriptErrors:AddUnhandledError"
+	else
+		return false
+	end
 	enganchado = true
-	if db and db.diag then db.diag.enganchado = true end
+	if db and db.diag then db.diag.enganchado, db.diag.via, db.diag.mudo = true, via, nil end
 	return true
 end
 -- Respaldo con BugGrabber: si está, el manejador de errores es suyo y nos avisa por su callback (no mancha más
@@ -63,7 +85,18 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("ADDON_ACTION_BLOCKED")
 f:RegisterEvent("ADDON_ACTION_FORBIDDEN")
+f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(_, evento, a, b)
+	if evento == "PLAYER_LOGIN" then
+		-- último intento; si no hay por dónde escuchar, el diag lo dice y la ventana (Errores) lo avisa
+		engancharErrores()
+		engancharBugGrabber()
+		if db and db.diag then
+			db.diag.enganchado, db.diag.via, db.diag.bugGrabber = enganchado, via, conBugGrabber
+			db.diag.mudo = (not enganchado and not conBugGrabber) or nil
+		end
+		return
+	end
 	if evento == "ADDON_LOADED" then
 		-- ScriptErrorsFrame puede llegar con un addon de Blizzard que se carga después
 		if not enganchado then engancharErrores() end
@@ -74,7 +107,7 @@ f:SetScript("OnEvent", function(_, evento, a, b)
 		db.lista = type(db.lista) == "table" and db.lista or {}
 		db.sesion = (db.sesion or 0) + 1
 		-- diag de esta sesión: si el enganche quedó puesto y cuántos errores llegaron (para ver si Errores quedó mudo)
-		db.diag = { sesion = db.sesion, enganchado = enganchado, bugGrabber = conBugGrabber, anotados = 0,
+		db.diag = { sesion = db.sesion, enganchado = enganchado, via = via, bugGrabber = conBugGrabber, anotados = 0,
 			scriptErrors = GetCVar and GetCVar("scriptErrors") or "?" }
 		for _, e in ipairs(pendientes) do anotar(e.msg, e.pila, e.tipo) end
 		pendientes = {}

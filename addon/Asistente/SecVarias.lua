@@ -182,8 +182,14 @@ Hub.Seccion({
 	dibujar = function(est, V)
 		local db = _G.MambaErroresDB
 		local lista = db and db.lista or {}
+		-- si Mamba_Errores no encontró por dónde escuchar los errores de Lua, se dice (y no "ningún addon falló")
+		local mudo = db and type(db.diag) == "table" and db.diag.mudo
+		if mudo then
+			V:Panel({ titulo = "Los errores de Lua no se están anotando",
+				texto = "En esta sesión el juego no ofrece por dónde escucharlos sin riesgo, así que aquí solo aparecen las acciones que el juego bloqueó. Si algo se ve raro, sácale una captura a la pantalla." })
+		end
 		if #lista == 0 then
-			V:Vacio("Sin errores", "Ningún addon falló desde que se borró la lista. Si algo se ve raro, vuelve aquí.")
+			V:Vacio("Sin errores", mudo and "No hay bloqueos guardados." or "Ningún addon falló desde que se borró la lista. Si algo se ve raro, vuelve aquí.")
 			return
 		end
 		if est.borrar then

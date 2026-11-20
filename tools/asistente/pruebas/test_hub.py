@@ -548,7 +548,7 @@ nv = G.MambaAPI.NoVender(211527)
 check(nv is not None and "Forever" in str(nv), f"MambaAPI.NoVender: el saco de dormir no se vende ({nv})")
 check(G.MambaAPI.NoVender(4306) is None, "MambaAPI.NoVender: un paño de seda sí se puede vender")
 
-# 10i) P14: la venta de basura de Polestar (QoL/Vendor.lua junkAt) salta lo que MambaAPI.NoVender protege
+# 10i) P16: la venta de basura de Polestar (QoL/Vendor.lua junkAt) salta lo que MambaAPI.NoVender protege
 VEND = L.eval("""function(src)
   local ns = { L = setmetatable({}, { __index = function(_, k) return k end }), QoL = {},
     RegisterEvent = function() end, On = function() end }
@@ -566,8 +566,8 @@ VEND = L.eval("""function(src)
 end""")
 src_v = (ADDON / "Polestar" / "QoL" / "Vendor.lua").read_text(encoding="utf-8")
 r = VEND(src_v)
-check(r[0] is None, f"P14: el saco marcado a mano como basura NO lo vende Polestar ({r[0]})")
-check(r[1] == 9104, f"P14: un gris común sí lo vende ({r[1]})")
+check(r[0] is None, f"P16: el saco marcado a mano como basura NO lo vende Polestar ({r[0]})")
+check(r[1] == 9104, f"P16: un gris común sí lo vende ({r[1]})")
 
 # 10j) P15: el fork NO se anuncia en el canal de versiones de Polestar (prefijo propio "Mamba")
 PREF = L.eval("""function(src, nombre, mamba)
@@ -600,12 +600,12 @@ end""")
 r = AYU()
 check(r[0] is True, f"sin Polestar, el cuadro de ayuda con líneas de dos columnas no da error ({r[1]})")
 
-# 10l) tanda 7: P14 también sin Asistente, BugGrabber no cuenta doble y MambaAPI.EsMecanica
+# 10l) tanda 7: P16 también sin Asistente, BugGrabber no cuenta doble y MambaAPI.EsMecanica
 API_ = G.MambaAPI
 G.MambaAPI = None
 r = VEND(src_v)
 G.MambaAPI = API_
-check(r[0] is None, f"P14 sin Asistente (sin MambaAPI): el saco sigue protegido por la lista del Tasador ({r[0]})")
+check(r[0] is None, f"P16 sin Asistente (sin MambaAPI): el saco sigue protegido por la lista del Tasador ({r[0]})")
 DOBLE = L.eval("""function()
   local cb
   BugGrabber = { RegisterCallback = function(_, ev, fn) cb = fn end }
@@ -620,6 +620,13 @@ end""")
 r = DOBLE()
 check(r[0] is True and r[1] == 1 and r[2] == 1, f"con BugGrabber, un error se anota UNA vez (no por OnError también) ({r[0]}, {r[1]}, veces {r[2]})")
 check(G.MambaAPI.EsMecanica(211527) is True and G.MambaAPI.EsMecanica(4306) is False, "MambaAPI.EsMecanica: el saco sí, el paño de seda no")
+
+# 10m) Errores mudo: la ventana lo dice (y no "ningún addon falló")
+L.execute('MambaErroresDB.lista = {}; MambaErroresDB.diag = MambaErroresDB.diag or {}; MambaErroresDB.diag.mudo = true')
+G.MambaAPI.Abrir("MambaErrores")
+v = textos()
+check(any("no se están anotando" in x for x in v) and not any("Ningún addon falló" in x for x in v), "Errores mudo: la ventana lo avisa")
+L.execute('MambaErroresDB.diag.mudo = nil')
 
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:

@@ -26,6 +26,7 @@ corre escaneo    python -I $P/test_escaneo.py addon/Tasador
 corre comercio   python -I $P/test_comercio.py addon/Tasador
 corre medidor    python -I $P/test_medidor.py addon/Medidor
 corre capa       python -I $P/test_capa.py addon
+corre errores    python -I $P/test_errores.py
 corre servicios  python -I $P/test_servicios.py addon $POL
 corre llevame    python -I $P/test_llevame.py addon
 corre barras     python -I $P/test_barras.py

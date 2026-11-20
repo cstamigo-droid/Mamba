@@ -193,8 +193,11 @@ function grupo(mamba) {
 // versión (los compañeros con el oficial 0.4.1.1 recibían avisos por Mamba, y al revés). Sin Mamba, los de siempre.
 test('P15 en el grupo: con Mamba, cero avisos de los Polestar oficiales; sin Mamba, los avisos de siempre', () => {
 	assert.deepEqual(grupo(false)[0], ['Ben is on Polestar 0.3.8: your guides can differ. A newer version is out.'], 'sin Mamba: Polestar tal cual');
-	const conMamba = grupo(true)[0];
-	assert.equal(Object.keys(conMamba || {}).length, 0, 'con Mamba: ningún aviso de un Polestar oficial');
+	// el simulado tiene que haber corrido y emitido su lista (vacía): sin emitir, la prueba no probaba nada (revisor t6)
+	const emitido = grupo(true);
+	assert.equal(emitido.length, 1, 'con Mamba: el simulado corrió y emitió su lista');
+	assert.ok(emitido[0] && typeof emitido[0] === 'object', 'con Mamba: lo emitido es la lista de avisos');
+	assert.equal(Object.keys(emitido[0]).length, 0, 'con Mamba: ningún aviso de un Polestar oficial');
 });
 
 test('Aviso de modificación (GPL-3.0 §5a): cada .toc de Polestar dice "· Mamba" y X-Mamba con fecha', () => {
