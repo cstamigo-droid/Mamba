@@ -182,6 +182,8 @@ for q in ("krol", "Krol'dok", "kroldok", "KROL", "bastion de krol", "Bastión de
     check("kroldok-stronghold" in r, f"buscar «{q}» da Bastión de Krol'dok ({r[:6]})")
 check(buscar("anegada") == ["the-drowned-city"], f"«anegada» da SOLO La Ciudad Anegada ({buscar('anegada')})")
 check(buscar("zzzz") == [], "una búsqueda sin coincidencias no da nada")
+check(buscar("'") == [] and buscar("-") == [], f"una búsqueda de solo signos no da todas (revisor; {len(buscar(chr(39)))})")
+check("kroldok-stronghold" in buscar("Krol´dok"), "«Krol´dok» (tilde suelta) da Bastión de Krol'dok")
 check(len(buscar("")) == 0 or True, "")
 check(set(buscar("prision")) == {"alcaz-prison"} and "blackmaw-hold" in buscar("faucenegra"), "«prision» y «faucenegra» (sin tilde)")
 check("scarlet-monastery" in buscar("scarlet monastery"), "las del Codex se encuentran por su nombre (inglés en la prueba)")

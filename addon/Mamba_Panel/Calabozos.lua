@@ -17,11 +17,11 @@ local type, pairs, ipairs, pcall, tostring = type, pairs, ipairs, pcall, tostrin
 -- Igual que Asistente/Llevame.lua (LL.Normal): primero las tildes y después solo A-Z, porque string.lower con un
 -- locale Latin-1 rompe los bytes de UTF-8. Además saca apóstrofos y guiones ("Krol'dok" = "kroldok").
 local TILDES = { ["á"] = "a", ["é"] = "e", ["í"] = "i", ["ó"] = "o", ["ú"] = "u", ["ü"] = "u", ["ñ"] = "n",
-	["Á"] = "a", ["É"] = "e", ["Í"] = "i", ["Ó"] = "o", ["Ú"] = "u", ["Ü"] = "u", ["Ñ"] = "n", ["’"] = "" }
+	["Á"] = "a", ["É"] = "e", ["Í"] = "i", ["Ó"] = "o", ["Ú"] = "u", ["Ü"] = "u", ["Ñ"] = "n", ["’"] = "", ["´"] = "", ["«"] = " ", ["»"] = " ", ["¡"] = " ", ["¿"] = " " } -- multibyte: aquí y no en una clase [..] de bytes
 function N.Pliega(t)
 	t = tostring(t or "")
 	for con, sin_ in pairs(TILDES) do t = t:gsub(con, sin_) end
-	t = t:gsub("[A-Z]", string.lower):gsub("'", ""):gsub("[%-:%(%),%.]", " "):gsub("%s+", " ")
+	t = t:gsub("[A-Z]", string.lower):gsub("'", ""):gsub("[%-:%(%),%./!%?]", " "):gsub("%s+", " ")
 	return (t:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
@@ -36,8 +36,9 @@ local VACIAS = { de = true, del = true, la = true, el = true, los = true, las = 
 -- ¿El texto t (ya plegado) calza con q? Cada palabra útil de q tiene que estar en t (o su raíz, sin plural).
 -- Sin palabras útiles ("la"), q entera. q vacía: sí.
 function N.CalzaTexto(t, q)
+	local crudo = tostring(q or "")
 	q = N.Pliega(q)
-	if q == "" then return true end
+	if q == "" then return not crudo:find("%S") end -- solo signos ("'", "-"): nada, como Polestar
 	local util = 0
 	for w in q:gmatch("%S+") do
 		if not VACIAS[w] then
