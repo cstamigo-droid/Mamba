@@ -53,6 +53,16 @@ for _, x in ipairs(M.INTERRUPTORES) do
 		get = function() return M.DB()[clave] == true end,
 		set = function(v) M.DB()[clave] = v and true or false; refrescar() end })
 end
+-- A8: el aviso de agro tiene cuatro valores; aquí, sí/no (encendido = destello, el más discreto). El detalle
+-- (sonido, destello o ambos) está en Combate › Avisos y barras.
+publicar({ id = "combate.agroAviso", addon = "Mamba_Combate", grupo = "Combate", nombre = "Aviso al acercarte demasiado a un bicho",
+	ayuda = "Un destello suave en la barrita de agro, una vez por bicho. Sonido o los dos: en Combate › Avisos y barras.",
+	get = function() return (M.DB().agroAviso or "nada") ~= "nada" end,
+	set = function(v)
+		local d = M.DB()
+		if v then if (d.agroAviso or "nada") == "nada" then d.agroAviso = "destello" end else d.agroAviso = "nada" end
+		refrescar()
+	end })
 for _, x in ipairs(M.INTERRUPTORES_MODO) do
 	local id, clave, nombre, ayuda = x[1], x[2], x[3], x[4]
 	publicar({ id = id, addon = "Mamba_Combate", grupo = "Combate", nombre = nombre, ayuda = ayuda,

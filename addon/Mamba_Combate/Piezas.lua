@@ -28,7 +28,7 @@ end
 -- ventana de Mamba, que respeta el candado de Ajustes › Mamba › Ventanas. La ventana ya se arrastra sola.
 local function movible(f, nombre, titulo)
 	local api = _G.MambaAPI
-	if f and api and api.Movible then pcall(api.Movible, f, nombre, nil, { yaArrastra = true, etiqueta = titulo }) end
+	if f and api and api.Movible then pcall(api.Movible, f, nombre, nil, { yaArrastra = true, escalable = true, etiqueta = titulo }) end
 	if M.movibles then M.movibles[nombre] = titulo or nombre end
 	return f
 end

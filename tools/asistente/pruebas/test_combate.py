@@ -140,6 +140,15 @@ def nuevo():
         if ROMPER and n == "Rotacion.lua":
             # control negativo del texto cortado: el botón no se ensancha
             src = src.replace("caja.modo:SetWidth(math.max(150, (ancho or 0) + 12))", "")
+        if ROMPER and n == "Agro.lua":
+            # control negativo A8: sin anti-spam (avisa cada vez que ve al bicho en rojo)
+            src = src.replace("if not enRojo[k] or t - enRojo[k] > Ag.SALIDA then nuevo = true end", "nuevo = true")
+        if ROMPER and n == "Piezas.lua":
+            # control negativo A7: las ventanas con título no piden tamaño en el modo Mover
+            src = src.replace("escalable = true, ", "")
+        if ROMPER and n == "Marcadores.lua":
+            # control negativo A6: la barra depende de estar en grupo (en solitario no aparece)
+            src = src.replace('local m = d.marcadores or "siempre"', 'local m = "grupo"')
         if ROMPER and n == "Cercanos.lua":
             # control negativo K105: anota muertes repetidas y se abre sola aunque esté silenciada
             src = src.replace("if ultima[clave] and t - ultima[clave] < 10 then", "if false then")
@@ -159,7 +168,9 @@ check(G.MambaInterfaz.modulos["combate"] is not None, "Combate en Interfaz")
 # ---------- Mover elementos: cada marco existe desde que se entra, escondido, con su nombre en español
 MOVIBLES = {"MambaMedidorCombate": "Medidor de combate", "MambaRanking": "Ranking del grupo", "MambaSiguiente": "Sugerencia de hechizo",
             "MambaCercanos": "Enemigos cerca", "MambaLanzamiento": "Barra de lanzamiento", "MambaDisparo": "Disparo automático y golpe",
-            "MambaAviso": "Avisos en pantalla", "MambaAmenaza": "Amenaza del grupo"}
+            "MambaAviso": "Avisos en pantalla", "MambaAmenaza": "Amenaza del grupo",
+            # A6/A7 (20-11): agro, marcadores y la barrita «Cerca» también entran en «Mover»
+            "MambaAgro": "Indicador de agro", "MambaMarcadores": "Marcadores de banda", "MambaCercaBarra": "Barra «Cerca»"}
 for nom, tit in MOVIBLES.items():
     check(G[nom] is not None and C.movibles[nom] == tit, "mover: %s existe al entrar y se llama «%s» (fue %s)" % (nom, tit, C.movibles[nom]))
 for nom in ["MambaRanking", "MambaSiguiente", "MambaCercanos", "MambaLanzamiento", "MambaDisparo", "MambaAviso", "MambaAmenaza"]:
@@ -173,7 +184,7 @@ G.MambaAviso.scripts.OnDragStart(G.MambaAviso)
 check(G.MOVIDO is True, "mover: fuera de combate sí")
 # con la ventana de Mamba: MambaAPI.Movible(marco, nombre, nil, { etiqueta, sinAsa }) y AlModoMover
 L.execute('''LLAMADAS = {}; MODO_FN = nil
-MambaAPI = { Movible = function(f, n, asa, o) table.insert(LLAMADAS, { n = n, asa = asa, etiqueta = o and o.etiqueta, sinAsa = o and o.sinAsa, ya = o and o.yaArrastra }) end,
+MambaAPI = { Movible = function(f, n, asa, o) table.insert(LLAMADAS, { n = n, asa = asa, etiqueta = o and o.etiqueta, sinAsa = o and o.sinAsa, ya = o and o.yaArrastra, escalable = o and o.escalable }) end,
   AlModoMover = function(fn) MODO_FN = fn end }''')
 C.Movible(L.eval('CreateFrame("Frame")'), "MambaPrueba", "Prueba")
 ll = G.LLAMADAS[1]
@@ -181,6 +192,7 @@ check(ll.n == "MambaPrueba" and ll.etiqueta == "Prueba" and ll.sinAsa is True an
 C.Piezas.Ventana("MambaPruebaV", "Ventana de prueba", 200, 100)
 ll = G.LLAMADAS[2]
 check(ll.n == "MambaPruebaV" and ll.etiqueta == "Ventana de prueba" and ll.ya is True, "mover: las ventanas con título pasan su etiqueta y se arrastran por el título")
+check(ll.escalable is True, "A7: las ventanas con título (Ranking, Enemigos cerca) piden tamaño ajustable en «Mover» (escalable)")
 C.ConectarMover()
 check(G.MODO_FN is not None, "mover: se engancha a MambaAPI.AlModoMover")
 ESCONDIDOS = ["MambaMedidorCombate", "MambaRanking", "MambaSiguiente", "MambaCercanos", "MambaLanzamiento", "MambaDisparo", "MambaAviso", "MambaAmenaza"]
@@ -685,5 +697,106 @@ L.execute('HONOR_VIEJO = COMBATLOG_HONORGAIN; COMBATLOG_HONORGAIN = "%s muere"')
 ej2 = C.Cercanos.HonorAnonimo(" muere")[0]
 check(ej2 is not None and "<nombre>" not in ej2, "K105 diag: si el patrón captura un nombre vacío, no mete <nombre> entre las letras (%s)" % ej2)
 L.execute('COMBATLOG_HONORGAIN = HONOR_VIEJO')
+
+# ---------- A7 (20-11): cada marco pedido tiene su interruptor en Ajustes › Mamba (K124)
+ids = set()
+pend = G.MambaInterruptoresPendientes
+if pend is not None:
+    for spec in pend.values():
+        ids.add(str(spec.id))
+for iid in ["combate.medidor", "combate.amenaza", "combate.agro", "combate.cercaBarra", "combate.marcadores", "combate.agroAviso"]:
+    check(iid in ids, "A7/A8: interruptor %s publicado (hay %d)" % (iid, len(ids)))
+
+# ---------- A6 (20-11): la barra de marcadores existe desde que se entra y se ve EN SOLITARIO
+Mk = C.Marcadores
+L.execute('EN_GRUPO = false')
+C.DB().marcadores = "siempre"
+L.execute('Fire("PLAYER_ENTERING_WORLD")')
+check(G.MambaMarcadores is not None and Mk.Barra() is not None, "A6: la barra de marcadores se crea al cargar")
+check(G.MambaMarcadores.visible is True, "A6: en solitario, con «Siempre» (lo de fábrica), la barra de marcadores se ve")
+check(C.DEFECTO.marcadores == "siempre", "A6: de fábrica la barra de marcadores está en «Siempre»")
+check(len(list(Mk.Barra().botones.values())) == 9, "A6: 8 marcadores + quitar")
+C.DB().marcadores = "nunca"; C.Cambio()
+check(G.MambaMarcadores.visible is False, "A6: «Nunca» la apaga")
+C.DB().marcadores = "grupo"; C.Cambio()
+check(G.MambaMarcadores.visible is False, "A6: «Solo en grupo» en solitario: escondida")
+L.execute('EN_GRUPO = true'); C.Cambio()
+check(G.MambaMarcadores.visible is True, "A6: «Solo en grupo» en grupo: a la vista")
+L.execute('EN_GRUPO = false'); C.DB().marcadores = "siempre"; C.Cambio()
+check(G.MambaMarcadores.visible is True, "A6: vuelve con «Siempre»")
+# el interruptor de Ajustes la apaga y la prende
+spec_m = [s for s in pend.values() if str(s.id) == "combate.marcadores"][0] if pend is not None else None
+if spec_m is not None:
+    spec_m.set(False)
+    check(C.DB().marcadores == "nunca" and G.MambaMarcadores.visible is False, "A6: el interruptor de Ajustes apaga la barra")
+    spec_m.set(True)
+    check(C.DB().marcadores == "siempre" and G.MambaMarcadores.visible is True, "A6: y la vuelve a prender")
+
+# ---------- A8 (20-11): aviso de agro (apagado / sonido / destello / ambos), una vez por bicho y por entrada
+Ag = C.Agro
+L.execute('''SONIDOS = {}; PlaySound = function(id, canal) table.insert(SONIDOS, { id = id, canal = canal }) end
+DESTELLO = { visible = false, alfa = 0 }
+function DESTELLO:Show() self.visible = true end
+function DESTELLO:Hide() self.visible = false end
+function DESTELLO:IsShown() return self.visible end
+function DESTELLO:SetColorTexture(r, g, b, a) self.alfa = a end
+MambaAgro.destello = DESTELLO
+GUID_DE = { nameplate1 = "Creature-1", nameplate2 = "Creature-2" }
+UnitGUID = function(u) return GUID_DE[u] end''')
+check(C.DEFECTO.agroAviso == "destello", "A8: de fábrica, el aviso es el destello (discreto, sin sonido)")
+LISTA = L.eval('function(...) local l = {} for i, u in ipairs({ ... }) do local n, x = u:match("^(%a+):(.+)$"); l[i] = { unidad = x, nivel = n } end return l end')
+def avisar(*u):
+    return Ag.Avisar(LISTA(*u))
+def sonidos():
+    return len(list(G.SONIDOS.values()))
+Ag.OlvidarAvisos()
+C.DB().agroAviso = "sonido"
+G.RELOJ = 1000
+check(avisar("amarillo:nameplate1") is False and sonidos() == 0, "A8: amarillo (puede estar dentro) no avisa")
+check(avisar("rojo:nameplate1") is True and sonidos() == 1, "A8: al entrar en su radio (rojo) suena una vez")
+check(G.SONIDOS[1].canal == "SFX", "A8: el sonido va por el canal de efectos")
+for k in range(1, 9):
+    G.RELOJ = 1000 + k * 0.25
+    avisar("rojo:nameplate1")
+check(sonidos() == 1, "A8: mientras sigues dentro no se repite (anti-spam) (%d sonidos)" % sonidos())
+G.RELOJ = 1003; avisar("amarillo:nameplate1"); G.RELOJ = 1003.5
+check(avisar("rojo:nameplate1") is False and sonidos() == 1, "A8: si el borde titila (rojo, amarillo, rojo) no cuenta como entrada nueva")
+G.RELOJ = 1004; avisar(); G.RELOJ = 1010
+check(avisar("rojo:nameplate1") is True and sonidos() == 2, "A8: sales del radio, pasan unos segundos y vuelves a entrar: avisa de nuevo")
+G.RELOJ = 1012
+check(avisar("rojo:nameplate1", "rojo:nameplate2") is True and sonidos() == 3, "A8: otro bicho distinto: avisa una vez")
+G.RELOJ = 1013
+check(avisar("rojo:nameplate1", "rojo:nameplate2") is False and sonidos() == 3, "A8: los dos siguen dentro: nada más")
+Ag.OlvidarAvisos(); G.RELOJ = 1100
+check(avisar("rojo:nameplate1", "rojo:nameplate2") is True and sonidos() == 4, "A8: dos bichos a la vez: un solo aviso")
+G.RELOJ = 1100.5
+check(avisar("rojo:nameplate1", "rojo:nameplate2") is False and sonidos() == 4, "A8: …y no un segundo medio segundo después")
+# apagado
+Ag.OlvidarAvisos(); C.DB().agroAviso = "nada"; G.RELOJ = 1200
+check(avisar("rojo:nameplate1") is False and sonidos() == 4 and Ag.destelloHasta is None, "A8: «Apagado»: ni sonido ni destello")
+# destello: sin sonido, el halo se ve y se apaga solo
+Ag.OlvidarAvisos(); C.DB().agroAviso = "destello"; G.RELOJ = 1300
+G.MambaAgro.Show(G.MambaAgro)
+check(avisar("rojo:nameplate1") is True and sonidos() == 4 and Ag.destelloHasta is not None, "A8: «Destello»: destella, sin sonido")
+G.RELOJ = 1300.25; Ag.PintarDestello()
+check(G.DESTELLO.visible is True and 0 < G.DESTELLO.alfa <= 0.6, "A8: el halo se ve suave (alfa %s)" % G.DESTELLO.alfa)
+G.RELOJ = 1301.5; Ag.PintarDestello()
+check(G.DESTELLO.visible is False and Ag.destelloHasta is None, "A8: el halo se apaga solo al segundo")
+# ambos
+Ag.OlvidarAvisos(); C.DB().agroAviso = "ambos"; G.RELOJ = 1400
+check(avisar("rojo:nameplate2") is True and sonidos() == 5 and Ag.destelloHasta is not None, "A8: «Sonido y destello»: los dos")
+# de punta a punta: el dibujo de la barrita (fuera de combate) llama al aviso
+Ag.OlvidarAvisos(); C.DB().agroAviso = "sonido"; C.DB().agro = True; G.RELOJ = 1500
+L.execute('EN_COMBATE = false; REVISAR_ORIG = MambaCombate.Agro.Revisar; MambaCombate.Agro.Revisar = function() return { { unidad = "nameplate1", nivel = "rojo" } }, "rojo" end')
+Ag.Dibujar(); G.RELOJ = 1500.25; Ag.Dibujar()
+check(sonidos() == 6, "A8: la barrita de agro avisa al pasar a rojo, una vez (%d)" % sonidos())
+L.execute('MambaCombate.Agro.Revisar = REVISAR_ORIG')
+spec_a = [s for s in pend.values() if str(s.id) == "combate.agroAviso"][0] if pend is not None else None
+if spec_a is not None:
+    spec_a.set(False); check(C.DB().agroAviso == "nada", "A8: el interruptor de Ajustes lo apaga")
+    spec_a.set(True); check(C.DB().agroAviso == "destello", "A8: y al prenderlo queda en destello")
+src_ag = (D / "Seccion.lua").read_text(encoding="utf-8")
+check("Aviso al acercarte demasiado" in src_ag and "M.Agro.AVISOS" in src_ag, "A8: se elige apagado / sonido / destello / ambos en Combate › Avisos y barras")
+check(C.DB().diag.fallas is None, "A6-A8: sin fallas: %s" % (C.DB().diag.fallas and list(C.DB().diag.fallas.values())[:2]))
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

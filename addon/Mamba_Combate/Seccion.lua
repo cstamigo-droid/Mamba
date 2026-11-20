@@ -166,6 +166,8 @@ local function dibujarAvisos(p, ancho)
 		I("Indicador de agro al acercarte", "Fuera de combate: una barrita bajo el personaje que pasa de verde a rojo cuando te acercas a un bicho hostil que ataca solo, con una marca hacia su lado de la pantalla, para pasar sin atraerlo. El radio es aproximado (Classic: unas 20 yardas a tu nivel, una más o menos por nivel de diferencia).", "agro"),
 		I("Ver la barrita de agro siempre", "Apagado: solo aparece cuando hay peligro.", "agroSiempre"),
 		I("Marcar en su placa al bicho que estás por atraer", "Borde naranja si puede estar dentro de su radio; rojo si ya estás dentro.", "agroPlacas"),
+		P.Desplegable(p, "Aviso al acercarte demasiado", "Una sola vez cuando entras en el radio de un bicho (no se repite mientras sigas ahí): un sonido suave, un destello rojo en la barrita de agro, o los dos.", M.Agro.AVISOS,
+			function() return d.agroAviso end, function(v) d.agroAviso = v; M.Cambio() end),
 		I("Ficha del enemigo (contra jugadores)", "Al elegir de objetivo a un jugador enemigo: su clase, sus controles y defensas (apagados con los segundos que le faltan si ya los usó) y lo tuyo para responder, con su tecla.", "ficha"),
 		I("Aviso cuando un enemigo usa una defensa", "«X usó Escudo divino». Los controles («X usó Aturdir») van con los avisos en pantalla.", "avisoDefensas"),
 		P.Desplegable(p, "Barra de marcadores", "Calavera, cruz, luna… Clic: marca a tu objetivo.", { { value = "siempre", text = "Siempre" }, { value = "grupo", text = "Solo en grupo" }, { value = "nunca", text = "Nunca" } },

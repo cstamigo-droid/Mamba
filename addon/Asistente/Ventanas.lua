@@ -69,7 +69,8 @@ function V.Movible(marco, nombre, asa, opciones)
 	opciones = opciones or {}
 	marco:SetClampedToScreen(true)
 	marco:SetMovable(true)
-	local reg = { marco = marco, nombre = nombre, original = nil, yaArrastra = opciones.yaArrastra and true or false, etiqueta = opciones.etiqueta or opciones.titulo or nombre } -- titulo: sinónimo de etiqueta
+	local reg = { marco = marco, nombre = nombre, original = nil, yaArrastra = opciones.yaArrastra and true or false, etiqueta = opciones.etiqueta or opciones.titulo or nombre, -- titulo: sinónimo de etiqueta
+		escalable = opciones.escalable and true or false } -- ventana con título que también cambia de tamaño en el modo Mover
 	if marco.GetNumPoints and (marco:GetNumPoints() or 0) > 0 and marco:GetPoint(1) then reg.original = { marco:GetPoint(1) } end
 	V.marcos[nombre] = reg
 	if not opciones.yaArrastra and not opciones.sinAsa then
@@ -118,7 +119,64 @@ function V.AlRestablecer(fn) V.alRestablecer = V.alRestablecer or {}; table.inse
 -- Cada elemento registrado se muestra con un borde y su nombre: se arrastra, la rueda cambia su tamaño
 -- (de 0,5 a 2) y todo queda guardado por personaje. En combate no se entra, y si empieza un combate se sale solo.
 V.moviendo = false
-local capas = {}
+local capas, fichas = {}, {}
+
+-- Cambia el tamaño de un elemento (de 0,5 a 2) y lo guarda por personaje. -> la escala nueva, o nil si no se pudo.
+local function escalar(r, delta)
+	if enCombate() or V.Fijas() or not r.marco.SetScale then return nil end
+	local e = math.max(0.5, math.min(2, (r.marco:GetScale() or 1) + delta * 0.05))
+	r.marco:SetScale(e)
+	guardar(r.nombre, r.marco)
+	local l = db()[r.nombre]
+	if l then l.escala = e else db()[r.nombre] = { escala = e } end
+	return e
+end
+V.Escalar = function(nombre, delta) local r = V.marcos[nombre]; return r and escalar(r, delta) end
+
+-- Pedido de Cristian (20-11, A7): las ventanas con título (Ranking, Enemigos cerca…) también cambian de tamaño.
+-- No llevan recuadro encima (taparía sus botones): llevan una fichita ARRIBA de la ventana con su nombre, el
+-- tamaño y los botones − y + (la rueda sobre la ficha también sirve). Solo las que piden opciones.escalable.
+local function ficha(r)
+	local c = fichas[r.nombre]
+	if c then return c end
+	c = CreateFrame("Frame", nil, UIParent)
+	c:SetFrameStrata("DIALOG")
+	c:SetSize(260, 20)
+	c:EnableMouse(true)
+	c:EnableMouseWheel(true)
+	c.fondo = c:CreateTexture(nil, "BACKGROUND")
+	c.fondo:SetAllPoints(c)
+	c.fondo:SetColorTexture(0.42, 0.85, 0.60, 0.35)
+	c.nombre = c:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	c.nombre:SetPoint("LEFT", c, "LEFT", 6, 0)
+	function c.Actualizar()
+		local e = r.marco.GetScale and r.marco:GetScale() or 1
+		c.nombre:SetText(r.etiqueta .. "  |cff9ba2b9tamaño " .. math.floor(e * 100 + 0.5) .. " %|r")
+	end
+	local function boton(texto, delta)
+		local b = CreateFrame("Button", nil, c, "UIPanelButtonTemplate")
+		b:SetSize(22, 18)
+		b:SetText(texto)
+		b:SetScript("OnClick", function() escalar(r, delta); c.Actualizar() end)
+		return b
+	end
+	c.mas = boton("+", 1)
+	c.mas:SetPoint("RIGHT", c, "RIGHT", -1, 0)
+	c.menos = boton("-", -1)
+	c.menos:SetPoint("RIGHT", c.mas, "LEFT", -2, 0)
+	c:SetScript("OnMouseWheel", function(_, delta) escalar(r, delta); c.Actualizar() end)
+	function c.Mostrar()
+		c:ClearAllPoints()
+		c:SetPoint("BOTTOMLEFT", r.marco, "TOPLEFT", 0, 2)
+		c.Actualizar()
+		c:Show()
+	end
+	-- la ventana se cierra o se abre con el modo abierto: la ficha la sigue
+	r.marco:HookScript("OnHide", function() c:Hide() end)
+	r.marco:HookScript("OnShow", function() if V.moviendo then c.Mostrar() end end)
+	fichas[r.nombre] = c
+	return c
+end
 
 local function capa(r)
 	local c = capas[r.nombre]
@@ -163,14 +221,7 @@ local function capa(r)
 		self.arrastre = nil
 		guardar(r.nombre, r.marco)
 	end)
-	c:SetScript("OnMouseWheel", function(_, delta)
-		if enCombate() or V.Fijas() or not r.marco.SetScale then return end
-		local e = math.max(0.5, math.min(2, (r.marco:GetScale() or 1) + delta * 0.05))
-		r.marco:SetScale(e)
-		guardar(r.nombre, r.marco)
-		local l = db()[r.nombre]
-		if l then l.escala = e else db()[r.nombre] = { escala = e } end
-	end)
+	c:SetScript("OnMouseWheel", function(_, delta) escalar(r, delta) end)
 	capas[r.nombre] = c
 	return c
 end
@@ -194,6 +245,11 @@ function V.ModoMover(si)
 		end
 	end
 	for _, fn in ipairs(V.alMover or {}) do pcall(fn, V.moviendo) end
+	-- después de los módulos: así ya se ven de ejemplo las ventanas escondidas (una ficha sin ventana no sirve)
+	for _, r in pairs(V.marcos) do
+		if r.escalable and V.moviendo and r.marco:IsShown() then ficha(r).Mostrar()
+		elseif fichas[r.nombre] then fichas[r.nombre]:Hide() end
+	end
 	return true
 end
 

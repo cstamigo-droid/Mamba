@@ -9,6 +9,7 @@ M.DEFECTO = {
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
 	cercanosSola = false, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100, agro = true, agroSiempre = false, agroPlacas = true,
+	agroAviso = "destello", -- A8 (20-11): «nada», «sonido», «destello» o «ambos»
 }
 
 function M.DB()

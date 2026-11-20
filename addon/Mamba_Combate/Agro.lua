@@ -159,6 +159,12 @@ function Ag.Crear()
 	barra.fondo:SetColorTexture(0.05, 0.05, 0.06, 0.6)
 	barra.color = barra:CreateTexture(nil, "ARTWORK")
 	barra.color:SetAllPoints(barra.fondo)
+	-- A8: el destello, un halo rojo suave alrededor de la barrita que se apaga solo en un segundo
+	barra.destello = barra:CreateTexture(nil, "BACKGROUND")
+	barra.destello:SetPoint("TOPLEFT", barra.fondo, "TOPLEFT", -6, 6)
+	barra.destello:SetPoint("BOTTOMRIGHT", barra.fondo, "BOTTOMRIGHT", 6, -6)
+	barra.destello:SetColorTexture(0.95, 0.2, 0.15, 0)
+	barra.destello:Hide()
 	barra.marcas = {}
 	for i = 1, MARCAS do
 		local t = barra:CreateTexture(nil, "OVERLAY")
@@ -212,6 +218,61 @@ function Ag.LimpiarPlacas()
 	end
 end
 
+---------------------------------------------------------------- A8: aviso al acercarte demasiado
+-- Pedido de Cristian (20-11): «un aviso opcional discreto, sonido o destello suave, cuando te acercas demasiado».
+-- Suena o destella UNA vez cuando un bicho pasa a rojo (ya estás dentro de su radio). Anti-spam: una vez por
+-- bicho y por entrada; si el borde titila (rojo, amarillo, rojo) no cuenta como entrada nueva hasta que pasa
+-- SALIDA segundos fuera de rojo; y dos bichos a la vez dan un solo aviso (PAUSA entre avisos).
+Ag.AVISOS = { { value = "nada", text = "Apagado" }, { value = "sonido", text = "Sonido suave" }, { value = "destello", text = "Destello" }, { value = "ambos", text = "Sonido y destello" } }
+Ag.SONIDO = 3175 -- SOUNDKIT.MAP_PING, el «tic» del mapa: suave (NO VERIFICADO el id en Forever; si falta, no suena y no rompe)
+Ag.SALIDA, Ag.PAUSA, Ag.DURA = 3, 1.5, 1
+local enRojo = {}   -- clave del bicho -> último momento en que estaba en rojo
+local ultimoAviso = -100
+local function clave(u)
+	if UnitGUID then
+		local ok, g = pcall(UnitGUID, u)
+		if ok and type(g) == "string" and not M.Secreto(g) then return g end
+	end
+	return "u:" .. tostring(u) -- sin GUID legible: la placa (se recicla, pero la salida de 3 s lo cubre)
+end
+local function ahora() return (GetTime and M.Num(GetTime())) or 0 end
+function Ag.OlvidarAvisos() enRojo = {}; ultimoAviso = -100 end
+
+-- lista: la de Ag.Revisar. -> true si avisó.
+function Ag.Avisar(lista)
+	local t = ahora()
+	local nuevo = false
+	for _, x in ipairs(lista or {}) do
+		if x.nivel == "rojo" then
+			local k = clave(x.unidad)
+			if not enRojo[k] or t - enRojo[k] > Ag.SALIDA then nuevo = true end
+			enRojo[k] = t
+		end
+	end
+	for k, cuando in pairs(enRojo) do if t - cuando > Ag.SALIDA then enRojo[k] = nil end end
+	local modo = M.DB().agroAviso or "nada"
+	if not nuevo or modo == "nada" or t - ultimoAviso < Ag.PAUSA then return false end
+	ultimoAviso = t
+	if (modo == "sonido" or modo == "ambos") and PlaySound then pcall(PlaySound, Ag.SONIDO, "SFX") end
+	if (modo == "destello" or modo == "ambos") and barra then Ag.destelloHasta = t + Ag.DURA end
+	local dg = diag(); dg.avisos = (dg.avisos or 0) + 1
+	return true
+end
+
+-- El halo baja de 0,6 a 0 en DURA segundos (lo llama el reloj del módulo, sin crear nada por cuadro).
+function Ag.PintarDestello()
+	if not (barra and barra.destello) then return end
+	local h = Ag.destelloHasta
+	local t = ahora()
+	if not h or t >= h or not barra:IsShown() then
+		if barra.destello:IsShown() then barra.destello:Hide() end
+		if h and t >= h then Ag.destelloHasta = nil end
+		return
+	end
+	barra.destello:SetColorTexture(0.95, 0.2, 0.15, 0.6 * (h - t) / Ag.DURA)
+	barra.destello:Show()
+end
+
 function Ag.Dibujar()
 	Ag.Crear()
 	if barra.ejemplo then return end
@@ -224,6 +285,7 @@ function Ag.Dibujar()
 	Ag.limpias = nil
 	local lista, peor = Ag.Revisar()
 	Ag.ultimo = { lista = lista, peor = peor }
+	Ag.Avisar(lista)
 	if not peor and not d.agroSiempre then barra:Hide(); return end
 	local c = COLOR[peor or "verde"]
 	barra.color:SetColorTexture(c[1], c[2], c[3], 0.75)
@@ -251,6 +313,7 @@ f:SetScript("OnEvent", function(_, ev)
 end)
 local acum = 0
 f:SetScript("OnUpdate", function(_, dt)
+	if Ag.destelloHasta then Ag.PintarDestello() end
 	acum = acum + (dt or 0)
 	if acum < 0.25 then return end -- cuatro veces por segundo basta para caminar
 	acum = 0

@@ -520,6 +520,50 @@ check(r[0] is False, "una ventana que ya se arrastra sola no lleva recuadro enci
 check(r[1] is True and r[2] is True, "botón «Listo: terminar de mover» encima de todo; al cerrarlo (o con Escape) sale del modo")
 check(r[3] is False and r[4] is True, "en combate no se repone el lugar; se hace al salir del combate")
 
+# 10h) A7 (20-11): una ventana con título que pide tamaño (escalable) lleva una ficha ARRIBA con − y +, guardada por personaje
+MOV3 = L.eval("""function()
+  local W = Asistente.Ventanas
+  local function ventana(n)
+    local v = CreateFrame("Frame", n, UIParent)
+    v.GetScale = function(self) return self.escala or 1 end
+    v.SetScale = function(self, e) self.escala = e end
+    return v
+  end
+  local a = ventana("MambaPruebaRanking"); MambaAPI.Movible(a, "pruebaRanking", { yaArrastra = true, escalable = true, etiqueta = "Ranking de prueba" })
+  local b = ventana("MambaPruebaSinTam"); MambaAPI.Movible(b, "pruebaSinTam", { yaArrastra = true, etiqueta = "Ventana sin tamaño" })
+  local c = ventana("MambaPruebaCerrada"); MambaAPI.Movible(c, "pruebaCerrada", { yaArrastra = true, escalable = true, etiqueta = "Ventana cerrada" })
+  a:Show(); b:Show(); c:Hide()
+  COMBATE = false
+  MambaAPI.ModoMover(true)
+  local function buscar(txt)
+    for _, f2 in ipairs(TODOS) do
+      if f2.nombre and type(f2.nombre) == "table" and tostring(f2.nombre.text or ""):find(txt, 1, true) and f2:IsShown() then return f2 end
+    end
+  end
+  local fa, fb, fc = buscar("Ranking de prueba"), buscar("Ventana sin tamaño"), buscar("Ventana cerrada")
+  local mas = fa and fa.mas
+  if mas and mas.scripts.OnClick then mas.scripts.OnClick(mas) end
+  local k = (UnitName("player") or "?") .. "-" .. (GetRealmName and GetRealmName() or "")
+  local guardada = AsistenteDB.lugares[k] and AsistenteDB.lugares[k].pruebaRanking and AsistenteDB.lugares[k].pruebaRanking.escala
+  local texto = fa and tostring(fa.nombre.text)
+  if fa and fa.scripts.OnMouseWheel then fa.scripts.OnMouseWheel(fa, -1); fa.scripts.OnMouseWheel(fa, -1) end
+  local tras = a.escala
+  MambaAPI.ModoMover(false)
+  local oculta = fa and not fa:IsShown()
+  -- vuelve a entrar: repone el tamaño guardado
+  a.escala = 1; a:Hide(); a:Show(); if a.scripts.OnShow then a.scripts.OnShow(a) end -- el simulado no dispara OnShow
+  return fa ~= nil, fb == nil, fc == nil, a.escala_tras_mas, guardada, texto, tras, oculta, a.escala
+end""")
+r = MOV3()
+check(r[0] is True, "A7: ventana con título escalable: lleva su ficha de tamaño en el modo Mover")
+check(r[1] is True, "A7: sin escalable no hay ficha (la ventana de Mamba no cambia)")
+check(r[2] is True, "A7: una ventana cerrada no deja una ficha flotando")
+check(r[4] is not None and abs(r[4] - 1.05) < 0.001, f"A7: el + agranda y guarda el tamaño por personaje ({r[4]})")
+check(r[5] is not None and "105 %" in r[5], f"A7: la ficha dice el tamaño ({r[5]})")
+check(r[6] is not None and abs(r[6] - 0.95) < 0.001, f"A7: la rueda sobre la ficha achica ({r[6]})")
+check(r[7] is True, "A7: al terminar de mover, la ficha se esconde")
+check(r[8] is not None and abs(r[8] - 0.95) < 0.001, f"A7: al volver a abrir la ventana repone su tamaño ({r[8]})")
+
 # 10g) K113: Mamba_Errores NO reemplaza el manejador de errores del juego (manchaba la interfaz del gremio);
 # escucha con hooksecurefunc sobre ScriptErrorsFrame:OnError
 src_err = (ADDON / "Mamba_Errores" / "Errores.lua").read_text(encoding="utf-8")
