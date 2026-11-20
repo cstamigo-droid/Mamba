@@ -56,9 +56,10 @@ def lua(rel):
     return (ADDON / rel).read_text(encoding="utf-8")
 
 
-def montar(codex_antes=False, romper=False):
+def montar(codex_antes=False, romper=False, traducido=False):
     """Un cliente nuevo: Dungeons.lua real, el Codex real (de carga a pedido) y Mamba_Panel en el orden del .toc.
-    codex_antes: el Codex ya está cargado cuando carga Mamba_Panel (otro addon lo pidió antes)."""
+    codex_antes: el Codex ya está cargado cuando carga Mamba_Panel (otro addon lo pidió antes).
+    traducido: cliente esMX (Polestar.Names da los nombres de las instancias en español, como en el juego)."""
     L = LuaRuntime(unpack_returned_tuples=True)
     G = L.globals()
     # string.lower solo para A-Z, sin tocar los bytes de UTF-8: es lo que asume Mamba (Asistente/Llevame.lua,
@@ -93,6 +94,10 @@ ns.Codex = { Load = function() if not CODEX_CARGADO then CODEX_CARGADO = true; C
     ld = L.eval('function(src, name, addon, ns) local f, e = loadstring(src, "@"..name); if not f then error(e) end; return f(addon, ns) end')
     G.CARGAR_CODEX = lambda: ld(lua("Polestar_Codex/Dungeons1.lua"), "Polestar_Codex/Dungeons1.lua", "Polestar_Codex", G.Polestar)
     ld(lua("Polestar/Dungeons/Dungeons.lua"), "Polestar/Dungeons/Dungeons.lua", "Polestar", G.Polestar)
+    L.execute("ORIG_FIND = Polestar.Dungeons.Find")  # la de Polestar, sin la envoltura de Mamba
+    if traducido:
+        L.execute("""Polestar.Names = { Localised = function() return true end,
+	Instance = function(m) return ({ [2959] = "Ciudad de Dalaran", [43] = "Cuevas de los Lamentos" })[m] end }""")
     if codex_antes:
         G.Polestar.Dungeons.Load()
     NP = L.table()
@@ -221,17 +226,23 @@ del_mapa = [x.key for x in lista(D.List()) if x.map == 3039]
 check(del_mapa == ["krol-dok"], f"mapa 3039 con otra clave en el Codex: una sola entrada, la del Codex ({del_mapa})")
 check(D.ForMap(3039) == "krol-dok", f"ForMap(3039) da la del Codex ({D.ForMap(3039)})")
 check(NP.SinDatos("kroldok-stronghold", "quests") is None, "la de Mamba ya no dice «datos en camino»")
+g = D.Get("kroldok-stronghold")
+check(g and g.key == "krol-dok", f"un enlace guardado a la clave de Mamba abre la del Codex ({g and g.key})")
 r = [x.key for x in lista(D.List()) if MATCHES(x, "krol")]
 check(r == ["krol-dok"], f"y el buscador da solo la del Codex ({r})")
 
 # 6) el Codex ya estaba cargado cuando cargó Mamba_Panel (otro addon lo pidió antes)
-L2, G2, D2, NP2 = montar(codex_antes=True)
+L2, G2, D2, NP2 = montar(codex_antes=True, traducido=True)
 dal = D2.Get("city-of-dalaran")
 check(dal and dal.zone == 1416 and dal.zoneName == "Montañas de Alterac", f"Codex ya cargado: Dalaran igual recibe su zona ({dal and dal.zoneName})")
 check(D2.ForMap(2970) == "the-drowned-city" and sum(1 for x in lista(D2.List()) if x.map == 2970) == 1,
       "Codex ya cargado: La Ciudad Anegada sale una vez")
 q = dal and (dal.quests.A, dal.quests.H)
 check(q == (2, 3), f"Codex ya cargado: Dalaran conserva sus misiones ({q})")
+check(dal and dal.name == "Ciudad de Dalaran", f"cliente esMX: Dalaran se ve en español ({dal and dal.name})")
+for txt in ("city of dalaran", "City of Dalaran", "ciudad de dalaran"):
+    k = G2.ORIG_FIND(txt)
+    check(k == "city-of-dalaran", f"cliente esMX, Codex ya cargado: la Find de Polestar sigue encontrando «{txt}» ({k})")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

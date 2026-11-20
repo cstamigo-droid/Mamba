@@ -54,7 +54,7 @@ end
 local EXTRA = {} -- clave -> fila de N.CALABOZOS registrada por Mamba
 local INGLES = {} -- clave -> nombre en inglés (el del Codex o el del cliente)
 local cubiertas = { clave = {}, mapa = {} } -- lo que ya trae el Codex (mapa -> su clave)
-local BAJA = {} -- clave de Mamba cuyo mapa trajo después el Codex con OTRA clave: Register no borra, así que se esconde
+local BAJA = {} -- clave de Mamba -> la del Codex que trajo después su mapa con OTRA clave: Register no borra, así que se esconde
 
 for _, d in ipairs(N.CALABOZOS or {}) do INGLES[d.key] = d.en end
 
@@ -85,7 +85,7 @@ local function registrarFaltantes(D, registro)
 			EXTRA[d.key] = d
 		else
 			-- ya registrada por Mamba y ahora el Codex la trae con otra clave ("drowned-city"): fuera de la lista
-			if EXTRA[d.key] and codex and codex ~= d.key then BAJA[d.key] = true end
+			if EXTRA[d.key] and codex and codex ~= d.key then BAJA[d.key] = codex end
 			EXTRA[d.key] = nil
 		end
 	end
@@ -130,7 +130,8 @@ function N.EngancharCalabozos()
 		for k, h in pairs(HUECO) do
 			local ok, s = pcall(D.Get, k)
 			if ok and type(s) == "table" and s.zone == nil and s.zoneName == nil and s.entrance == nil and h.zone then
-				s.key, s.zone, s.zoneName = nil, h.zone, h.zoneName
+				-- Get trae el nombre ya traducido: se vuelve al del Codex (inglés), que Dungeons.Find compara
+				s.key, s.zone, s.zoneName, s.name = nil, h.zone, h.zoneName, h.en or INGLES[k] or s.name
 				pcall(original, "dungeon", { [k] = s }, nil)
 			end
 		end
@@ -152,8 +153,18 @@ function N.EngancharCalabozos()
 	if type(forMap) == "function" then
 		D.ForMap = function(mapID, ...)
 			local k = forMap(mapID, ...)
-			if k and BAJA[k] then return cubiertas.mapa[mapID] or nil end
+			if k and BAJA[k] then return BAJA[k] end
 			return k
+		end
+	end
+	-- Y por su clave (un enlace guardado a "kroldok-stronghold") responde la del Codex.
+	for _, nombre in ipairs({ "Get", "Entrance" }) do
+		local f = D[nombre]
+		if type(f) == "function" then
+			D[nombre] = function(key, ...)
+				if key ~= nil and BAJA[key] then key = BAJA[key] end
+				return f(key, ...)
+			end
 		end
 	end
 	-- /polestar dungeons <nombre>: si Polestar no la encuentra, sin tildes y por cualquier palabra.

@@ -194,7 +194,7 @@ def generar() -> str:
             if tiene["entrance"] and tiene["zone"]:
                 continue
             zona, ent, fuente = ubicar(mapa, en)
-            h = {"key": clave}
+            h = {"key": clave, "en": en}
             if not tiene["zone"]:
                 h["zone"] = zona
                 h["zoneName"] = zona_es(zona)
@@ -223,7 +223,9 @@ def generar() -> str:
         d["entradaFuente"] = fuente  # la fuente, para quien lee los datos (no se le muestra al jugador)
         if fuente and fuente.startswith("aprox"):
             d["approx"] = True
-            d["entradaLugar"] = re.search(r"en (.*) \(Polestar_Nav\)$", fuente)[1]
+            lugar = re.search(r" en (.*?)(?: \(Polestar_Nav\))?$", fuente)
+            if lugar:
+                d["entradaLugar"] = lugar[1]
         d["misiones"] = misiones.get(clave, 0)
         filas_out.append(d)
     lineas = [

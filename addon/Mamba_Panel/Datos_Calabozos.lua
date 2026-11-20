@@ -14,7 +14,7 @@ N.CALABOZOS = {
 }
 -- Las del Codex sin zona o sin entrada: Mamba completa la zona y dice "entrada: datos en camino".
 N.CALABOZOS_HUECOS = {
-	{ key = "naxxramas", sinEntrada = true },
-	{ key = "city-of-dalaran", zone = 1416, zoneName = "Montañas de Alterac", sinEntrada = true },
-	{ key = "excavation-site-wetlands", sinEntrada = true },
+	{ key = "naxxramas", en = "Naxxramas", sinEntrada = true },
+	{ key = "city-of-dalaran", en = "City of Dalaran", zone = 1416, zoneName = "Montañas de Alterac", sinEntrada = true },
+	{ key = "excavation-site-wetlands", en = "Excavation Site: Wetlands", sinEntrada = true },
 }
