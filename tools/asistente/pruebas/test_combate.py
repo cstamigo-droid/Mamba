@@ -545,9 +545,21 @@ src = (AQUI.parent.parent.parent / "addon" / "Tasador" / "Alerta.lua").read_text
 L.eval('function(src) local f = assert(loadstring(src, "@Alerta.lua")); f("Tasador", TAS) end')(src)
 L.execute('EVENTOS_DESCONOCIDOS = GUARDA_DESC; Fire("PLAYER_LOGIN")')
 check(Cz.HayDeteccion(), "K105: engancha con MambaAPI.AlVerEnemigo del Tasador")
-check(C.DB().cercanosSola is True, "K105: abrir sola viene encendido")
+check(C.DB().cercanosSola is False and C.DB().versionAjustes == 2, "K105 (19-11): la ventana grande NO se abre sola por defecto")
+# migración: a quien lo tenía encendido (Cristian) se le apaga una sola vez, y después respeta lo que elija
+C.DB().cercanosSola = True; C.DB().versionAjustes = None
+check(C.DB().cercanosSola is False, "K105: ajustes viejos con «abrir sola» encendido se apagan una vez")
+C.DB().cercanosSola = True
+check(C.DB().cercanosSola is True, "K105: si el jugador la vuelve a encender, se respeta")
 G.EN_COMBATE = False; G.COMBATE = False  # fuera de combate (secciones anteriores lo dejan encendido)
 G.RELOJ = 200
+G.RELOJ = 199
+C.DB().cercanosSola = False
+L.execute('UNIDADES.nameplate9 = { name = "Brujito", lvl = 40, fac = "Alliance", cl = "Brujo", tok = "WARLOCK" }; TIMERS = {}; Fire("NAME_PLATE_UNIT_ADDED", "nameplate9")')
+check(not VC.visible, "K105: apagado, un enemigo nuevo NO abre la ventana grande (basta la barrita)")
+Cz.vistos["Brujito"] = None; L.execute("UNIDADES.nameplate9 = nil")
+G.RELOJ = 200
+C.DB().cercanosSola = True  # lo que sigue prueba el «abrir sola» encendido a mano
 L.execute('UNIDADES.nameplate1 = { name = "Pícaro", lvl = 41, fac = "Alliance", cl = "Pícaro", tok = "ROGUE", gremio = "Los Rojos" }; TIMERS = {}; Fire("NAME_PLATE_UNIT_ADDED", "nameplate1")')
 check(VC.visible and VC.abiertaSola, "K105: aparece un enemigo y la ventana se abre sola")
 check(G.AVISOS_PANTALLA == 1 and G.SONIDOS == 1, "K105: la alerta del Tasador avisa como siempre")

@@ -168,7 +168,7 @@ local function dibujarAvisos(p, ancho)
 		P.Desplegable(p, "Barra de marcadores", "Calavera, cruz, luna… Clic: marca a tu objetivo.", { { value = "siempre", text = "Siempre" }, { value = "grupo", text = "Solo en grupo" }, { value = "nunca", text = "Nunca" } },
 			function() return d.marcadores end, function(v) d.marcadores = v; M.Cambio() end),
 		I("Medidor de combate en pantalla", "Clic: cambia qué mide. Clic derecho: esta pelea o el total.", "medidor"),
-		I("Abrir sola la ventana de enemigos cerca", "Cuando aparece un jugador de la otra facción (fuera de mazmorras). Silenciar la alerta también la deja quieta.", "cercanosSola"),
+		I("Abrir sola la ventana grande de enemigos cerca", "Apagado: basta la barrita «Cerca: N»; la ventana grande se abre con un clic en la barrita o con el botón de abajo.", "cercanosSola"),
 		P.Desplegable(p, "Barra «Cerca: N»", "Chica y fija, como la de Spy: crece con cada jugador enemigo cerca. Clic en ella: la ventana completa.",
 			{ { value = "siempre", text = "Siempre a la vista" }, { value = "conEnemigos", text = "Solo cuando hay enemigos" }, { value = "nunca", text = "Nunca" } },
 			function() return d.cercaBarra end, function(v) d.cercaBarra = v; M.Cambio() end),

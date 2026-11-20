@@ -8,13 +8,19 @@ M.DEFECTO = {
 	modo = "auto", rol = "auto", sugerencia = true, resaltar = true, avisos = true, sonido = true,
 	disparo = true, amenaza = true, placas = true, lanzamiento = true, numerosCD = true, medidor = true,
 	avisoMana = 25, avisoAmenaza = 90, sonidoTodos = false, avisoAmenazaSi = true, avisoManaSi = true,
-	cercanosSola = true, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100,
+	cercanosSola = false, ficha = true, avisoDefensas = true, placaAncho = 100, placaAlto = 8, marcadores = "siempre", cercaBarra = "siempre", alfaMarcos = 100,
 }
 
 function M.DB()
 	MambaCombateDB = MambaCombateDB or {}
 	local d = MambaCombateDB
 	for k, v in pairs(M.DEFECTO) do if d[k] == nil then d[k] = v end end
+	-- versión 2 de los ajustes (Cristian, 19-11: la ventana grande "no la necesito… que se pueda abrir pero no se
+	-- abra sola"): la barrita «Cerca: N» es la vista principal; a quien la tenía encendida se le apaga una vez
+	if (d.versionAjustes or 1) < 2 then
+		d.cercanosSola = false
+		d.versionAjustes = 2
+	end
 	d.diag = d.diag or {}
 	return d
 end
