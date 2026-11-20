@@ -141,9 +141,15 @@ function D.Lanzando()
 	local nombre, ini, fin, _
 	if UnitCastingInfo then nombre, _, _, ini, fin = UnitCastingInfo("player") end
 	local canal = false
-	if not nombre and UnitChannelInfo then nombre, _, _, ini, fin = UnitChannelInfo("player"); canal = nombre ~= nil end
 	ini, fin = M.Num(ini), M.Num(fin)
-	if not (nombre and ini and fin and fin > ini) then lanz:Hide(); return end
+	local hay = M.Secreto(nombre) or nombre ~= nil -- D12: el nombre puede venir secreto: no se prueba con not/and
+	if not hay and UnitChannelInfo then
+		local n2, _, _, i2, f2 = UnitChannelInfo("player")
+		nombre, ini, fin = n2, M.Num(i2), M.Num(f2)
+		hay = M.Secreto(nombre) or nombre ~= nil
+		canal = hay
+	end
+	if not (hay and ini and fin and fin > ini) then lanz:Hide(); return end
 	lanz.ini, lanz.fin, lanz.canal = ini / 1000, fin / 1000, canal
 	lanz.texto:SetText(M.Secreto(nombre) and "" or nombre)
 	local dur = lanz.fin - lanz.ini

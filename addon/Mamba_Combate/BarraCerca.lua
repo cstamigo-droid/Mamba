@@ -97,15 +97,10 @@ function B.Reloj(prender)
 end
 
 -- Un enemigo NUEVO (no el que se sigue viendo): aviso en pantalla, salvo con la alerta silenciada.
+-- K135/D20 (auditoría 20-11): el aviso de un enemigo nuevo lo da UNA vez la alerta del Tasador (el detector, con su
+-- freno de 60 s por jugador y de sonido). La barrita no repite el aviso: solo crece. Queda la cuenta para el diag.
 function B.Nuevo(x)
-	local c = Cz()
-	if c and c.Silenciada and c.Silenciada() then return end
-	-- los de la lista «Matar» ya tienen su aviso fuerte (Historial.lua): no se tapa con este
-	local h = M.DB().historial
-	if h and h[x.nombre] and h[x.nombre].matar then return end
-	if M.Avisos and M.Avisos.Mostrar and M.DB().avisos then
-		M.Avisos.Mostrar("Enemigo cerca: " .. B.Texto(x), true)
-	end
+	B.nuevos = (B.nuevos or 0) + 1
 end
 
 -- Placas de nombre de enemigos (la tecla V del juego): con ellas la alerta detecta antes.

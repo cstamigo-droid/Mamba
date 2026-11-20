@@ -41,15 +41,19 @@ function Pl.EsEnemigo(u)
 end
 
 -- Esconde el dibujo de Blizzard (solo el aspecto). Si Blizzard le vuelve a subir el alfa, se baja de nuevo.
+-- D16 (auditoría 20-11): no se escriben campos propios en el UnitFrame de Blizzard (podría ensuciarlo): el gancho y
+-- el «estoy poniendo el alfa» van en tablas de Mamba, y el alfa que llega al gancho no se compara si es secreto.
+local enganchados, poniendo = {}, {}
 local function esconderBlizzard(placa)
 	local uf = placa and placa.UnitFrame
 	if not uf or not uf.SetAlpha then return end
 	ocultas[uf] = true
-	uf:SetAlpha(0)
-	if not uf.mambaGancho and hooksecurefunc then
-		uf.mambaGancho = true
+	poniendo[uf] = true; uf:SetAlpha(0); poniendo[uf] = nil
+	if not enganchados[uf] and hooksecurefunc then
+		enganchados[uf] = true
 		pcall(hooksecurefunc, uf, "SetAlpha", function(s, a)
-			if ocultas[s] and a ~= 0 and not s.mambaPoniendo then s.mambaPoniendo = true; s:SetAlpha(0); s.mambaPoniendo = nil end
+			if not ocultas[s] or poniendo[s] or M.Secreto(a) or a == 0 then return end
+			poniendo[s] = true; s:SetAlpha(0); poniendo[s] = nil
 		end)
 	end
 end
@@ -57,9 +61,7 @@ local function mostrarBlizzard(placa)
 	local uf = placa and placa.UnitFrame
 	if not uf or not ocultas[uf] then return end
 	ocultas[uf] = nil
-	uf.mambaPoniendo = true
-	uf:SetAlpha(1)
-	uf.mambaPoniendo = nil
+	poniendo[uf] = true; uf:SetAlpha(1); poniendo[uf] = nil
 end
 Pl.MostrarBlizzard = mostrarBlizzard
 
