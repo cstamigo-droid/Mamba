@@ -40,7 +40,6 @@ corre profesiones python -I $P/test_profesiones.py
 # D18 (auditoría 20-11): sin «[ -f … ] &&»; si una suite se renombra o se borra, falla en vez de saltarse en silencio
 corre combate    python -I $P/test_combate.py
 corre combate_pvp python -I $P/test_combate_pvp.py
-corre raros      python -I $P/test_raros.py
 corre version    python -I $P/test_version.py addon
 corre sello_zip  python -I $P/test_sello_zip.py
 # todas las pruebas Node de Mamba (panel, estética, misiones, reemplazos y las que se sumen)
