@@ -678,5 +678,12 @@ L.execute('Fire("DAMAGE_METER_COMBAT_SESSION_UPDATED")')
 if not SIN_EVENTOS:
     check((k.cuenta["DAMAGE_METER_COMBAT_SESSION_UPDATED"] or 0) + (k.cuenta["DAMAGE_METER_COMBAT_SESSION_UPDATED:combate"] or 0) >= 1, "K106 diag: cuenta DAMAGE_METER_*")
 check((k.cuenta["sesiones"] or 0) >= 1 and k.sesionesUltima is not None, "K106 diag: cuenta GetAvailableCombatSessions y cuántas peleas da (%s)" % k.sesionesUltima)
+# revisor tanda 7: mayúsculas con tilde y nombre vacío
+ej, co = C.Cercanos.HonorAnonimo("Ángel y Élune mueren, Ñandú también")[:2]
+check("Ángel" not in ej and "Élune" not in ej and "Ñandú" not in ej and co is False, "K105 diag: nombres con tilde también se esconden (%s)" % ej)
+L.execute('HONOR_VIEJO = COMBATLOG_HONORGAIN; COMBATLOG_HONORGAIN = "%s muere"')
+ej2 = C.Cercanos.HonorAnonimo(" muere")[0]
+check(ej2 is not None and "<nombre>" not in ej2, "K105 diag: si el patrón captura un nombre vacío, no mete <nombre> entre las letras (%s)" % ej2)
+L.execute('COMBATLOG_HONORGAIN = HONOR_VIEJO')
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
