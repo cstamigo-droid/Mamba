@@ -394,5 +394,28 @@ check(len(b) == 0, "control negativo: sin la tabla de subzonas, «poblado magram
 L.execute("Asistente_Lugares = GUARDA; Asistente.Llevame.OlvidarSubzonas()")
 check(len(lista(LL.Buscar("xqzv poblado inexistente"))) == 0, "control negativo: un lugar inventado da 0 resultados")
 
+# 15) Auditoría 20-11 (D13, D14): normalizar como Calabozos; un nombre nil no rompe el orden
+check(LL.Normal("Bastión de Krol'dok") == "bastion de kroldok", f"apóstrofo fuera ({LL.Normal(chr(66) + 'astión de Krol' + chr(39) + 'dok')})")
+check(LL.Normal("ÜBER «Ñandú» ¿sí?") == "uber nandu si", f"Ü, «», ¿? ({LL.Normal('ÜBER «Ñandú» ¿sí?')})")
+check(LL.Normal(None) == "" and LL.Normal(False) == "", "LL.Normal(nil) = '' (no 'nil')")
+check(len(lista(LL.Buscar("'"))) == 0 and len(lista(LL.Buscar("¿?«»"))) == 0, "una búsqueda de solo signos no trae nada")
+L.execute("Asistente_Lugares.areas[#Asistente_Lugares.areas + 1] = { 999001, 1443, 50, 50, \"Bastión de Krol'dok (prueba)\", \"Krol'Dok (prueba)\" }; Asistente.Llevame.OlvidarSubzonas()")
+b = [d for d in lista(LL.Buscar("kroldok")) if d.clave == "a:999001"]
+check(len(b) == 1, "«kroldok» encuentra «Krol'dok»")
+b = [d for d in lista(LL.Buscar("krol'dok")) if d.clave == "a:999001"]
+check(len(b) == 1, "«krol'dok» también")
+check(len([d for d in lista(LL.Buscar("kroldak")) if d.clave == "a:999001"]) == 0, "control negativo: «kroldak» no lo encuentra")
+L.execute("table.remove(Asistente_Lugares.areas); Asistente.Llevame.OlvidarSubzonas()")
+# D14: un destino sin nombre (un PNJ del Codex sin nombre) no rompe el orden
+L.execute("""
+SIN_NOMBRE = Polestar.Search
+Polestar.Search = { Query = function(t) return { { kind = 'npc', id = 3309 }, { kind = 'npc', id = 3310, title = 'Zeta' } } end }
+Polestar.Codex.Npc = (function(f) return function(id) local r = f(id) or {}; if id == 3309 then r = { spawns = { { map = 1454, x = 50, y = 50 } } } end return r end end)(Polestar.Codex.Npc)
+Asistente.Llevame.OlvidarSubzonas()
+""")
+okb, res = L.eval("function() return pcall(Asistente.Llevame.Buscar, 'kxz banco') end")()
+check(okb, f"D14: un nombre nil no rompe el orden ({res if not okb else 'ok'})")
+L.execute("Polestar.Search = SIN_NOMBRE; Asistente.Llevame.OlvidarSubzonas()")
+
 print(f"{ok} OK, {fail} fallas" + (" (control negativo)" if ROMPER else ""))
 sys.exit(1 if fail else 0)

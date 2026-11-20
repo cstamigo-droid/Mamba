@@ -87,13 +87,16 @@ local function enCombate() return (A.EnCombate and A.EnCombate()) or (InCombatLo
 local function ahora() return GetTime and GetTime() or 0 end
 
 ---------------------------------------------------------------- texto
+-- Igual que Calabozos (Mamba_Panel/Calabozos.lua, N.Pliega; auditoría 20-11, D13): tildes y «Ü», apóstrofos
+-- ("Krol'dok" = "kroldok"), guiones, comillas «» y ¡¿, y signos sueltos (una búsqueda de solo «'» no trae nada).
 local TILDES = { ["á"] = "a", ["é"] = "e", ["í"] = "i", ["ó"] = "o", ["ú"] = "u", ["ü"] = "u", ["ñ"] = "n",
-	["Á"] = "a", ["É"] = "e", ["Í"] = "i", ["Ó"] = "o", ["Ú"] = "u", ["Ñ"] = "n" }
+	["Á"] = "a", ["É"] = "e", ["Í"] = "i", ["Ó"] = "o", ["Ú"] = "u", ["Ü"] = "u", ["Ñ"] = "n", ["’"] = "", ["´"] = "", ["«"] = " ", ["»"] = " ", ["¡"] = " ", ["¿"] = " " } -- multibyte: aquí y no en una clase [..] de bytes
 function LL.Normal(t)
 	-- primero las tildes y después solo A-Z: string.lower con un locale Latin-1 rompe los bytes de UTF-8
-	t = tostring(t or "")
+	if type(t) ~= "string" and type(t) ~= "number" then return "" end
+	t = tostring(t)
 	for con, sin_ in pairs(TILDES) do t = t:gsub(con, sin_) end
-	t = t:gsub("[A-Z]", string.lower)
+	t = t:gsub("[A-Z]", string.lower):gsub("'", ""):gsub("[%-:%(%),%./!%?]", " "):gsub("%s+", " ")
 	return (t:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
@@ -786,7 +789,7 @@ function LL.Buscar(texto)
 	table.sort(out, function(a, b)
 		if a.calce ~= b.calce then return a.calce > b.calce end
 		if orden[a.tipo] ~= orden[b.tipo] then return (orden[a.tipo] or 9) < (orden[b.tipo] or 9) end
-		return a.nombre < b.nombre
+		return tostring(a.nombre or "") < tostring(b.nombre or "") -- D14: un nombre nil no rompe el orden
 	end)
 	ultimaBusqueda = { q = q, t = ahora(), r = out }
 	return out

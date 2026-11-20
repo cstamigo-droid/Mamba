@@ -138,7 +138,7 @@ Hub.Seccion({
 				local c = l.Calce(d, q)
 				if c > 0 then d.calce = c - 5; vis[#vis + 1] = d end
 			end
-			table.sort(vis, function(a, b) if a.calce ~= b.calce then return a.calce > b.calce end return a.nombre < b.nombre end)
+			table.sort(vis, function(a, b) if (a.calce or 0) ~= (b.calce or 0) then return (a.calce or 0) > (b.calce or 0) end return tostring(a.nombre or "") < tostring(b.nombre or "") end)
 		else
 			vis = sugeridos(l.Destinos())
 		end
