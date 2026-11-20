@@ -100,6 +100,12 @@ PARCHES = [
     ('P14-no-vender', 'Polestar/QoL/Vendor.lua',
      "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n",
      "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n\t-- Mamba (PARCHES.md P14): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,\n\t-- quest items, bound utility) goes, even when marked as junk by hand.\n\tlocal mamba = _G.MambaAPI\n\tif mamba and mamba.NoVender and mamba.NoVender(id) then return nil end\n"),
+    ('P15-prefijo', 'Polestar/Quests/Party.lua',
+     'Party.PREFIX = "Polestar"\n',
+     '-- Mamba (PARCHES.md P15): its own prefix. On "Polestar" the fork announced itself as Polestar 0.4.1 and the\n-- official Polestar in the party or guild said "X is on Polestar ...: your guides can differ" (18-11). With\n-- "Mamba", official clients never hear the fork nor the fork them; party sync runs among Mamba players only.\nParty.PREFIX = ns.mamba and "Mamba" or "Polestar"\n'),
+    ('P15-prefijo', 'Polestar/Core/Update.lua',
+     'U.PREFIX = "Polestar" -- Party.PREFIX\n',
+     'U.PREFIX = ns.mamba and "Mamba" or "Polestar" -- Party.PREFIX; Mamba (PARCHES.md P15): its own prefix\n'),
     # P12: la ventana de Mamba (riel que se achica, encabezado Mamba, cuadro del objeto con lista, título por sección).
     ('P12-cuadro', 'Polestar/Theme/Widgets.lua',
      '\tif extra then extra(tip) end\n\ttip:Show()',

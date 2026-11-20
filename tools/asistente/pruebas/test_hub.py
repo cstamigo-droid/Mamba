@@ -569,6 +569,26 @@ r = VEND(src_v)
 check(r[0] is None, f"P14: el saco marcado a mano como basura NO lo vende Polestar ({r[0]})")
 check(r[1] == 9104, f"P14: un gris común sí lo vende ({r[1]})")
 
+# 10j) P15: el fork NO se anuncia en el canal de versiones de Polestar (prefijo propio "Mamba")
+PREF = L.eval("""function(src, nombre, mamba)
+  local stub = function() end
+  local ns = setmetatable({ mamba = mamba }, { __index = function(t, k)
+    local v = setmetatable({}, { __index = function() return stub end, __call = stub })
+    rawset(t, k, v); return v end })
+  ns.L = setmetatable({}, { __index = function(_, k) return k end })
+  local f = assert(loadstring(src, "@" .. nombre))
+  local ok, err = pcall(f, "Polestar", ns)
+  return ns, ok, tostring(err)
+end""")
+for archivo, campo in (("Quests/Party.lua", "Party"), ("Core/Update.lua", "Update")):
+    src_p = (ADDON / "Polestar" / archivo).read_text(encoding="utf-8")
+    ns_m, ok_m, err_m = PREF(src_p, archivo, "fork")
+    pref_m = ns_m[campo].PREFIX if ok_m or ns_m[campo] is not None else None
+    check(str(pref_m) == "Mamba", f"P15 {archivo}: con Mamba el prefijo es «Mamba» ({pref_m}; {err_m[:80] if not ok_m else ''})")
+    ns_o, ok_o, err_o = PREF(src_p, archivo, False)  # el Polestar oficial: sin X-Mamba
+    pref_o = ns_o[campo].PREFIX if ns_o[campo] is not None else None
+    check(str(pref_o) == "Polestar", f"P15 {archivo}: sin la marca de Mamba sigue «Polestar» ({pref_o})")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

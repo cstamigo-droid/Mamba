@@ -35,6 +35,7 @@ Pruebas de Polestar que fijan esos mismos valores y se ajustan junto con el parc
 | P2 | `rust/crates/forge-addontest/tests/addontest/ui-update.rs` | el enlace del release es el de Mamba |
 | P3 | `rust/crates/forge-addontest/tests/addontest/nav-journey.rs` | la prueba "off by default" espera encendido |
 | P14 | `addon/Polestar/QoL/Vendor.lua` | `junkAt` no vende lo que `MambaAPI.NoVender(id)` dice que no se vende (mecánicas de Forever de ForeverTDB, llaves, misión, ligado de utilidad), aunque esté marcado a mano como basura | Revisor de la tanda 5 (19-11): una montura marcada como basura se vendía. Prueba: `test_hub.py` (10i) |
+| P15 | `addon/Polestar/Quests/Party.lua`, `addon/Polestar/Core/Update.lua` | `Party.PREFIX` y `U.PREFIX` = "Mamba" cuando `ns.mamba` (P1): el fork ya no se anuncia en el canal de versiones de Polestar, ni en el grupo ni en la hermandad | Cristian, 19-11: sus compañeros con el Polestar oficial 0.4.1.1 veían "X usa Polestar 0.4.1: sus guías y las tuyas pueden ser distintas" por Mamba, y Mamba les avisaba a ellos. Con prefijo propio no se oyen; la sincronización de grupo queda entre jugadores de Mamba. Prueba: `test_hub.py` (10j) |
 
 **No verificado:** las pruebas en Rust (`forge-addontest`), porque en este PC no hay Rust. Las de Node sí se corrieron (ver `MAMBA.md`, "Pruebas").
 

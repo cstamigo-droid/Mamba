@@ -56,7 +56,7 @@ U.CLIENT_FRESH = 7 * DAY -- the Client's check this recent says we are current
 U.HELLO_GAP = 1800 -- seconds between two guild hellos (a /reload sends none)
 U.HELLO_DELAY = 20 -- seconds after login
 U.REPLY_GAP = 300 -- seconds between two guild answers
-U.PREFIX = "Polestar" -- Party.PREFIX
+U.PREFIX = ns.mamba and "Mamba" or "Polestar" -- Party.PREFIX; Mamba (PARCHES.md P15): its own prefix
 
 ns.RegisterDefaults("update", { card = true, probe = true })
 

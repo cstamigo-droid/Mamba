@@ -85,7 +85,10 @@ local concat = table.concat
 local Party = {}
 ns.Party = Party
 
-Party.PREFIX = "Polestar"
+-- Mamba (PARCHES.md P15): its own prefix. On "Polestar" the fork announced itself as Polestar 0.4.1 and the
+-- official Polestar in the party or guild said "X is on Polestar ...: your guides can differ" (18-11). With
+-- "Mamba", official clients never hear the fork nor the fork them; party sync runs among Mamba players only.
+Party.PREFIX = ns.mamba and "Mamba" or "Polestar"
 Party.MAX_BYTES = 255
 local VERSION = "1"
 -- Forever's log holds 40 quests (QuestLogConstsMainlineCamelot.
