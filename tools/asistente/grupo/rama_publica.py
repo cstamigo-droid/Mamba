@@ -139,7 +139,9 @@ def revisar() -> int:
     if PERSONAL in git("log", "--format=%ae%n%ce%n%B", DESTINO):
         fallas.append("queda el correo personal en algún commit de la rama (también los de Polestar)")
     dif = git("diff", "--name-only", ORIGEN, DESTINO).decode().split()
-    otros = [d for d in dif if not d.startswith(".github/workflows/")]
+    # Fuera de los workflows, solo puede diferir un archivo cuyo único cambio sea el correo personal -> noreply.
+    otros = [d for d in dif if not d.startswith(".github/workflows/")
+             and git("show", f"{ORIGEN}:{d}").replace(PERSONAL, NOREPLY) != git("show", f"{DESTINO}:{d}")]
     if otros:
         fallas.append(f"publica difiere de asistente fuera de .github/workflows: {otros[:5]}")
     if git("ls-tree", "-r", "--name-only", DESTINO, "--", ".github/workflows").strip():
