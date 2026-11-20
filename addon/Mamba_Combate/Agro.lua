@@ -122,7 +122,13 @@ end
 -- Lado de la pantalla de su placa: -1 (izquierda) … 0 (delante) … 1 (derecha), o nil.
 function Ag.Lado(placa)
 	if not (placa and placa.GetCenter and UIParent and UIParent.GetWidth) then return nil end
-	local x = placa:GetCenter()
+	-- Forever prohíbe medir placas restringidas ("Action[FrameMeasurement] failed", 18-11/20-11: miles de
+	-- errores y el juego terminó desactivando Mamba_Combate). Nunca medir una placa prohibida, y si una
+	-- medición falla una vez, se deja de medir lados en esta sesión: la barra sigue funcionando sin flechas.
+	if Ag.sinLado then return nil end
+	if placa.IsForbidden and placa:IsForbidden() then return nil end
+	local ok, x = pcall(placa.GetCenter, placa)
+	if not ok then Ag.sinLado = true return nil end
 	x = M.Num(x)
 	local w = M.Num(UIParent:GetWidth())
 	if not (x and w and w > 0) then return nil end
