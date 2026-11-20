@@ -58,6 +58,26 @@ local function clave()
 	return (UnitName("player") or "?") .. " - " .. (GetRealmName and GetRealmName() or "")
 end
 M.Clave = clave
+-- El oro de este personaje en cobre, o nil si el juego lo da como valor secreto (no se compara ni se guarda).
+function M.Oro()
+	local v = GetMoney and GetMoney()
+	if v == nil then return nil end
+	if issecretvalue and issecretvalue(v) then return nil end
+	return v
+end
+
+-- "1.234 o 05 p 07 c" con los ÍCONOS de las monedas del juego, siempre las tres (como Bagnon). tam: alto del ícono.
+local ICONO = { "Interface\\MoneyFrame\\UI-GoldIcon", "Interface\\MoneyFrame\\UI-SilverIcon", "Interface\\MoneyFrame\\UI-CopperIcon" }
+function M.Monedas(cobre, tam)
+	if type(cobre) ~= "number" then return "" end
+	cobre = math.floor(cobre)
+	tam = tam or 0
+	local o, p, c = math.floor(cobre / 10000), math.floor(cobre / 100) % 100, cobre % 100
+	local txt = tostring(o):reverse():gsub("(%d%d%d)", "%1."):reverse():gsub("^%.", "")
+	local function ic(i) return ("|T%s:%d:%d:2:0|t"):format(ICONO[i], tam, tam) end
+	return ("%s%s %02d%s %02d%s"):format(txt, ic(1), p, ic(2), c, ic(3))
+end
+
 function M.NombreDe(k) return (k or ""):match("^(.-) %-") or k end
 
 ---------------------------------------------------------------- qué bolsas hay
@@ -208,7 +228,7 @@ function M.GuardarBolsas()
 	p.bolsas = totales(p, false)
 	local _, clase = UnitClass("player")
 	p.clase = clase
-	p.oro = GetMoney and GetMoney() or 0
+	p.oro = M.Oro() or p.oro
 	p.fecha = date and date("%d-%m-%Y") or ""
 end
 
@@ -371,7 +391,7 @@ ev:SetScript("OnEvent", function(_, e, a1)
 		avisar("bolsas", s)
 	elseif e == "PLAYER_MONEY" then
 		local p = yo()
-		p.oro = GetMoney and GetMoney() or p.oro
+		p.oro = M.Oro() or p.oro
 		avisar("oro")
 	elseif e == "ITEM_LOCK_CHANGED" or e == "BAG_UPDATE_COOLDOWN" or e == "BAG_NEW_ITEMS_UPDATED" then
 		avisar("casillas")

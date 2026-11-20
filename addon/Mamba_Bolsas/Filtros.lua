@@ -73,6 +73,12 @@ end
 function M.Marca(d)
 	if d and d.id and M.EsDeMision(d) then return nil end
 	-- mecánicas de Forever (saco de dormir, piedra de hogar...): la lista única del Tasador, de ForeverTDB
+	-- MambaAPI.NoVender (aa87b7ad) es la entrada única: mecánicas de ForeverTDB, lo protegido del Tasador y lo VITAL
+	local api = _G.MambaAPI
+	if d and d.id and api and api.NoVender then
+		local ok, motivo = pcall(api.NoVender, d.id)
+		if ok and motivo then return nil end
+	end
 	local Tz = _G.Tasador
 	if d and d.id and Tz and type(Tz.MECANICAS) == "table" and Tz.MECANICAS[d.id] then return nil end
 	local Ps = PS()

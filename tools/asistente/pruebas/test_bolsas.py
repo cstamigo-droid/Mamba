@@ -182,6 +182,10 @@ def nuevo(antes=""):
             src = src.replace("Tz.MECANICAS[d.id] then return nil end", "false then return nil end")
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace("if ABRE[e] then M.AbrirInventario(true, true)", "if false then")
+        if ROMPER and n == "Bolsas.lua":
+            src = src.replace("if issecretvalue and issecretvalue(v) then return nil end", "").replace('local function ic(i) return ("|T%s:%d:%d:2:0|t"):format(ICONO[i], tam, tam) end', 'local function ic(i) return "" end')
+        if ROMPER and n == "Filtros.lua":
+            src = src.replace("if ok and motivo then return nil end", "")
         if ROMPER and n == "Banco.lua":
             src = src.replace("if ok and retrasa then", "if false then")
         if ROMPER and n == "Bolsas.lua":
@@ -267,7 +271,7 @@ check(fi.celdas[1].visible, "y la vuelve a mostrar")
 c = fi.celdas[1]
 check(c.libres == 11 and c.total == 16, "pie: libres/total de la mochila (%s/%s)" % (c.libres, c.total))
 check(fi.libresTexto.texto == "37/44", "pie: libres/total (%s)" % fi.libresTexto.texto)
-check(fi.oroTexto.texto == "841200c", "pie: el oro (%s)" % fi.oroTexto.texto)
+check((fi.oroTexto.texto or "").startswith("84|TInterface") and "UI-GoldIcon" in fi.oroTexto.texto and "UI-SilverIcon" in fi.oroTexto.texto and "UI-CopperIcon" in fi.oroTexto.texto, "pie: el oro con las tres monedas (%s)" % fi.oroTexto.texto)
 # resaltar al pasar el ratón
 L.execute('local f = MambaBolsas.ventanas.inventario; f.celdas[4].scripts.OnEnter(f.celdas[4])')
 resaltadas = L.eval('function(f) local n = 0; for i, b in pairs(f.mostrados) do if b.mamba and b.mamba.resalte.__vis then n = n + 1 end end; return n end')
@@ -511,6 +515,24 @@ L.execute('Tasador = { MECANICAS = { [211527] = true } }; MARCAS = { [211527] = 
 check(M.Marca(L.eval('{ id = 211527, calidad = 0 }')) is None, "saco de dormir: sin marca de basura")
 check(not M.Pasa("basura", L.eval('{ id = 211527, calidad = 0 }')), "y no aparece en el filtro Basura")
 L.execute('Tasador = nil; MARCAS = nil')
+
+# (Cristian, 19-11) el oro como Bagnon: íconos, siempre las tres monedas, por personaje y total; nunca un secreto
+m = M.Monedas(12345678, 14)
+check(m.startswith("1.234|T") and " 56|T" in m and " 78|T" in m, "1.234 o 56 p 78 c con íconos (%s)" % m)
+m = M.Monedas(5)
+check(m.startswith("0|T") and " 00|T" in m and " 05|T" in m, "siempre las tres monedas, aunque sean 0 (%s)" % m)
+lineas, total = M.LineasOro()
+oro_hope = G.MambaBolsasDB.personajes["Hope - Fé"].oro
+check(total == oro_hope + 5000 and any("Total" in x.left for x in lineas.values()), "al pasar el ratón: cada personaje y el total de la cuenta (%s)" % total)
+check(fi.oroBoton is not None, "el oro tiene su cuadro al pasar el ratón")
+L.execute('function issecretvalue(v) return SECRETO == true end; SECRETO = true; function GetMoney() return 1 end; Fire("PLAYER_MONEY"); Fire("BAG_UPDATE_DELAYED"); Correr()')
+check(G.MambaBolsasDB.personajes["Hope - Fé"].oro == oro_hope, "oro secreto: no se guarda ni se compara (%s)" % G.MambaBolsasDB.personajes["Hope - Fé"].oro)
+check(M.ConsejoPestana(2) is None, "oro secreto: sin consejo de compra antes que uno con números falsos")
+L.execute('SECRETO = false; function GetMoney() return 841200 end')
+# K115: MambaAPI.NoVender es la entrada única
+L.execute('MambaAPI = { NoVender = function(id) if id == 117 then return "Lo usas tú" end end }')
+check(M.Marca(L.eval('{ id = 117, calidad = 0 }')) is None, "NoVender: sin marca de basura")
+L.execute('MambaAPI = nil')
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.

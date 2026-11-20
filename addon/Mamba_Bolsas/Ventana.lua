@@ -463,11 +463,40 @@ local function dibujarBolsas(f, bolsas, anchoUtil)
 	color(f.libresTexto, libresT <= 2 and "warning" or "text")
 	f.libresT = libresT
 	local oro = (f.tipo ~= "banco") and p and p.oro
-	f.oroTexto:SetText(oro and (GetCoinTextureString and GetCoinTextureString(oro) or M.Dinero(oro)) or "")
+	M.PintarOro(f, oro)
 	if not verFila or #bolsas == 0 then f.filaBolsas:SetHeight(1); return 0 end
 	local alto = math.ceil(#bolsas / porFila) * FILA_BOLSAS
 	f.filaBolsas:SetHeight(alto)
 	return alto
+end
+
+-- El oro del pie: con los íconos de las monedas y a un tamaño que se lee (Cristian creía que "no salía el dinero").
+function M.PintarOro(f, oro)
+	if not f.oroTexto then return end
+	f.oroTexto:SetText(type(oro) == "number" and M.Monedas(oro, 14) or "")
+	if f.oroBoton then
+		f.oroBoton:SetShown(type(oro) == "number")
+		local w = f.oroTexto.GetStringWidth and f.oroTexto:GetStringWidth() or 120
+		f.oroBoton:SetSize(math.max(60, (w or 120) + 8), 22)
+	end
+end
+
+-- Al pasar el ratón: el oro de cada personaje (lo guardado de cada uno) y el total de la cuenta.
+function M.LineasOro()
+	local lista, total = {}, 0
+	for k, p in pairs(M.DB().personajes) do
+		if type(p.oro) == "number" then
+			lista[#lista + 1] = { M.NombreDe(k), p.oro, k == M.Clave() }
+			total = total + p.oro
+		end
+	end
+	table.sort(lista, function(a, b) if a[2] ~= b[2] then return a[2] > b[2] end return a[1] < b[1] end)
+	local lineas = {}
+	for _, x in ipairs(lista) do
+		lineas[#lineas + 1] = { left = x[1] .. (x[3] and " (tú)" or ""), right = M.Monedas(x[2], 12) }
+	end
+	lineas[#lineas + 1] = { left = "Total de la cuenta", right = M.Monedas(total, 12) }
+	return lineas, total
 end
 
 ---------------------------------------------------------------- la rejilla
@@ -844,8 +873,18 @@ function M.CrearVentanaBolsas(tipo)
 	-- el pie: casillas libres a la izquierda, oro a la derecha (como Bagnon)
 	f.libresTexto = P.Texto(f, "number", "text")
 	f.libresTexto:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", f.margen, 9)
-	f.oroTexto = P.Texto(f, "number", "text")
-	f.oroTexto:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -f.margen, 9)
+	f.oroTexto = P.Texto(f, "heading", "text")
+	f.oroTexto:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -f.margen, 8)
+	if f.oroTexto.SetJustifyH then f.oroTexto:SetJustifyH("RIGHT") end
+	f.oroBoton = CreateFrame("Button", nil, f)
+	f.oroBoton:SetPoint("RIGHT", f.oroTexto, "RIGHT", 4, 0)
+	f.oroBoton:SetSize(120, 22)
+	f.oroBoton:SetScript("OnEnter", function(self)
+		local lineas = M.LineasOro()
+		local A2 = _G.Asistente
+		if A2 and A2.CuadroAyuda then A2.CuadroAyuda(self, "Oro de tus personajes", lineas) end
+	end)
+	f.oroBoton:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
 	if f.cabeza and f.cabeza.EnableMouse then f.cabeza:EnableMouse(not M.Op("fija")) end
 	f:HookScript("OnShow", function(self) M.Dibujar(self) end)
 	f:HookScript("OnHide", function(self)
@@ -882,7 +921,7 @@ function M.CrearVentanaBolsas(tipo)
 			if f.tipo == "banco" then programar(false) end
 		elseif motivo == "oro" then
 			local p = M.DB().personajes[f.dueno]
-			if f.tipo ~= "banco" and p and p.oro and f.oroTexto then f.oroTexto:SetText(GetCoinTextureString and GetCoinTextureString(p.oro) or M.Dinero(p.oro)) end
+			if f.tipo ~= "banco" and p and f.oroTexto then M.PintarOro(f, p.oro) end
 			if f.tipo == "banco" and M.DibujarCompra then
 				local antes = f.compra and f.compra:IsShown()
 				M.DibujarCompra(f)

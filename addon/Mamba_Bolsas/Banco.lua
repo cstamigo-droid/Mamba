@@ -57,7 +57,8 @@ end
 function M.ConsejoPestana(libresBanco)
 	local costo = M.CostoPestana()
 	if not costo then return nil end
-	local oro = GetMoney and GetMoney() or 0
+	local oro = M.Oro()
+	if not oro then return nil end -- el oro llegó secreto: sin consejo antes que uno con números falsos
 	local dinero = M.Dinero
 	local r = { costo = costo, libres = libresBanco, oro = oro }
 	if oro < costo then
@@ -124,7 +125,7 @@ function M.DibujarCompra(f)
 	end
 	local c
 	if M.EsVivo(f) then
-		local clave = tostring(M.CostoPestana()) .. ":" .. tostring(GetMoney and GetMoney() or 0) .. ":" .. tostring(f.libresT or 0)
+		local clave = tostring(M.CostoPestana()) .. ":" .. tostring(M.Oro()) .. ":" .. tostring(f.libresT or 0)
 		if f.claveConsejo ~= clave then f.claveConsejo, f.consejoMemo = clave, M.ConsejoPestana(f.libresT or 0) end
 		c = f.consejoMemo
 	end
