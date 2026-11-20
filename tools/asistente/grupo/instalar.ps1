@@ -195,6 +195,20 @@ if ($malas.Count) {
 "Mamba $VersionMamba instalada el $Fecha. Respaldo: $Respaldo" | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $Forever 'Interface\Mamba_respaldos\ULTIMA_INSTALACION.txt')
 
 
+# ---------- K127: SkillUpForever, WhatsTraining y ForeverLootSparkles habilitados en cada personaje ----------
+# El juego los deja "disabled" en AddOns.txt; se cambian SOLO esas líneas (WTF ya está respaldada entera arriba, y
+# cada archivo que cambia se copia además a $Respaldo\AddOns_txt_antes). El juego está cerrado (se revisó antes).
+$habil = Join-Path $PSScriptRoot 'habilitar_addons.ps1'
+$avisoHab = ''
+if ((Test-Path -LiteralPath $habil) -and (Test-Path -LiteralPath $WTF)) {
+    try {
+        . $habil
+        $rh = Enable-MambaAddons -WTF $WTF -Respaldo (Join-Path $Respaldo 'AddOns_txt_antes')
+        if ($rh.lineas -gt 0) { Decir ("Habilitados SkillUpForever, WhatsTraining y ForeverLootSparkles: {0} líneas en {1} personajes." -f $rh.lineas, $rh.cambiados.Count) }
+        if ($rh.errores.Count) { $avisoHab = "`n`n(No pude habilitar los addons de profesiones en algún personaje: actívalos en «AddOns» de la pantalla de personajes.)" }
+    } catch { $avisoHab = "`n`n(No pude habilitar los addons de profesiones: actívalos en «AddOns» de la pantalla de personajes.)" }
+}
+
 # ---------- 6. El actualizador (19-11): "Actualizar Mamba" en el escritorio y una revisión al iniciar sesión ----------
 # Va fuera de AddOns (el juego no lo carga) y se reescribe en cada instalación, así se actualiza solo.
 $Act = Join-Path $Forever 'Interface\Mamba_actualizador'
@@ -230,5 +244,5 @@ Decir ("Copiadas: {0} carpetas." -f $copiar.Count)
 if ($saltar.Count) { Decir ("No se tocaron (ya tenías una igual o más nueva): " + ($saltar -join '; ')) }
 if ($apartar.Count) { Decir ("Apartadas al respaldo (vuelven con VOLVER_ATRAS): " + ($apartar -join ', ')) }
 Decir 'LISTO.'
-Aviso 'Mamba instalada' ("Listo: Mamba $VersionMamba quedó instalada.`n`nAbre el juego y, en la pantalla de personajes, entra a «AddOns» y revisa que estén marcados Polestar y los de la categoría Mamba.`n`nSi algo no te gusta, para volver a como estabas: doble clic en QUITAR_MAMBA.bat (en la carpeta del ZIP) o en VOLVER_ATRAS.bat dentro de:`n$Respaldo$avisoAct") | Out-Null
+Aviso 'Mamba instalada' ("Listo: Mamba $VersionMamba quedó instalada.`n`nAbre el juego y, en la pantalla de personajes, entra a «AddOns» y revisa que estén marcados Polestar y los de la categoría Mamba.`n`nSi algo no te gusta, para volver a como estabas: doble clic en QUITAR_MAMBA.bat (en la carpeta del ZIP) o en VOLVER_ATRAS.bat dentro de:`n$Respaldo$avisoAct$avisoHab") | Out-Null
 Terminar 0

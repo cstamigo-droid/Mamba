@@ -218,6 +218,7 @@ def main() -> int:
         poner("archivos/VERSION.json", json.dumps(version_json, ensure_ascii=False, indent=1).encode("utf-8"))
         poner("archivos/canal.json", json.dumps({"manifiesto": a.canal}, indent=1).encode("utf-8"))
         poner("archivos/actualizar.ps1", ps1(AQUI / "actualizar.ps1"))
+        poner("archivos/habilitar_addons.ps1", ps1(AQUI / "habilitar_addons.ps1"))  # K127
         poner("QUE_CAMBIO.txt", b"\xef\xbb\xbf" + crlf(f"Mamba {version_txt}\n\nQué cambió:\n" + "".join(f"- {x}\n" for x in notas)))
         for lic in ("LICENSE", "LICENSE-EXCEPTION.md", "LICENCIAS_TERCEROS.md", "THIRD_PARTY.md"):
             poner(f"LICENCIAS/{lic}", (RAIZ / lic).read_bytes())
