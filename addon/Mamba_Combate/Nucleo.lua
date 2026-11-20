@@ -38,7 +38,13 @@ function M.Contar(clave, dato)
 	local k = d.k105 or { cuenta = {}, ultimo = {}, dato = {} }
 	d.k105 = k
 	k.cuenta[clave] = (k.cuenta[clave] or 0) + 1
-	k.ultimo[clave] = date and date("%d-%m %H:%M:%S") or true
+	-- la hora de la última vez se escribe como mucho una vez por segundo por clave (DAMAGE_METER llega seguido)
+	local t = (GetTime and M.Num(GetTime())) or 0
+	M.contarHora = M.contarHora or {}
+	if not M.contarHora[clave] or t - M.contarHora[clave] >= 1 then
+		M.contarHora[clave] = t
+		k.ultimo[clave] = date and date("%d-%m %H:%M:%S") or true
+	end
 	if dato ~= nil and k.dato[clave] == nil then k.dato[clave] = dato end -- el primer ejemplo, una vez
 end
 

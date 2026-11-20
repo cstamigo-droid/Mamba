@@ -383,7 +383,7 @@ local f = CreateFrame("Frame")
 for _, ev in ipairs({ "DAMAGE_METER_COMBAT_SESSION_UPDATED", "DAMAGE_METER_CURRENT_SESSION_UPDATED", "DAMAGE_METER_RESET",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_LOGIN" }) do M.Escuchar(f, ev) end
 f:SetScript("OnEvent", function(_, ev)
-	if ev:find("^DAMAGE_METER") then M.Contar(ev .. (M.EnCombate() and ":combate" or "")) end
+	if ev:find("^DAMAGE_METER") then M.Proteger("diag", M.Contar, ev .. (M.EnCombate() and ":combate" or "")) end
 	if ev == "PLAYER_LOGIN" then
 		if M.DB().rankingAbierto then M.Proteger("ranking", Rk.Abrir) end
 		return

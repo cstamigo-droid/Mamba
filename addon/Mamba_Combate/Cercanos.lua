@@ -438,7 +438,22 @@ f:SetScript("OnEvent", function(_, ev, a1, a2)
 	elseif ev == "CHAT_MSG_COMBAT_HONOR_GAIN" then
 		-- diag: ¿llega?, ¿secreto?, y el formato del juego en su idioma (para el patrón, NO VERIFICADO en esMX)
 		if M.Secreto(a1) then M.Contar("honorSecreto") else
-			M.Contar("honor", type(a1) == "string" and a1:sub(1, 120) or nil)
+			-- el ejemplo va SIN el nombre del otro jugador (revisión, 19-11): si el patrón del juego lo encuentra,
+			-- se cambia por <nombre>; si no, toda palabra con mayúscula pasa a <N> y se cuenta que no coincidió
+			local ej = type(a1) == "string" and a1:sub(1, 120) or nil
+			local nombre
+			for _, k in ipairs({ "COMBATLOG_HONORGAIN", "COMBATLOG_HONORGAIN_NO_RANK" }) do
+				local p = Cz.Patron(_G[k])
+				nombre = nombre or (p and ej and ej:match(p))
+			end
+			if ej and nombre then
+				ej = ej:gsub(escapar(nombre), "<nombre>")
+				M.Contar("honorPatronCoincide")
+			elseif ej then
+				ej = ej:gsub("%f[%a]%u[%w\128-\255]*", "<N>")
+				M.Contar("honorPatronNoCoincide")
+			end
+			M.Contar("honor", ej)
 			M.Contar("honorFormato", type(_G.COMBATLOG_HONORGAIN) == "string" and _G.COMBATLOG_HONORGAIN or "sin COMBATLOG_HONORGAIN")
 		end
 		local r = M.Proteger("cercanos:honor", Cz.MensajeHonor, a1)

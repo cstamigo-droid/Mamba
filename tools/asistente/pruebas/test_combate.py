@@ -670,7 +670,8 @@ if not SIN_EVENTOS:
     cu = k.cuenta
     check((cu["partyKill"] or 0) >= 3 and (cu["partyKillAnotado"] or 0) >= 2, "K105 diag: cuenta PARTY_KILL recibidos y anotados (%s / %s)" % (cu["partyKill"], cu["partyKillAnotado"]))
     check((cu["partyKillSecreto"] or 0) >= 1, "K105 diag: cuenta PARTY_KILL con valores secretos")
-    check((cu["honor"] or 0) >= 2 and (cu["honorSecreto"] or 0) >= 1 and "muere" in str(k.dato["honor"]), "K105 diag: cuenta los mensajes de honor y guarda un ejemplo (%s)" % k.dato["honor"])
+    check((cu["honor"] or 0) >= 2 and (cu["honorSecreto"] or 0) >= 1 and "muere" in str(k.dato["honor"]) and "<nombre>" in str(k.dato["honor"]) and "Brujo" not in str(k.dato["honor"]), "K105 diag: cuenta los mensajes de honor y guarda un ejemplo SIN el nombre del jugador (%s)" % k.dato["honor"])
+    check((cu["honorPatronCoincide"] or 0) >= 1, "K105 diag: cuenta si el patrón del juego reconoce el mensaje")
     check("%s" in str(k.dato["honorFormato"]), "K105 diag: guarda el formato COMBATLOG_HONORGAIN del juego")
     check((cu["muerteJugador"] or 0) >= 1 and (cu["recapLeido"] or 0) >= 1 and (cu["recap:viejo"] or 0) >= 1, "K105 diag: muertes y por qué se descartó un registro")
 L.execute('Fire("DAMAGE_METER_COMBAT_SESSION_UPDATED")')
