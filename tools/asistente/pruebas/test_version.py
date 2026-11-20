@@ -170,5 +170,23 @@ L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY",
 L.execute('RESULTADO = 0; T = T + 6; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Y-Forever")')
 check(L.eval("#enviados") == 2, "un susurro frenado por el juego se reintenta (no se marcó el minuto de espera)")
 
+# 9. K124: los dos interruptores de Ajustes (sin comandos)
+L = nuevo(202611191200)
+L.execute('INT = {}; for _, s in ipairs(MambaInterruptoresPendientes or {}) do INT[s.id] = s end')
+check(L.eval("INT['version.aviso'] ~= nil and INT['version.responder'] ~= nil"),
+      "publica sus dos interruptores (en la cola, porque aquí no hay MambaAPI)")
+check(L.eval("INT['version.aviso'] and INT['version.aviso'].addon") == "Mamba_Version", "con addon = Mamba_Version")
+for i in ("version.aviso", "version.responder"):
+    check(L.eval(f"INT['{i}'].get()") is True, f"{i}: encendido por defecto")
+    L.execute(f"INT['{i}'].set(false)")
+    check(L.eval(f"INT['{i}'].get()") is False, f"{i}: set(false) lo apaga")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611221800|beta 3", "PARTY", "Kud-Forever")')
+check(L.eval("#chat") == 0, "con el aviso apagado no avisa")
+check(L.eval("MambaVersionDB.masNueva") == 202611221800, "pero sigue anotando la versión más nueva")
+L.execute('T = 999; Fire("GROUP_ROSTER_UPDATE")')
+check(L.eval("#enviados") == 0, "con «contarle a tu grupo» apagado no manda nada")
+L.execute("INT['version.aviso'].set(true); INT['version.responder'].set(true)")
+check(L.eval("INT['version.aviso'].get()") is True and L.eval("MambaVersionDB.sinAviso") is None, "set(true) lo vuelve a encender")
+
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

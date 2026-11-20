@@ -5,6 +5,7 @@
 ## Version: 0.1.0
 ## X-License: GPL-3.0-only
 ## SavedVariables: MambaVersionDB
+## OptionalDeps: Asistente
 ## Category: Mamba
 ## Category-esMX: Mamba
 ## Category-esES: Mamba

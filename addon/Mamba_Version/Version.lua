@@ -53,6 +53,7 @@ end
 
 function M.Enviar(destino)
 	if (sello.build or 0) <= 0 then return false end -- copia de desarrollo: escucha, no anuncia
+	if MambaVersionDB and MambaVersionDB.sinResponder then return false end -- apagado en Ajustes (K124)
 	local c = destino and "WHISPER" or canal()
 	if not c or bloqueado() then return false end
 	return M.Salio(pcall(C_ChatInfo.SendAddonMessage, PREFIJO, M.Codificar(sello.build, sello.texto), c, destino))
@@ -67,6 +68,7 @@ end
 
 function M.Avisar(build, texto, quien)
 	if avisado then return end
+	if MambaVersionDB and MambaVersionDB.sinAviso then return end -- apagado en Ajustes (K124); se sigue anotando
 	avisado = true
 	local linea = ("|cff8c9e6bMamba:|r hay una versión nueva (%s%s). Cierra el juego y haz doble clic en «Actualizar Mamba» en tu escritorio.")
 		:format(texto ~= "" and texto or tostring(build), quien and (", la tiene " .. quien) or "")
@@ -127,3 +129,27 @@ f:SetScript("OnEvent", function(_, ev, a1, a2, a3, a4)
 		anunciar(false)
 	end
 end)
+
+-- K124 (Cristian: todo se enciende y se apaga desde Opciones, sin comandos): Ajustes › Mamba › «Qué se muestra».
+-- Plantilla: publicar(spec) de Medidor/Comandos.lua. Si MambaAPI todavía no existe, queda en la cola que lee
+-- Asistente/Interruptores.lua.
+local function publicar(spec)
+	local api = _G.MambaAPI
+	if type(api) == "table" and api.Interruptor then
+		local ok, err = api.Interruptor(spec)
+		if not ok and geterrorhandler then geterrorhandler()(err) end
+	else
+		_G.MambaInterruptoresPendientes = _G.MambaInterruptoresPendientes or {}
+		table.insert(_G.MambaInterruptoresPendientes, spec)
+	end
+end
+publicar({ id = "version.aviso", addon = "Mamba_Version", nombre = "Avisar cuando hay una versión nueva de Mamba",
+	grupo = "Avisos",
+	ayuda = "Si alguien de tu grupo tiene una versión más nueva, te avisa una vez: cierra el juego y usa «Actualizar Mamba».",
+	get = function() return not (MambaVersionDB and MambaVersionDB.sinAviso) end,
+	set = function(v) MambaVersionDB = MambaVersionDB or {}; MambaVersionDB.sinAviso = (not v) or nil end })
+publicar({ id = "version.responder", addon = "Mamba_Version", nombre = "Contarle a tu grupo qué versión de Mamba tienes",
+	grupo = "Avisos",
+	ayuda = "Manda tu versión a tu grupo o banda (solo a quienes usan Mamba), para que el que esté atrasado se entere.",
+	get = function() return not (MambaVersionDB and MambaVersionDB.sinResponder) end,
+	set = function(v) MambaVersionDB = MambaVersionDB or {}; MambaVersionDB.sinResponder = (not v) or nil end })
