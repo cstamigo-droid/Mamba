@@ -20,6 +20,7 @@ import datetime as dt
 import hashlib
 import shutil
 import json
+import os
 import re
 import subprocess
 import sys
@@ -186,11 +187,12 @@ def main() -> int:
     nombre_v = a.version.replace(" ", "")
     tope = f"Mamba_Horda_{nombre_v}"
     a.salida.mkdir(parents=True, exist_ok=True)
-    zpath = a.salida / f"{tope}_{a.fecha}.zip"
-    # Nada de otra corrida puede quedar como si fuera de esta (revisor t7): se borra antes de armar.
-    for viejo in (zpath, zpath.with_name(zpath.name + ".sha256"), a.salida / "canal" / ZIP_FIJO,
-                  a.salida / "canal" / "mamba_grupo.json"):
-        viejo.unlink(missing_ok=True)
+    zfinal = a.salida / f"{tope}_{a.fecha}.zip"
+    # Se arma en un archivo aparte; el ZIP final, su .sha256 y el canal se reemplazan SOLO si el armado nuevo
+    # salió bien (revisor t7: borrarlos antes dejaba el canal vacío si fallaba). Si falla, queda lo último bueno,
+    # que es coherente consigo mismo (el actualizador revisa el sha256 contra el manifiesto).
+    zpath = zfinal.with_name(zfinal.name + ".armando")
+    zpath.unlink(missing_ok=True)
     version_txt = f"{a.version} ({a.fecha}, commit {a.commit})"
 
     def ps1(p: Path) -> bytes:  # PowerShell 5.1 lee como ANSI un .ps1 sin BOM: va con BOM
@@ -239,18 +241,23 @@ def main() -> int:
         print(f"fuente: {fz} ({fz.stat().st_size / 1e6:.1f} MB)")
     if verificar_sello(zpath) != build or build <= 0:
         zpath.unlink()
-        print(f"NO SE ARMA: el ZIP salió con un sello distinto de {build} (o sin sellar); se borró")
+        print(f"NO SE ARMA: el ZIP salió con un sello distinto de {build} (o sin sellar); se borró y el canal "
+              "quedó como estaba")
         return 1
+    os.replace(zpath, zfinal)
+    zpath = zfinal
     h = hashlib.sha256(zpath.read_bytes()).hexdigest()
     (a.salida / (zpath.name + ".sha256")).write_text(f"{h}  {zpath.name}\n", "utf-8")
     print(f"ZIP: {zpath} ({zpath.stat().st_size / 1e6:.1f} MB, {n} archivos)\nsha256 {h}")
     # Lo que se publica en el lugar fijo (SOLO con el sí de Cristian): el ZIP con nombre fijo y su manifiesto.
     canal = a.salida / "canal"
     canal.mkdir(exist_ok=True)
-    shutil.copyfile(zpath, canal / ZIP_FIJO)
     man = {"build": build, "version": a.version, "commit": a.commit, "fecha": a.fecha,
            "zip": ZIP_FIJO, "sha256": h, "notas": notas}
-    (canal / "mamba_grupo.json").write_text(json.dumps(man, ensure_ascii=False, indent=1), "utf-8")
+    shutil.copyfile(zpath, canal / (ZIP_FIJO + ".nuevo"))
+    (canal / "mamba_grupo.json.nuevo").write_text(json.dumps(man, ensure_ascii=False, indent=1), "utf-8")
+    os.replace(canal / (ZIP_FIJO + ".nuevo"), canal / ZIP_FIJO)  # primero el ZIP, el manifiesto al final
+    os.replace(canal / "mamba_grupo.json.nuevo", canal / "mamba_grupo.json")
     print(f"canal: {canal} (mamba_grupo.json + {ZIP_FIJO}); build {build}")
     return 0
 

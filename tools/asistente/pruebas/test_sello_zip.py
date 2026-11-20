@@ -12,6 +12,7 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parent / "grupo"))
 import armar_zip_grupo as A  # noqa: E402
 import sellar_version as S  # noqa: E402
+VERIFICAR = A.verificar_sello
 
 if "--romper" in sys.argv:
     A.verificar_sello = lambda z: 202611190100
@@ -79,12 +80,17 @@ with tempfile.TemporaryDirectory() as t:
     check(not list((tmp / "s2").glob("*.zip")), "y no queda ningún ZIP")
     # Revisor t7: una corrida que falla no deja a la vista lo de una corrida anterior en la misma salida
     s1 = tmp / "s1"
+    A.verificar_sello = VERIFICAR  # (por si --romper la cambió arriba no importa: aquí se fuerza el fallo)
     (paq / "Mamba_Version" / "Sello.lua").write_text(S.PLANTILLA.format(build=0, texto="x", commit="y"), "utf-8")
     A.verificar_sello = lambda z: 0  # simula un ZIP que sale sin sellar
     check(armar(["--build", "202611191500"], "s1") == 1, "un ZIP que sale sin sellar hace fallar el armado")
-    check(not list(s1.glob("*.zip")) and not list(s1.glob("*.sha256")), "no quedan el ZIP ni el .sha256 viejos")
-    check(not (s1 / "canal" / "Mamba_Horda.zip").exists() and not (s1 / "canal" / "mamba_grupo.json").exists(),
-          "no quedan el canal/Mamba_Horda.zip ni el mamba_grupo.json viejos")
+    # Revisor t7 (2.ª vuelta): si el armado nuevo falla, el canal queda con lo ÚLTIMO BUENO, entero y coherente.
+    import hashlib, json as _json
+    man1 = _json.loads((s1 / "canal" / "mamba_grupo.json").read_text("utf-8"))
+    check(man1["build"] == 202611191500, "el canal sigue con la versión buena anterior")
+    check(hashlib.sha256((s1 / "canal" / "Mamba_Horda.zip").read_bytes()).hexdigest() == man1["sha256"],
+          "y su ZIP coincide con su manifiesto (sha256)")
+    check(not list(s1.rglob("*.armando")) and not list(s1.rglob("*.nuevo")), "no quedan archivos a medio armar")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

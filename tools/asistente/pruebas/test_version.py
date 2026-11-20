@@ -142,8 +142,10 @@ L = nuevo(202611221800)
 L.execute('BLOQUEO = true; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X-Forever")')
 check(L.eval("#enviados") == 0, "con el chat de addons bloqueado no sale el susurro")
 L.execute('BLOQUEO = false; T = T + 1; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X-Forever")')
+check(L.eval("#enviados") == 0, "tras un fallo, pausa de 5 s antes de reintentar (no reintenta con cada mensaje)")
+L.execute('T = T + 5; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "X-Forever")')
 check(L.eval("#enviados") == 1 and L.eval("enviados[1].d") == "X-Forever",
-      "al levantarse el bloqueo, a X se le responde enseguida (no quedó 60 s marcado sin aviso)")
+      "pasada la pausa, a X se le responde (no quedó 60 s marcado sin aviso)")
 L = nuevo(202611221800)
 L.execute('Fire("GROUP_ROSTER_UPDATE")')  # anuncio al grupo: la espera de 30 s del grupo queda corriendo
 L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "A-Forever")')  # susurro: tope global
@@ -156,6 +158,17 @@ check(L.eval("#enviados") == n + 1 and L.eval("enviados[#enviados].d") == "B-For
 L = nuevo(202611191200)
 L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611221800|beta 3", "PARTY", "Kud-OtroReino")')
 check("Kud" in (L.eval("chat[1]") or "") and "OtroReino" not in (L.eval("chat[1]") or ""), "el aviso muestra el nombre corto")
+
+# 8. El juego frena el envío (devuelve un código de rechazo): no cuenta como enviado (revisor t7)
+L = nuevo(202611221800)
+L.execute('RESULTADO = 3; C_ChatInfo.SendAddonMessage = function(p, m, c, d) table.insert(enviados, { p = p, m = m, c = c, d = d }); return RESULTADO end')
+check(L.eval("MambaVersion.Salio(true, 0)") is True and L.eval("MambaVersion.Salio(true, 3)") is False,
+      "código 0 = salió; 3 (tope del juego) = no salió")
+check(L.eval("MambaVersion.Salio(true)") is True and L.eval("MambaVersion.Salio(true, false)") is False
+      and L.eval("MambaVersion.Salio(false)") is False, "booleano o nada (clientes viejos) y error de Lua")
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Y-Forever")')
+L.execute('RESULTADO = 0; T = T + 6; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Y-Forever")')
+check(L.eval("#enviados") == 2, "un susurro frenado por el juego se reintenta (no se marcó el minuto de espera)")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

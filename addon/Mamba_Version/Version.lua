@@ -8,13 +8,14 @@
 local PREFIJO = "MAMBAver"
 local ESPERA_ENVIO = 30      -- segundos mínimos entre dos envíos al grupo
 local ESPERA_RESPUESTA = 60  -- a un mismo jugador se le responde como mucho una vez por minuto
+local ESPERA_FALLO = 5       -- tras un envío que no salió (chat bloqueado, tope del juego), pausa antes de reintentar
 local ESPERA_GLOBAL = 2      -- y en total, un susurro cada 2 s (revisor t6: en una banda con 20 atrasados
                              -- salían 20 seguidos); el resto lo cubre UN anuncio a la banda
 
 local M = {}
 MambaVersion = M
 local sello = MambaSello or { build = 0, texto = "sin sellar" }
-local ultimoEnvio, respondido, avisado, ultimaRespuesta = -1e9, {}, false, -1e9
+local ultimoEnvio, respondido, avisado, ultimaRespuesta, ultimoFallo = -1e9, {}, false, -1e9, -1e9
 
 local function ahora() return GetTime and GetTime() or 0 end
 
@@ -38,12 +39,23 @@ function M.Decodificar(msg)
 	return tonumber(b), t
 end
 
+-- ¿Salió de verdad? (revisor t7) pcall solo dice que no hubo error. Según el cliente, SendAddonMessage devuelve
+-- un booleano o un código Enum.SendAddonMessageResult (0 = Success; 3 = tope de mensajes, 5 = sin grupo…).
+-- Se lee como ChatThrottleLib (Ace3, que trae Details para Forever 16001): el ÚLTIMO valor devuelto; nada = true.
+local EXITO = (Enum and Enum.SendAddonMessageResult and Enum.SendAddonMessageResult.Success) or 0
+function M.Salio(ok, ...)
+	if not ok then return false end
+	local r = select(-1, true, ...)
+	if r == true or r == nil then return true end
+	if r == false then return false end
+	return r == EXITO
+end
+
 function M.Enviar(destino)
 	if (sello.build or 0) <= 0 then return false end -- copia de desarrollo: escucha, no anuncia
 	local c = destino and "WHISPER" or canal()
 	if not c or bloqueado() then return false end
-	local ok = pcall(C_ChatInfo.SendAddonMessage, PREFIJO, M.Codificar(sello.build, sello.texto), c, destino)
-	return ok
+	return M.Salio(pcall(C_ChatInfo.SendAddonMessage, PREFIJO, M.Codificar(sello.build, sello.texto), c, destino))
 end
 
 -- Devuelve true solo si de verdad mandó el mensaje.
@@ -79,8 +91,10 @@ function M.Recibir(msg, quien, nombre)
 		-- Las esperas se marcan SOLO si de verdad salió un mensaje (revisor t7): si no salió (tope, chat de
 		-- addons bloqueado), el próximo mensaje de ese jugador vuelve a intentarlo.
 		if ahora() - (respondido[quien] or -1e9) < ESPERA_RESPUESTA then return end
+		if ahora() - ultimoFallo < ESPERA_FALLO then return end -- no reintentar sin pausa (chat bloqueado)
 		if ahora() - ultimaRespuesta >= ESPERA_GLOBAL then
-			if M.Enviar(quien) then ultimaRespuesta, respondido[quien] = ahora(), ahora() end
+			if M.Enviar(quien) then ultimaRespuesta, respondido[quien] = ahora(), ahora()
+			else ultimoFallo = ahora() end
 		elseif anunciar(false) then -- muchos atrasados a la vez: un solo mensaje a todo el grupo
 			respondido[quien] = ahora()
 		end
