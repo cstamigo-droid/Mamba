@@ -195,9 +195,27 @@ end
 
 function M.TextoMini() return textoMini end
 
+-- K117: diagnóstico de las coordenadas del minimapa, UNA vez por sesión, a los 10 s de entrar
+function M.DiagCoords()
+	if M.diagHecho or (GetTime and GetTime() or 0) < (M.inicio or 0) + 10 then return end
+	M.diagHecho = true
+	local p = _G.PolestarMinimapCoords
+	local txt = textoMini and textoMini.GetText and textoMini:GetText()
+	db().diag.coords = {
+		cuando = date and date("%d-%m %H:%M") or "", otras = M.OtrasCoords() or "ninguna",
+		polestarExiste = p ~= nil, polestarShown = p and p.IsShown and p:IsShown() or false,
+		polestarVisible = p and p.IsVisible and p:IsVisible() or false,
+		mambaExiste = textoMini ~= nil, mambaShown = textoMini and textoMini.IsShown and textoMini:IsShown() or false,
+		mambaTexto = type(txt) == "string" and txt or "", ticks = M.ticksCoords or 0,
+		minimapaShown = Minimap and Minimap.IsShown and Minimap:IsShown() or false,
+	}
+end
+
 function M.ActualizarCoords()
 	local d = db()
-	if Minimap and d.coords and not M.OtrasCoords() then
+	local otras = M.OtrasCoords()
+	-- las de Mamba nacen 5 s después de entrar (las de Polestar se arman al entrar) y nunca si ya hay otras
+	if Minimap and d.coords and not otras and (GetTime and GetTime() or 0) >= (M.inicio or 0) + 5 then
 		if not textoMini then
 			textoMini = M.Piezas.Texto(Minimap, "small", "text")
 			textoMini:SetPoint("TOP", Minimap, "BOTTOM", 0, -4)
@@ -205,7 +223,13 @@ function M.ActualizarCoords()
 		local x, y = coords(C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player"))
 		textoMini:SetText(x and string.format("%.1f, %.1f", x, y) or "")
 		textoMini:Show()
-	elseif textoMini then textoMini:Hide() end
+	elseif textoMini then
+		-- vacío además de escondido: si algo lo vuelve a mostrar, no se ven dos lecturas (K117)
+		textoMini:SetText("")
+		textoMini:Hide()
+	end
+	M.ticksCoords = (M.ticksCoords or 0) + 1
+	M.DiagCoords()
 	local W = WorldMapFrame
 	if W and W.IsShown and W:IsShown() and d.coordsMapa then
 		if not textoMapa then
@@ -363,6 +387,7 @@ local f = CreateFrame("Frame")
 for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "ZONE_CHANGED_NEW_AREA", "SKILL_LINES_CHANGED" }) do M.Escuchar(f, e) end
 f:SetScript("OnEvent", function(_, e)
 	if e == "PLAYER_LOGIN" then
+		M.inicio = GetTime and GetTime() or 0
 		M.Proteger("escala", M.AplicarEscala)
 		M.Proteger("minimapa", M.AplicarMinimapa)
 		if WorldMapFrame and WorldMapFrame.HookScript then

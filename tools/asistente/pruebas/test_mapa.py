@@ -152,6 +152,11 @@ G.MambaInterfaz.modulos["mapa"].refrescar()
 check(len(list(G.ERRORES.values())) == 0, "panel de Interfaz › Mapa sin errores: %s" % list(G.ERRORES.values())[:3])
 check(Mp.DB().diag.fallas is None, "sin fallas en diag: %s" % (Mp.DB().diag.fallas and list(Mp.DB().diag.fallas.values())))
 # coordenadas duplicadas (captura 18-11): si Polestar ya las muestra en el minimapa, Mamba no dibuja las suyas
+L.execute("RELOJ = 2; GetTime = function() return RELOJ end; MambaMapa.inicio = 0")
+Mp.ActualizarCoords()
+check(Mp.TextoMini() is None, "K117: en los primeros 5 s Mamba no crea sus coordenadas (Polestar arma las suyas al entrar)")
+G.RELOJ = 6
+Mp.ActualizarCoords()
 check(Mp.OtrasCoords() is None, "sin otras coordenadas: Mamba dibuja las suyas")
 L.eval("function(t) t.Show = function(s) s.visible = true end; t.Hide = function(s) s.visible = false end end")(Mp.TextoMini()); Mp.ActualizarCoords()
 check(Mp.TextoMini() is not None and Mp.TextoMini().visible, "sin otras: las de Mamba se ven")
@@ -159,6 +164,13 @@ L.execute('PolestarMinimapCoords = CreateFrame("Frame", "PolestarMinimapCoords",
 check(Mp.OtrasCoords() == "Polestar", "detecta las coordenadas de Polestar en el minimapa")
 Mp.ActualizarCoords()
 check(Mp.TextoMini() is not None and not Mp.TextoMini().visible, "con las de Polestar, Mamba esconde las suyas (no se ven dos)")
+check(Mp.TextoMini().texto == "", "K117: además quedan vacías (si algo las vuelve a mostrar, no se ven dos)")
+G.RELOJ = 11
+Mp.ActualizarCoords(); Mp.ActualizarCoords()
+dc = Mp.DB().diag.coords
+check(dc is not None and dc.otras == "Polestar" and dc.polestarShown and not dc.mambaShown and dc.ticks >= 1, "K117: diag de coordenadas a los 10 s")
+dc.ticks = -1; Mp.ActualizarCoords()
+check(Mp.DB().diag.coords.ticks == -1, "K117: el diag se anota una sola vez por sesión")
 # ---------- K110: posición y ángulo secretos (en instancias): sin cuentas ni comparaciones
 L.execute("""
 local MS = { __sub = function() error("arithmetic on a secret value") end, __add = function() error("arithmetic on a secret value") end,
