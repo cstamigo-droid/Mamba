@@ -34,7 +34,17 @@ function Rk.Anteriores()
 	local d = DM()
 	if not (d and d.GetAvailableCombatSessions and d.GetCombatSessionFromID) then return {} end
 	local ok, lista = pcall(d.GetAvailableCombatSessions)
-	if not ok or type(lista) ~= "table" then return {} end
+	if not ok or type(lista) ~= "table" then M.Contar(ok and "sesionesNoTabla" or "sesionesError"); return {} end
+	-- diag: cuántas peleas da el juego y qué campos trae cada una (Details solo usa sessionID: NO VERIFICADO)
+	local campos
+	if type(lista[1]) == "table" and not M.Secreto(lista[1]) then
+		campos = {}
+		for k in pairs(lista[1]) do if type(k) == "string" then campos[#campos + 1] = k end end
+		table.sort(campos)
+		campos = table.concat(campos, ",")
+	end
+	M.Contar("sesiones", campos)
+	M.DB().diag.k105.sesionesUltima = #lista
 	local out = {}
 	for i = #lista - 1, 1, -1 do
 		local x = lista[i]
@@ -373,6 +383,7 @@ local f = CreateFrame("Frame")
 for _, ev in ipairs({ "DAMAGE_METER_COMBAT_SESSION_UPDATED", "DAMAGE_METER_CURRENT_SESSION_UPDATED", "DAMAGE_METER_RESET",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_LOGIN" }) do M.Escuchar(f, ev) end
 f:SetScript("OnEvent", function(_, ev)
+	if ev:find("^DAMAGE_METER") then M.Contar(ev .. (M.EnCombate() and ":combate" or "")) end
 	if ev == "PLAYER_LOGIN" then
 		if M.DB().rankingAbierto then M.Proteger("ranking", Rk.Abrir) end
 		return

@@ -31,6 +31,17 @@ function M.Falla(donde, err)
 	if #d.fallas < 30 then d.fallas[#d.fallas + 1] = (date and date("%d-%m %H:%M") or "") .. " " .. donde .. ": " .. tostring(err) end
 	if geterrorhandler then geterrorhandler()(err) end
 end
+-- K105/K106 (opción b): contadores en MambaCombateDB.diag.k105 para saber, al cerrar el juego, qué señales da
+-- Forever de verdad (PARTY_KILL, honor, DAMAGE_METER_*, peleas anteriores). Solo cuentan; no cambian nada.
+function M.Contar(clave, dato)
+	local d = M.DB().diag
+	local k = d.k105 or { cuenta = {}, ultimo = {}, dato = {} }
+	d.k105 = k
+	k.cuenta[clave] = (k.cuenta[clave] or 0) + 1
+	k.ultimo[clave] = date and date("%d-%m %H:%M:%S") or true
+	if dato ~= nil and k.dato[clave] == nil then k.dato[clave] = dato end -- el primer ejemplo, una vez
+end
+
 function M.Proteger(donde, fn, ...)
 	local ok, a, b, c = pcall(fn, ...)
 	if not ok then M.Falla(donde, a); return nil end

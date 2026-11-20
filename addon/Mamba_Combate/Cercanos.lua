@@ -200,7 +200,8 @@ function Cz.QuienMeMato()
 	return texto(e.sourceName)
 end
 function Cz.AlMorir()
-	local quien = Cz.QuienMeMato()
+	local quien, porque = Cz.QuienMeMato()
+	M.Contar(quien and "recapLeido" or ("recap:" .. tostring(porque)))
 	if quien and Cz.vistos[quien] then return Cz.Muerte("temato", quien) end
 end
 
@@ -427,6 +428,7 @@ f:SetScript("OnEvent", function(_, ev, a1, a2)
 	if ev == "PLAYER_LOGIN" or ev == "PLAYER_ENTERING_WORLD" then
 		enganchar()
 	elseif ev == "PLAYER_DEAD" then
+		M.Contar("muerteJugador")
 		-- el registro de muerte tarda un poco en llenarse: se mira a los 0,5 s y a los 2 s (el mismo registro
 		-- no se anota dos veces: QuienMeMato recuerda el último leído)
 		if C_Timer and C_Timer.After then
@@ -434,9 +436,17 @@ f:SetScript("OnEvent", function(_, ev, a1, a2)
 			C_Timer.After(2, function() M.Proteger("cercanos:muerte", Cz.AlMorir) end)
 		else M.Proteger("cercanos:muerte", Cz.AlMorir) end
 	elseif ev == "CHAT_MSG_COMBAT_HONOR_GAIN" then
-		M.Proteger("cercanos:honor", Cz.MensajeHonor, a1)
+		-- diag: ¿llega?, ¿secreto?, y el formato del juego en su idioma (para el patrón, NO VERIFICADO en esMX)
+		if M.Secreto(a1) then M.Contar("honorSecreto") else
+			M.Contar("honor", type(a1) == "string" and a1:sub(1, 120) or nil)
+			M.Contar("honorFormato", type(_G.COMBATLOG_HONORGAIN) == "string" and _G.COMBATLOG_HONORGAIN or "sin COMBATLOG_HONORGAIN")
+		end
+		local r = M.Proteger("cercanos:honor", Cz.MensajeHonor, a1)
+		if r then M.Contar("honorAnotado") end
 	elseif ev == "PARTY_KILL" then
-		M.Proteger("cercanos:muerte", Cz.PartyKill, a1, a2)
+		M.Contar((M.Secreto(a1) or M.Secreto(a2)) and "partyKillSecreto" or "partyKill")
+		local r = M.Proteger("cercanos:muerte", Cz.PartyKill, a1, a2)
+		if r then M.Contar("partyKillAnotado") end
 	end
 end)
 -- por si el Tasador cargó después de PLAYER_LOGIN de este addon

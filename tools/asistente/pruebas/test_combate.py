@@ -663,5 +663,19 @@ src_todo = "".join((D / n).read_text(encoding="utf-8") for n in ("Ranking.lua", 
 check("SLASH_" not in src_todo and "SlashCmdList" not in src_todo, "K105/K106 sin comandos /")
 check("GameFont" not in src_todo and "|cff" not in src_todo and "SetTextColor(" not in src_todo, "K105/K106: letra y colores de la apariencia (E2/E3)")
 check("OnUpdate" not in src_todo, "K105/K106: nada corre por cuadro")
+# ---------- K105/K106 (b): contadores en el diagnóstico para leer al cerrar el juego
+k = C.DB().diag.k105
+check(k is not None, "K105 diag: existe diag.k105")
+if not SIN_EVENTOS:
+    cu = k.cuenta
+    check((cu["partyKill"] or 0) >= 3 and (cu["partyKillAnotado"] or 0) >= 2, "K105 diag: cuenta PARTY_KILL recibidos y anotados (%s / %s)" % (cu["partyKill"], cu["partyKillAnotado"]))
+    check((cu["partyKillSecreto"] or 0) >= 1, "K105 diag: cuenta PARTY_KILL con valores secretos")
+    check((cu["honor"] or 0) >= 2 and (cu["honorSecreto"] or 0) >= 1 and "muere" in str(k.dato["honor"]), "K105 diag: cuenta los mensajes de honor y guarda un ejemplo (%s)" % k.dato["honor"])
+    check("%s" in str(k.dato["honorFormato"]), "K105 diag: guarda el formato COMBATLOG_HONORGAIN del juego")
+    check((cu["muerteJugador"] or 0) >= 1 and (cu["recapLeido"] or 0) >= 1 and (cu["recap:viejo"] or 0) >= 1, "K105 diag: muertes y por qué se descartó un registro")
+L.execute('Fire("DAMAGE_METER_COMBAT_SESSION_UPDATED")')
+if not SIN_EVENTOS:
+    check((k.cuenta["DAMAGE_METER_COMBAT_SESSION_UPDATED"] or 0) + (k.cuenta["DAMAGE_METER_COMBAT_SESSION_UPDATED:combate"] or 0) >= 1, "K106 diag: cuenta DAMAGE_METER_*")
+check((k.cuenta["sesiones"] or 0) >= 1 and k.sesionesUltima is not None, "K106 diag: cuenta GetAvailableCombatSessions y cuántas peleas da (%s)" % k.sesionesUltima)
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
