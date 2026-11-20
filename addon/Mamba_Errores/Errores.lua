@@ -31,11 +31,13 @@ end
 -- y el juego bloqueaba UpdateGuildLobby(), IsUserOAuthed()... a nombre de Mamba_Errores. Ahora se escucha con
 -- hooksecurefunc sobre ScriptErrorsFrame:OnError, que corre DESPUÉS de Blizzard y no mancha a quien llama.
 local enganchado = false
+local conBugGrabber = false -- se pone en true cuando BugGrabber nos avisa (engancharBugGrabber)
 local function engancharErrores()
 	if enganchado then return true end
 	local sef = _G.ScriptErrorsFrame
 	if not (sef and type(sef.OnError) == "function" and hooksecurefunc) then return false end
 	hooksecurefunc(sef, "OnError", function(_, msg)
+		if conBugGrabber then return end -- ya llega por BugGrabber: no contarlo dos veces (revisor t5)
 		local ok, pila = pcall(debugstack, 4, 12, 0)
 		pcall(anotar, msg, ok and pila or nil, "lua")
 	end)
@@ -45,7 +47,6 @@ local function engancharErrores()
 end
 -- Respaldo con BugGrabber: si está, el manejador de errores es suyo y nos avisa por su callback (no mancha más
 -- de lo que ya mancha BugGrabber). Se cuenta en el diag para ver en el juego si llegan.
-local conBugGrabber = false
 local function engancharBugGrabber()
 	if conBugGrabber then return end
 	local BG = _G.BugGrabber

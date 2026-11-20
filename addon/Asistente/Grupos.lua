@@ -225,3 +225,11 @@ function API.NoVender(id)
 	return nil
 end
 
+-- K116: ¿es una mecánica de Forever (saco de dormir, ecos, apuntes, llaves...)? Lista por id de ForeverTDB
+-- (Tasador/Mecanicas.lua). -> true | false
+function API.EsMecanica(id)
+	local T = _G.Tasador
+	id = tonumber(id)
+	return (id and T and T.MECANICAS and T.MECANICAS[id]) and true or false
+end
+

@@ -600,6 +600,27 @@ end""")
 r = AYU()
 check(r[0] is True, f"sin Polestar, el cuadro de ayuda con líneas de dos columnas no da error ({r[1]})")
 
+# 10l) tanda 7: P14 también sin Asistente, BugGrabber no cuenta doble y MambaAPI.EsMecanica
+API_ = G.MambaAPI
+G.MambaAPI = None
+r = VEND(src_v)
+G.MambaAPI = API_
+check(r[0] is None, f"P14 sin Asistente (sin MambaAPI): el saco sigue protegido por la lista del Tasador ({r[0]})")
+DOBLE = L.eval("""function()
+  local cb
+  BugGrabber = { RegisterCallback = function(_, ev, fn) cb = fn end }
+  Fire("ADDON_LOADED", "BugGrabber")
+  MambaErroresDB.lista = {}
+  if cb then cb(nil, { message = "X.lua:1: doble", stack = "" }) end
+  ScriptErrorsFrame:OnError("X.lua:1: doble", false, true)
+  BugGrabber = nil
+  local l = MambaErroresDB.lista
+  return cb ~= nil, #l, l[1] and l[1].veces or 0
+end""")
+r = DOBLE()
+check(r[0] is True and r[1] == 1 and r[2] == 1, f"con BugGrabber, un error se anota UNA vez (no por OnError también) ({r[0]}, {r[1]}, veces {r[2]})")
+check(G.MambaAPI.EsMecanica(211527) is True and G.MambaAPI.EsMecanica(4306) is False, "MambaAPI.EsMecanica: el saco sí, el paño de seda no")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

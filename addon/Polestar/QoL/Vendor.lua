@@ -57,6 +57,8 @@ local function junkAt(bag, slot)
 	-- quest items, bound utility) goes, even when marked as junk by hand.
 	local mamba = _G.MambaAPI
 	if mamba and mamba.NoVender and mamba.NoVender(id) then return nil end
+	local tasador = _G.Tasador -- without Asistente: the Tasador's ForeverTDB list still protects
+	if tasador and tasador.MECANICAS and tasador.MECANICAS[id] then return nil end
 	if info.quality ~= Client.QUALITY_POOR and not Marks.Junk(id) then return nil end
 	local price = Client.SellPrice(id)
 	if not price or price <= 0 then return nil end
