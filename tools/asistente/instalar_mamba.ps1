@@ -105,4 +105,11 @@ foreach ($n in $copiar) {
     robocopy (Join-Path $Paquete $n) (Join-Path $AddOns $n) /MIR /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "falló la copia de $n (robocopy $LASTEXITCODE)" }
 }
+# K127 + 20-11: el juego deja "disabled" en el AddOns.txt de cada personaje los addons que fallan (Forever apagó
+# Mamba_Combate por las placas) y los de terceros que trae el paquete. Todo lo que viene en el paquete queda
+# enabled; solo esas líneas, con copia en <respaldo>\AddOns_txt_antes (y WTF entera ya está respaldada arriba).
+. (Join-Path $PSScriptRoot 'grupo\habilitar_addons.ps1')
+$hab = Enable-MambaAddons -WTF $WTF -Respaldo (Join-Path $Respaldo 'AddOns_txt_antes') -Addons (@($MambaAddonsHabilitar) + @($nuevas) | Select-Object -Unique)
+Write-Output "AddOns.txt: $($hab.lineas) lineas pasaron a enabled en $(@($hab.cambiados).Count) personajes."
+foreach ($e in $hab.errores) { Write-Output "AVISO AddOns.txt: $e" }
 Write-Output "INSTALADO. Para volver atrás: $Respaldo\VOLVER_ATRAS.ps1"
