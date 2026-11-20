@@ -191,7 +191,8 @@ def nuevo(antes=""):
         if ROMPER and n == "Bolsas.lua":
             src = src.replace("if E and E.CharacterBankTab_1 then", "if false then").replace("return E and E.CharacterBankTab_1 or nil", "return nil")
         if ROMPER and n == "Reemplazo.lua":
-            src = src.replace('and not M.Op("abrirSolas") then', 'and false then')        if ROMPER and n == "Ventana.lua":
+            src = src.replace('and not M.Op("abrirSolas") then', 'and false then')
+        if ROMPER and n == "Ventana.lua":
             src = src.replace('if not M.Op("oro") then oro = nil end', '')
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace('if j.alternar then M.AbrirInventario(nil)', 'if j.alternar then M.AbrirInventario(nil); M.AbrirInventario(nil)')
