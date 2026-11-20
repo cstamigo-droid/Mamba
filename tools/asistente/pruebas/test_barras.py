@@ -323,5 +323,34 @@ check(G.MODO_MOVER is not None, "Barras se enganchan al modo Mover de Mamba")
 if G.MODO_MOVER is not None:
     G.MODO_MOVER(True); check(M.moviendoBarras, "modo Mover: las barras muestran sus recuadros")
     G.MODO_MOVER(False); check(not M.moviendoBarras, "al salir: las barras salen de su modo")
+
+# ---------- 14. Asignar teclas desde el modo edición, como en Bartender (Cristian, 19-11) ----------
+L, M = nuevo()
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+check(M.EmpezarMover(), "entra al modo mover")
+bt = G.MambaBarrasMover.botonTeclas
+check(bt is not None, "el panel de mover trae «Asignar teclas»")
+bt.scripts.OnClick(bt)
+check(M.asignando and not M.moviendoBarras, "«Asignar teclas» desde el modo mover abre el modo de teclas")
+cap = G.MambaBarrasCaptura
+M.bajoRaton = G.MambaBoton3
+cap.scripts.OnMouseDown(cap, "Button4")
+check(list((G.BINDINGS["ACTIONBUTTON3"] or L.table()).values()) == ["BUTTON4"], "botón lateral del ratón (Button4) se asigna")
+cap.scripts.OnMouseWheel(cap, 1)
+check("MOUSEWHEELUP" in list(G.BINDINGS["ACTIONBUTTON3"].values()), "la rueda se asigna")
+cap.scripts.OnMouseDown(cap, "LeftButton")
+check("BUTTON1" not in list(G.BINDINGS["ACTIONBUTTON3"].values()), "el clic izquierdo no se asigna (es para apuntar)")
+cap.scripts.OnKeyDown(cap, "DELETE")
+check(not list((G.BINDINGS["ACTIONBUTTON3"] or L.table()).values()), "Supr borra las teclas del botón")
+# control negativo: en combate no se toca ninguna tecla
+L.execute('COMBATE = true')
+cap.scripts.OnKeyDown(cap, "F")
+check(not list((G.BINDINGS["ACTIONBUTTON3"] or L.table()).values()) and not list(G.BLOQUEOS.values()), "en combate: nada de SetBinding")
+L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
+check(not M.asignando, "al salir de combate el modo queda cerrado")
+# arrastrar hechizos a los botones: Mamba no apaga el arrastrar de LibActionButton
+for n in ARCHIVOS:
+    check("DisableDragNDrop" not in (D / n).read_text(encoding="utf-8"), n + ": no apaga arrastrar hechizos a los botones")
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)

@@ -137,6 +137,8 @@ end)
 local function seguir()
 	if not M.asignando then return end
 	local foco = GetMouseFoci and GetMouseFoci()[1] or (GetMouseFocus and GetMouseFocus())
+	-- la captura recibe el ratón (para los botones laterales): mientras esté encima, sigue el mismo botón
+	if foco == captura and M.bajoRaton then return end
 	local b
 	for _, x in pairs(M.botones) do if x == foco then b = x end end
 	for _, id in ipairs({ "formas", "mascota" }) do
@@ -149,11 +151,13 @@ local function seguir()
 		captura:SetAllPoints(b)
 		captura:EnableKeyboard(true)
 		captura:EnableMouseWheel(true)
+		captura:EnableMouse(true) -- sin esto OnMouseDown no llega: los botones 3, 4 y 5 del ratón no se podían asignar
 		captura:Show()
 		if M.AlApuntarTecla then M.AlApuntarTecla(b) end
 	elseif not captura:IsMouseOver() then
 		captura:Hide()
 		captura:EnableKeyboard(false)
+		captura:EnableMouse(false)
 	end
 end
 local reloj = CreateFrame("Frame")
@@ -171,6 +175,7 @@ function M.TerminarTeclas()
 	M.bajoRaton = nil
 	captura:Hide()
 	captura:EnableKeyboard(false)
+	captura:EnableMouse(false)
 	if not M.moviendoBarras then M.MostrarVacios(false) end
 	M.AplicarTeclas()
 	if M.AlTerminarTeclas then M.AlTerminarTeclas() end

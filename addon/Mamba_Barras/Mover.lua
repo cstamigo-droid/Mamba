@@ -93,6 +93,14 @@ local function crearPanel()
 	P.Acomodar(reg, 200)
 	local listo = P.Boton(panel, "Listo", function() M.TerminarMover() end, true)
 	listo:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -m, 14)
+	-- Pedido de Cristian (19-11): asignar teclas desde el modo edición, como en Bartender: el ratón sobre el
+	-- botón y se aprieta la tecla. Aparece también en el modo «Mover» global de Mamba (este panel sale ahí).
+	local teclas = P.Boton(panel, "Asignar teclas", function()
+		M.TerminarMover()
+		if M.EmpezarTeclas() and M.AbrirAyudaTeclas then M.AbrirAyudaTeclas() end
+	end)
+	teclas:SetPoint("RIGHT", listo, "LEFT", -8, 0)
+	panel.botonTeclas = teclas
 	panel:SetScript("OnHide", function() if M.moviendoBarras then M.TerminarMover() end end)
 end
 
