@@ -127,8 +127,13 @@ function Ag.Lado(placa)
 	-- medición falla una vez, se deja de medir lados en esta sesión: la barra sigue funcionando sin flechas.
 	if Ag.sinLado then return nil end
 	if placa.IsForbidden and placa:IsForbidden() then return nil end
+	if placa.IsAnchoringRestricted then
+		local okR, r = pcall(placa.IsAnchoringRestricted, placa)
+		if not okR or r then return nil end
+	end
 	local ok, x = pcall(placa.GetCenter, placa)
-	if not ok then Ag.sinLado = true return nil end
+	-- Si el cliente anota el error y devuelve nil sin lanzar, también se deja de medir (revisor t11).
+	if not ok or x == nil then Ag.sinLado = true return nil end
 	x = M.Num(x)
 	local w = M.Num(UIParent:GetWidth())
 	if not (x and w and w > 0) then return nil end

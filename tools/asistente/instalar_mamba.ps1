@@ -108,6 +108,8 @@ foreach ($n in $copiar) {
 # K127 + 20-11: el juego deja "disabled" en el AddOns.txt de cada personaje los addons que fallan (Forever apagó
 # Mamba_Combate por las placas) y los de terceros que trae el paquete. Todo lo que viene en el paquete queda
 # enabled; solo esas líneas, con copia en <respaldo>\AddOns_txt_antes (y WTF entera ya está respaldada arriba).
+# El juego reescribe AddOns.txt al salir: si se abrió durante la copia, no se toca (se avisa).
+if (-not $ignorar -and (tasklist /FI "IMAGENAME eq Wow.exe" /NH | Select-String -Pattern 'Wow.exe')) { Write-Output 'AVISO: Wow.exe se abrió: AddOns.txt sin tocar; activa los addons en la pantalla de AddOns.'; Write-Output "INSTALADO. Para volver atrás: $Respaldo\VOLVER_ATRAS.ps1"; exit 0 }
 . (Join-Path $PSScriptRoot 'grupo\habilitar_addons.ps1')
 $hab = Enable-MambaAddons -WTF $WTF -Respaldo (Join-Path $Respaldo 'AddOns_txt_antes') -Addons (@($MambaAddonsHabilitar) + @($nuevas) | Select-Object -Unique)
 Write-Output "AddOns.txt: $($hab.lineas) lineas pasaron a enabled en $(@($hab.cambiados).Count) personajes."

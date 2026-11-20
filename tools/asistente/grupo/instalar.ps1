@@ -203,7 +203,8 @@ $avisoHab = ''
 if ((Test-Path -LiteralPath $habil) -and (Test-Path -LiteralPath $WTF)) {
     try {
         . $habil
-        $rh = Enable-MambaAddons -WTF $WTF -Respaldo (Join-Path $Respaldo 'AddOns_txt_antes')
+        $hab = @($MambaAddonsHabilitar); if ($Paquete -and (Test-Path -LiteralPath $Paquete)) { $hab += @(Get-ChildItem -LiteralPath $Paquete -Directory | Select-Object -ExpandProperty Name) }
+        $rh = Enable-MambaAddons -WTF $WTF -Respaldo (Join-Path $Respaldo 'AddOns_txt_antes') -Addons ($hab | Select-Object -Unique)
         if ($rh.lineas -gt 0) { Decir ("Habilitados SkillUpForever, WhatsTraining y ForeverLootSparkles: {0} líneas en {1} personajes." -f $rh.lineas, $rh.cambiados.Count) }
         if ($rh.errores.Count) { $avisoHab = "`n`n(No pude habilitar los addons de profesiones en algún personaje: actívalos en «AddOns» de la pantalla de personajes.)" }
     } catch { $avisoHab = "`n`n(No pude habilitar los addons de profesiones: actívalos en «AddOns» de la pantalla de personajes.)" }

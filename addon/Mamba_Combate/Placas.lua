@@ -53,8 +53,10 @@ local function esconderBlizzard(placa)
 end
 function Pl.MantenerOcultas()
 	for uf in pairs(ocultas) do
-		local a = uf.GetAlpha and uf:GetAlpha()
-		if M.Secreto(a) or (type(a) == "number" and a > 0) then uf:SetAlpha(0) end
+		-- pcall por placa: una prohibida no corta el Tick de las demás (revisor t11)
+		local okA, a = pcall(function() return uf.GetAlpha and uf:GetAlpha() end)
+		if not okA then ocultas[uf] = nil
+		elseif M.Secreto(a) or (type(a) == "number" and a > 0) then pcall(uf.SetAlpha, uf, 0) end
 	end
 end
 local function mostrarBlizzard(placa)
