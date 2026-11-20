@@ -29,6 +29,7 @@ corre capa       python -I $P/test_capa.py addon
 corre errores    python -I $P/test_errores.py
 corre servicios  python -I $P/test_servicios.py addon $POL
 corre llevame    python -I $P/test_llevame.py addon
+corre calabozos  python -I $P/test_calabozos.py addon
 corre barras     python -I $P/test_barras.py
 corre bolsas     python -I $P/test_bolsas.py
 corre plan       python -I $P/test_plan.py

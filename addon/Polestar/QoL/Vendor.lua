@@ -53,7 +53,7 @@ local function junkAt(bag, slot)
 	local Q = ns.QuestDB
 	if Q and Q.IsItemNeeded and Q.IsItemNeeded(id) then return nil end -- a quest still needs it
 	if Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)
-	-- Mamba (PARCHES.md P14): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,
+	-- Mamba (PARCHES.md P16): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,
 	-- quest items, bound utility) goes, even when marked as junk by hand.
 	local mamba = _G.MambaAPI
 	if mamba and mamba.NoVender and mamba.NoVender(id) then return nil end

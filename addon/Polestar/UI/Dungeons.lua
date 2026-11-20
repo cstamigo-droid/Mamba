@@ -359,6 +359,13 @@ end
 
 -- Whether dungeon d's name holds the search q (lower case; nil: no search).
 local function matches(d, q)
+	-- Mamba (PARCHES.md P17): the search folds accents and case and takes any word, in the client's language and
+	-- English (Polestar.UI.MambaCalce, Mamba_Panel/Calabozos.lua): "anegada", "ANEGADA" and "ciudad anegada" find La Ciudad Anegada.
+	local mc = q and UI.MambaCalce
+	if mc then
+		local ok, r = pcall(mc, d, q)
+		if ok and r ~= nil then return r and true or false end
+	end
 	return not q or find(lower(d.name), q, 1, true) ~= nil
 end
 
@@ -1336,6 +1343,11 @@ local function pageHeader(d)
 	local zm = (e and e.map) or d.zone
 	local z = d.zoneName or (zm and mapName(zm))
 	if z then facts[#facts + 1] = z end
+	local sd = not e and UI.MambaSinDatos -- Mamba (PARCHES.md P17): "Entrada: datos en camino" when the way in is unknown
+	if sd then
+		local ok, t = pcall(sd, d.key, "entrance")
+		if ok and type(t) == "string" then facts[#facts + 1] = t end
+	end
 	if d.players then
 		facts[#facts + 1] = (d.playersMax and d.playersMax > d.players) and format(L["%d-%d players"], d.players, d.playersMax) or format(L["%d players"], d.players)
 	end
@@ -1870,6 +1882,11 @@ local function renderQuests(key, f, plevel)
 		local other = 0
 		if side then other = #D().Quests(key, side == "A" and "H" or "A") end
 		local text = L["No quests are known for this dungeon yet."]
+		local sd = UI.MambaSinDatos -- Mamba (PARCHES.md P17): "datos en camino" for Forever's dungeons the Codex lacks
+		if sd then
+			local ok, t = pcall(sd, key, "quests")
+			if ok and type(t) == "string" then text = t end
+		end
 		if other > 0 then
 			local them = ns.FactionName(side == "A" and "H" or "A")
 			text = other == 1 and format(L["1 quest here is for the %s. Switch the filter to All to see it."], them)
@@ -2005,7 +2022,12 @@ local function renderBosses(key, f, plevel)
 	hidePool(bossRows, #bosses + 1)
 	hidePool(ties, nt + 1)
 	if #bosses == 0 then
-		y = emptyPage(L["No bosses known yet"], L["The sources Polestar reads list no bosses for this dungeon."], 28)
+		local note, sd = L["The sources Polestar reads list no bosses for this dungeon."], UI.MambaSinDatos -- Mamba (PARCHES.md P17)
+		if sd then
+			local ok, t = pcall(sd, key, "bosses")
+			if ok and type(t) == "string" then note = t end
+		end
+		y = emptyPage(L["No bosses known yet"], note, 28)
 	end
 	shown.bosses, shown.ties, shown.lootBoss = #bosses, nt, lootBoss
 	return y + 16

@@ -13,5 +13,7 @@
 Lineas.lua
 Avisos.lua
 Misiones.lua
+Datos_Calabozos.lua
+Calabozos.lua
 Pestanas.lua
 Panel.lua

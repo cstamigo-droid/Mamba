@@ -97,9 +97,9 @@ PARCHES = [
     ('P12-pie', 'Polestar/Theme/Widgets.lua',
      '\t\tplace(bottom[k], i, y, true)\n\t\ty = y + RAIL_ROW\n',
      '\t\tplace(bottom[k], i, y, true)\n\t\tlocal pb = f.railButtons[i] -- Mamba (P12-riel): el pie siempre a tamaño completo, con su nombre\n\t\tpb:SetHeight(RAIL_ROW); pb.Label:SetShown(true); pb.Icon:ClearAllPoints(); pb.Icon:SetPoint("TOP", pb, "TOP", 0, -10)\n\t\ty = y + RAIL_ROW\n'),
-    ('P14-no-vender', 'Polestar/QoL/Vendor.lua',
+    ('P16-no-vender', 'Polestar/QoL/Vendor.lua',
      "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n",
-     "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n\t-- Mamba (PARCHES.md P14): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,\n\t-- quest items, bound utility) goes, even when marked as junk by hand.\n\tlocal mamba = _G.MambaAPI\n\tif mamba and mamba.NoVender and mamba.NoVender(id) then return nil end\n\tlocal tasador = _G.Tasador -- without Asistente: the Tasador's ForeverTDB list still protects\n\tif tasador and tasador.MECANICAS and tasador.MECANICAS[id] then return nil end\n"),
+     "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n\t-- Mamba (PARCHES.md P16): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,\n\t-- quest items, bound utility) goes, even when marked as junk by hand.\n\tlocal mamba = _G.MambaAPI\n\tif mamba and mamba.NoVender and mamba.NoVender(id) then return nil end\n\tlocal tasador = _G.Tasador -- without Asistente: the Tasador's ForeverTDB list still protects\n\tif tasador and tasador.MECANICAS and tasador.MECANICAS[id] then return nil end\n"),
     ('P15-prefijo', 'Polestar/Quests/Party.lua',
      'Party.PREFIX = "Polestar"\n',
      '-- Mamba (PARCHES.md P15): its own prefix. On "Polestar" the fork announced itself as Polestar 0.4.1 and the\n-- official Polestar in the party or guild said "X is on Polestar ...: your guides can differ" (18-11). With\n-- "Mamba", party and version messages stay among Mamba players (no version notices either way); only the\n-- transit timings (Nav/Transit.lua, "PolestarT1") are still shared with official clients.\nParty.PREFIX = ns.mamba and "Mamba" or "Polestar"\n'),
@@ -123,6 +123,29 @@ PARCHES = [
     ('P13-misiones', 'Polestar/UI/Dungeons.lua',
      '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\tb:Show()\nend',
      '\t\tb.ChainXP:SetPoint("TOPLEFT", b, "TOPLEFT", x, -p.more)\n\tend\n\t-- Mamba (PARCHES.md P13): K100, what is still to do and «Guíame» (Mamba_Panel/Misiones.lua).\n\tif UI.MambaMision then pcall(UI.MambaMision, b, q, key, state, target, tlabel, fin) end\n\tb:Show()\nend'),
+    # P17 (K122, Mamba_Panel/Calabozos.lua): el buscador de Calabozos sin tildes ni mayúsculas y por cualquier palabra,
+    # y "datos en camino" en las páginas de las mazmorras de Forever que el Codex no trae.
+    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+     '\nlocal function matches(d, q)\n\treturn not q or find(lower(d.name), q, 1, true) ~= nil\nend\n',
+     '\nlocal function matches(d, q)\n\t-- Mamba (PARCHES.md P17): the search folds accents and case and takes any word, in the client\'s language and\n'
+     '\t-- English (Polestar.UI.MambaCalce, Mamba_Panel/Calabozos.lua): "anegada", "ANEGADA" and "ciudad anegada" find La Ciudad Anegada.\n'
+     '\tlocal mc = q and UI.MambaCalce\n\tif mc then\n\t\tlocal ok, r = pcall(mc, d, q)\n\t\tif ok and r ~= nil then return r and true or false end\n\tend\n'
+     '\treturn not q or find(lower(d.name), q, 1, true) ~= nil\nend\n'),
+    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+     '\t\tlocal text = L["No quests are known for this dungeon yet."]\n',
+     '\t\tlocal text = L["No quests are known for this dungeon yet."]\n'
+     '\t\tlocal sd = UI.MambaSinDatos -- Mamba (PARCHES.md P17): "datos en camino" for Forever\'s dungeons the Codex lacks\n'
+     '\t\tif sd then\n\t\t\tlocal ok, t = pcall(sd, key, "quests")\n\t\t\tif ok and type(t) == "string" then text = t end\n\t\tend\n'),
+    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+     '\t\ty = emptyPage(L["No bosses known yet"], L["The sources Polestar reads list no bosses for this dungeon."], 28)\n',
+     '\t\tlocal note, sd = L["The sources Polestar reads list no bosses for this dungeon."], UI.MambaSinDatos -- Mamba (PARCHES.md P17)\n'
+     '\t\tif sd then\n\t\t\tlocal ok, t = pcall(sd, key, "bosses")\n\t\t\tif ok and type(t) == "string" then note = t end\n\t\tend\n'
+     '\t\ty = emptyPage(L["No bosses known yet"], note, 28)\n'),
+    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+     '\tif z then facts[#facts + 1] = z end\n',
+     '\tif z then facts[#facts + 1] = z end\n'
+     '\tlocal sd = not e and UI.MambaSinDatos -- Mamba (PARCHES.md P17): "Entrada: datos en camino" when the way in is unknown\n'
+     '\tif sd then\n\t\tlocal ok, t = pcall(sd, d.key, "entrance")\n\t\tif ok and type(t) == "string" then facts[#facts + 1] = t end\n\tend\n'),
     # P14 (Mamba_Panel, prueba de la coordinadora 18-11): la facción de una misión de mazmorra desde el Codex.
     ('P14-faccion', 'Polestar/Dungeons/Dungeons.lua',
      '\tp.attunement = p.attunement or {}\n\tlocalisePage(p)\n\topenKey, openPage = key, p\n\treturn p\nend',
