@@ -473,9 +473,10 @@ end
 -- El oro del pie: con los íconos de las monedas y a un tamaño que se lee (Cristian creía que "no salía el dinero").
 function M.PintarOro(f, oro)
 	if not f.oroTexto then return end
+	if not M.Op("oro") then oro = nil end -- K124: apagado en Opciones
 	f.oroTexto:SetText(type(oro) == "number" and M.Monedas(oro, 14) or "")
 	if f.oroBoton then
-		f.oroBoton:SetShown(type(oro) == "number")
+		f.oroBoton:SetShown(type(oro) == "number" and M.Op("oroOtros") and true or false)
 		local w = f.oroTexto.GetStringWidth and f.oroTexto:GetStringWidth() or 120
 		f.oroBoton:SetSize(math.max(60, (w or 120) + 8), 22)
 	end

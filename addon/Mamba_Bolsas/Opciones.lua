@@ -168,6 +168,9 @@ local function dibujar(p, ancho, alto)
 	interruptor("Brillo de las mejoras", "Flecha y brillo verde en el equipo que es mejor que el tuyo.", "mejora")
 	interruptor("Resaltar lo nuevo", "Lo que acaba de entrar a tus bolsas brilla hasta que pasas el ratón.", "nuevo")
 	interruptor("Decir en el cuadro del objeto cuántos tienes y dónde", nil, "cuadro")
+	interruptor("Abrir las bolsas solas", "Con el vendedor, el banco, la subasta, el correo o un intercambio, y cerrarlas al terminar.", "abrirSolas")
+	interruptor("Oro con monedas en el pie", nil, "oro")
+	interruptor("Oro de tus otros personajes al pasar el ratón", "Lo que lleva cada uno y el total de la cuenta.", "oroOtros")
 	interruptor("Sin la ventana de Mamba: la ventana unida del juego", "Solo cuenta con la de Mamba apagada.", "unir", function() if not d.propia then M.AplicarUnir() end end)
 	if M.OtroCargado and M.OtroCargado() then
 		local n = P.Texto(opciones, "note", "warning")
@@ -196,4 +199,45 @@ function M.Registrar()
 		dibujar = dibujar,
 		refrescar = function() M.RefrescarPanel() end,
 	})
+end
+
+---------------------------------------------------------------- K124: todo se enciende y se apaga desde Opciones
+-- Ajustes › Mamba › «Qué se muestra», grupo «Bolsas y venta». Cada set guarda la opción y la aplica en el momento.
+local function publicar(spec)
+	local api = _G.MambaAPI
+	if type(api) == "table" and api.Interruptor then
+		local ok, err = api.Interruptor(spec)
+		if not ok and geterrorhandler then geterrorhandler()(err) end
+	else
+		_G.MambaInterruptoresPendientes = _G.MambaInterruptoresPendientes or {}
+		table.insert(_G.MambaInterruptoresPendientes, spec)
+	end
+end
+
+local function aplicarTodo()
+	if M.Redibujar then pcall(M.Redibujar) end
+	if M.RefrescarPanel then pcall(M.RefrescarPanel) end
+end
+
+local INTERRUPTORES = {
+	{ "propia", "Usar la ventana de bolsas de Mamba", "Todas tus bolsas y el banco en una ventana. Apagado: las bolsas del juego.",
+		function() if M.AplicarReemplazo then M.AplicarReemplazo() end end },
+	{ "abrirSolas", "Abrir las bolsas solas", "Con el vendedor, el banco, la subasta, el correo o un intercambio, y cerrarlas al terminar." },
+	{ "oro", "Oro con monedas en el pie de las bolsas", "Oro, plata y cobre con sus íconos." },
+	{ "oroOtros", "Oro de tus otros personajes al pasar el ratón", "Lo que lleva cada uno y el total de la cuenta." },
+	{ "verBolsas", "Fila de bolsas arriba de las casillas", "Cada bolsa con sus casillas libres; clic en una para verla sola." },
+	{ "marcas", "Marcas sobre los objetos", "Basura, para vender, subastar o guardar, y los objetos de misión." },
+	{ "mejora", "Brillo de las mejoras", "Flecha y brillo verde en el equipo que es mejor que el tuyo." },
+	{ "nuevo", "Resaltar lo nuevo en las bolsas", "Lo que acaba de entrar brilla hasta que pasas el ratón." },
+	{ "cuadro", "Cuántos tienes y dónde, en el cuadro del objeto", "Por personaje, en las bolsas y en el banco." },
+}
+for _, x in ipairs(INTERRUPTORES) do
+	local k, despues = x[1], x[4]
+	publicar({ id = "bolsas." .. k, addon = "Mamba_Bolsas", grupo = "Bolsas y venta", nombre = x[2], ayuda = x[3],
+		get = function() return M.Op(k) and true or false end,
+		set = function(v)
+			M.DB().opciones[k] = v and true or false
+			if despues then pcall(despues) end
+			aplicarTodo()
+		end })
 end

@@ -22,6 +22,9 @@ local POR_DEFECTO = {
 	fija = false, separar = false, reves = false,
 	columnasBanco = 14,
 	marcas = true, nuevo = true, mejora = true,
+	abrirSolas = true,  -- K121: vendedor, banco, subasta, correo e intercambio abren las bolsas
+	oro = true,         -- el oro con monedas en el pie
+	oroOtros = true,    -- al pasar el ratón por el oro: el de tus otros personajes y el total
 }
 
 local function db()

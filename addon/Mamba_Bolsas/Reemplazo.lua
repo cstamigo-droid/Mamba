@@ -45,6 +45,8 @@ function M.AbrirInventario(si, porJuego)
 	if not M.Activa() then return end
 	local f = M.Ventana("inventario")
 	if si == nil then si = not f:IsShown() end
+	-- K124: «Abrir las bolsas solas» apagado: el juego (vendedor, banco, correo…) no las abre; tú sí (B, mochila)
+	if si and porJuego and not f:IsShown() and not M.Op("abrirSolas") then M.Anotar("abrir", "apagado (Opciones)"); return end
 	if si then
 		if not f:IsShown() then f.porJuego = porJuego and true or false end
 		f.dueno = M.Clave()

@@ -191,6 +191,10 @@ def nuevo(antes=""):
         if ROMPER and n == "Bolsas.lua":
             src = src.replace("if E and E.CharacterBankTab_1 then", "if false then").replace("return E and E.CharacterBankTab_1 or nil", "return nil")
         if ROMPER and n == "Reemplazo.lua":
+            src = src.replace('and not M.Op("abrirSolas") then', 'and false then')
+        if ROMPER and n == "Ventana.lua":
+            src = src.replace('if not M.Op("oro") then oro = nil end', '')
+        if ROMPER and n == "Reemplazo.lua":
             src = src.replace('if j.alternar then M.AbrirInventario(nil)', 'if j.alternar then M.AbrirInventario(nil); M.AbrirInventario(nil)')
         cargar(src, n, M)
     return L, M
@@ -533,6 +537,33 @@ L.execute('SECRETO = false; function GetMoney() return 841200 end')
 L.execute('MambaAPI = { NoVender = function(id) if id == 117 then return "Lo usas tú" end end }')
 check(M.Marca(L.eval('{ id = 117, calidad = 0 }')) is None, "NoVender: sin marca de basura")
 L.execute('MambaAPI = nil')
+
+# K124: todo se enciende y se apaga desde Opciones (MambaAPI.Interruptor), y el set aplica en el momento
+specs = {}
+for x in (G.MambaInterruptoresPendientes or L.table()).values():
+    if str(x.addon) == "Mamba_Bolsas":
+        specs[str(x.id)] = x
+check(set(specs) >= {"bolsas.propia", "bolsas.abrirSolas", "bolsas.oro", "bolsas.oroOtros", "bolsas.marcas", "bolsas.nuevo", "bolsas.mejora", "bolsas.cuadro", "bolsas.verBolsas"}, "interruptores publicados: %s" % sorted(specs))
+check(all(x.grupo == "Bolsas y venta" and x.get() is True for x in specs.values()), "todos en «Bolsas y venta» y encendidos por defecto")
+if "bolsas.abrirSolas" in specs and "bolsas.oro" in specs and "bolsas.oroOtros" in specs:
+    specs["bolsas.abrirSolas"].set(False)
+    check(specs["bolsas.abrirSolas"].get() is False, "abrirSolas: get sigue al set")
+    L.execute('MambaBolsas.ventanas.inventario:Hide(); Fire("MERCHANT_SHOW"); Correr()')
+    check(not fi.visible, "«Abrir las bolsas solas» apagado: el vendedor no las abre")
+    L.execute('Fire("MERCHANT_CLOSED"); Correr(); MambaBolsasTecla.scripts.OnClick(MambaBolsasTecla); Correr()')
+    check(fi.visible, "apagado igual se abren con B")
+    specs["bolsas.abrirSolas"].set(True)
+    L.execute('MambaBolsas.ventanas.inventario:Hide(); Fire("MERCHANT_SHOW"); Correr()')
+    check(fi.visible, "encendido de nuevo: el vendedor las abre, sin recargar")
+    L.execute('Fire("MERCHANT_CLOSED"); Correr(); OpenAllBags(); Correr()')
+    specs["bolsas.oro"].set(False)
+    check((fi.oroTexto.texto or "") == "" and not fi.oroBoton.visible, "oro apagado: el pie sin oro al instante (%s)" % fi.oroTexto.texto)
+    specs["bolsas.oro"].set(True)
+    check("|T" in (fi.oroTexto.texto or "") and fi.oroBoton.visible, "oro encendido: vuelven las monedas al instante")
+    specs["bolsas.oroOtros"].set(False)
+    check("|T" in (fi.oroTexto.texto or "") and not fi.oroBoton.visible, "sin el cuadro de los otros personajes, las monedas siguen")
+    specs["bolsas.oroOtros"].set(True)
+    check(fi.oroBoton.visible, "cuadro del oro de vuelta")
 
 # poción en combate: nada del addon en el camino del clic de una casilla en vivo (riesgo de acción bloqueada).
 # La prueba de verdad es en el juego; aquí se fija que el addon no ponga código ni campos propios en ese camino.
