@@ -127,11 +127,11 @@ test('el ciclo: entra con fundido, se acuesta junto a "Mamba", saca la lengua y 
 	assert.equal(out.cuerpoEntero, true, 'nunca asoma un cuerpo cortado');
 });
 
-test('el interruptor de Ajustes › Mamba › Ventanas la apaga y la prende', () => {
+test('el interruptor de Ajustes › Mamba › Qué se muestra la apaga y la prende', () => {
 	const [out] = run(`
 		local control
 		Polestar.Widgets.OnOptionsRegistered(function(spec)
-			if spec.page == "Mamba" and spec.section == "Encabezado de Mamba" then control = spec.controls[1] end
+			if spec.page == "Mamba" and spec.tab == "Qué se muestra" and spec.controls[1] and spec.controls[1].label == "Serpiente animada en el encabezado" then control = spec.controls[1] end
 		end)
 		Polestar.UI.ShowPicker()
 		local s = S.actual
@@ -141,9 +141,9 @@ test('el interruptor de Ajustes › Mamba › Ventanas la apaga y la prende', ()
 		stub.advance(1)
 		local quieta = s.t == t0
 		control.set(true)
-		emit({ etiqueta = control.label, tab = "Ventanas", apagada = apagada, quieta = quieta, prendida = s.host:IsShown() and control.get() })
+		emit({ etiqueta = control.label, tab = "Qué se muestra", apagada = apagada, quieta = quieta, prendida = s.host:IsShown() and control.get() })
 	`);
-	assert.equal(out.etiqueta, 'Serpiente animada');
+	assert.equal(out.etiqueta, 'Serpiente animada en el encabezado');
 	assert.equal(out.apagada, true);
 	assert.equal(out.quieta, true);
 	assert.equal(out.prendida, true);

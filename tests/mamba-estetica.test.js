@@ -122,7 +122,8 @@ test('módulo de prueba: la ventana de Servicios (/servicios) se dibuja con Pole
 			S.Abrir(id)
 			local v = AsistenteServiciosVentana
 			local pagina
-			Polestar.Widgets.OnOptionsRegistered(function(spec) if spec.page == "Mamba" and spec.tab == "Servicios" then pagina = spec end end)
+			-- K124: el ajuste vive en Ajustes › Mamba › Qué se muestra (Interruptores.lua)
+			Polestar.Widgets.OnOptionsRegistered(function(spec) if spec.page == "Mamba" and spec.tab == "Qué se muestra" and spec.controls[1] and spec.controls[1].label == "Abrir Servicios al entrar a una ciudad" then pagina = spec end end)
 			emit({ abierta = v:IsShown(), polestar = v.polestar == true, banda = v.banda ~= nil,
 				buscador = v.buscar.Placeholder ~= nil, filas = #v.filas, titulo = v.titulo:GetText(),
 				ajuste = pagina and pagina.controls[1].label or false })
@@ -134,7 +135,7 @@ test('módulo de prueba: la ventana de Servicios (/servicios) se dibuja con Pole
 	assert.equal(out.buscador, true, 'el buscador es el de Polestar (con texto de ayuda)');
 	assert.equal(out.filas, 14);
 	assert.match(out.titulo, /^Servicios de /);
-	assert.equal(out.ajuste, 'Abrir la lista al entrar a una ciudad');
+	assert.equal(out.ajuste, 'Abrir Servicios al entrar a una ciudad');
 });
 
 test('módulo de prueba: al cambiar de apariencia, las filas de Servicios se reescriben con los colores nuevos (no quedan pegados)', () => {
@@ -178,10 +179,11 @@ test('la ventana vuelve al lugar guardado (AsistenteDB.ventanas, lo guarda el on
 	assert.deepEqual(out, { p: 'TOPLEFT', relp: 'BOTTOMLEFT', x: 111, y: 555 });
 });
 
-test('la página Mamba › Servicios existe desde el inicio, antes de que Servicios se cargue (E5)', () => {
+test('el ajuste de Servicios está en Mamba › Qué se muestra desde el inicio, antes de que Servicios se cargue (E5)', () => {
 	const [out] = run(`
 		local pagina
-		Polestar.Widgets.OnOptionsRegistered(function(spec) if spec.page == "Mamba" and spec.tab == "Servicios" then pagina = spec end end)
+		-- K124: el ajuste vive en Ajustes › Mamba › Qué se muestra (Interruptores.lua)
+			Polestar.Widgets.OnOptionsRegistered(function(spec) if spec.page == "Mamba" and spec.tab == "Qué se muestra" and spec.controls[1] and spec.controls[1].label == "Abrir Servicios al entrar a una ciudad" then pagina = spec end end)
 		emit({ hay = pagina ~= nil, cargado = A.modulos.servicios ~= nil, valor = pagina and pagina.controls[1].get() })
 	`);
 	assert.deepEqual(out, { hay: true, cargado: false, valor: true });
