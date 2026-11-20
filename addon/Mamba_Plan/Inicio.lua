@@ -446,7 +446,7 @@ end
 local ev = CreateFrame("Frame")
 M.Escuchar(ev, "PLAYER_LOGIN")
 ev:SetScript("OnEvent", function()
-	if M.PJ().respondido then return end
+	if M.PJ().respondido or M.PJ().noPreguntar then return end
 	local function intentar(n)
 		if (InCombatLockdown and InCombatLockdown()) or (_G.PolestarWelcome and _G.PolestarWelcome:IsShown()) then
 			if n < 20 then C_Timer.After(15, function() intentar(n + 1) end) end

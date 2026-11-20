@@ -369,8 +369,11 @@ end
 -- Medido en el juego el 18-11: con solo SetParent la barra principal del juego seguía a la vista. El Modo de
 -- edición del cliente nuevo reemplaza Hide() en sus barras: hay que esconderla con su Hide original (HideBase),
 -- y quitarle los eventos que la vuelven a mostrar al entrar y salir de combate o al arrastrar un hechizo.
+M.padres = M.padres or {}      -- marco del juego -> su padre original (para devolverlo al apagar, K124)
+M.escondidos = M.escondidos or {}
 local function esconderMarco(f, eventos)
 	if not f then return end
+	if M.padres[f] == nil and f.GetParent then M.padres[f] = f:GetParent() or false end
 	if eventos and f.UnregisterAllEvents then f:UnregisterAllEvents() end
 	if f.HideBase then pcall(f.HideBase, f) elseif f.Hide then pcall(f.Hide, f) end
 	f:SetParent(oculto)
@@ -380,6 +383,20 @@ local function esconderBoton(b)
 	b:UnregisterAllEvents()
 	b:SetAttribute("statehidden", true)
 	b:Hide()
+	M.escondidos[b] = true
+end
+
+-- K124 (apagar desde Opciones): devolver las barras del juego. Los botones del juego perdieron sus eventos
+-- propios al esconderlos: se ven y funcionan, y con la próxima recarga quedan exactamente como el juego las deja.
+function M.MostrarJuego()
+	for f, padre in pairs(M.padres) do
+		if padre then pcall(f.SetParent, f, padre) end
+		if f.ShowBase then pcall(f.ShowBase, f) elseif f.Show then pcall(f.Show, f) end
+	end
+	for b in pairs(M.escondidos) do
+		pcall(b.SetAttribute, b, "statehidden", nil)
+		pcall(b.Show, b)
+	end
 end
 
 M.MARCOS_JUEGO = { "MultiBarBottomLeft", "MultiBarBottomRight", "MultiBarLeft", "MultiBarRight",
@@ -461,6 +478,7 @@ end
 ---------------------------------------------------------------- arranque
 function M.Construir()
 	if M.listo then return end
+	if pj().apagado then M.Anotar("apagado", true) return end -- K124: el jugador las apagó en Opciones
 	local otro = M.OtroAddonDeBarras()
 	M.Anotar("otroAddon", otro or false)
 	if otro then

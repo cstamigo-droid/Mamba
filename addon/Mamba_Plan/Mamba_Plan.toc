@@ -21,3 +21,4 @@ Plan.lua
 Macros.lua
 Inicio.lua
 Seccion.lua
+Interruptor.lua

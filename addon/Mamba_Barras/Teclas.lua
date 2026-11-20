@@ -16,6 +16,7 @@ end
 
 function M.AplicarTeclas()
 	if InCombatLockdown() then return M.FueraDeCombate("teclas", M.AplicarTeclas) end
+	if M.PJ().apagado then ClearOverrideBindings(dueno); return end -- K124: apagadas, las teclas vuelven al juego
 	if not M.listo and not next(M.marcos) then return end
 	ClearOverrideBindings(dueno)
 	local n = 0

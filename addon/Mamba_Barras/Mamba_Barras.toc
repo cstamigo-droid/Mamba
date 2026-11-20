@@ -26,3 +26,4 @@ Interfaz.lua
 Teclas.lua
 Mover.lua
 Opciones.lua
+Interruptor.lua

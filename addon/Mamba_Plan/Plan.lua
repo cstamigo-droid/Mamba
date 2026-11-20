@@ -401,7 +401,7 @@ end
 -- Hoy: la bolsa recomendada de tu plan. "VITAL para subir una profesión" llega con la sección Profesiones
 -- (necesita las recetas). La ventana de Mamba lo muestra en el bloque "Mamba" del cuadro del objeto.
 function M.MaterialDelPlan(itemID)
-	if not itemID then return nil end
+	if not itemID or M.PJ().sinCuadro then return nil end -- K124: apagado en Opciones
 	local ok, e = pcall(M.Estado)
 	if not ok then return nil end
 	local b = M.Bolsas(e)

@@ -349,6 +349,28 @@ cap.scripts.OnKeyDown(cap, "F")
 check(not list((G.BINDINGS["ACTIONBUTTON3"] or L.table()).values()) and not list(G.BLOQUEOS.values()), "en combate: nada de SetBinding")
 L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
 check(not M.asignando, "al salir de combate el modo queda cerrado")
+# ---------- 15. K124: interruptor en Opciones (apagar sin recargar; en combate, al salir) ----------
+L, M = nuevo('CreateFrame("Frame", "MainActionBar", UIParent); for i = 1, 12 do CreateFrame("CheckButton", "ActionButton"..i, UIParent, "SecureActionButtonTemplate") end; '
+             'BINDINGS["ACTIONBUTTON1"] = {"1"}; INTERRUPTORES = {}; MambaAPI = { Interruptor = function(s) INTERRUPTORES[s.id] = s; return true end }')
+G = L.globals()
+L.execute('Fire("PLAYER_LOGIN")')
+I = G.INTERRUPTORES["barras.usar"]
+check(I is not None and I.addon == "Mamba_Barras" and I.get() is True, "interruptor publicado y prendido")
+L.execute('COMBATE = true')
+I.set(False)
+check(G.MambaBarra1.visible is not False and not list(G.BLOQUEOS.values()), "en combate: no se toca nada protegido")
+L.execute('COMBATE = false; Fire("PLAYER_REGEN_ENABLED")')
+check(G.MambaBarra1.visible is False and G.ActionButton1.visible is True and L.eval("function() return MainActionBar.padre == UIParent end")(),
+      "apagado: barras de Mamba escondidas y las del juego de vuelta")
+check(G.OVERRIDES["1"] is None, "apagado: la tecla 1 vuelve al juego")
+check(I.get() is False and G.MambaBarrasPJ.apagado is True, "queda guardado")
+I.set(True)
+check(G.MambaBarra1.visible is True and G.ActionButton1.visible is False and G.OVERRIDES["1"] == "MambaBoton1", "prendido de nuevo: vuelven las de Mamba")
+# control negativo: con apagado guardado, al entrar no se arman ni se esconden las del juego
+L2, M2 = nuevo('MambaBarrasPJ = { version = 1, apagado = true }; CreateFrame("Frame", "MainActionBar", UIParent)')
+L2.execute('Fire("PLAYER_LOGIN")')
+G2 = L2.globals()
+check(G2.MambaBarra1 is None and L2.eval("function() return MainActionBar.padre == UIParent end")(), "apagado al entrar: no arma nada")
 # arrastrar hechizos a los botones: Mamba no apaga el arrastrar de LibActionButton
 for n in ARCHIVOS:
     check("DisableDragNDrop" not in (D / n).read_text(encoding="utf-8"), n + ": no apaga arrastrar hechizos a los botones")
