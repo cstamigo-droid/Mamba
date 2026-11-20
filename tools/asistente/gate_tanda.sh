@@ -17,7 +17,7 @@ echo "== 1. árbol limpio"
 if [ -n "$(git status --porcelain -- addon tools PARCHES.md)" ]; then echo "FALLA cambios sin commit:"; git status --porcelain -- addon tools PARCHES.md | sed 's/^/      /'; fallas=$((fallas+1)); else echo "OK    git status limpio"; fi
 echo "== 2. suites"
 corre hub        python -I $P/test_hub.py addon
-[ -f $P/test_talentos.py ] && corre talentos python -I $P/test_talentos.py addon
+corre talentos   python -I $P/test_talentos.py addon
 corre ventana    python -I $P/test_ventana.py addon
 corre equipo     python -I $P/test_equipo.py addon
 corre tasador    python -I $P/test_tasador.py addon/Tasador
@@ -37,11 +37,12 @@ corre comodidades python -I $P/test_comodidades.py
 corre curacion   python -I $P/test_curacion.py
 corre mapa       python -I $P/test_mapa.py
 corre profesiones python -I $P/test_profesiones.py
-[ -f $P/test_combate.py ] && corre combate python -I $P/test_combate.py
-[ -f $P/test_combate_pvp.py ] && corre combate_pvp python -I $P/test_combate_pvp.py
-[ -f $P/test_raros.py ] && corre raros python -I $P/test_raros.py
-[ -f $P/test_version.py ] && corre version python -I $P/test_version.py addon
-[ -f $P/test_sello_zip.py ] && corre sello_zip python -I $P/test_sello_zip.py
+# D18 (auditoría 20-11): sin «[ -f … ] &&»; si una suite se renombra o se borra, falla en vez de saltarse en silencio
+corre combate    python -I $P/test_combate.py
+corre combate_pvp python -I $P/test_combate_pvp.py
+corre raros      python -I $P/test_raros.py
+corre version    python -I $P/test_version.py addon
+corre sello_zip  python -I $P/test_sello_zip.py
 # todas las pruebas Node de Mamba (panel, estética, misiones, reemplazos y las que se sumen)
 for t in tests/mamba-*.test.js; do
 	n=$(basename "$t" .test.js)
@@ -58,7 +59,13 @@ corre sintaxis   python -I tools/asistente/sintaxis_lua.py addon
 echo "== 5. parches.py"
 corre parches    python -I tools/asistente/parches.py --revisar
 echo "== 6. control_zip --estricto"
-corre armar      python -I tools/asistente/armar_instalar.py
-corre control_zip python -I tools/asistente/control_zip.py 'D:\rust\mamba_instalar' --manifiesto 'D:\rust\noche\manifiesto_mamba.json' --estricto
+# MAMBA_PAQUETE / MAMBA_MANIFIESTO: carpeta propia para armar. D:\rust\mamba_instalar es compartida y dos gates a la
+# vez la dejaban a medias (19-11); el valor por defecto sigue siendo el de siempre.
+PAQ="${MAMBA_PAQUETE:-D:\\rust\\mamba_instalar}"
+MAN="${MAMBA_MANIFIESTO:-D:\\rust\\noche\\manifiesto_mamba.json}"
+corre armar      python -I tools/asistente/armar_instalar.py --dest "$PAQ" --manifiesto "$MAN"
+corre control_zip python -I tools/asistente/control_zip.py "$PAQ" --manifiesto "$MAN" --estricto
+# D7 (auditoría 20-11): la carga completa del paquete armado (errores de Lua, riel y K124: interruptores, guardado, efecto)
+corre carga_completa python -I $P/test_carga_completa.py "$PAQ"
 echo "== RESULTADO: $fallas fallas"
 [ $fallas -eq 0 ]
