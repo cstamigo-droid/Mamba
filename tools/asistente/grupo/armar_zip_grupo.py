@@ -124,6 +124,19 @@ def creditos(paquete: Path) -> str:
     return "\n".join(l)
 
 
+def verificar_sello(zpath: Path) -> int:
+    """build del Sello.lua que lleva el ZIP; 0 si falta o no está sellado (el ZIP NO sirve para el canal)."""
+    sys.path.insert(0, str(AQUI))
+    import sellar_version
+    with zipfile.ZipFile(zpath) as z:
+        try:
+            texto = z.read("archivos/Mamba/Mamba_Version/Sello.lua").decode("utf-8")
+        except KeyError:
+            return 0
+    m = sellar_version.PATRON.search(texto)
+    return int(m.group(1)) if m else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--paquete", type=Path, required=True)
@@ -154,8 +167,9 @@ def main() -> int:
     sello = sellar_version.leer(a.paquete)
     sello_zip = None  # contenido de Sello.lua que va en el ZIP si el armado no venía sellado
     if sello is None:
-        print("AVISO: el armado no trae Mamba_Version: no habrá aviso de versión nueva dentro del juego")
-        build = a.build or int(dt.datetime.now().strftime("%Y%m%d%H%M"))
+        # Revisor t6: sin Mamba_Version (o con un Sello.lua que no se entiende) nadie avisa nunca y no hay error.
+        print("NO SE ARMA: el armado no trae Mamba_Version/Sello.lua legible; sin él no hay aviso de versión nueva")
+        return 1
     elif sello["build"] > 0:
         build = sello["build"]
         if a.build and a.build != build:
@@ -219,6 +233,10 @@ def main() -> int:
         fz = a.salida / f"Mamba_fuente_{a.commit}.zip"
         subprocess.run(["git", "-C", str(RAIZ), "archive", "--format=zip", "-o", str(fz), a.commit], check=True)
         print(f"fuente: {fz} ({fz.stat().st_size / 1e6:.1f} MB)")
+    if verificar_sello(zpath) != build or build <= 0:
+        zpath.unlink()
+        print(f"NO SE ARMA: el ZIP salió con un sello distinto de {build} (o sin sellar); se borró")
+        return 1
     h = hashlib.sha256(zpath.read_bytes()).hexdigest()
     (a.salida / (zpath.name + ".sha256")).write_text(f"{h}  {zpath.name}\n", "utf-8")
     print(f"ZIP: {zpath} ({zpath.stat().st_size / 1e6:.1f} MB, {n} archivos)\nsha256 {h}")

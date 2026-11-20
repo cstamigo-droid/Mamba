@@ -8,11 +8,13 @@
 local PREFIJO = "MAMBAver"
 local ESPERA_ENVIO = 30      -- segundos mínimos entre dos envíos al grupo
 local ESPERA_RESPUESTA = 60  -- a un mismo jugador se le responde como mucho una vez por minuto
+local ESPERA_GLOBAL = 2      -- y en total, un susurro cada 2 s (revisor t6: en una banda con 20 atrasados
+                             -- salían 20 seguidos); el resto lo cubre UN anuncio a la banda
 
 local M = {}
 MambaVersion = M
 local sello = MambaSello or { build = 0, texto = "sin sellar" }
-local ultimoEnvio, respondido, avisado = -1e9, {}, false
+local ultimoEnvio, respondido, avisado, ultimaRespuesta = -1e9, {}, false, -1e9
 
 local function ahora() return GetTime and GetTime() or 0 end
 
@@ -58,21 +60,27 @@ function M.Avisar(build, texto, quien)
 	if UIErrorsFrame then UIErrorsFrame:AddMessage("Hay una versión nueva de Mamba: cierra el juego y actualiza", 0.55, 0.62, 0.42) end
 end
 
-function M.Recibir(msg, quien)
+-- quien = nombre completo con reino ("Kud-Forever"), para que el susurro llegue a otro reino; nombre = el corto
+-- para mostrar.
+function M.Recibir(msg, quien, nombre)
 	local build, texto = M.Decodificar(msg)
 	if not build then return end
 	local mio = sello.build or 0
 	MambaVersionDB = MambaVersionDB or {}
 	if build > mio then
 		if build > (MambaVersionDB.masNueva or 0) then
-			MambaVersionDB.masNueva, MambaVersionDB.texto, MambaVersionDB.quien = build, texto, quien
+			MambaVersionDB.masNueva, MambaVersionDB.texto, MambaVersionDB.quien = build, texto, nombre or quien
 		end
-		M.Avisar(build, texto, quien)
+		M.Avisar(build, texto, nombre or quien)
 	elseif build < mio and quien and mio > 0 then
 		-- El otro está atrasado: se le responde (por susurro de addon) para que vea el aviso.
-		if ahora() - (respondido[quien] or -1e9) >= ESPERA_RESPUESTA then
-			respondido[quien] = ahora()
+		if ahora() - (respondido[quien] or -1e9) < ESPERA_RESPUESTA then return end
+		respondido[quien] = ahora()
+		if ahora() - ultimaRespuesta >= ESPERA_GLOBAL then
+			ultimaRespuesta = ahora()
 			M.Enviar(quien)
+		else
+			anunciar(false) -- muchos atrasados a la vez: un solo mensaje a todo el grupo (con su propia espera)
 		end
 	end
 end
@@ -95,9 +103,9 @@ f:SetScript("OnEvent", function(_, ev, a1, a2, a3, a4)
 	elseif ev == "CHAT_MSG_ADDON" then
 		if a1 == PREFIJO then
 			local quien = a4
-			if quien and Ambiguate then quien = Ambiguate(quien, "none") end
-			if UnitName and quien == UnitName("player") then return end
-			M.Recibir(a2, quien)
+			local nombre = (quien and Ambiguate) and Ambiguate(quien, "none") or quien
+			if UnitName and nombre == UnitName("player") then return end
+			M.Recibir(a2, quien, nombre)
 		end
 	else
 		anunciar(false)

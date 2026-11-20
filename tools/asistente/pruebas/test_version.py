@@ -105,8 +105,8 @@ check(L.eval("#chat") == 0, "ya actualizado: no avisa")
 L = nuevo(202611221800)
 L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Atrasado-Forever")')
 check(L.eval("#chat") == 0, "una versión más vieja no genera aviso")
-check(L.eval("#enviados") == 1 and L.eval("enviados[1].c") == "WHISPER" and L.eval("enviados[1].d") == "Atrasado",
-      "le responde al atrasado para que él vea el aviso")
+check(L.eval("#enviados") == 1 and L.eval("enviados[1].c") == "WHISPER" and L.eval("enviados[1].d") == "Atrasado-Forever",
+      "le responde al atrasado por susurro, con su nombre COMPLETO (llega aunque sea de otro reino)")
 L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "PARTY", "Atrasado-Forever")')
 check(L.eval("#enviados") == 1, "no le responde dos veces seguidas")
 
@@ -126,6 +126,20 @@ check(L.eval("#chat") == 1, "una copia sin sellar sí escucha (y avisa)")
 L = nuevo(202611191200)
 L.execute('GRUPO = false; Fire("PLAYER_ENTERING_WORLD")')
 check(L.eval("#enviados") == 0, "solo, sin grupo, no manda nada")
+
+# 6. Banda con muchos atrasados: tope global de susurros (revisor t6)
+L = nuevo(202611221800)
+L.execute('BANDA = true')
+L.execute('for i = 1, 20 do Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "RAID", "Atr" .. i .. "-Forever") end')
+check(L.eval("(function() local n = 0 for _, e in ipairs(enviados) do if e.c == 'WHISPER' then n = n + 1 end end return n end)()") == 1,
+      "20 atrasados a la vez: un solo susurro (tope de 1 cada 2 s)")
+check(L.eval("(function() local n = 0 for _, e in ipairs(enviados) do if e.c == 'RAID' then n = n + 1 end end return n end)()") == 1,
+      "y un solo anuncio a la banda, que les llega a todos los demás")
+L.execute('T = T + 3; Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611191200|beta 1", "RAID", "Nuevo-Forever")')
+check(L.eval("enviados[#enviados] and enviados[#enviados].d") == "Nuevo-Forever", "pasados 2 s vuelve a susurrar")
+L = nuevo(202611191200)
+L.execute('Fire("CHAT_MSG_ADDON", "MAMBAver", "V1|202611221800|beta 3", "PARTY", "Kud-OtroReino")')
+check("Kud" in (L.eval("chat[1]") or "") and "OtroReino" not in (L.eval("chat[1]") or ""), "el aviso muestra el nombre corto")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
