@@ -26,6 +26,26 @@ local function marcar()
 	end
 end
 
+local function nombreHechizo(id)
+	if C_Spell and C_Spell.GetSpellName then
+		local ok, n = pcall(C_Spell.GetSpellName, id)
+		if ok and type(n) == "string" and n ~= "" then return n end
+	end
+	if GetSpellInfo then
+		local ok, n = pcall(GetSpellInfo, id)
+		if ok and type(n) == "string" and n ~= "" then return n end
+	end
+end
+
+-- A3: el clic (ratón o tecla, que llega como LeftButton) usa "*type1"/"*macrotext1" (el * = con cualquier
+-- modificador: las teclas de forma del juego son CTRL-F1...), que el botón seguro mira antes que "type"; la
+-- librería solo reescribe "type", así el ícono y el cuadro siguen siendo los suyos.
+local function salidaDeForma(b, i, hechizo)
+	local texto = hechizo and M.MacroForma(i, nombreHechizo(hechizo))
+	b:SetAttribute("*type1", texto and "macro" or nil)
+	b:SetAttribute("*macrotext1", texto)
+end
+
 -- Pone en cada botón la forma que corresponde (fuera de combate: cambia atributos seguros).
 function M.LlenarFormas()
 	local h = M.marcos.formas
@@ -35,8 +55,10 @@ function M.LlenarFormas()
 		local _, _, _, hechizo = infoForma(i)
 		if i <= n and hechizo then
 			b:SetState(0, "spell", hechizo)
+			salidaDeForma(b, i, hechizo)
 		else
 			b:SetState(0, "empty")
+			salidaDeForma(b, i, nil)
 		end
 	end
 	local c = M.Config("formas")

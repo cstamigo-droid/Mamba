@@ -99,6 +99,16 @@ function M.PaginasFormas(clase, guardadas, tieneAccion)
 	return out
 end
 
+-- A3 (20-11): lo que hace el botón de la forma número i de la barra de formas. Con Bartender (y la barra del
+-- juego) apretar la forma en la que ya estás te devolvía a la forma normal; el botón de Mamba lanzaba el
+-- hechizo por su número y eso no la cancela. Ahora: si no estás en esa forma, la lanza; si ya estás, la quita.
+-- Nunca con "!" (eso es justo lo que impide salir). Las dos líneas se excluyen: [noform:i] / [form:i].
+function M.MacroForma(i, nombre)
+	if type(i) ~= "number" or type(nombre) ~= "string" or nombre == "" then return nil end
+	nombre = nombre:gsub("^!+", "")
+	return "/cast [noform:" .. i .. "] " .. nombre .. "\n/cancelform [form:" .. i .. "]"
+end
+
 -- La cadena de condiciones de la barra principal. idx = { anular, vehiculo } (números del juego: se leen
 -- en vivo con GetOverrideBarIndex/GetVehicleBarIndex; nil si este cliente no los tiene).
 function M.Conductor(clase, paginas, idx)

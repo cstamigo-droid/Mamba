@@ -173,6 +173,8 @@ function SetOverrideBindingClick(dueno, prio, k, boton)
 end
 function GetNumShapeshiftForms() return #FORMAS end
 function GetShapeshiftFormInfo(i) local f = FORMAS[i]; if f then return f[1], f[2], f[3], f[4] end end
+NOMBRES_HECHIZO = { [5487] = "Forma de oso", [768] = "Forma felina" }
+function GetSpellInfo(id) return NOMBRES_HECHIZO[id] end
 function GetPetActionInfo(i) return nil end
 function IsAltKeyDown() return false end
 function IsControlKeyDown() return false end

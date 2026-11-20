@@ -61,7 +61,7 @@ def generar_copia():
 COPIA = generar_copia()
 
 
-def nuevo(antes="", con_copia=True):
+def nuevo(antes="", con_copia=True, cambios=None):
     L = LuaRuntime(unpack_returned_tuples=True)
     L.execute((AQUI / "mock_barras.lua").read_text(encoding="utf-8"))
     if antes:
@@ -72,6 +72,10 @@ def nuevo(antes="", con_copia=True):
         src = (D / n).read_text(encoding="utf-8")
         if n == "DeBartender.lua" and con_copia:
             src = COPIA
+        for (archivo, viejo, nuevo_) in (cambios or []):
+            if archivo == n:
+                assert viejo in src, "cambio de control negativo no aplica: " + viejo
+                src = src.replace(viejo, nuevo_)
         cargar(src, n, M)
     return L, M
 
@@ -380,5 +384,46 @@ check(G2.MambaBarra1 is None and L2.eval("function() return MainActionBar.padre 
 # arrastrar hechizos a los botones: Mamba no apaga el arrastrar de LibActionButton
 for n in ARCHIVOS:
     check("DisableDragNDrop" not in (D / n).read_text(encoding="utf-8"), n + ": no apaga arrastrar hechizos a los botones")
+
+# ---------- A3 (20-11): la tecla de la forma en la que ya estás te devuelve a la forma normal ----------
+# Con Bartender/la barra del juego sí; el botón de Mamba lanzaba el hechizo por número y no la cancelaba.
+# Regla: cada botón con forma, al clic izquierdo (con cualquier modificador: CTRL-F1...), corre una macro
+# que lanza la forma solo fuera de ella y la quita si ya estás; nunca "/cast !".
+def fallas_salida_forma(L):
+    G = L.globals()
+    malas = []
+    for i, hechizo in ((1, "Forma de oso"), (2, "Forma felina")):
+        b = G["MambaForma%d" % i]
+        tipo, texto = b.attr["*type1"], b.attr["*macrotext1"] or ""
+        if tipo != "macro":
+            malas.append("forma %d: *type1=%s" % (i, tipo))
+        if ("/cast [noform:%d] %s" % (i, hechizo)) not in texto or ("/cancelform [form:%d]" % i) not in texto:
+            malas.append("forma %d: macro %r" % (i, texto))
+        if "!" in texto:
+            malas.append("forma %d: con ! no sale" % i)
+    b3 = G.MambaForma3
+    if b3.attr["*type1"] is not None or b3.attr["*macrotext1"] is not None:
+        malas.append("botón sin forma con macro")
+    return malas
+
+
+def con_formas(cambios=None):
+    Lx, _ = nuevo(cambios=cambios)
+    Lx.execute('Fire("PLAYER_LOGIN")')
+    return Lx
+
+
+f_a3 = fallas_salida_forma(con_formas())
+check(not f_a3, "A3: la tecla de la forma activa sale de la forma: %s" % f_a3)
+check(L.eval("function(M) return M.MacroForma(3, '!Forma de viaje') end")(M) == "/cast [noform:3] Forma de viaje\n/cancelform [form:3]",
+      "A3: MacroForma quita el ! y arma las dos líneas")
+check(L.eval("function(M) return M.MacroForma(3, nil) end")(M) is None, "A3: sin nombre, sin macro")
+# controles negativos: la regla tiene que detectar el error de antes (sin macro: hechizo por número) y el "!"
+neg1 = fallas_salida_forma(con_formas([("Formas.lua", "\t\t\tsalidaDeForma(b, i, hechizo)\n", "\n")]))
+check(len(neg1) >= 2, "A3 control negativo (botón como antes, sin macro): la regla falla: %s" % neg1)
+neg2 = fallas_salida_forma(con_formas([("Datos.lua", '"/cast [noform:" .. i .. "] " .. nombre', '"/cast !" .. nombre')]))
+check(len(neg2) >= 2, "A3 control negativo (/cast !): la regla falla: %s" % neg2)
+neg3 = fallas_salida_forma(con_formas([("Formas.lua", 'b:SetAttribute("*type1"', 'b:SetAttribute("type1"')]))
+check(len(neg3) >= 2, "A3 control negativo (type1 sin *: CTRL-F1 no la usa): la regla falla: %s" % neg3)
 print(f"{ok} OK, {fail} FALLAN")
 sys.exit(1 if fail else 0)
