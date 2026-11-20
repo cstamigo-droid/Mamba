@@ -95,8 +95,7 @@ def reescribir(flujo: bytes, borrar: list[bytes]) -> tuple[bytes, int]:
                 carga = carga.replace(PERSONAL, NOREPLY)
                 if commit is not None:
                     tocado = True
-            bloque = b"data %d
-" % len(carga) + carga
+            bloque = b"data %d\n" % len(carga) + carga
             (commit if commit is not None else out).append(bloque)
             i = sig
             continue
