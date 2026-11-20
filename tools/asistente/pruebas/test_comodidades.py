@@ -263,6 +263,31 @@ for k in ["raros:ruta", "raros:macro", "raros:opciones", "comodidades:interrupto
     S.onNav(k); S.render()
 check(not lista_lua(G4.ERRORES), "panel sin errores: %s" % lista_lua(G4.ERRORES)[:3])
 
+# --- K124: cada automatismo y aviso se apaga desde Ajustes › Mamba › Qué se muestra (MambaAPI.Interruptor)
+L5, M5 = nuevo('INTER = {}; MambaAPI = { Interruptor = function(s) INTER[s.id] = s; return true end }')
+G5 = L5.globals()
+L5.execute('Fire("PLAYER_LOGIN")')
+inter = {k: G5.INTER[k] for k in G5.INTER.keys()}
+for k in ["comodidades.raro_cara", "comodidades.macro_raros", "comodidades.qol_autoReleasePvP", "comodidades.qol_acceptSummon",
+          "comodidades.qol_acceptResurrect", "comodidades.qol_fastLoot", "comodidades.maps_flightTimer", "comodidades.qol_hideErrors",
+          "comodidades.autoLootDefault", "comodidades.trenes", "comodidades.fallido", "comodidades.bostezo"]:
+    check(k in inter and inter[k].addon == "Mamba_Comodidades", "interruptor publicado: " + k)
+check("comodidades.brillo" not in inter, "sin ForeverLootSparkles no se publica un interruptor que no haría nada")
+for k, s in inter.items():
+    v0 = bool(s.get())
+    s.set(not v0)
+    check(bool(s.get()) == (not v0), "set aplica en el momento: " + k)
+    s.set(v0)
+    check(bool(s.get()) == v0, "y vuelve: " + k)
+L5.execute('INTER["comodidades.trenes"].set(true)')
+check(G5.MUDOS[539802], "apagar desde Opciones silencia de verdad (no solo guarda)")
+L5.execute('INTER["comodidades.raro_cara"].set(false)')
+check(not M5.Raros.Miniatura(L5.eval('{ kind = "rare", id = 61 }')), "la cara apagada desde Opciones no sale")
+L6, M6 = nuevo()
+L6.execute('Fire("PLAYER_LOGIN")')
+check(L6.globals().MambaInterruptoresPendientes is not None and len(lista_lua(L6.globals().MambaInterruptoresPendientes)) >= 5,
+      "sin Asistente cargado, quedan en MambaInterruptoresPendientes")
+
 # --- reglas del código (estética E1-E4, sin comandos, de cero)
 for n in ARCHIVOS:
     src = (D / n).read_text(encoding="utf-8")

@@ -66,7 +66,8 @@ end
 function C.Valor(it)
 	if it.tipo == "polestar" then
 		local p = PS()
-		return p and (p.Get(it.clave) and true or false) or nil
+		if not p then return nil end
+		return p.Get(it.clave) and true or false
 	elseif it.tipo == "cvar" then
 		local v = C_CVar and C_CVar.GetCVar and C_CVar.GetCVar(it.clave)
 		if v == nil then return nil end

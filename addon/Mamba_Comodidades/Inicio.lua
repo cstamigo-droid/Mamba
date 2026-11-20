@@ -10,7 +10,7 @@ end
 local ev = CreateFrame("Frame")
 ev:RegisterEvent("PLAYER_LOGIN")
 ev:SetScript("OnEvent", function()
-	for _, fn in ipairs({ M.Comodidades.Iniciar, M.Raros.Iniciar, M.Registrar }) do
+	for _, fn in ipairs({ M.Comodidades.Iniciar, M.Raros.Iniciar, M.Registrar, M.PublicarInterruptores }) do
 		local ok, err = pcall(fn)
 		if not ok and geterrorhandler then geterrorhandler()(err) end
 	end

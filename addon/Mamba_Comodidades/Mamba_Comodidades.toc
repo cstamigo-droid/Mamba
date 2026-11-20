@@ -16,3 +16,4 @@ Inicio.lua
 Raros.lua
 Comodidades.lua
 Panel.lua
+Interruptores.lua
