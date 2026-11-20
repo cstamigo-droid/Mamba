@@ -41,27 +41,27 @@ function Pl.EsEnemigo(u)
 end
 
 -- Esconde el dibujo de Blizzard (solo el aspecto). Si Blizzard le vuelve a subir el alfa, se baja de nuevo.
--- D16 (auditoría 20-11): no se escriben campos propios en el UnitFrame de Blizzard (podría ensuciarlo): el gancho y
--- el «estoy poniendo el alfa» van en tablas de Mamba, y el alfa que llega al gancho no se compara si es secreto.
-local enganchados, poniendo = {}, {}
+-- D16 (auditoría 20-11; revisor tanda 10): NADA se escribe en el UnitFrame de Blizzard, ni campos ni ganchos
+-- (hooksecurefunc sobre el marco reemplaza su método en esa misma tabla). Mamba solo le baja el alfa; si Blizzard
+-- se lo vuelve a subir, el tic de las placas (Pl.Tick, que ya corre) lo baja otra vez. Si el alfa llega secreto,
+-- se baja igual: poner 0 no compara nada.
 local function esconderBlizzard(placa)
 	local uf = placa and placa.UnitFrame
 	if not uf or not uf.SetAlpha then return end
 	ocultas[uf] = true
-	poniendo[uf] = true; uf:SetAlpha(0); poniendo[uf] = nil
-	if not enganchados[uf] and hooksecurefunc then
-		enganchados[uf] = true
-		pcall(hooksecurefunc, uf, "SetAlpha", function(s, a)
-			if not ocultas[s] or poniendo[s] or M.Secreto(a) or a == 0 then return end
-			poniendo[s] = true; s:SetAlpha(0); poniendo[s] = nil
-		end)
+	uf:SetAlpha(0)
+end
+function Pl.MantenerOcultas()
+	for uf in pairs(ocultas) do
+		local a = uf.GetAlpha and uf:GetAlpha()
+		if M.Secreto(a) or (type(a) == "number" and a > 0) then uf:SetAlpha(0) end
 	end
 end
 local function mostrarBlizzard(placa)
 	local uf = placa and placa.UnitFrame
 	if not uf or not ocultas[uf] then return end
 	ocultas[uf] = nil
-	poniendo[uf] = true; uf:SetAlpha(1); poniendo[uf] = nil
+	uf:SetAlpha(1)
 end
 Pl.MostrarBlizzard = mostrarBlizzard
 
@@ -267,11 +267,12 @@ function Pl.Quitar(unidad)
 	local N = C_NamePlate
 	local p = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(unidad)
 	local c = p and placas[p]
-	if c then c.lanz:Hide(); c:Hide() end
+	if c then c.lanz:Hide(); c:Hide(); c.agro = nil end -- la placa se recicla: sin el borde de agro viejo
 	if p then mostrarBlizzard(p) end
 end
 
 function Pl.Tick(t)
+	Pl.MantenerOcultas()
 	for _, c in pairs(placas) do
 		local b = c.lanz
 		if b:IsShown() and b.fin then

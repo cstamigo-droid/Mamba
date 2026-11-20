@@ -78,7 +78,7 @@ def nuevo():
     for n in ARCHIVOS:
         src = (D / n).read_text(encoding="utf-8")
         if ROMPER and n == "Placas.lua":
-            src = src.replace("if ocultas[s] and a ~= 0 and not s.mambaPoniendo then", "if false then")      # Blizzard la vuelve a mostrar
+            src = src.replace("if M.Secreto(a) or (type(a) == \"number\" and a > 0) then uf:SetAlpha(0) end", "")      # Blizzard la vuelve a mostrar
             src = src.replace("return ok and leer(si) == true", "return true")                              # dibuja también las amigas
         if ROMPER and n == "Gladius.lua":
             src = src.replace("local repetido = previo and math.abs(previo.fin - (t + e[1])) < 1.5", "local repetido = false")
@@ -116,10 +116,13 @@ c1 = Pl.Lista()[p1]
 check(c1 is not None and c1.visible and p1.UnitFrame.alfa == 0, "enemigo: placa de Mamba a la vista y la de Blizzard escondida")
 check(L.eval('issecretvalue')(c1.vida.valor), "la vida secreta va tal cual a la barra (sin cuentas)")
 p1.UnitFrame.SetAlpha(p1.UnitFrame, 1)
-check(p1.UnitFrame.alfa == 0, "si Blizzard le vuelve a subir el alfa, se esconde de nuevo")
+L.execute('local mt = getmetatable(CreateFrame("Frame")).__index; for _, p in ipairs(PLACAS) do p.UnitFrame.GetAlpha = function(s) return s.alfa end end')
+C.Placas.Tick(G.RELOJ)
+check(p1.UnitFrame.alfa == 0, "si Blizzard le vuelve a subir el alfa, se esconde de nuevo (en el tic, sin gancho)")
 check(p1.UnitFrame.mambaGancho is None and p1.UnitFrame.mambaPoniendo is None, "D16: no escribe campos propios en el UnitFrame de Blizzard")
 p1.UnitFrame.SetAlpha(p1.UnitFrame, L.eval("Secreto()"))
-check(len(list(G.ERRORES.values())) == 0, "D16: un alfa secreto en el gancho no rompe")
+C.Placas.Tick(G.RELOJ)
+check(len(list(G.ERRORES.values())) == 0 and p1.UnitFrame.alfa == 0, "D16: un alfa secreto se vuelve a bajar a 0 sin compararlo")
 p1.UnitFrame.SetAlpha(p1.UnitFrame, 0)
 check(Pl.Lista()[p2] is None and p2.UnitFrame.alfa == 1, "amigo: queda la placa del juego")
 check("ÉLITE" in str(c1.marca.texto) and "37" in str(c1.marca.texto), "élite y nivel en la placa (fue %s)" % c1.marca.texto)

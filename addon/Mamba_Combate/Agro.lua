@@ -205,7 +205,12 @@ function Ag.Dibujar()
 	Ag.Crear()
 	if barra.ejemplo then return end
 	local d = M.DB()
-	if not d.agro or M.Si(M.EnCombate()) then barra:Hide(); Ag.ultimo = nil; Ag.LimpiarPlacas(); return end
+	if not d.agro or M.Si(M.EnCombate()) then
+		barra:Hide(); Ag.ultimo = nil
+		if not Ag.limpias then Ag.LimpiarPlacas(); Ag.limpias = true end -- una vez, no cuatro por segundo
+		return
+	end
+	Ag.limpias = nil
 	local lista, peor = Ag.Revisar()
 	Ag.ultimo = { lista = lista, peor = peor }
 	if not peor and not d.agroSiempre then barra:Hide(); return end
