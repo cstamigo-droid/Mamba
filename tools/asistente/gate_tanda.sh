@@ -38,6 +38,8 @@ corre profesiones python -I $P/test_profesiones.py
 [ -f $P/test_combate.py ] && corre combate python -I $P/test_combate.py
 [ -f $P/test_combate_pvp.py ] && corre combate_pvp python -I $P/test_combate_pvp.py
 [ -f $P/test_raros.py ] && corre raros python -I $P/test_raros.py
+[ -f $P/test_version.py ] && corre version python -I $P/test_version.py addon
+[ -f $P/test_sello_zip.py ] && corre sello_zip python -I $P/test_sello_zip.py
 # todas las pruebas Node de Mamba (panel, estética, misiones, reemplazos y las que se sumen)
 for t in tests/mamba-*.test.js; do
 	n=$(basename "$t" .test.js)
