@@ -17,20 +17,24 @@ M.CURAS = {
 }
 -- Primer perfil sugerido (el jugador lo cambia): clave del clic -> id o "target" / "menu".
 M.SUGERIDO = {
-	DRUID = { ["1"] = 774, ["2"] = 8936, ["shift-1"] = 5185, ["ctrl-1"] = 2782, ["ctrl-2"] = 8946, ["3"] = 18562,
-		["4"] = 774, ["5"] = 8936, ["alt-1"] = "target", ["alt-2"] = "menu" },
+	-- pedido de Cristian (19-11): izquierdo Rejuvenecimiento, derecho Recrecimiento, lateral de atrás Toque de sanación
+	DRUID = { ["1"] = 774, ["2"] = 8936, ["4"] = 5185, ["shift-1"] = 5185, ["ctrl-1"] = 2782, ["ctrl-2"] = 8946, ["3"] = 18562,
+		["ra"] = 774, ["rb"] = 8936, ["alt-1"] = "target", ["alt-2"] = "menu" },
 	PRIEST = { ["1"] = 2061, ["2"] = 139, ["shift-1"] = 2054, ["shift-2"] = 17, ["ctrl-1"] = 527, ["ctrl-2"] = 528,
-		["4"] = 139, ["5"] = 17, ["alt-1"] = "target", ["alt-2"] = "menu" },
+		["ra"] = 139, ["rb"] = 17, ["alt-1"] = "target", ["alt-2"] = "menu" },
 	SHAMAN = { ["1"] = 8004, ["2"] = 1064, ["shift-1"] = 331, ["ctrl-1"] = 526, ["ctrl-2"] = 2870, ["alt-1"] = "target", ["alt-2"] = "menu" },
 	PALADIN = { ["1"] = 19750, ["2"] = 635, ["ctrl-1"] = 4987, ["ctrl-2"] = 1152, ["shift-2"] = 633, ["alt-1"] = "target", ["alt-2"] = "menu" },
 }
 M.CLICS = { -- clave, texto
 	{ "1", "Clic izquierdo" }, { "2", "Clic derecho" }, { "3", "Clic de la rueda" },
-	{ "4", "Rueda arriba" }, { "5", "Rueda abajo" },
+	{ "4", "Botón lateral de atrás (el de abajo)" }, { "5", "Botón lateral de adelante (el de arriba)" },
+	{ "ra", "Rueda arriba" }, { "rb", "Rueda abajo" },
 	{ "shift-1", "Mayús + clic izquierdo" }, { "shift-2", "Mayús + clic derecho" },
 	{ "ctrl-1", "Ctrl + clic izquierdo" }, { "ctrl-2", "Ctrl + clic derecho" },
 	{ "alt-1", "Alt + clic izquierdo" }, { "alt-2", "Alt + clic derecho" },
-	{ "shift-4", "Mayús + rueda arriba" }, { "shift-5", "Mayús + rueda abajo" },
+	{ "shift-4", "Mayús + lateral de atrás" }, { "shift-5", "Mayús + lateral de adelante" },
+	{ "ctrl-4", "Ctrl + lateral de atrás" }, { "ctrl-5", "Ctrl + lateral de adelante" },
+	{ "shift-ra", "Mayús + rueda arriba" }, { "shift-rb", "Mayús + rueda abajo" },
 }
 -- Lo que tu clase puede limpiar (para marcar en el marco solo eso, K16).
 M.LIMPIA = {
@@ -84,13 +88,44 @@ function M.Spec()
 end
 
 -- El perfil de clics de esta clase y especialización (se crea con el sugerido la primera vez).
+-- Perfiles viejos (hasta el 19-11): "4"/"5" eran la rueda. Si el perfil está igual al sugerido viejo, pasa al nuevo
+-- (pedido de Cristian); si el jugador lo cambió, solo se mueve su rueda a "ra"/"rb" y no se pisa nada más.
+M.SUGERIDO_VIEJO = {
+	DRUID = { ["1"] = 774, ["2"] = 8936, ["shift-1"] = 5185, ["ctrl-1"] = 2782, ["ctrl-2"] = 8946, ["3"] = 18562,
+		["4"] = 774, ["5"] = 8936, ["alt-1"] = "target", ["alt-2"] = "menu" },
+	PRIEST = { ["1"] = 2061, ["2"] = 139, ["shift-1"] = 2054, ["shift-2"] = 17, ["ctrl-1"] = 527, ["ctrl-2"] = 528,
+		["4"] = 139, ["5"] = 17, ["alt-1"] = "target", ["alt-2"] = "menu" },
+}
+local function iguales(a, b)
+	for k, v in pairs(a or {}) do if b[k] ~= v then return false end end
+	for k, v in pairs(b or {}) do if a[k] ~= v then return false end end
+	return true
+end
+function M.Migrar(p, clase)
+	if p.v2 then return p end
+	local viejo = M.SUGERIDO_VIEJO[clase]
+	if viejo and iguales(p, viejo) then
+		for k in pairs(p) do p[k] = nil end
+		for k, v in pairs(M.SUGERIDO[clase] or {}) do p[k] = v end
+	else
+		for _, pre in ipairs({ "", "shift-", "ctrl-", "alt-" }) do
+			if p[pre .. "4"] ~= nil and p[pre .. "ra"] == nil then p[pre .. "ra"], p[pre .. "4"] = p[pre .. "4"], nil end
+			if p[pre .. "5"] ~= nil and p[pre .. "rb"] == nil then p[pre .. "rb"], p[pre .. "5"] = p[pre .. "5"], nil end
+		end
+	end
+	p.v2 = true
+	return p
+end
+
 function M.Perfil()
 	local d, clase, spec = M.DB(), M.Clase(), M.Spec()
 	d.perfiles[clase] = d.perfiles[clase] or {}
 	local p = d.perfiles[clase][spec]
+	if p then return M.Migrar(p, clase) end
 	if not p then
 		p = {}
 		for k, v in pairs(M.SUGERIDO[clase] or { ["1"] = "target", ["2"] = "menu" }) do p[k] = v end
+		p.v2 = true
 		d.perfiles[clase][spec] = p
 	end
 	return p
@@ -110,11 +145,22 @@ function M.NombreAccion(v)
 	return "Nada"
 end
 
--- Atributos seguros de un clic: prefijo ("shift-") y botón ("1") -> { [atributo] = valor }
+-- Botones de los atributos seguros. 1-5 son los botones FÍSICOS del ratón (4 y 5, los laterales); la rueda va con
+-- botones virtuales propios ("RuedaArriba"/"RuedaAbajo"), que el juego nombra "-<nombre>" en los atributos.
+M.SUFIJO = { ["1"] = "1", ["2"] = "2", ["3"] = "3", ["4"] = "4", ["5"] = "5", ra = "-RuedaArriba", rb = "-RuedaAbajo" }
+function M.Partes(clave)
+	local pre, b = tostring(clave):match("^(.-)([^%-]+)$")
+	local suf = b and M.SUFIJO[b]
+	if not suf then return nil end
+	return pre or "", suf
+end
+
+-- Atributos seguros de un clic: prefijo ("shift-") y botón ("1" o "-RuedaArriba") -> { [atributo] = valor }
 function M.Atributos(perfil)
 	local out = {}
 	for clave, v in pairs(perfil) do
-		local pre, boton = clave:match("^(.-)(%d)$")
+		local pre, boton = M.Partes(clave)
+		if not pre then v = nil end
 		if v == "target" then
 			out[pre .. "type" .. boton] = "target"
 		elseif v == "menu" then

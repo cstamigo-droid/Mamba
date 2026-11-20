@@ -54,25 +54,47 @@ local function dibujarMarcos(p, ancho)
 	}, ancho, y)
 end
 
+-- "Tu ratón": un dibujo en texto de los botones del ratón con lo que hace cada uno (pedido de Cristian, 19-11).
+function M.ResumenRaton()
+	local p = M.Perfil()
+	local function q(k) return M.NombreAccion(p[k] or "nada") end
+	return ("Izquierdo: %s     Derecho: %s\nBotón de la rueda: %s     Rueda arriba: %s     Rueda abajo: %s\nLateral de atrás (el de abajo): %s     Lateral de adelante (el de arriba): %s"):format(
+		q("1"), q("2"), q("3"), q("ra"), q("rb"), q("4"), q("5"))
+end
+
+local resumen
 local function dibujarClics(p, ancho)
 	local spec = M.Spec()
-	local y = titulo(p, "Qué hace cada clic", ("Perfil de tu especialización %d: si cambias de especialización, cambia solo. La rueda funciona con el ratón encima del compañero."):format(spec))
-	local filas = {}
+	local y = titulo(p, "Qué hace cada clic", ("Perfil de tu especialización %d: si cambias de especialización, cambia solo. La rueda funciona con el ratón encima del compañero. Elige en cada menú un hechizo de los que ya tienes."):format(spec))
+	resumen = P.Texto(p, "body", "text")
+	resumen:SetPoint("TOPLEFT", p, "TOPLEFT", 16, y)
+	resumen:SetWidth(ancho - 40)
+	resumen:SetJustifyH("LEFT")
+	resumen:SetText(M.ResumenRaton())
+	y = y - 58
+	-- dos columnas: los clics sin tecla a la izquierda, con Mayús/Ctrl/Alt a la derecha
+	local mitad = math.floor((ancho - 40) / 2)
+	local yI, yD = y, y
 	for _, c in ipairs(M.CLICS) do
 		local clave = c[1]
-		filas[#filas + 1] = P.Desplegable(p, c[2], nil, opcionesClic(),
+		local f = P.Desplegable(p, c[2], nil, opcionesClic(),
 			function() return M.Perfil()[clave] or "nada" end,
 			function(v) M.Perfil()[clave] = (v ~= "nada") and v or nil; M.Cambio() end)
+		local der = clave:find("%-") ~= nil
+		f:ClearAllPoints()
+		f:SetPoint("TOPLEFT", p, "TOPLEFT", der and (16 + mitad + 8) or 16, der and yD or yI)
+		local h = P.Acomodar(f, mitad - 8) + 4
+		if der then yD = yD - h else yI = yI - h end
 	end
-	y = colocar(p, filas, ancho, y)
 	local b = P.Boton(p, "Volver al perfil sugerido", function()
 		local d = db()
 		d.perfiles[M.Clase()][M.Spec()] = nil
 		M.Perfil()
 		M.Cambio()
 	end)
-	b:SetPoint("TOPLEFT", p, "TOPLEFT", 16, y - 6)
+	b:SetPoint("TOPLEFT", p, "TOPLEFT", 16, math.min(yI, yD) - 6)
 end
+M.AlCambiar(function() if resumen then resumen:SetText(M.ResumenRaton()) end end)
 
 local function dibujar(parent, ancho)
 	for k, fn in pairs({ marcos = dibujarMarcos, clics = dibujarClics }) do

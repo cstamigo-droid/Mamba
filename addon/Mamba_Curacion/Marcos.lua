@@ -24,12 +24,12 @@ M.Claro = claro
 -- Fragmento seguro: al entrar el ratón ata la rueda a este botón; al salir la suelta.
 local ENTRAR = [[
 	for _, m in ipairs(newtable("", "SHIFT-", "CTRL-", "ALT-")) do
-		self:SetBindingClick(true, m .. "MOUSEWHEELUP", self, "Button4")
-		self:SetBindingClick(true, m .. "MOUSEWHEELDOWN", self, "Button5")
+		self:SetBindingClick(true, m .. "MOUSEWHEELUP", self, "RuedaArriba")
+		self:SetBindingClick(true, m .. "MOUSEWHEELDOWN", self, "RuedaAbajo")
 	end ]]
 local SALIR = [[ self:ClearBindings() ]]
 local function usaRueda(attrs)
-	for k in pairs(attrs) do if k:match("type[45]$") then return true end end
+	for k in pairs(attrs) do if k:match("type%-Rueda") then return true end end
 	return false
 end
 
@@ -245,9 +245,11 @@ function M.Aplicar()
 		b:SetAttribute("_onleave", rueda and SALIR or nil)
 		b:SetAttribute("_onhide", rueda and SALIR or nil)
 		for _, c in ipairs(M.CLICS) do
-			local pre, boton = c[1]:match("^(.-)(%d)$")
-			b:SetAttribute(pre .. "type" .. boton, nil)
-			b:SetAttribute(pre .. "spell" .. boton, nil)
+			local pre, boton = M.Partes(c[1])
+			if pre then
+				b:SetAttribute(pre .. "type" .. boton, nil)
+				b:SetAttribute(pre .. "spell" .. boton, nil)
+			end
 		end
 		for k, v in pairs(attrs) do b:SetAttribute(k, v) end
 	end
