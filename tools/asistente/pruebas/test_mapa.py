@@ -155,6 +155,10 @@ check(Mp.DB().diag.fallas is None, "sin fallas en diag: %s" % (Mp.DB().diag.fall
 L.execute("RELOJ = 2; GetTime = function() return RELOJ end; MambaMapa.inicio = 0")
 Mp.ActualizarCoords()
 check(Mp.TextoMini() is None, "K117: en los primeros 5 s Mamba no crea sus coordenadas (Polestar arma las suyas al entrar)")
+L.execute("MambaMapa.inicio = nil; RELOJ = 500")
+Mp.ActualizarCoords()
+check(Mp.TextoMini() is None and G.MambaMapa.inicio == 500, "K117: sin PLAYER_LOGIN visto, el reloj empieza al primer tick (no aparecen de inmediato)")
+L.execute("MambaMapa.inicio = 0; RELOJ = 2")
 G.RELOJ = 6
 Mp.ActualizarCoords()
 check(Mp.OtrasCoords() is None, "sin otras coordenadas: Mamba dibuja las suyas")

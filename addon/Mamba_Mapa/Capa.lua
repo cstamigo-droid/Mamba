@@ -213,6 +213,8 @@ end
 
 function M.ActualizarCoords()
 	local d = db()
+	-- sin PLAYER_LOGIN visto (se cargó tarde), el reloj empieza ahora: si no, el retraso de 5 s no se cumpliría
+	if not M.inicio then M.inicio = GetTime and GetTime() or 0 end
 	local otras = M.OtrasCoords()
 	-- las de Mamba nacen 5 s después de entrar (las de Polestar se arman al entrar) y nunca si ya hay otras
 	if Minimap and d.coords and not otras and (GetTime and GetTime() or 0) >= (M.inicio or 0) + 5 then
