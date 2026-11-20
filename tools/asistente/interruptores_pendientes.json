@@ -2,7 +2,6 @@
   "_nota": "K124: addons de Mamba que todavía no publican su interruptor (MambaAPI.Interruptor). Clave: carpeta del addon; valor: dueño. Solo puede achicarse: la prueba de carga completa falla si uno ya lo tiene y sigue aquí.",
   "pendientes": {
     "Mamba_Bolsas": "la sesión dueña de Mamba_Bolsas (la asigna la coordinadora 4, K124)",
-    "Mamba_Comodidades": "la sesión dueña de Mamba_Comodidades (la asigna la coordinadora 4, K124)",
-    "Mamba_Panel": "la sesión dueña de Mamba_Panel (la asigna la coordinadora 4, K124)"
+    "Mamba_Comodidades": "la sesión dueña de Mamba_Comodidades (la asigna la coordinadora 4, K124)"
   }
 }

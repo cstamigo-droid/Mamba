@@ -421,3 +421,35 @@ test('alto de las filas: con una medida vieja de una línea (como en el juego), 
 	}
 	assert.ok(out.alto >= out.suma - 0.01, 'la parte de Mamba mide lo que miden sus filas: no pisa lo de Polestar de abajo');
 });
+
+test('K124: los interruptores de Mamba_Panel están publicados y se aplican en el momento', () => {
+	const [out] = run(`
+		E.SetGuide(LEV)
+		N.Refrescar(true)
+		local por = {}
+		for _, s in ipairs(MambaInterruptoresPendientes or {}) do por[s.id] = s end
+		local ids = {}
+		for id, s in pairs(por) do if s.addon == "Mamba_Panel" then ids[#ids + 1] = id end end
+		table.sort(ids)
+		local cont = N._Piezas()
+		local antes = cont:IsShown()
+		por["panel.lineas"].set(false)
+		local apagado, getApagado = cont:IsShown(), por["panel.lineas"].get()
+		por["panel.lineas"].set(true)
+		local encendido = cont:IsShown()
+		por["panel.aviso.subasta"].set(false)
+		local silencio = N.Silenciado("subasta")
+		por["panel.aviso.subasta"].set(true)
+		por["panel.misiones"].set(false)
+		local mis = MambaPanelPJ.sinMisiones
+		emit({ ids = ids, antes = antes, apagado = apagado, getApagado = getApagado, encendido = encendido,
+			silencio = silencio, vuelve = not N.Silenciado("subasta"), mis = mis })`);
+	assert.deepEqual(out.ids, ['panel.aviso.botin', 'panel.aviso.espacio', 'panel.aviso.lugar', 'panel.aviso.subasta', 'panel.lineas', 'panel.misiones']);
+	assert.equal(out.antes, true);
+	assert.equal(out.apagado, false, 'apagado: el bloque desaparece en el momento');
+	assert.equal(out.getApagado, false);
+	assert.equal(out.encendido, true, 'encendido: vuelve sin recargar');
+	assert.equal(out.silencio, true, 'el aviso se apaga desde Opciones');
+	assert.equal(out.vuelve, true);
+	assert.equal(out.mis, true);
+});

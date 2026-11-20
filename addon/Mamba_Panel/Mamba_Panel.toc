@@ -17,3 +17,4 @@ Datos_Calabozos.lua
 Calabozos.lua
 Pestanas.lua
 Panel.lua
+Interruptor.lua

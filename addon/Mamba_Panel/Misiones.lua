@@ -123,6 +123,11 @@ local ESTADO_CADENA = { hecha = "hecha", lista = "lista para entregar", ["en el 
 local function mision(b, q, key, state, target, tlabel, fin)
 	local P = PS()
 	if not (P and P.Widgets and b and q) then return end
+	-- K124: apagado desde Opciones (la tarjeta queda como la de Polestar)
+	if N.PJ().sinMisiones then
+		if rawget(b, "MambaGuiame") then b.MambaGuiame:Hide() end
+		return
+	end
 	-- una misión del otro bando (la página no lo dice; P14 lo completa desde el Codex): sin «Guíame» ni "Falta"
 	local lado = UnitFactionGroup and UnitFactionGroup("player")
 	lado = lado == "Alliance" and "A" or lado == "Horde" and "H" or nil

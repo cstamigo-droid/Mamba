@@ -201,7 +201,7 @@ N.AltoTexto = alto
 local function lineas(GF, body, width, shown, PAD, TEXT_X, UP_ROW, UP_TOGGLE)
 	if not cont then construir(GF, body, PAD, UP_TOGGLE) end
 	local ls = N.lineas
-	if not shown or #ls == 0 then
+	if not shown or #ls == 0 or N.PJ().apagado then -- K124: apagado desde Opciones
 		cont:Hide()
 		return cont, 0
 	end
