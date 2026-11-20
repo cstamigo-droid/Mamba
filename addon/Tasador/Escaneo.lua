@@ -39,6 +39,31 @@ function T.SumarSubasta(buffer, id, cantidad, compraYa, vendedor, tramo)
 	end
 end
 
+-- Escaneo POR PÁGINAS (respaldo, A2 20-11): la subasta solo da, por objeto, el precio más bajo por unidad y el
+-- total a la venta. Sin lista ni foto: no inventa un percentil ni ventas (GuardarEscaneo no toca p ni n).
+function T.SumarGrupo(buffer, id, cantidad, minimo)
+	if type(id) ~= "number" or type(cantidad) ~= "number" or cantidad < 1 then return end
+	if type(minimo) ~= "number" or minimo <= 0 then return end
+	local b = buffer[id]
+	if not b then b = { min = minimo, cant = 0 }; buffer[id] = b end
+	if minimo < b.min then b.min = minimo end
+	b.cant = b.cant + cantidad
+end
+
+-- Segundos que faltan para poder pedir de nuevo la lista completa (0 = ya se puede). pedida = time() del pedido.
+function T.FaltaEspera(pedida, ahora, espera)
+	if type(pedida) ~= "number" or type(ahora) ~= "number" then return 0 end
+	local falta = pedida + espera - ahora
+	if falta <= 0 or falta > espera then return 0 end -- (un reloj que retrocedió no deja trabado el botón)
+	return math.ceil(falta)
+end
+
+-- 754 -> "12:34"
+function T.Reloj(seg)
+	seg = math.max(0, math.floor((seg or 0) + 0.5))
+	return string.format("%d:%02d", math.floor(seg / 60), seg % 60)
+end
+
 -- Percentil por UNIDADES: el precio al que se compra la fracción q más barata. lista = { {precio, u}, ... }
 function T.Percentil(lista, q)
 	if type(lista) ~= "table" or #lista == 0 then return nil end
@@ -132,10 +157,30 @@ end
 
 ---------------------------------------------------------------- parte del juego
 -- Las dos subastas posibles: la moderna (C_AuctionHouse.ReplicateItems) y la antigua (QueryAuctionItems
--- con getAll). NO VERIFICADO cuál trae Forever: se usa la que exista. Las dos devuelven los mismos
+-- con getAll). MEDIDO (TasadorDB.diag del 20-11): Forever trae la MODERNA. Las dos devuelven los mismos
 -- campos en el mismo orden: 3 = cantidad, 10 = "comprar ya" total, 17 = id del objeto.
+-- A2 (20-11): la lista completa la da el servidor UNA vez cada 15 min por cuenta (también la piden otros addons:
+-- ForeverHispano la pide sola al abrir la subasta). Pedida antes de tiempo, el servidor no contesta nada. Por eso:
+-- se anota cuándo se pidió (TasadorDB.pedidaCompleta, de la cuenta), se dice cuánto falta, se acepta la
+-- respuesta tardía o la que llega sin evento, y si no hay lista se escanea POR PÁGINAS (C_AuctionHouse.SendBrowseQuery).
 local estado = { activo = false }
 T.escaneo = estado
+T.ESPERA_COMPLETO = 15 * 60
+T.ESPERA_RESPUESTA = 60
+T.ESPERA_PAGINA = 30
+T.MAX_PAGINAS = 400
+
+local function ahora() return time and time() or 0 end
+
+-- Cada intento queda en TasadorDB.diagEscaneo (los últimos 10): evidencia medida para la próxima vez que falle.
+local function anotar(resultado, extra)
+	T.db = T.db or TasadorDB or {}
+	local d = T.db.diagEscaneo
+	if type(d) ~= "table" then d = {}; T.db.diagEscaneo = d end
+	d[#d + 1] = { cuando = date and date("%Y-%m-%d %H:%M:%S") or "?", api = estado.tipo or "?", resultado = resultado,
+		extra = extra ~= nil and tostring(extra) or nil }
+	while #d > 10 do table.remove(d, 1) end
+end
 
 local function moderna()
 	return C_AuctionHouse and C_AuctionHouse.ReplicateItems and C_AuctionHouse.GetNumReplicateItems
@@ -143,6 +188,18 @@ local function moderna()
 end
 local function antigua()
 	return QueryAuctionItems and GetNumAuctionItems and GetAuctionItemInfo and true or false
+end
+local function porPaginas()
+	local A = C_AuctionHouse
+	return A and A.SendBrowseQuery and A.GetBrowseResults and A.HasFullBrowseResults and A.RequestMoreBrowseResults
+		and true or false
+end
+-- Cuántas subastas tiene ahora la lista completa en el cliente (0 si no se puede leer).
+local function enCliente()
+	if not moderna() then return 0 end
+	local ok, n = pcall(C_AuctionHouse.GetNumReplicateItems)
+	n = ok and T.Leer(n)
+	return type(n) == "number" and n or 0
 end
 
 local function leer(i)
@@ -242,12 +299,19 @@ local function terminar(buffer)
 	tanda()
 end
 
-avisar = function(n, dia, ventas, segundos)
+-- Marca el día como escaneado y devuelve cuántos días distintos hay en los últimos 14.
+local function marcarDia(dia)
 	T.db.ultimoEscaneo = dia
 	T.db.diasEscaneados = T.db.diasEscaneados or {}
 	T.db.diasEscaneados[tostring(dia)] = true
 	local dias = 0
 	for d in pairs(T.db.diasEscaneados) do if tonumber(d) and tonumber(d) >= dia - T.DIAS_GUARDADOS then dias = dias + 1 end end
+	return dias
+end
+
+avisar = function(n, dia, ventas, segundos)
+	local dias = marcarDia(dia)
+	anotar("completo", n)
 	if dias >= 3 then
 		T.Decir(string.format("Escaneo listo: %d objetos con precio. Míralos en el botón de Mamba del minimapa › Subasta.", n))
 	else
@@ -281,7 +345,8 @@ local function procesar(total)
 			end
 		end)
 		if not bien then
-			estado.activo, estado.leyendo = false, false
+			estado.activo, estado.leyendo, estado.modo = false, false, nil
+			anotar("error leyendo", total)
 			T.Decir("Error leyendo la lista de la subasta: no se guardó nada.")
 			return
 		end
@@ -295,18 +360,114 @@ local function procesar(total)
 	tanda()
 end
 
--- Lo llama el botón (clic del jugador). Devuelve true si pidió la lista.
+---------------------------------------------------------------- respaldo: escaneo por páginas (subasta moderna)
+-- Pide la búsqueda vacía (todo) y va pidiendo más páginas hasta que el juego dice que están todas. Da, por objeto,
+-- el precio más bajo por unidad y la cantidad total: sirve para el cuadro del objeto, Baratos y Hierbas; las ventas
+-- estimadas (Comercio.lua) necesitan la lista completa con vendedores, así que la foto no se toca.
+local function guardarPaginas(parcial)
+	estado.activo, estado.leyendo, estado.modo = false, false, nil
+	local buffer = {}
+	local ok, lista = pcall(C_AuctionHouse.GetBrowseResults)
+	if ok and type(lista) == "table" then
+		for _, r in ipairs(lista) do
+			if type(r) == "table" then
+				local clave = T.Leer(r.itemKey)
+				local id = type(clave) == "table" and T.Leer(clave.itemID) or nil
+				T.SumarGrupo(buffer, id, T.Leer(r.totalQuantity), T.Leer(r.minPrice))
+			end
+		end
+	end
+	T.db = T.db or TasadorDB or {}
+	T.db.precios = T.db.precios or {}
+	local dia = T.DiaHoy() or 0
+	local n = T.GuardarEscaneo(T.db.precios, buffer, dia, categoria)
+	if n == 0 then
+		anotar("paginas vacio", estado.paginas)
+		T.Decir("La subasta no devolvió nada por páginas: no se guardó nada.")
+		return
+	end
+	local dias = marcarDia(dia)
+	anotar(parcial and "paginas incompleto" or "paginas", n)
+	local falta = T.FaltaEspera(T.db.pedidaCompleta, ahora(), T.ESPERA_COMPLETO)
+	T.Decir(string.format("Escaneo por páginas listo%s: %d objetos con su precio más bajo y cantidad (días escaneados: %d). "
+		.. "Para las ventas estimadas hace falta el escaneo completo: %s.", parcial and " (la subasta dejó de contestar: quedó incompleto)" or "",
+		n, dias, falta > 0 and ("se puede de nuevo en " .. T.Reloj(falta)) or "aprieta Escanear de nuevo"))
+	if T.AlTerminarEscaneo then pcall(T.AlTerminarEscaneo) end
+end
+
+-- Si una página no llega en 30 s, se guarda lo que hay (no queda «Ya estoy escaneando» pegado).
+local function vigilarPagina()
+	if not (C_Timer and C_Timer.After) then return end
+	local vuelta, desde = estado.paginas, estado.desde
+	C_Timer.After(T.ESPERA_PAGINA, function()
+		if estado.activo and estado.modo == "paginas" and estado.paginas == vuelta and estado.desde == desde then
+			guardarPaginas(true)
+		end
+	end)
+end
+
+local function empezarPaginas()
+	estado.activo, estado.leyendo, estado.modo, estado.paginas = true, false, "paginas", 0
+	estado.desde = GetTime and GetTime() or 0
+	local orden = Enum and Enum.AuctionHouseSortOrder and Enum.AuctionHouseSortOrder.Price or 0
+	local ok, err = pcall(C_AuctionHouse.SendBrowseQuery,
+		{ searchString = "", sorts = { { sortOrder = orden, reverseSort = false } }, filters = {}, itemClassFilters = {} })
+	if not ok then
+		estado.activo, estado.modo = false, nil
+		anotar("paginas error", err)
+		T.Decir("No pude escanear por páginas: " .. tostring(err))
+		return false
+	end
+	vigilarPagina()
+	return true
+end
+
+local function llegoPagina()
+	if not (estado.activo and estado.modo == "paginas") then return end
+	estado.paginas = estado.paginas + 1
+	local ok, todas = pcall(C_AuctionHouse.HasFullBrowseResults)
+	todas = ok and T.Leer(todas)
+	if todas == true or estado.paginas >= T.MAX_PAGINAS then guardarPaginas(todas ~= true) return end
+	if not pcall(C_AuctionHouse.RequestMoreBrowseResults) then guardarPaginas(true) return end
+	vigilarPagina()
+end
+
+---------------------------------------------------------------- el botón
+-- Lo llama el botón (clic del jugador). Devuelve true si empezó un escaneo (completo o por páginas).
 function T.Escanear()
-	if estado.activo then T.Decir("Ya estoy escaneando: espera unos segundos.") return false end
+	if estado.activo then
+		if estado.modo == "paginas" then
+			T.Decir(string.format("Ya estoy escaneando por páginas (%d leídas): espera unos segundos.", estado.paginas or 0))
+		else
+			local seg = GetTime and estado.desde and math.floor(GetTime() - estado.desde) or 0
+			T.Decir(string.format("Ya estoy escaneando: pedí la lista hace %d s; espero hasta %d s y, si no llega, sigo por páginas.",
+				seg, T.ESPERA_RESPUESTA))
+		end
+		return false
+	end
 	if estado.guardando then T.Decir("Estoy guardando el escaneo anterior: espera unos segundos.") return false end
+	T.db = T.db or TasadorDB or {}
+	local falta = T.FaltaEspera(T.db.pedidaCompleta, ahora(), T.ESPERA_COMPLETO)
 	if moderna() then
 		estado.tipo = "moderna"
+		if falta > 0 then
+			anotar("espera", falta)
+			if porPaginas() then
+				T.Decir("El juego da la lista completa una vez cada 15 minutos por cuenta: faltan " .. T.Reloj(falta)
+					.. ". Mientras, escaneo por páginas (precio más bajo y cantidad de cada objeto).")
+				return empezarPaginas()
+			end
+			T.Decir("El juego da la lista completa una vez cada 15 minutos por cuenta: faltan " .. T.Reloj(falta) .. ".")
+			return false
+		end
 	elseif antigua() then
 		estado.tipo = "antigua"
 		if CanSendAuctionQuery then
 			local _, todo = CanSendAuctionQuery()
-			if not todo then
-				T.Decir("El juego permite un escaneo completo cada 15 minutos. Prueba más tarde.")
+			if not T.Leer(todo) then
+				anotar("espera", falta)
+				T.Decir("El juego permite un escaneo completo cada 15 minutos. "
+					.. (falta > 0 and ("Faltan " .. T.Reloj(falta) .. ".") or "Prueba en unos minutos."))
 				return false
 			end
 		end
@@ -314,32 +475,61 @@ function T.Escanear()
 		T.Decir("No encuentro la subasta del juego. Abre la casa de subastas primero.")
 		return false
 	end
-	estado.activo = true
+	estado.activo, estado.modo, estado.tarde = true, "completo", false
 	estado.desde = GetTime and GetTime() or 0
-	-- si el servidor no contesta en 60 s (espera de 15 min, o esta subasta no existe en Forever), se suelta
+	estado.antes = enCliente()
+	T.db.pedidaCompleta = ahora()
+	anotar("pedida")
+	-- si el servidor no contesta en 60 s: ¿llegó la lista sin el evento? si no, por páginas (y se acepta la tardía)
 	local yo = estado.desde
 	if C_Timer and C_Timer.After then
-		C_Timer.After(60, function()
-			if estado.activo and not estado.leyendo and estado.desde == yo then
-				estado.activo = false
-				T.Decir("La subasta no mandó la lista en 60 segundos. Prueba de nuevo en 15 minutos.")
+		C_Timer.After(T.ESPERA_RESPUESTA, function()
+			if not (estado.activo and estado.modo == "completo" and not estado.leyendo and estado.desde == yo) then return end
+			local n = enCliente()
+			if n > 0 and n ~= estado.antes then anotar("sin evento", n); procesar(n) return end
+			anotar("sin respuesta", estado.antes)
+			if estado.tipo == "moderna" and porPaginas() then
+				estado.tarde = true
+				T.Decir("La subasta no mandó la lista completa en " .. T.ESPERA_RESPUESTA .. " segundos (el juego la da una vez cada 15 minutos"
+					.. " por cuenta y otro addon pudo haberla pedido). Sigo por páginas: precio más bajo y cantidad de cada objeto.")
+				empezarPaginas()
+				return
 			end
+			estado.activo, estado.modo = false, nil
+			T.Decir("La subasta no mandó la lista en " .. T.ESPERA_RESPUESTA .. " segundos. El juego la da una vez cada 15 minutos por cuenta: prueba de nuevo en "
+				.. T.Reloj(T.FaltaEspera(T.db.pedidaCompleta, ahora(), T.ESPERA_COMPLETO)) .. ".")
 		end)
 	end
+	local ok, err
 	if estado.tipo == "moderna" then
-		C_AuctionHouse.ReplicateItems()
+		ok, err = pcall(C_AuctionHouse.ReplicateItems)
 	else
-		QueryAuctionItems("", nil, nil, 0, nil, nil, true)
+		ok, err = pcall(QueryAuctionItems, "", nil, nil, 0, nil, nil, true)
+	end
+	if not ok then
+		estado.activo, estado.modo = false, nil
+		anotar("error al pedir", err)
+		T.Decir("El juego no aceptó el pedido de la lista: " .. tostring(err))
+		return false
 	end
 	T.Decir("Escaneando la subasta... te aviso cuando termine.")
 	return true
 end
 
 local function alLlegarLista(evento)
-	if not estado.activo or estado.leyendo then return end -- el evento puede llegar varias veces
+	if estado.leyendo then return end -- el evento puede llegar varias veces (y mientras se lee, de eco)
 	if evento == "REPLICATE_ITEM_LIST_UPDATE" and estado.tipo == "moderna" then
-		procesar(C_AuctionHouse.GetNumReplicateItems())
-	elseif evento == "AUCTION_ITEM_LIST_UPDATE" and estado.tipo == "antigua" then
+		if estado.activo and estado.modo == "completo" then
+			procesar(enCliente())
+		elseif estado.tarde then
+			-- la respuesta llegó después de los 60 s: vale más que el escaneo por páginas (trae vendedores)
+			estado.tarde = false
+			estado.activo, estado.modo = true, "completo"
+			anotar("tarde", enCliente())
+			T.Decir("Llegó la lista completa (tarde): la leo.")
+			procesar(enCliente())
+		end
+	elseif evento == "AUCTION_ITEM_LIST_UPDATE" and estado.tipo == "antigua" and estado.activo then
 		procesar(GetNumAuctionItems("list") or 0) -- con getAll llega todo en una sola lista
 	end
 end
@@ -396,6 +586,9 @@ f:RegisterEvent("AUCTION_HOUSE_SHOW")
 f:RegisterEvent("AUCTION_HOUSE_CLOSED")
 f:RegisterEvent("REPLICATE_ITEM_LIST_UPDATE")
 pcall(f.RegisterEvent, f, "AUCTION_ITEM_LIST_UPDATE") -- solo existe en la subasta antigua; en Forever da error y cortaba el archivo
+-- las páginas del respaldo (solo en la subasta moderna; con pcall por si el cliente no las tiene)
+pcall(f.RegisterEvent, f, "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")
+pcall(f.RegisterEvent, f, "AUCTION_HOUSE_BROWSE_RESULTS_ADDED")
 -- K124: al cambiar el interruptor con la subasta abierta, el botón aparece o se va en el momento.
 function T.AplicarBotonEscanear()
 	local padre = AuctionHouseFrame or AuctionFrame
@@ -411,7 +604,9 @@ f:SetScript("OnEvent", function(_, evento)
 		if C_Timer and C_Timer.After then C_Timer.After(1, function() pcall(ponerBoton); pcall(T.Diagnostico, false) end) end
 	elseif evento == "AUCTION_HOUSE_CLOSED" then
 		if estado.activo then T.Decir("Cerraste la subasta antes de terminar: el escaneo quedó a medias, no se guardó.") end
-		estado.activo = false
+		estado.activo, estado.modo, estado.tarde = false, nil, false
+	elseif evento == "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED" or evento == "AUCTION_HOUSE_BROWSE_RESULTS_ADDED" then
+		llegoPagina()
 	else
 		alLlegarLista(evento)
 	end

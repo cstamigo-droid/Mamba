@@ -263,5 +263,160 @@ T.GuardarEscaneo(G.TasadorDB.precios, b, T.DiaHoy() - 10)
 L.execute('PRICES[2447] = 120; AGES = nil')
 check(T.PrecioSubasta("|Hitem:2447::::::::|h[x]|h", 2447)[0] == 120, "Auctionator sin edad gana a un propio de hace 10 días")
 
+# ---------- 8. A2 (20-11): «Ya estoy escaneando» + «no mandó la lista en 60 segundos», nunca escaneaba.
+# Medido: Forever trae la subasta MODERNA (TasadorDB.diag) y la lista completa la da el servidor una vez cada 15 min
+# por cuenta; pedida antes, no contesta. Ahora: tiempo restante real, respuesta tardía o sin evento, y por páginas.
+RELOJ = r'''
+-- reloj que avanza a mano y temporizador con demora: RunDelay(d) corre solo los de esa demora
+SEG = 0
+local t0 = time
+function time(t) if t then return t0(t) end return t0() + SEG end
+TIMERS2 = {}
+C_Timer = { After = function(d, fn) table.insert(TIMERS2, { d, fn }) end }
+function RunDelay(max)
+	local hubo = true
+	while hubo do
+		hubo = false
+		for k, x in ipairs(TIMERS2) do
+			if x[1] == max then table.remove(TIMERS2, k); x[2](); hubo = true; break end
+		end
+	end
+end
+-- búsqueda por páginas simulada: PAGINAS = { { {id, cantidad, minimo}, ... }, ... } (una tabla por página)
+BROWSE, MAS, PAGINAS, VISTAS = 0, 0, {}, 0
+function ConPaginas()
+	C_AuctionHouse.SendBrowseQuery = function(q) BROWSE = BROWSE + 1; QUERY = q; VISTAS = 1 end
+	C_AuctionHouse.RequestMoreBrowseResults = function() MAS = MAS + 1; VISTAS = VISTAS + 1 end
+	C_AuctionHouse.HasFullBrowseResults = function() return VISTAS >= #PAGINAS end
+	C_AuctionHouse.GetBrowseResults = function()
+		local r = {}
+		for p = 1, math.min(VISTAS, #PAGINAS) do
+			for _, x in ipairs(PAGINAS[p]) do
+				table.insert(r, { itemKey = { itemID = x[1], itemLevel = 1 }, totalQuantity = x[2], minPrice = x[3] })
+			end
+		end
+		return r
+	end
+end
+'''
+
+
+def nuevo_a2(paginas=True):
+    L, T = nuevo()
+    L.execute(RELOJ)
+    G = L.globals()
+    G.UsarModerna()
+    if paginas:
+        G.ConPaginas()
+    G.AuctionHouseFrame = L.table()
+    L.execute('Fire("AUCTION_HOUSE_SHOW")')
+    return L, T, G
+
+
+# puras (con el Escaneo.lua de antes del arreglo no existen: falla, no se cae)
+if T.FaltaEspera is None or T.Reloj is None:
+    check(False, "A2: faltan T.FaltaEspera / T.Reloj")
+else:
+    check(T.FaltaEspera(1000, 1060, 900) == 840 and T.Reloj(840) == "14:00", "A2: faltan 14:00 un minuto después del pedido")
+    check(T.FaltaEspera(1000, 1900, 900) == 0 and T.FaltaEspera(None, 5, 900) == 0, "A2: pasados 15 min (o sin pedido) ya se puede")
+    check(T.FaltaEspera(1000, 500, 900) == 0, "A2: un reloj que retrocede no deja el botón trabado")
+
+# a) el caso de Cristian: el servidor no contesta -> a los 60 s sigue por páginas y GUARDA precios
+L, T, G = nuevo_a2()
+L.execute('PAGINAS = { { {2447, 20, 100}, {785, 2, 150} }, { {2447, 5, 80} } }')
+check(T.Escanear() and G.PEDIDOS == 1, "A2a: el clic pide la lista completa")
+T.Escanear()
+check(any("pedí la lista hace" in c for c in chat(L)), "A2a: doble clic dice hace cuánto pidió y hasta cuándo espera")
+L.execute('RunDelay(0)')
+check(G.BROWSE == 0, "A2a (control): antes de los 60 s no escanea por páginas")
+G.SEG = 60
+L.execute('RunDelay(60)')
+check(G.BROWSE == 1 and G.QUERY.searchString == "" and any("Sigo por páginas" in c for c in chat(L)), "A2a: a los 60 s sin lista sigue por páginas")
+L.execute('Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")')
+check(G.MAS == 1 and T.escaneo.activo, "A2a: pide la página siguiente")
+L.execute('Fire("AUCTION_HOUSE_BROWSE_RESULTS_ADDED")')
+dia = str(T.DiaHoy())
+p = G.TasadorDB.precios
+check(p is not None and p["2447"] is not None and p["2447"].l[dia] == 80 and p["2447"].a[dia] == 25 and p["785"].l[dia] == 150,
+      "A2a: precios guardados por páginas (mínimo por unidad y cantidad total)")
+check(not T.escaneo.activo and any("Escaneo por páginas listo" in c and "14:" in c for c in chat(L)),
+      "A2a: termina, suelta el botón y dice el tiempo real que falta para el completo")
+check(p is not None and p["2447"] is not None and p["2447"].p is None and G.TasadorDB.foto is None, "A2a: por páginas no inventa percentil ni foto de ventas")
+check(G.TasadorDB.ultimoEscaneo == T.DiaHoy(), "A2a: cuenta como día escaneado")
+diag = G.TasadorDB.diagEscaneo
+res = [diag[i].resultado for i in range(1, len(diag) + 1)]
+check(res == ["pedida", "sin respuesta", "paginas"], f"A2a: cada intento queda en TasadorDB.diagEscaneo ({res})")
+
+# b) otro clic dentro de los 15 min: NO pide la lista (no contestaría), dice cuánto falta y va por páginas
+G.SEG = 300
+L.execute('VISTAS = 0')
+T.Escanear()
+check(G.PEDIDOS == 1 and G.BROWSE == 2 and any("faltan 10:00" in c for c in chat(L)), "A2b: dentro de los 15 min dice «faltan 10:00» y va por páginas")
+L.execute('Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED"); Fire("AUCTION_HOUSE_BROWSE_RESULTS_ADDED")')
+check(not T.escaneo.activo, "A2b: termina")
+# control negativo: pasados los 15 min, SÍ pide la lista completa
+G.SEG = 15 * 60 + 1
+check(T.Escanear() and G.PEDIDOS == 2, "A2b (control): pasados los 15 min pide la lista completa otra vez")
+
+# c) la lista completa llega TARDE (ya escaneando por páginas): se lee la completa (trae vendedores y foto)
+L, T, G = nuevo_a2()
+L.execute('PAGINAS = { { {2447, 1, 999} }, { {785, 1, 999} } }')
+T.Escanear()
+L.execute('RunDelay(60)')
+L.execute('SUBASTAS = { {2447, 20, 2000}, {2447, 5, 400} }')
+L.execute('Fire("REPLICATE_ITEM_LIST_UPDATE")')
+L.execute('RunDelay(0)')
+L.execute('Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")')  # una página que llega después: ya no cuenta
+L.execute('RunDelay(30)')
+p = G.TasadorDB.precios
+check(any("tarde" in c for c in chat(L)) and p["2447"].l[str(T.DiaHoy())] == 80 and p["785"] is None,
+      "A2c: la respuesta tardía gana al escaneo por páginas")
+check(G.TasadorDB.foto is not None and not T.escaneo.activo, "A2c: con la completa sí guarda la foto de ventas")
+
+# d) la lista llega SIN evento: a los 60 s la ve en el cliente y la lee (no va por páginas)
+L, T, G = nuevo_a2()
+T.Escanear()
+L.execute('SUBASTAS = { {2447, 4, 400} }')
+L.execute('RunDelay(60)')
+check(G.BROWSE == 0 and G.TasadorDB.precios["2447"].l[str(T.DiaHoy())] == 100, "A2d: lista sin evento: la lee igual")
+
+# e) una página que nunca llega: a los 30 s guarda lo que hay y suelta el botón (no queda «Ya estoy escaneando»)
+L, T, G = nuevo_a2()
+L.execute('PAGINAS = { { {2447, 3, 90} }, { {785, 1, 50} } }')
+T.Escanear()
+L.execute('RunDelay(60)')
+L.execute('Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")')
+L.execute('RunDelay(30)')
+check(not T.escaneo.activo and G.TasadorDB.precios["2447"] is not None and any("incompleto" in c for c in chat(L)),
+      "A2e: página que no llega: guarda lo que hay y suelta el botón")
+T.Escanear()
+check(not any("Ya estoy escaneando" in c for c in chat(L)[-1:]), "A2e: el botón responde de nuevo")
+
+# f) sin páginas en el cliente: mensaje con el tiempo real, nunca «Ya estoy escaneando» pegado
+L, T, G = nuevo_a2(paginas=False)
+T.Escanear()
+G.SEG = 60
+L.execute('RunDelay(60)')
+check(not T.escaneo.activo and any("prueba de nuevo en 14:" in c for c in chat(L)), "A2f: sin respaldo dice cuánto falta de verdad")
+check(not T.Escanear() and any("faltan 14:" in c for c in chat(L)[-1:]), "A2f: otro clic: «faltan» con el tiempo restante")
+
+# g) cerrar la subasta a medias del escaneo por páginas: no queda pegado
+L, T, G = nuevo_a2()
+L.execute('PAGINAS = { { {2447, 3, 90} }, { {785, 1, 50} } }')
+T.Escanear()
+L.execute('RunDelay(60)')
+L.execute('Fire("AUCTION_HOUSE_CLOSED")')
+check(not T.escaneo.activo and not T.escaneo.tarde, "A2g: cerrar la subasta suelta el escaneo por páginas")
+L.execute('Fire("REPLICATE_ITEM_LIST_UPDATE")')
+check(not T.escaneo.activo, "A2g: una lista que llega después de cerrar no reabre nada")
+
+# h) el diag guarda solo los últimos 10
+L, T, G = nuevo_a2(paginas=False)
+for k in range(12):
+    G.SEG = k * 1000
+    T.Escanear()
+    L.execute('RunDelay(60)')
+check(len(G.TasadorDB.diagEscaneo) == 10, "A2h: diagEscaneo guarda los últimos 10")
+
 print(f"OK {ok} · FALLAS {fail}")
 sys.exit(1 if fail else 0)
