@@ -46,8 +46,10 @@ Si instalaste varias versiones, cada QUITAR retrocede una.
 
 CUANDO HAYA UNA VERSIÓN NUEVA
 -----------------------------
-Cristian deja el ZIP nuevo en el MISMO enlace de siempre.
-Bájalo y repite los pasos 1 a 5. No hace falta quitar la anterior.
+El juego te avisa cuando alguien del grupo tiene una versión más nueva.
+Cierra el juego y haz doble clic en «Actualizar Mamba» en tu escritorio.
+(Si no lo tienes: baja el ZIP nuevo del mismo enlace y repite los pasos 1 a 5;
+no hace falta quitar la anterior.)
 
 
 IMPORTANTE

@@ -32,6 +32,13 @@ NOREPLY = b"cstamigo-droid@users.noreply.github.com"
 PUBLICADO = "f924685f7"  # punta de origin/asistente en GitHub (16-11): la rama nueva tiene que contenerla
 EXCLUIR = ["--remotes=upstream", "--tags"]  # lo de Polestar no se reescribe
 CABECERA = re.compile(rb"^(author|committer) (.*) <([^>]*)> (\d+ [+-]\d{4})$")
+# Revisor (20-11): datos personales DENTRO de los archivos (número de cuenta de WoW, usuario de Windows). La lista
+# vive en <.git>/mamba_ocultar.txt (nunca se publica), una línea por dato: "texto => reemplazo". El correo
+# personal se agrega solo (-> noreply).
+OCULTAR: list[tuple[bytes, bytes]] = []
+# Plantillas de Polestar que en el fork confunden (Discord, botón de donar a fitzforge, @fitzforge como revisor):
+# se quitan en la rama publicada junto con los workflows.
+QUITAR_RUTAS = (".github/workflows", ".github/ISSUE_TEMPLATE", ".github/FUNDING.yml", ".github/CODEOWNERS")
 
 
 def git(*a: str, entrada: bytes | None = None) -> bytes:
@@ -53,9 +60,28 @@ def correo_personal() -> bytes:
     return c
 
 
+def leer_ocultar() -> list[tuple[bytes, bytes]]:
+    lista = [(PERSONAL, NOREPLY)]
+    comun = Path(git("rev-parse", "--git-common-dir").decode().strip())
+    f = (comun if comun.is_absolute() else RAIZ / comun) / "mamba_ocultar.txt"
+    if f.exists():
+        for l in f.read_text("utf-8").splitlines():
+            if "=>" in l and not l.lstrip().startswith("#"):
+                a, b = (x.strip() for x in l.split("=>", 1))
+                if a:
+                    lista.append((a.encode("utf-8"), b.encode("utf-8")))
+    return lista
+
+
+def ocultar(datos: bytes) -> bytes:
+    for a, b in OCULTAR:
+        datos = datos.replace(a, b)
+    return datos
+
+
 def workflows() -> list[bytes]:
-    """Rutas de .github/workflows en la punta de asistente (las que se borran en cada commit reescrito)."""
-    salida = git("ls-tree", "-r", "--name-only", ORIGEN, "--", ".github/workflows")
+    """Rutas que se borran en cada commit reescrito: los workflows y las plantillas de Polestar (QUITAR_RUTAS)."""
+    salida = git("ls-tree", "-r", "--name-only", ORIGEN, "--", *QUITAR_RUTAS)
     return [l for l in salida.splitlines() if l]
 
 
@@ -91,8 +117,9 @@ def reescribir(flujo: bytes, borrar: list[bytes]) -> tuple[bytes, int]:
             largo = int(linea[5:])
             carga = flujo[sig:sig + largo]
             sig = sig + largo
-            if PERSONAL in carga:  # también dentro de los archivos y los mensajes (revisor, 20-11)
-                carga = carga.replace(PERSONAL, NOREPLY)
+            nueva = ocultar(carga)  # también dentro de los archivos y los mensajes (revisor, 20-11)
+            if nueva != carga:
+                carga = nueva
                 if commit is not None:
                     tocado = True
             bloque = b"data %d\n" % len(carga) + carga
@@ -123,29 +150,33 @@ def armar() -> None:
     nuevo, cambiados = reescribir(flujo, borrar)
     git("fast-import", "--quiet", "--force", entrada=nuevo)
     print(f"publica: {git('rev-parse', '--short', DESTINO).decode().strip()} · {cambiados} commits reescritos · "
-          f"{len(borrar)} workflows quitados")
+          f"{len(borrar)} archivos de .github quitados · {len(OCULTAR)} datos ocultos")
 
 
 def revisar() -> int:
     fallas = []
     rango = [DESTINO, "--not", *EXCLUIR]
-    if PERSONAL in git("log", "-p", "--format=", *rango):
-        fallas.append("queda el correo personal DENTRO de algún archivo del historial reescrito")
-    if subprocess.run(["git", "-C", str(RAIZ), "grep", "-q", "-F", PERSONAL.decode(), DESTINO]).returncode == 0:
-        fallas.append("queda el correo personal dentro de un archivo de la punta")
+    historia = git("log", "-p", "--format=", *rango)
+    for k, (a, _) in enumerate(OCULTAR):
+        que = "el correo personal" if k == 0 else f"el dato oculto n.º {k}"
+        if a in historia:
+            fallas.append(f"queda {que} DENTRO de algún archivo del historial reescrito")
+        if subprocess.run(["git", "-C", str(RAIZ), "grep", "-q", "-F", a.decode("utf-8"), DESTINO]).returncode == 0:
+            fallas.append(f"queda {que} dentro de un archivo de la punta")
     for fmt, que in (("%ae", "autor"), ("%ce", "committer"), ("%B", "mensaje")):
         if PERSONAL in git("log", f"--format={fmt}", *rango):
             fallas.append(f"queda el correo personal en {que}")
     if PERSONAL in git("log", "--format=%ae%n%ce%n%B", DESTINO):
         fallas.append("queda el correo personal en algún commit de la rama (también los de Polestar)")
     dif = git("diff", "--name-only", ORIGEN, DESTINO).decode().split()
-    # Fuera de los workflows, solo puede diferir un archivo cuyo único cambio sea el correo personal -> noreply.
-    otros = [d for d in dif if not d.startswith(".github/workflows/")
-             and git("show", f"{ORIGEN}:{d}").replace(PERSONAL, NOREPLY) != git("show", f"{DESTINO}:{d}")]
+    # Fuera de lo quitado, solo puede diferir un archivo cuyo único cambio sean los datos ocultos.
+    quitado = tuple(r if r.endswith(".yml") or r.endswith("CODEOWNERS") else r + "/" for r in QUITAR_RUTAS)
+    otros = [d for d in dif if not (d.startswith(quitado) or d in QUITAR_RUTAS)
+             and ocultar(git("show", f"{ORIGEN}:{d}")) != git("show", f"{DESTINO}:{d}")]
     if otros:
-        fallas.append(f"publica difiere de asistente fuera de .github/workflows: {otros[:5]}")
-    if git("ls-tree", "-r", "--name-only", DESTINO, "--", ".github/workflows").strip():
-        fallas.append("publica todavía tiene workflows")
+        fallas.append(f"publica difiere de asistente en algo más que lo quitado y lo oculto: {otros[:5]}")
+    if git("ls-tree", "-r", "--name-only", DESTINO, "--", *QUITAR_RUTAS).strip():
+        fallas.append("publica todavía tiene workflows o plantillas de Polestar")
     if subprocess.run(["git", "-C", str(RAIZ), "merge-base", "--is-ancestor", PUBLICADO, DESTINO]).returncode != 0:
         fallas.append(f"{PUBLICADO} (lo ya publicado) no es ancestro: el push necesitaría forzar")
     n_or = git("rev-list", "--count", ORIGEN).strip()
@@ -166,6 +197,7 @@ if __name__ == "__main__":
     if "--destino" in sys.argv:
         DESTINO = sys.argv[sys.argv.index("--destino") + 1]
     PERSONAL = correo_personal()
+    OCULTAR = leer_ocultar()
     if "--revisar" not in sys.argv:
         armar()
     sys.exit(revisar())

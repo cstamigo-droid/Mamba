@@ -5,7 +5,7 @@
 *Mamba is **not** the official Polestar. It is a fork of [Polestar](https://github.com/fitzforge/polestar) (by Fitz and contributors, GPL-3.0) for World of Warcraft: Forever, Horde and Spanish only. For the official addon, go to Polestar.*
 
 - **Descargar e instalar:** página de [Releases](https://github.com/cstamigo-droid/Mamba/releases/latest). Baja `Mamba_Horda.zip` y sigue los 5 pasos de su `LEEME.txt`. Para actualizar después, usa «Actualizar Mamba» en el escritorio.
-- **Errores de Mamba:** van [aquí](https://github.com/cstamigo-droid/Mamba/issues), **no** a Polestar.
+- **Errores de Mamba:** en la ventana de Mamba, «Errores» (abajo a la izquierda): sácale una captura y mándasela a Cristian. **No** se informan a Polestar.
 - **Ojo:** si actualizas Polestar desde la app de CurseForge, reemplaza las carpetas de Mamba por las oficiales. Vuelve a correr el instalador de Mamba.
 
 ## Licencia y créditos

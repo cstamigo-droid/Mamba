@@ -238,7 +238,7 @@ try {
             Register-ScheduledTask -TaskName 'Mamba - revisar version nueva' -Action $acc -Trigger $dis -Settings $aj -Force | Out-Null
         }
     }
-} catch { $avisoAct = "`n`n(No pude dejar el acceso directo «Actualizar Mamba»: $($_.Exception.Message). Mamba quedó instalada igual.)" }
+} catch { $avisoAct = "`n`n(No pude dejar listo «Actualizar Mamba» del todo: $($_.Exception.Message). Mamba quedó instalada igual; si falta el acceso directo, para actualizar baja el ZIP nuevo y vuelve a instalar.)" }
 
 Decir ''
 Decir ("Copiadas: {0} carpetas." -f $copiar.Count)

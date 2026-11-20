@@ -72,10 +72,12 @@ de Polestar (LICENSE-EXCEPTION.md). Es un fork de Polestar
 No es el Polestar oficial.
 
 El código de los addons va tal cual en la carpeta archivos/Mamba (Lua y XML).
-El código fuente correspondiente completo de esta versión (incluidas las
-herramientas y los datos de origen con que se generaron los archivos de datos)
-está en el archivo {fuente}, que se entrega en el MISMO lugar y por el
-mismo enlace que este ZIP, sin costo (GPL-3.0, sección 6d).
+El código fuente de esta versión, con las herramientas que generan los archivos
+de datos (forge y tools/), está en el archivo {fuente}, que se entrega en el
+MISMO lugar y por el mismo enlace que este ZIP, sin costo (GPL-3.0, sección 6d).
+Los archivos de datos generados (por ejemplo Polestar_Codex y Polestar_QuestDB)
+van ya armados en este ZIP: forge los genera a partir de fuentes externas, que
+cada carpeta nombra en su LICENSE-DATA.txt; esas fuentes no van incluidas.
 
 Los addons de otros autores que van incluidos conservan su licencia y sus
 créditos dentro de su carpeta; su único cambio es una línea en su .toc que
