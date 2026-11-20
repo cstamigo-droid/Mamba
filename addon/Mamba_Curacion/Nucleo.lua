@@ -42,12 +42,19 @@ M.LIMPIA = {
 	PALADIN = { Magic = true, Poison = true, Disease = true }, MAGE = { Curse = true },
 }
 
-M.DEFECTO = { mover = false, mostrar = "grupo", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
+-- A4 (20-11): por defecto «siempre»: jugando solo se ve tu propio marco y te curas con los clics
+M.DEFECTO = { mover = false, mostrar = "siempre", ancho = 90, alto = 38, columnas = 5, escala = 1, solo = true, hots = true, limpiar = true, rango = true }
 
 function M.DB()
 	MambaCuraDB = MambaCuraDB or {}
 	local d = MambaCuraDB
 	for k, v in pairs(M.DEFECTO) do if d[k] == nil then d[k] = v end end
+	-- A4 (20-11), una sola vez: quien tenía «Solo en grupo» guardado (el defecto viejo) no veía su marco jugando solo
+	if not d.migradoSolo then
+		d.migradoSolo = true
+		if d.mostrar == "grupo" then d.mostrar = "siempre" end
+		d.solo = true
+	end
 	d.perfiles = d.perfiles or {}
 	d.diag = d.diag or {}
 	return d

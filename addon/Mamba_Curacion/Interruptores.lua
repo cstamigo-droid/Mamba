@@ -16,16 +16,29 @@ end
 
 publicar({ id = "curacion.marcos", addon = "Mamba_Curacion", grupo = "Curación",
 	nombre = "Marcos de grupo con clic para curar",
-	ayuda = "Encendido: se ven en grupo (o como elegiste en Interfaz › Curación). En combate, el cambio se aplica al terminar la pelea.",
+	ayuda = "Encendido: se ven como elegiste en Interfaz › Curación (por defecto, siempre). En combate, el cambio se aplica al terminar la pelea.",
 	get = function() return M.DB().mostrar ~= "nunca" end,
 	set = function(v)
 		local d = M.DB()
-		if v then d.mostrar = (d.mostrarAntes and d.mostrarAntes ~= "nunca") and d.mostrarAntes or "grupo"
+		if v then d.mostrar = (d.mostrarAntes and d.mostrarAntes ~= "nunca") and d.mostrarAntes or "siempre"
 		else
 			if d.mostrar ~= "nunca" then d.mostrarAntes = d.mostrar end
 			d.mostrar = "nunca"
 		end
 		M.MostrarSegun()
+	end })
+
+-- A4 (20-11): «Mostrar mi marco»: encendido = siempre (también jugando solo); apagado = solo en grupo.
+-- «Nunca» se elige en el interruptor de arriba o en Interfaz › Curación.
+publicar({ id = "curacion.solo", addon = "Mamba_Curacion", grupo = "Curación",
+	nombre = "Mostrar mi marco también cuando juego solo",
+	ayuda = "Encendido: tu marco se ve siempre y te curas con los clics aunque no tengas grupo. Apagado: solo en grupo. Se mueve con el resto (Mover marcos). En combate, el cambio se aplica al terminar la pelea.",
+	get = function() local d = M.DB(); return d.mostrar == "siempre" and d.solo and true or false end,
+	set = function(v)
+		local d = M.DB()
+		if v then d.mostrar = "siempre"; d.solo = true
+		elseif d.mostrar ~= "nunca" then d.mostrar = "grupo" end
+		M.Cambio()
 	end })
 
 local function ajuste(clave)

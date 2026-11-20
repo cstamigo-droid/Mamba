@@ -246,5 +246,52 @@ r = Cu.ResumenRaton()
 check("Lateral de atrás" in r and "Rueda arriba" in r and "Izquierdo" in r, "Clics: el resumen dibuja los botones del ratón")
 pre, suf = Cu.Partes("shift-ra")
 check(pre == "shift-" and suf == "-RuedaArriba", "Mayús + rueda arriba = shift-type-RuedaArriba")
+# ---------- A4 (20-11): jugando solo no se veía mi propio marco (defecto «grupo» escondía la cabecera)
+def solo_visible(L, guardado):
+    """Carga con un MambaCuraDB guardado, sin grupo y sin rol que fuerce: ¿se ve la cabecera con showSolo?"""
+    G = L.globals()
+    G.MambaCuraDB = L.eval(guardado)
+    G.EN_GRUPO = False; G.COMBATE = False
+    L.execute('Fire("PLAYER_LOGIN")')
+    cab = G.MambaCuraCabecera
+    return bool(cab.visible and cab.attr["showSolo"] and cab.attr["showPlayer"])
+
+check(solo_visible(nuevo(), "nil"), "A4: instalación nueva, sin grupo: mi marco se ve (defecto «siempre» + showSolo)")
+check(solo_visible(nuevo(), '{ mostrar = "grupo", solo = false }'), "A4: «Solo en grupo» guardado del defecto viejo: se migra una vez y mi marco se ve")
+L = nuevo(); G = L.globals()
+check(not solo_visible(L, '{ mostrar = "grupo", migradoSolo = true }'), "A4: después de migrar, si eliges «Solo en grupo» se respeta")
+check(not solo_visible(nuevo(), '{ mostrar = "nunca" }'), "A4: «Nunca» guardado sigue mandando (no lo pisa la migración)")
+# el interruptor de Ajustes › Mamba › Qué se muestra (sin MambaAPI.Interruptor queda en la lista pendiente)
+L = nuevo(); G = L.globals()
+solo_visible(L, "nil")
+specs = {s.id: s for s in G.MambaInterruptoresPendientes.values()}
+sw = specs.get("curacion.solo")
+check(sw is not None and sw.addon == "Mamba_Curacion" and sw.grupo == "Curación" and sw.get() is True, "A4: interruptor «Mostrar mi marco también cuando juego solo», encendido por defecto")
+if sw is not None:
+    cab = G.MambaCuraCabecera
+    sw.set(False)
+    check(Cu.DB is not None and G.MambaCuraDB.mostrar == "grupo" and not cab.visible and sw.get() is False, "A4: apagado = solo en grupo: sin grupo se esconde")
+    G.COMBATE = True; L.execute("BLOQUEOS = {}")
+    sw.set(True)
+    check(len(list(G.BLOQUEOS.values())) == 0 and not cab.visible, "A4: en combate no toca la cabecera segura (sin taint): %s" % list(G.BLOQUEOS.values()))
+    G.COMBATE = False; L.execute('Fire("PLAYER_REGEN_ENABLED")')
+    check(cab.visible and G.MambaCuraDB.mostrar == "siempre", "A4: al salir de combate se aplica y mi marco aparece")
+    check(L.eval("MambaCuraCabecera.padre == MambaCuraAncla and MambaCuraAncla.raton == false"),
+          "A4: mi marco cuelga del ancla movible (se mueve con el resto)")
+# control negativo: con el defecto viejo y sin migración, la prueba TIENE que ver el marco escondido
+def nuevo_viejo():
+    L = LuaRuntime(unpack_returned_tuples=True)
+    L.execute((AQUI / "mock_barras.lua").read_text(encoding="utf-8"))
+    L.execute(MOCK)
+    cargar = L.eval('function(src, name, M) local f, e = loadstring(src, "@"..name); if not f then error(e) end; f("Mamba_Curacion", M) end')
+    M = L.table()
+    for n in ARCHIVOS:
+        src = (D / n).read_text(encoding="utf-8")
+        if n == "Nucleo.lua":
+            src = src.replace('mostrar = "siempre",', 'mostrar = "grupo",').replace("if not d.migradoSolo then", "if false then")
+        cargar(src, n, M)
+    return L
+check(not solo_visible(nuevo_viejo(), '{ mostrar = "grupo" }') and not solo_visible(nuevo_viejo(), "nil"),
+      "A4 control negativo: con el defecto viejo la prueba ve el marco escondido (el detector sirve)")
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

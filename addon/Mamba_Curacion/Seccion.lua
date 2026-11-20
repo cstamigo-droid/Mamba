@@ -42,7 +42,7 @@ local function dibujarMarcos(p, ancho)
 	local function S(et, ay, a, b, paso, fmt, k) return P.Deslizador(p, et, ay, a, b, paso, fmt, function() return d[k] end, function(v) d[k] = v; M.Cambio() end) end
 	colocar(p, {
 		P.Desplegable(p, "Mostrar", "Solo en grupo, siempre o nunca. Los modos de pelea también los muestran u ocultan.",
-			{ { value = "grupo", text = "Solo en grupo" }, { value = "siempre", text = "Siempre" }, { value = "nunca", text = "Nunca" } },
+			{ { value = "grupo", text = "Solo en grupo" }, { value = "siempre", text = "Siempre (también solo: ves tu marco)" }, { value = "nunca", text = "Nunca" } },
 			function() return d.mostrar end, function(v) d.mostrar = v; M.Cambio() end),
 		I("Mover marcos", "Muestra un asa arriba de los marcos para arrastrarlos (solo fuera de combate). Apágalo al terminar.", "mover"),
 		I("Incluirme a mí cuando juego solo", nil, "solo"),
