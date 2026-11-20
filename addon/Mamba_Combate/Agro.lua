@@ -55,6 +55,8 @@ function Ag.SondasHechizo()
 					vistos[id] = true
 					local ok, info = pcall(C_Spell.GetSpellInfo, id)
 					local alc = ok and type(info) == "table" and M.Num(info.maxRange)
+					local minimo = ok and type(info) == "table" and M.Num(info.minRange) or 0
+					if minimo > 0 then alc = nil end -- con alcance mínimo, «fuera» puede ser «demasiado cerca»
 					local dano = true
 					if C_Spell.IsSpellHarmful then local okH, h = pcall(C_Spell.IsSpellHarmful, id); dano = not okH or M.Si(h) end
 					-- uno por alcance (con varios plates y 4 veces por segundo, cada sonda cuenta)
@@ -89,7 +91,7 @@ function Ag.Distancia(u)
 	if CheckInteractDistance then
 		for _, x in ipairs(Ag.INTERACCION) do
 			local ok, v = pcall(CheckInteractDistance, u, x[1])
-			v = ok and leer(v)
+			if ok then v = leer(v) else v = nil end
 			if v == nil then dg.interaccionNil = dg.interaccionNil + 1 else dg.interaccion = dg.interaccion + 1 end
 			if v ~= nil then dato(v and true or false, x[2]) end
 		end
@@ -97,7 +99,7 @@ function Ag.Distancia(u)
 	if C_Spell and C_Spell.IsSpellInRange then
 		for _, s in ipairs(Ag.SondasHechizo()) do
 			local ok, v = pcall(C_Spell.IsSpellInRange, s.nombre, u)
-			v = ok and leer(v)
+			if ok then v = leer(v) else v = nil end
 			if v == nil then dg.hechizoNil = dg.hechizoNil + 1 else dg.hechizo = dg.hechizo + 1 end
 			if v ~= nil then dato((v == true or v == 1), s.alcance) end
 		end
@@ -112,9 +114,9 @@ function Ag.Peligro(u)
 	if not R then return nil end
 	local lo, hi = Ag.Distancia(u)
 	if hi and hi <= R then return "rojo", R, lo, hi end
-	if lo >= R + 8 then return "verde", R, lo, hi end
-	if hi == nil and lo == 0 then return nil, R end -- ninguna sonda respondió
-	return "amarillo", R, lo, hi
+	if lo >= R then return "verde", R, lo, hi end      -- seguro fuera de su radio
+	if hi == nil then return nil, R, lo, hi end         -- más lejos que todo lo medible, pero el radio es mayor: no se sabe
+	return "amarillo", R, lo, hi                         -- puede estar dentro (entre lo y hi está el borde)
 end
 
 -- Lado de la pantalla de su placa: -1 (izquierda) … 0 (delante) … 1 (derecha), o nil.
@@ -175,7 +177,9 @@ function Ag.Revisar()
 	if not (N and N.GetNamePlates) then return lista, nil end
 	for _, p in ipairs(N.GetNamePlates() or {}) do
 		local u = p.namePlateUnitToken or (p.UnitFrame and p.UnitFrame.unit)
-		if u and Ag.EsAgresivo(u) then
+		local agresivo = u and Ag.EsAgresivo(u)
+		if u and not agresivo and M.Placas and M.Placas.MarcarAgro then M.Placas.MarcarAgro(u, nil) end
+		if agresivo then
 			local nivel, R, lo, hi = Ag.Peligro(u)
 			if nivel == "rojo" or nivel == "amarillo" then
 				lista[#lista + 1] = { unidad = u, nivel = nivel, lado = Ag.Lado(p), radio = R, lo = lo, hi = hi }
@@ -188,11 +192,20 @@ function Ag.Revisar()
 	return lista, peor
 end
 
+function Ag.LimpiarPlacas()
+	local N = C_NamePlate
+	if not (N and N.GetNamePlates and M.Placas and M.Placas.MarcarAgro) then return end
+	for _, p in ipairs(N.GetNamePlates() or {}) do
+		local u = p.namePlateUnitToken or (p.UnitFrame and p.UnitFrame.unit)
+		if u then M.Placas.MarcarAgro(u, nil) end
+	end
+end
+
 function Ag.Dibujar()
 	Ag.Crear()
 	if barra.ejemplo then return end
 	local d = M.DB()
-	if not d.agro or M.EnCombate() then barra:Hide(); Ag.ultimo = nil; return end
+	if not d.agro or M.Si(M.EnCombate()) then barra:Hide(); Ag.ultimo = nil; Ag.LimpiarPlacas(); return end
 	local lista, peor = Ag.Revisar()
 	Ag.ultimo = { lista = lista, peor = peor }
 	if not peor and not d.agroSiempre then barra:Hide(); return end

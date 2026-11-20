@@ -175,8 +175,9 @@ function Pl.MarcarAgro(unidad, nivel)
 	local N = C_NamePlate
 	local placa = N and N.GetNamePlateForUnit and N.GetNamePlateForUnit(unidad)
 	local c = placa and placas[placa]
-	if not c or not c:IsShown() or c.objetivo then return end
+	if not c then return end
 	c.agro = nivel
+	if not c:IsShown() or c.objetivo then return end
 	for _, t in ipairs(c.borde) do
 		if nivel == "rojo" then t:SetColorTexture(1, 0.2, 0.1, 1)
 		elseif nivel == "amarillo" then t:SetColorTexture(1, 0.65, 0.1, 1)
@@ -209,7 +210,10 @@ function Pl.Pintar(unidad)
 	-- objetivo: borde claro
 	local obj = UnitIsUnit and leer(UnitIsUnit(unidad, "target"))
 	for _, t in ipairs(c.borde) do
-		if obj then t:SetColorTexture(1, 1, 1, 0.95) else t:SetColorTexture(0, 0, 0, 1) end
+		if obj then t:SetColorTexture(1, 1, 1, 0.95)
+		elseif c.agro == "rojo" then t:SetColorTexture(1, 0.2, 0.1, 1)
+		elseif c.agro == "amarillo" then t:SetColorTexture(1, 0.65, 0.1, 1)
+		else t:SetColorTexture(0, 0, 0, 1) end
 	end
 	c.objetivo = obj and true or false
 	-- nombre (secreto o no, va tal cual) y nivel solo si se puede leer

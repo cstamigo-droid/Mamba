@@ -375,6 +375,63 @@ check(d_ag.interaccion > 0 and d_ag.hechizo > 0, "K123: diag cuenta qué sondas 
 check(C.movibles["MambaAgro"] == "Indicador de agro", "K123: entra en «Mover elementos»")
 L.execute("UnitAffectingCombat = AFECTA_ORIG")
 
+# ---------- K123, revisor tanda 9: la barrita no tiene que mentir
+L.execute("""
+CID_ORIG = CheckInteractDistance
+CheckInteractDistance = function() error("prohibido") end
+""")
+G.DIST.nameplate5 = 8
+niv, R, lo, hi = Ag.Peligro("nameplate5")
+check(niv == "amarillo" and lo < 28 and hi == 30, "K123 rev1: si CheckInteractDistance falla, la sonda no cuenta como «lejos» (%s lo %s hi %s)" % (niv, lo, hi))
+L.execute("CheckInteractDistance = CID_ORIG")
+# 2) disparo con alcance mínimo 8: con el bicho pegado el juego dice «fuera»; no se usa
+L.execute("""
+NOMBRES[75] = "Disparo automático"; CONOCE[75] = true
+GI_ORIG = C_Spell.GetSpellInfo
+C_Spell.GetSpellInfo = function(id) if id == 75 then return { name = NOMBRES[75], minRange = 8, maxRange = 35 } end; return GI_ORIG(id) end
+IR_ORIG = C_Spell.IsSpellInRange
+C_Spell.IsSpellInRange = function(n, u) if n == NOMBRES[75] then local d = DIST[u]; return d ~= nil and d >= 8 and d <= 35 end; return IR_ORIG(n, u) end
+""")
+Ag.Olvidar()
+pasos = C.Rotacion.Datos().specs[1].casos.solo.pasos
+L.execute("table.insert(MambaCombate.Rotacion.Datos().specs[1].casos.solo.pasos, { h = 75, cuando = '' })")
+Ag.Olvidar()
+G.DIST.nameplate5 = 4
+niv = Ag.Peligro("nameplate5")[0]
+check(niv == "rojo" and all(x.id != 75 for x in Ag.SondasHechizo().values()), "K123 rev2: hechizos con alcance mínimo no se usan como sonda (%s)" % niv)
+L.execute("table.remove(MambaCombate.Rotacion.Datos().specs[1].casos.solo.pasos); C_Spell.GetSpellInfo = GI_ORIG; C_Spell.IsSpellInRange = IR_ORIG")
+Ag.Olvidar()
+# 3) bicho 3 niveles más (radio 23) a 32 yd: verde (antes quedaba amarillo para siempre); calavera a 40: no se sabe
+L.execute("UNIDADES.nameplate5.nivel = 42")
+G.DIST.nameplate5 = 32
+niv = Ag.Peligro("nameplate5")[0]
+check(niv == "verde", "K123 rev3: radio 23 y el bicho a más de 30 yd: verde (%s)" % niv)
+L.execute("UNIDADES.nameplate5.nivel = -1")
+G.DIST.nameplate5 = 40
+niv = Ag.Peligro("nameplate5")[0]
+check(niv is None, "K123 rev3: calavera más lejos que todo lo medible: no se sabe, no amarillo eterno (%s)" % niv)
+L.execute("UNIDADES.nameplate5.nivel = 39")
+# 4) en combate secreto: sin error y escondida
+L.execute('EN_COMBATE = Secreto(); COMBATE = false')
+n_f = len(list((C.DB().diag.fallas or L.table()).values()))
+Ag.Dibujar()
+check(not Ag.Barra().visible and len(list((C.DB().diag.fallas or L.table()).values())) == n_f, "K123 rev4: combate secreto: sin falla y escondida")
+L.execute('EN_COMBATE = false')
+# BAJA: el borde vuelve a negro cuando el bicho deja de contar, y Pl.Pintar no lo pisa
+C.DB().agroPlacas = True
+G.DIST.nameplate5 = 8
+L.execute('UnitAffectingCombat = function(u) if u == "player" then return false end; return u ~= "nameplate5" end')
+L.execute('Fire("NAME_PLATE_UNIT_ADDED", "nameplate5")')
+Ag.Dibujar()
+cp = C.Placas.Lista()[G.PLACAS[1]]
+check(cp is not None and cp.agro == "rojo", "K123 BAJA: la placa queda marcada en rojo")
+C.Placas.Pintar("nameplate5")
+check(cp.agro == "rojo", "K123 BAJA: repintar la placa no borra la marca de agro (no parpadea)")
+L.execute('UnitAffectingCombat = function(u) return u ~= "player" end')  # ahora ya pelea: deja de contar
+Ag.Dibujar()
+check(cp.agro is None, "K123 BAJA: el bicho que ya no cuenta pierde la marca (vuelve a negro)")
+L.execute('UnitAffectingCombat = AFECTA_ORIG')
+
 # ---------- K124: cada parte de combate se apaga desde Opciones (MambaAPI.Interruptor), en el momento
 specs = G.MambaInterruptoresPendientes
 ids = [x.id for x in specs.values() if x.addon == "Mamba_Combate"]
