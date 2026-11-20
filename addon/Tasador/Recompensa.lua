@@ -199,6 +199,7 @@ function T.EngancharRecompensas()
 	local rankPolestar, markPolestar = R.Rank, R.Mark
 	R.Rank = function(choices)
 		local order, reason = rankPolestar(choices)
+		if not T.Encendido("recompensa") then return order, reason end -- K124: apagada, manda el orden de Polestar
 		local ok, res = pcall(T.RecompensaDe, choices)
 		if not (ok and res and res.index) then return order, reason end
 		local nuevo = { res.index }
@@ -212,7 +213,7 @@ function T.EngancharRecompensas()
 		local enLog = _G.QuestInfoFrame and _G.QuestInfoFrame.questLog
 		local panel = _G.QuestFrameRewardPanel
 		local oculto = p.Hidden and p.Hidden()
-		if enLog or oculto or not (panel and panel.IsShown and panel:IsShown()) then
+		if enLog or oculto or not T.Encendido("recompensa") or not (panel and panel.IsShown and panel:IsShown()) then
 			T.OcultarFranjaRecompensa()
 			return marcado
 		end

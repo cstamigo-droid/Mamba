@@ -16,13 +16,17 @@
 #   - SECCIONES DEL HUB: claves repetidas en Polestar.UI.RegisterSection y empates de `order` en el riel (aviso).
 #   - RIEL SIN «PRÓXIMAMENTE» (K109): se abre cada sección del riel; ninguna puede mostrar «Próximamente» /
 #     «Coming soon» ni quedar sin un solo texto a la vista (FALLA).
+#   - K124 «TODO SE APAGA DESDE QUÉ SE MUESTRA»: cada addon de Mamba que escucha eventos del juego o cuelga un marco
+#     de la pantalla publicó su MambaAPI.Interruptor (o está en tools/asistente/interruptores_pendientes.json con
+#     dueño; esa lista solo se achica), cada interruptor cumple get/set y todos están en Ajustes › Mamba (FALLA).
 #
 # Sale con 1 si hay errores de Lua, globales pisadas, choques de comandos o una sección del riel en «Próximamente» o vacía.
 #
 # Uso (desde el repositorio Mamba):
 #   python -I tools/asistente/pruebas/test_carga_completa.py [carpeta paquete] [--pj REINO/PERSONAJE] [--romper] [--detalle]
 #   --romper: control negativo (agrega un addon falso que pisa SlashCmdList, repite /capa, engancha el cuadro dos
-#             veces, da un error y suma al riel una sección que dice «Próximamente»): la prueba TIENE que fallar y nombrarlo.
+#             veces, da un error y suma al riel una sección que dice «Próximamente», un addon que escucha eventos sin
+#             interruptor y un interruptor cuyo set no hace nada): la prueba TIENE que fallar y nombrarlo.
 #   --detalle: además lista las globales con nombre de API que los addons leyeron y no existían en el simulado.
 #
 # Lo que el simulado NO hace (NO VERIFICADO aquí): marcos y plantillas definidos en XML (solo se cargan los
@@ -1329,6 +1333,111 @@ for k, m in riel_malas:
 for k, m in riel_no_abre:
     print(f"  (NO VERIFICADO) {k}: el simulado no la pudo abrir: {m}")
 
+# K124 (regla de Cristian, 19-11): todo lo de Mamba que se ve o actúa solo se enciende y se apaga desde Ajustes ›
+# Mamba › Qué se muestra (MambaAPI.Interruptor, Asistente/Interruptores.lua). Se recorre cada addon de Mamba del
+# paquete: si creó un marco que escucha eventos del juego o que cuelga de la pantalla (UIParent/Minimap), tiene que
+# haber publicado al menos un interruptor con su nombre de addon. Los que todavía no lo tienen están en
+# tools/asistente/interruptores_pendientes.json con su dueño: la lista solo puede achicarse (si uno ya tiene su
+# interruptor y sigue en la lista, también FALLA, para sacarlo). Además, cada interruptor cumple su contrato: get()
+# da un booleano, set(no v) lo da vuelta y set(v) lo deja como estaba.
+import json
+PENDIENTES_K124 = json.loads((AQUI.parent / "interruptores_pendientes.json").read_text(encoding="utf-8"))["pendientes"]
+if ROMPER:
+    L.execute("""
+    H.actual = "ZZ_SinInterruptor"
+    local f = CreateFrame("Frame", "ZZSinInterruptorMarco", UIParent)
+    f:RegisterEvent("PLAYER_TARGET_CHANGED")
+    H.actual = "ZZ_Romper"
+    if MambaAPI and MambaAPI.Interruptor then
+      MambaAPI.Interruptor({ id = "zz.roto", addon = "ZZ_Romper", nombre = "Roto", grupo = "Otros",
+        get = function() return true end, set = function() end })
+    end
+    H.actual = "(prueba)"
+    """)
+L.execute(r"""
+-- Lo que «se ve o actúa solo»: un marco del addon que escucha eventos que no son solo de carga, o que cuelga
+-- directo de la pantalla o del minimapa.
+local CARGA = { ADDON_LOADED = true, PLAYER_LOGIN = true, PLAYER_ENTERING_WORLD = true, VARIABLES_LOADED = true,
+  PLAYER_LOGOUT = true, GET_ITEM_INFO_RECEIVED = true }
+function H.k124Actividad()
+  local act = {}
+  for _, f in ipairs(TODOS) do
+    local d = rawget(f, "__dueno")
+    if d and d ~= "(prueba)" then
+      local motivo
+      for e in pairs(rawget(f, "ev") or {}) do if type(e) == "string" and not CARGA[e] then motivo = "escucha " .. e break end end
+      if not motivo and rawget(f, "todos") then motivo = "escucha todos los eventos" end
+      local p = rawget(f, "padre")
+      if not motivo and (p == UIParent or p == Minimap) and type(rawget(f, "nombre")) == "string" then motivo = "marco " .. rawget(f, "nombre") .. " en pantalla" end
+      if motivo and not act[d] then act[d] = motivo end
+    end
+  end
+  return act
+end
+""")
+act_k124 = {str(k): str(v) for k, v in L.eval("function() return H.k124Actividad() end")().items()}
+api_k124 = G.MambaAPI
+interruptores = []
+if api_k124 is not None and api_k124.Interruptores is not None:
+    interruptores = [dict(id=str(x.id), addon=str(x.addon), grupo=str(x.grupo), nombre=str(x.nombre)) for x in lista(api_k124.Interruptores())]
+con_interruptor = {x["addon"] for x in interruptores}
+k124_sin, k124_viejos, k124_contrato = [], [], []
+for addon in sorted(set(act_k124) | set(PENDIENTES_K124)):
+    if lado(addon) != "Mamba":
+        continue
+    tiene = addon in con_interruptor
+    if addon in act_k124 and not tiene and addon not in PENDIENTES_K124:
+        k124_sin.append((addon, act_k124[addon]))
+    if tiene and addon in PENDIENTES_K124:
+        k124_viejos.append(addon)
+# contrato: por cada interruptor, get -> bool; set(no v) lo da vuelta; set(v) lo devuelve
+probar_k124 = L.eval("""function(id)
+  local api = MambaAPI
+  local v0 = api.InterruptorEncendido(id)
+  if type(v0) ~= "boolean" then return "get no da un booleano" end
+  local spec
+  for _, x in ipairs(api._InterruptoresCrudos and api._InterruptoresCrudos() or {}) do if x.id == id then spec = x end end
+  if not spec then return "no está en el registro" end
+  local ok, e = pcall(spec.set, not v0)
+  if not ok then return "set falla: " .. tostring(e):sub(1, 100) end
+  if api.InterruptorEncendido(id) ~= (not v0) then return "set(" .. tostring(not v0) .. ") no lo cambia" end
+  ok, e = pcall(spec.set, v0)
+  if not ok then return "set falla al volver: " .. tostring(e):sub(1, 100) end
+  if api.InterruptorEncendido(id) ~= v0 then return "set(" .. tostring(v0) .. ") no lo deja como estaba" end
+  return nil
+end""")
+for x in interruptores:
+    m = probar_k124(x["id"])
+    if m is not None:
+        k124_contrato.append((x["id"], str(m)))
+# y que llegan a la ventana de ajustes de Polestar: Ajustes › Mamba › «Qué se muestra», un control por interruptor
+en_ajustes = L.eval("""function()
+  local W = Polestar and Polestar.Widgets
+  if not (W and W.OnOptionsRegistered) then return -1 end
+  local n = 0
+  W.OnOptionsRegistered(function(spec)
+    if spec.page == "Mamba" and spec.tab == "Qué se muestra" then
+      for _, c in ipairs(spec.controls or {}) do if c.kind == "toggle" then n = n + 1 end end
+    end
+  end)
+  return n
+end""")()
+if en_ajustes != -1 and en_ajustes != len(interruptores):
+    k124_contrato.append(("(Ajustes)", f"«Qué se muestra» tiene {en_ajustes} controles y hay {len(interruptores)} interruptores"))
+print(f"\n== K124: TODO SE APAGA DESDE «QUÉ SE MUESTRA»: {len(interruptores)} interruptores de {len(con_interruptor)} addons · "
+      f"sin interruptor: {len(k124_sin)} · pendientes con dueño: {len([a for a in PENDIENTES_K124 if a not in con_interruptor])} · "
+      f"lista vieja: {len(k124_viejos)} · contrato roto: {len(k124_contrato)} · en Ajustes: {en_ajustes if en_ajustes != -1 else 'NO VERIFICADO'}")
+for a, m in k124_sin:
+    print(f"  - FALLA {a}: {m} y no publicó ningún interruptor (MambaAPI.Interruptor)")
+for a in k124_viejos:
+    print(f"  - FALLA {a} ya tiene interruptor: sacarlo de tools/asistente/interruptores_pendientes.json")
+for i, m in k124_contrato:
+    print(f"  - FALLA interruptor {i}: {m}")
+for a, d in sorted(PENDIENTES_K124.items()):
+    if a not in con_interruptor:
+        print(f"  (pendiente) {a}: {act_k124.get(a, 'sin actividad en el simulado')} · dueño: {d}")
+k124_falla = len(k124_sin) + len(k124_viejos) + len(k124_contrato)
+
 falto = lista(G.FALTO)
 print(f"\n== AGREGADO AL SIMULADO EN ESTA PRUEBA ({len(falto)} entradas; los mocks compartidos no se tocaron):")
 print("  " + "; ".join(str(x) for x in falto))
@@ -1343,8 +1452,8 @@ else:
     print(f"  ({len(nil_leidas)} globales con nombre de API leídas y ausentes: --detalle las lista; la mayoría son addons opcionales)")
 print(f"  SavedVariables de addons fuera del paquete, no cargadas (como el cliente): {len(SV_FUERA)}")
 
-falla = len(errores) > 0 or len(pisadas) > 0 or len(cambiadas) > 0 or len(choques_cmd) > 0 or len(riel_malas) > 0
+falla = len(errores) > 0 or len(pisadas) > 0 or len(cambiadas) > 0 or len(choques_cmd) > 0 or len(riel_malas) > 0 or k124_falla > 0
 print(f"\nRESULTADO: {len(ADDONS)} addons, {len(errores)} errores de Lua, {len(pisadas)} globales pisadas, "
-      f"{len(choques_cmd)} choques de comandos, {len(riel_malas)} secciones del riel en Próximamente o vacías, {len(dup)} hooks duplicados (aviso), {len(avisos_riel)} avisos del riel"
+      f"{len(choques_cmd)} choques de comandos, {len(riel_malas)} secciones del riel en Próximamente o vacías, {k124_falla} fallas K124, {len(dup)} hooks duplicados (aviso), {len(avisos_riel)} avisos del riel"
       f" → {'FALLA' if falla else 'OK'}" + (" [--romper]" if ROMPER else ""))
 sys.exit(1 if falla else 0)

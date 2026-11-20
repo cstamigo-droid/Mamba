@@ -210,6 +210,7 @@ function M.Iniciar()
 	p.precios = p.precios or {}
 	M.pj = p
 	M.sesion = {}
+	if MedidorDB.apagado then M.pausa = true end -- K124: apagado en Ajustes › Mamba › Qué se muestra
 end
 
 -- "%s has been reset." -> patrón Lua (el texto viene en el idioma del cliente)

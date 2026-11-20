@@ -80,3 +80,23 @@ SlashCmdList.MEDIDOR = M.Comando
 
 -- La sección «Medidor» de la ventana de Mamba lee los datos desde aquí.
 _G.Medidor = M
+
+-- K124: interruptor en Ajustes › Mamba › Qué se muestra (registro: Asistente/Interruptores.lua).
+local function publicar(spec)
+	local api = _G.MambaAPI
+	if type(api) == "table" and api.Interruptor then
+		local ok, err = api.Interruptor(spec)
+		if not ok and geterrorhandler then geterrorhandler()(err) end
+	else
+		_G.MambaInterruptoresPendientes = _G.MambaInterruptoresPendientes or {}
+		table.insert(_G.MambaInterruptoresPendientes, spec)
+	end
+end
+publicar({ id = "medidor.reloj", addon = "Medidor", nombre = "Medir oro y experiencia por hora", grupo = "Oro",
+	ayuda = "Cuenta, mientras juegas, cuánto oro y experiencia ganas por hora en cada actividad.",
+	get = function() return not M.pausa end,
+	set = function(v)
+		M.pausa = not v
+		MedidorDB = MedidorDB or {}
+		MedidorDB.apagado = (not v) or nil
+	end })

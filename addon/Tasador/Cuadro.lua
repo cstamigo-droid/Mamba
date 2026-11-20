@@ -108,6 +108,7 @@ local ACCION = {
 }
 
 function T.AgregarLineas(tooltip, link, datos)
+	if not T.Encendido("cuadro") then return end -- K124
 	local ligado = T.LigadoEnTextos(T.TextosDeDatos(datos))
 	local info = T.InfoDe(link, ligado)
 	if not info then return end

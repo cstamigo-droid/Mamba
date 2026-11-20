@@ -7,6 +7,7 @@ local db
 local pendientes = {}
 
 local function anotar(msg, pila, tipo)
+	if db and db.apagado then return end -- K124: apagado en Ajustes › Mamba › Qué se muestra
 	msg = tostring(msg or "?")
 	local e = { msg = msg, pila = pila, tipo = tipo, hora = date and date("%Y-%m-%d %H:%M:%S") or "", veces = 1 }
 	if not db then
@@ -139,3 +140,22 @@ SlashCmdList.MAMBAERRORES = function(arg)
 	end
 	print("Escribe /errores borrar para vaciar la lista.")
 end
+
+-- K124: interruptor en Ajustes › Mamba › Qué se muestra (registro: Asistente/Interruptores.lua).
+local function publicar(spec)
+	local api = _G.MambaAPI
+	if type(api) == "table" and api.Interruptor then
+		local ok, err = api.Interruptor(spec)
+		if not ok and geterrorhandler then geterrorhandler()(err) end
+	else
+		_G.MambaInterruptoresPendientes = _G.MambaInterruptoresPendientes or {}
+		table.insert(_G.MambaInterruptoresPendientes, spec)
+	end
+end
+publicar({ id = "errores.anotar", addon = "Mamba_Errores", nombre = "Guardar los errores de Lua", grupo = "Errores",
+	ayuda = "Anota cada error de la interfaz para que se pueda arreglar. No muestra nada en pantalla.",
+	get = function() return not (MambaErroresDB and MambaErroresDB.apagado) end,
+	set = function(v)
+		MambaErroresDB = type(MambaErroresDB) == "table" and MambaErroresDB or {}
+		MambaErroresDB.apagado = (not v) or nil
+	end })

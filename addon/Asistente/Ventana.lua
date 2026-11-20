@@ -538,6 +538,13 @@ function A.MostrarBotonMinimapa()
 	if boton then boton:Show() end
 end
 
+-- K124: el interruptor de Ajustes › Mamba › Qué se muestra.
+function A.BotonMinimapaVisible() return not dbMinimapa().oculto end
+function A.FijarBotonMinimapa(v)
+	dbMinimapa().oculto = not v
+	A.MostrarBotonMinimapa()
+end
+
 function A.AlternarBotonMinimapa()
 	local db = dbMinimapa()
 	db.oculto = not db.oculto

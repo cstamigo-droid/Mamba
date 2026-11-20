@@ -4,6 +4,11 @@
 local _, T = ...
 
 T.db = nil -- se llena en ADDON_LOADED con TasadorDB
+-- K124: ¿está encendida esta parte? (cuadro, escanear, recompensa, alerta). Encendida salvo que se apague en
+-- Ajustes › Mamba › Qué se muestra (TasadorDB.ajustes[clave] = false).
+function T.Encendido(clave)
+	return not (T.db and T.db.ajustes and T.db.ajustes[clave] == false)
+end
 
 -- Valores secretos: el cliente de Forever puede entregar valores "secretos" que se pueden
 -- mostrar pero no comparar ni usar como clave. Se convierten en nil antes de usarlos

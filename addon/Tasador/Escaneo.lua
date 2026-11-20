@@ -348,6 +348,10 @@ T._AlLlegarLista = alLlegarLista
 -- Botón en la ventana de subasta (la moderna o la antigua).
 local boton
 local function ponerBoton()
+	if not T.Encendido("escanear") then -- K124: apagado en Ajustes › Mamba › Qué se muestra
+		if boton then boton:Hide() end
+		return
+	end
 	if boton then boton:Show() return end
 	local padre = AuctionHouseFrame or AuctionFrame
 	if not padre then return end
@@ -392,6 +396,13 @@ f:RegisterEvent("AUCTION_HOUSE_SHOW")
 f:RegisterEvent("AUCTION_HOUSE_CLOSED")
 f:RegisterEvent("REPLICATE_ITEM_LIST_UPDATE")
 pcall(f.RegisterEvent, f, "AUCTION_ITEM_LIST_UPDATE") -- solo existe en la subasta antigua; en Forever da error y cortaba el archivo
+-- K124: al cambiar el interruptor con la subasta abierta, el botón aparece o se va en el momento.
+function T.AplicarBotonEscanear()
+	local padre = AuctionHouseFrame or AuctionFrame
+	if padre and padre.IsShown and padre:IsShown() then pcall(ponerBoton)
+	elseif boton and not T.Encendido("escanear") then boton:Hide() end
+end
+
 f:SetScript("OnEvent", function(_, evento)
 	if evento == "AUCTION_HOUSE_SHOW" then
 		pcall(ponerBoton)

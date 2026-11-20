@@ -25,5 +25,6 @@ SecLugares.lua
 SecVarias.lua
 SecTalentos.lua
 Grupos.lua
+Interruptores.lua
 Lugares.lua
 Llevame.lua
