@@ -76,6 +76,7 @@ ScriptErrorsFrame:DisplayMessageInternal("una advertencia", 1)
 G = L.globals()
 lista = G.MambaErroresDB.lista
 check(len(list(lista.values())) == 1 and "error de prueba" in str(lista[1].msg), "A: con scriptErrors=0 anota el error por DisplayMessageInternal (y no la advertencia)")
+check(G.MambaErroresDB.diag.descartadosPorTipo == 1 and str(G.MambaErroresDB.diag.ultimoTipoDescartado) == "1", "A: el diag cuenta la advertencia descartada por tipo (y guarda el tipo)")
 check(G.MambaErroresDB.diag.enganchado is True and "DisplayMessageInternal" in str(G.MambaErroresDB.diag.via), f"A: el diag dice enganchado por DisplayMessageInternal ({G.MambaErroresDB.diag.via})")
 check(str(lista[1].pila) == "pila de X", f"A: guarda la pila que manda Blizzard (tercer argumento) ({lista[1].pila})")
 check(G.MambaErroresDB.diag.mudo is None, "A: no queda mudo")
@@ -92,14 +93,14 @@ G = L.globals()
 lista = G.MambaErroresDB.lista
 check(len(list(lista.values())) == 1 and "otro" in str(lista[1].msg), "B: sin ScriptErrorsFrame anota por ScriptErrors:AddUnhandledError")
 
-# D) cliente viejo con OnError (sin pila): toma debugstack
+# D) cliente viejo con OnError (sin pila): la pila queda nil (la de debugstack sería la del manejador, engañosa)
 L = nuevo()
 L.execute('ScriptErrorsFrame = { OnError = function(self, msg) end }')
 cargar(L)
 L.execute('Fire("PLAYER_LOGIN"); ScriptErrorsFrame:OnError("Z.lua:3: viejo")')
 G = L.globals()
 lista = G.MambaErroresDB.lista
-check(len(list(lista.values())) == 1 and str(lista[1].pila) == "pila", f"D: por OnError guarda la pila de debugstack ({lista[1].pila if len(list(lista.values())) else None})")
+check(len(list(lista.values())) == 1 and lista[1].pila is None, f"D: por OnError anota el error sin pila, no una engañosa ({lista[1].pila if len(list(lista.values())) else None})")
 
 # C) nada por dónde escuchar: lo declara
 L = nuevo()

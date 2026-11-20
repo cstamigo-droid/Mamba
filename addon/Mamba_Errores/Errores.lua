@@ -46,8 +46,9 @@ local TIPO_ERROR = 0
 local via = nil
 local function anotarDeBlizzard(msg, pila)
 	if conBugGrabber then return end -- ya llega por BugGrabber: no contarlo dos veces (revisor t5)
-	-- sin pila de Blizzard, se toma la de aquí (como antes del 19-11), para no guardar errores sin pista
-	if type(pila) ~= "string" or pila == "" then pila = debugstack and debugstack(3) or nil end
+	-- sin pila de Blizzard queda nil: un debugstack() aquí daría la pila del manejador de Blizzard (el gancho corre
+	-- después de él), no la del código que falló, y confunde más de lo que ayuda (revisor t8)
+	if type(pila) ~= "string" or pila == "" then pila = nil end
 	pcall(anotar, msg, pila, "lua")
 end
 local function engancharErrores()
@@ -58,7 +59,15 @@ local function engancharErrores()
 		-- firma comprobada en classic_era y classic: DisplayMessageInternal(message, messageType, stack, locals);
 		-- solo se anota el tipo error (0): la advertencia (1) no es un error de Lua
 		hooksecurefunc(sef, "DisplayMessageInternal", function(_, msg, tipo, pila)
-			if tipo ~= nil and tipo ~= TIPO_ERROR then return end
+			if tipo ~= nil and tipo ~= TIPO_ERROR then
+				-- revisor t8: si Forever usara otro número para los errores se perderían todos sin aviso; el diag
+				-- cuenta los descartados y guarda el último tipo, para verlo en SavedVariables
+				if db and db.diag then
+					db.diag.descartadosPorTipo = (db.diag.descartadosPorTipo or 0) + 1
+					db.diag.ultimoTipoDescartado = tostring(tipo)
+				end
+				return
+			end
 			anotarDeBlizzard(msg, pila)
 		end)
 		via = "ScriptErrorsFrame:DisplayMessageInternal"
