@@ -12,6 +12,7 @@ Decisión de Cristian: "Sí, ocultarlo".
 Uso:
     python -I tools/asistente/grupo/rama_publica.py            arma o actualiza refs/heads/publica y la verifica
     python -I tools/asistente/grupo/rama_publica.py --revisar  solo verifica la rama publica que ya existe
+    ... [--origen <commit>] [--destino <rama>]
 Sale con 1 si algo no se cumple (correo personal en autor, committer o mensaje; contenido distinto de asistente
 fuera de .github/workflows; la rama ya publicada en GitHub no es ancestro). Push: SOLO con el sí de Cristian.
 """
@@ -24,7 +25,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[3]
 ORIGEN, DESTINO = "asistente", "publica"
-PERSONAL = b"cstamigo-droid@users.noreply.github.com"
+# El correo personal NO va escrito en este archivo (el archivo también se publica): se lee de la configuración
+# GLOBAL de git (la del repo ya es el noreply) o de MAMBA_CORREO_PERSONAL.
+PERSONAL = b""
 NOREPLY = b"cstamigo-droid@users.noreply.github.com"
 PUBLICADO = "f924685f7"  # punta de origin/asistente en GitHub (16-11): la rama nueva tiene que contenerla
 EXCLUIR = ["--remotes=upstream", "--tags"]  # lo de Polestar no se reescribe
@@ -36,6 +39,18 @@ def git(*a: str, entrada: bytes | None = None) -> bytes:
     if r.returncode != 0:
         raise SystemExit(f"git {' '.join(a)} falló: {r.stderr.decode('utf-8', 'replace')}")
     return r.stdout
+
+
+def correo_personal() -> bytes:
+    import os
+    c = os.environ.get("MAMBA_CORREO_PERSONAL", "").encode()
+    if not c:
+        r = subprocess.run(["git", "config", "--global", "user.email"], capture_output=True)
+        c = r.stdout.strip()
+    if not c or c == NOREPLY or b"@" not in c:
+        raise SystemExit("no sé cuál es el correo personal a ocultar (git config --global user.email o "
+                         "MAMBA_CORREO_PERSONAL)")
+    return c
 
 
 def workflows() -> list[bytes]:
@@ -74,8 +89,14 @@ def reescribir(flujo: bytes, borrar: list[bytes]) -> tuple[bytes, int]:
         sig = fin + 1
         if linea.startswith(b"data "):
             largo = int(linea[5:])
-            bloque = flujo[i:sig + largo]
+            carga = flujo[sig:sig + largo]
             sig = sig + largo
+            if PERSONAL in carga:  # también dentro de los archivos y los mensajes (revisor, 20-11)
+                carga = carga.replace(PERSONAL, NOREPLY)
+                if commit is not None:
+                    tocado = True
+            bloque = b"data %d
+" % len(carga) + carga
             (commit if commit is not None else out).append(bloque)
             i = sig
             continue
@@ -109,6 +130,10 @@ def armar() -> None:
 def revisar() -> int:
     fallas = []
     rango = [DESTINO, "--not", *EXCLUIR]
+    if PERSONAL in git("log", "-p", "--format=", *rango):
+        fallas.append("queda el correo personal DENTRO de algún archivo del historial reescrito")
+    if subprocess.run(["git", "-C", str(RAIZ), "grep", "-q", "-F", PERSONAL.decode(), DESTINO]).returncode == 0:
+        fallas.append("queda el correo personal dentro de un archivo de la punta")
     for fmt, que in (("%ae", "autor"), ("%ce", "committer"), ("%B", "mensaje")):
         if PERSONAL in git("log", f"--format={fmt}", *rango):
             fallas.append(f"queda el correo personal en {que}")
@@ -133,6 +158,13 @@ def revisar() -> int:
 
 
 if __name__ == "__main__":
+    # --origen <commit>: reescribe hasta ese commit (el instalado en el juego) en vez de la punta de asistente.
+    # --destino <rama>: otra rama local (por defecto "publica"). Mismo commit de origen = mismos hashes.
+    if "--origen" in sys.argv:
+        ORIGEN = sys.argv[sys.argv.index("--origen") + 1]
+    if "--destino" in sys.argv:
+        DESTINO = sys.argv[sys.argv.index("--destino") + 1]
+    PERSONAL = correo_personal()
     if "--revisar" not in sys.argv:
         armar()
     sys.exit(revisar())
