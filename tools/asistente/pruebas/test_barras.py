@@ -366,6 +366,12 @@ check(G.OVERRIDES["1"] is None, "apagado: la tecla 1 vuelve al juego")
 check(I.get() is False and G.MambaBarrasPJ.apagado is True, "queda guardado")
 I.set(True)
 check(G.MambaBarra1.visible is True and G.ActionButton1.visible is False and G.OVERRIDES["1"] == "MambaBoton1", "prendido de nuevo: vuelven las de Mamba")
+# revisor tanda 10: apagadas no reaparecen por otros caminos; solo vuelven las del juego que se veían
+I.set(False)
+M.DisponerTodo(); M.Disponer("formas")
+check(G.MambaBarra1.visible is False and G.MambaBarraFormas.visible is False, "apagadas: Disponer/Formas no las vuelven a mostrar")
+check(not M.EmpezarMover(), "apagadas: el modo mover se niega")
+I.set(True)
 # control negativo: con apagado guardado, al entrar no se arman ni se esconden las del juego
 L2, M2 = nuevo('MambaBarrasPJ = { version = 1, apagado = true }; CreateFrame("Frame", "MainActionBar", UIParent)')
 L2.execute('Fire("PLAYER_LOGIN")')

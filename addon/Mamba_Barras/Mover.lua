@@ -105,7 +105,7 @@ local function crearPanel()
 end
 
 function M.EmpezarMover()
-	if InCombatLockdown() or not M.listo then return false end
+	if InCombatLockdown() or not M.listo or M.PJ().apagado then return false end -- apagadas: no hay nada que mover
 	M.moviendoBarras = true
 	M.MostrarVacios(true)
 	for id in pairs(M.marcos) do recuadro(id) end

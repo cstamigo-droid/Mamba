@@ -274,6 +274,9 @@ end
 
 local function verBarra(h, c)
 	UnregisterStateDriver(h, "visibility")
+	-- apagadas en Opciones (K124): nada vuelve a mostrarlas (revisor tanda 10: Formas, Mover, Opciones y
+	-- Restablecer pasaban por aquí y las volvían a poner a la vista)
+	if pj().apagado then h:Hide() return end
 	if not c.mostrar then
 		h:Hide()
 	elseif c.ver == "combate" then
@@ -373,7 +376,12 @@ M.padres = M.padres or {}      -- marco del juego -> su padre original (para dev
 M.escondidos = M.escondidos or {}
 local function esconderMarco(f, eventos)
 	if not f then return end
-	if M.padres[f] == nil and f.GetParent then M.padres[f] = f:GetParent() or false end
+	if M.padres[f] == nil and f.GetParent then
+		M.padres[f] = f:GetParent() or false
+		-- ¿se veía antes de esconderla? (las que el jugador tenía apagadas no se devuelven a la vista)
+		M.visibles = M.visibles or {}
+		M.visibles[f] = (f.IsShown and f:IsShown()) and true or false
+	end
 	if eventos and f.UnregisterAllEvents then f:UnregisterAllEvents() end
 	if f.HideBase then pcall(f.HideBase, f) elseif f.Hide then pcall(f.Hide, f) end
 	f:SetParent(oculto)
@@ -391,7 +399,10 @@ end
 function M.MostrarJuego()
 	for f, padre in pairs(M.padres) do
 		if padre then pcall(f.SetParent, f, padre) end
-		if f.ShowBase then pcall(f.ShowBase, f) elseif f.Show then pcall(f.Show, f) end
+		-- solo las que estaban a la vista (revisor tanda 10: aparecían StanceBar, PetActionBar y barras apagadas)
+		if M.visibles and M.visibles[f] then
+			if f.ShowBase then pcall(f.ShowBase, f) elseif f.Show then pcall(f.Show, f) end
+		end
 	end
 	for b in pairs(M.escondidos) do
 		pcall(b.SetAttribute, b, "statehidden", nil)
