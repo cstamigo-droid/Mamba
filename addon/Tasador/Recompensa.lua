@@ -5,7 +5,12 @@
 --      del cuadro del objeto (E8, T.MejorasDeBuilds de Cuadro.lua).
 --   2. Si ninguna mejora: la que más vale, en la subasta (precio del Tasador, menos la comisión) o con el vendedor.
 -- El resaltado es el marco de «la mejor» de Polestar (QoL/Rewards.lua): Mamba solo le dice cuál es, cambiando su
--- orden (Rewards.Rank). La línea del motivo va en una franja pegada bajo la ventana de la misión.
+-- orden (Rewards.Rank). La línea del motivo va en una franja pegada bajo la ventana de la misión, solo cuando
+-- Polestar dibujó ese marco.
+-- DECIDIDO (revisor t5, MEDIA): si el jugador enciende la elección automática de Polestar (qol.rewardAutoPick,
+-- apagada por defecto), toma la que dice Mamba, la misma del marco. Que la toma automática y el marco digan dos cosas
+-- distintas sería peor, y la R0 pide la de mayor mejora. Mamba no toma nada: la toma la opción que encendió el
+-- jugador (Shift la detiene). Lo prueba test_recompensa («elección automática»).
 -- Licencia: GPL-3.0-only.
 local _, T = ...
 
@@ -211,8 +216,10 @@ function T.EngancharRecompensas()
 			T.OcultarFranjaRecompensa()
 			return marcado
 		end
+		-- revisor t5 (BAJA): la franja explica el marco; sin marco de Polestar (resaltado apagado, datos del objeto
+		-- aún sin cargar) no hay nada que explicar y no sale
 		local okC, choices = pcall(R.ReadChoices, false)
-		if not (okC and type(choices) == "table") or #choices < 2 then
+		if marcado ~= true or not (okC and type(choices) == "table") or #choices < 2 then
 			T.OcultarFranjaRecompensa()
 			return marcado
 		end
@@ -222,7 +229,7 @@ function T.EngancharRecompensas()
 			local okI, info = pcall(T.InfoDe, choices[res.index].link or ("item:" .. tostring(choices[res.index].itemID)))
 			nombre = okI and info and info.nombre or nil
 		end
-		T.MostrarFranjaRecompensa(ok and res or nil, nombre)
+		T.MostrarFranjaRecompensa(ok and res and res.index and res or nil, nombre)
 		return marcado
 	end
 	return true

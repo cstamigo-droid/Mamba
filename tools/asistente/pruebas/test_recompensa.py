@@ -173,7 +173,7 @@ Polestar.QoL = { Rewards = {
   Rank = function(c) return { 1, 2 }, "value" end,
 }}
 local R = Polestar.QoL.Rewards
-R.Mark = function() local o = R.Rank(R.ReadChoices()); POLESTAR_MARCO = o[1]; return true end
+R.Mark = function() local o = R.Rank(R.ReadChoices()); POLESTAR_MARCO = o[1]; return MARCA ~= false end
 ''')
 check(T.EngancharRecompensas() is True, "se engancha a las recompensas de Polestar")
 check(T.EngancharRecompensas() is True, "engancharse dos veces no rompe")
@@ -196,6 +196,25 @@ check(g.ULTIMO_TEXTO is None, "con Polestar oculto no se muestra")
 # si Mamba falla, Polestar sigue con su orden (no rompe la ventana)
 L.execute('local e = T.RecompensaDe; T.RecompensaDe = function() error("x") end; ORD = Polestar.QoL.Rewards.Rank(ELECCION); T.RecompensaDe = e')
 check(g.ORD[1] == 1, "si el cálculo de Mamba falla, queda el orden de Polestar")
+
+
+# revisor t5 (BAJA): sin el marco de Polestar (resaltado apagado o datos sin cargar) no sale la franja
+L.execute('ULTIMO_TEXTO = "x"; MARCA = false; Polestar.QoL.Rewards.Mark(); MARCA = nil')
+check(g.ULTIMO_TEXTO == "x", "si Polestar no marca, la franja no se muestra")
+L.execute('ULTIMO_TEXTO = nil; Polestar.QoL.Rewards.Mark()')
+check(g.ULTIMO_TEXTO is not None, "con el marco de Polestar, la franja vuelve")
+
+# revisor t5 (MEDIA), DECIDIDO: con la elección automática de Polestar encendida por el jugador, toma la del marco
+# (la de Mamba). Simula el camino de Polestar (QoL/Rewards.lua, evaluate: order = Rewards.Rank(...); GetQuestReward(order[1]))
+L.execute('''
+TOMADA = nil
+local R = Polestar.QoL.Rewards
+local order = R.Rank(R.ReadChoices())
+GetQuestReward(order[1])
+''')
+check(g.TOMADA == 2, f"elección automática (encendida por el jugador): toma la misma del marco: {g.TOMADA}")
+qol = (D.parent / "Polestar" / "QoL" / "QoL.lua").read_text(encoding="utf-8")
+check("rewardAutoPick = false," in qol, "la elección automática de Polestar viene apagada: por defecto el clic es del jugador")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)
