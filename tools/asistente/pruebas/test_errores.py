@@ -46,7 +46,8 @@ function debugstack() return "pila" end
 date = function() return "2026-11-19 23:00:00" end
 SLASH_MAMBAERRORES1 = nil
 SlashCmdList = {}
-ErrorMessageType, WarningMessageType = 0, 1
+-- como en Blizzard: ErrorMessageType y WarningMessageType son LOCALES del marco (0 y 1), no globales
+ErrorMessageType, WarningMessageType = nil, nil
 """
 
 
@@ -69,13 +70,14 @@ L.execute("""
 ScriptErrorsFrame = { DisplayMessageInternal = function(self, msg, tipo, pila, locales) end }
 Fire("ADDON_LOADED", "Blizzard_ScriptErrorsFrame")
 Fire("PLAYER_LOGIN")
-ScriptErrorsFrame:DisplayMessageInternal("X.lua:1: error de prueba", ErrorMessageType, "pila de X", "")
-ScriptErrorsFrame:DisplayMessageInternal("una advertencia", WarningMessageType)
+ScriptErrorsFrame:DisplayMessageInternal("X.lua:1: error de prueba", 0, "pila de X", "")
+ScriptErrorsFrame:DisplayMessageInternal("una advertencia", 1)
 """)
 G = L.globals()
 lista = G.MambaErroresDB.lista
 check(len(list(lista.values())) == 1 and "error de prueba" in str(lista[1].msg), "A: con scriptErrors=0 anota el error por DisplayMessageInternal (y no la advertencia)")
 check(G.MambaErroresDB.diag.enganchado is True and "DisplayMessageInternal" in str(G.MambaErroresDB.diag.via), f"A: el diag dice enganchado por DisplayMessageInternal ({G.MambaErroresDB.diag.via})")
+check(str(lista[1].pila) == "pila de X", f"A: guarda la pila que manda Blizzard (tercer argumento) ({lista[1].pila})")
 check(G.MambaErroresDB.diag.mudo is None, "A: no queda mudo")
 check(str(G.MambaErroresDB.diag.scriptErrors) == "0", "A: el diag guarda scriptErrors")
 
@@ -89,6 +91,15 @@ L.execute('Fire("PLAYER_LOGIN"); ScriptErrors:AddUnhandledError("Y.lua:2: otro",
 G = L.globals()
 lista = G.MambaErroresDB.lista
 check(len(list(lista.values())) == 1 and "otro" in str(lista[1].msg), "B: sin ScriptErrorsFrame anota por ScriptErrors:AddUnhandledError")
+
+# D) cliente viejo con OnError (sin pila): toma debugstack
+L = nuevo()
+L.execute('ScriptErrorsFrame = { OnError = function(self, msg) end }')
+cargar(L)
+L.execute('Fire("PLAYER_LOGIN"); ScriptErrorsFrame:OnError("Z.lua:3: viejo")')
+G = L.globals()
+lista = G.MambaErroresDB.lista
+check(len(list(lista.values())) == 1 and str(lista[1].pila) == "pila", f"D: por OnError guarda la pila de debugstack ({lista[1].pila if len(list(lista.values())) else None})")
 
 # C) nada por dónde escuchar: lo declara
 L = nuevo()

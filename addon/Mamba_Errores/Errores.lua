@@ -38,19 +38,26 @@ local conBugGrabber = false -- se pone en true cuando BugGrabber nos avisa (enga
 -- ScriptErrorsFrame:DisplayMessageInternal(msg, tipo, pila, locales) SIEMPRE; el CVar scriptErrors solo decide
 -- si la ventana se muestra. Sin manejadores, va a ScriptErrors:AddUnhandledError(msg, pila, locales).
 -- ScriptErrorsFrame NO tiene OnError en este cliente: ese enganche (19-11) nunca se ponía y Errores quedó mudo.
+-- Tipos de mensaje: en Blizzard_ScriptErrorsFrame son LOCALES (ErrorMessageType = 0, WarningMessageType = 1);
+-- _G.WarningMessageType no existe, así que se compara con el número (revisor t7: si no, las advertencias
+-- contaban como errores).
+local TIPO_ERROR = 0
 local via = nil
 local function anotarDeBlizzard(msg, pila)
 	if conBugGrabber then return end -- ya llega por BugGrabber: no contarlo dos veces (revisor t5)
-	pcall(anotar, msg, type(pila) == "string" and pila or nil, "lua")
+	-- sin pila de Blizzard, se toma la de aquí (como antes del 19-11), para no guardar errores sin pista
+	if type(pila) ~= "string" or pila == "" then pila = debugstack and debugstack(3) or nil end
+	pcall(anotar, msg, pila, "lua")
 end
 local function engancharErrores()
 	if enganchado or not hooksecurefunc then return enganchado end
 	local sef = _G.ScriptErrorsFrame
 	local se = _G.ScriptErrors
 	if sef and type(sef.DisplayMessageInternal) == "function" then
-		-- (self, mensaje, tipo, pila, locales): el tipo de advertencia (LUA_WARNING) no es un error de Lua
+		-- firma comprobada en classic_era y classic: DisplayMessageInternal(message, messageType, stack, locals);
+		-- solo se anota el tipo error (0): la advertencia (1) no es un error de Lua
 		hooksecurefunc(sef, "DisplayMessageInternal", function(_, msg, tipo, pila)
-			if tipo ~= nil and _G.WarningMessageType ~= nil and tipo == _G.WarningMessageType then return end
+			if tipo ~= nil and tipo ~= TIPO_ERROR then return end
 			anotarDeBlizzard(msg, pila)
 		end)
 		via = "ScriptErrorsFrame:DisplayMessageInternal"
