@@ -42,6 +42,7 @@ corre combate    python -I $P/test_combate.py
 corre combate_pvp python -I $P/test_combate_pvp.py
 corre version    python -I $P/test_version.py addon
 corre sello_zip  python -I $P/test_sello_zip.py
+corre habilitar  python -I $P/test_habilitar_addons.py
 # todas las pruebas Node de Mamba (panel, estética, misiones, reemplazos y las que se sumen)
 for t in tests/mamba-*.test.js; do
 	n=$(basename "$t" .test.js)
