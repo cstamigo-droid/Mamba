@@ -589,6 +589,17 @@ for archivo, campo in (("Quests/Party.lua", "Party"), ("Core/Update.lua", "Updat
     pref_o = ns_o[campo].PREFIX if ns_o[campo] is not None else None
     check(str(pref_o) == "Polestar", f"P15 {archivo}: sin la marca de Mamba sigue «Polestar» ({pref_o})")
 
+# 10k) revisor t6: sin Polestar, el cuadro de ayuda acepta líneas { izquierda, derecha } (LineasOro de Bolsas)
+AYU = L.eval("""function()
+  local orig = Asistente.Polestar
+  Asistente.Polestar = function() return nil end
+  local ok, err = pcall(Asistente.CuadroAyuda, UIParent, "Oro", { { "Hoy", "5o" }, { left = "Ayer", right = "3o" }, "texto" })
+  Asistente.Polestar = orig
+  return ok, tostring(err)
+end""")
+r = AYU()
+check(r[0] is True, f"sin Polestar, el cuadro de ayuda con líneas de dos columnas no da error ({r[1]})")
+
 # 11) el riel de Polestar: con 12 secciones en 680 de alto, caben TODAS (antes cortaba las que no cabían)
 if W_REAL:
     RIEL = L.eval("""function()

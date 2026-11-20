@@ -70,7 +70,15 @@ function A.CuadroAyuda(dueno, titulo, lineas)
 	if not (GameTooltip and GameTooltip.SetOwner) then return end
 	GameTooltip:SetOwner(dueno, "ANCHOR_RIGHT")
 	GameTooltip:AddLine(titulo or "")
-	for _, l in ipairs(lineas or {}) do GameTooltip:AddLine(l) end
+	-- una línea puede ser texto o { izquierda, derecha } (LineasOro de Bolsas): sin Polestar daba error
+	for _, l in ipairs(lineas or {}) do
+		if type(l) == "table" then
+			local izq, der = l[1] or l.left, l[2] or l.right
+			if der ~= nil then GameTooltip:AddDoubleLine(tostring(izq or ""), tostring(der)) else GameTooltip:AddLine(tostring(izq or "")) end
+		else
+			GameTooltip:AddLine(tostring(l))
+		end
+	end
 	GameTooltip:Show()
 end
 

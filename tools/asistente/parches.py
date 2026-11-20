@@ -102,7 +102,7 @@ PARCHES = [
      "\tif Client.SlotQuest(bag, slot) then return nil end -- a quest's item or a quest starter (#1557)\n\t-- Mamba (PARCHES.md P14): nothing Mamba says not to sell (Forever mechanics like the sleeping bag, keys,\n\t-- quest items, bound utility) goes, even when marked as junk by hand.\n\tlocal mamba = _G.MambaAPI\n\tif mamba and mamba.NoVender and mamba.NoVender(id) then return nil end\n"),
     ('P15-prefijo', 'Polestar/Quests/Party.lua',
      'Party.PREFIX = "Polestar"\n',
-     '-- Mamba (PARCHES.md P15): its own prefix. On "Polestar" the fork announced itself as Polestar 0.4.1 and the\n-- official Polestar in the party or guild said "X is on Polestar ...: your guides can differ" (18-11). With\n-- "Mamba", official clients never hear the fork nor the fork them; party sync runs among Mamba players only.\nParty.PREFIX = ns.mamba and "Mamba" or "Polestar"\n'),
+     '-- Mamba (PARCHES.md P15): its own prefix. On "Polestar" the fork announced itself as Polestar 0.4.1 and the\n-- official Polestar in the party or guild said "X is on Polestar ...: your guides can differ" (18-11). With\n-- "Mamba", party and version messages stay among Mamba players (no version notices either way); only the\n-- transit timings (Nav/Transit.lua, "PolestarT1") are still shared with official clients.\nParty.PREFIX = ns.mamba and "Mamba" or "Polestar"\n'),
     ('P15-prefijo', 'Polestar/Core/Update.lua',
      'U.PREFIX = "Polestar" -- Party.PREFIX\n',
      'U.PREFIX = ns.mamba and "Mamba" or "Polestar" -- Party.PREFIX; Mamba (PARCHES.md P15): its own prefix\n'),

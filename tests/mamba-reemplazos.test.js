@@ -189,9 +189,12 @@ function grupo(mamba) {
 	}).emitted;
 }
 
-test('P2 en el grupo: Mamba sigue diciendo "your guides can differ" pero no "A newer version is out"', () => {
+// P15 (19-11): con Mamba el prefijo es "Mamba": un Polestar oficial del grupo no se oye y no hay ningún aviso de
+// versión (los compañeros con el oficial 0.4.1.1 recibían avisos por Mamba, y al revés). Sin Mamba, los de siempre.
+test('P15 en el grupo: con Mamba, cero avisos de los Polestar oficiales; sin Mamba, los avisos de siempre', () => {
 	assert.deepEqual(grupo(false)[0], ['Ben is on Polestar 0.3.8: your guides can differ. A newer version is out.'], 'sin Mamba: Polestar tal cual');
-	assert.deepEqual(grupo(true)[0], ['Ben is on Polestar 0.3.8: your guides can differ.'], 'con Mamba: sin pedir actualizar');
+	const conMamba = grupo(true)[0];
+	assert.equal(Object.keys(conMamba || {}).length, 0, 'con Mamba: ningún aviso de un Polestar oficial');
 });
 
 test('Aviso de modificación (GPL-3.0 §5a): cada .toc de Polestar dice "· Mamba" y X-Mamba con fecha', () => {
