@@ -220,7 +220,10 @@ def generar() -> str:
         d["entrance"] = ent
         d["zone"] = zona
         d["zoneName"] = zes.get(nombre) or zona_es(zona)
-        d["entradaFuente"] = fuente
+        d["entradaFuente"] = fuente  # la fuente, para quien lee los datos (no se le muestra al jugador)
+        if fuente and fuente.startswith("aprox"):
+            d["approx"] = True
+            d["entradaLugar"] = re.search(r"en (.*) \(Polestar_Nav\)$", fuente)[1]
         d["misiones"] = misiones.get(clave, 0)
         filas_out.append(d)
     lineas = [

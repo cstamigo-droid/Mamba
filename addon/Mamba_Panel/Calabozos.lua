@@ -53,7 +53,8 @@ end
 ---------------------------------------------------------------- las que faltan
 local EXTRA = {} -- clave -> fila de N.CALABOZOS registrada por Mamba
 local INGLES = {} -- clave -> nombre en inglés (el del Codex o el del cliente)
-local cubiertas = { clave = {}, mapa = {} } -- lo que ya trae el Codex
+local cubiertas = { clave = {}, mapa = {} } -- lo que ya trae el Codex (mapa -> su clave)
+local BAJA = {} -- clave de Mamba cuyo mapa trajo después el Codex con OTRA clave: Register no borra, así que se esconde
 
 for _, d in ipairs(N.CALABOZOS or {}) do INGLES[d.key] = d.en end
 
@@ -78,10 +79,13 @@ local registrando = false
 local function registrarFaltantes(D, registro)
 	local nuevas = {}
 	for _, d in ipairs(N.CALABOZOS or {}) do
-		if not (cubiertas.clave[d.key] or cubiertas.mapa[d.map]) then
+		local codex = cubiertas.mapa[d.map]
+		if not (cubiertas.clave[d.key] or codex) then
 			nuevas[d.key] = resumen(d)
 			EXTRA[d.key] = d
 		else
+			-- ya registrada por Mamba y ahora el Codex la trae con otra clave ("drowned-city"): fuera de la lista
+			if EXTRA[d.key] and codex and codex ~= d.key then BAJA[d.key] = true end
 			EXTRA[d.key] = nil
 		end
 	end
@@ -104,7 +108,7 @@ function N.EngancharCalabozos()
 			for k, s in pairs(a) do
 				if type(s) == "table" then
 					cubiertas.clave[k] = true
-					if s.map then cubiertas.mapa[s.map] = true end
+					if s.map then cubiertas.mapa[s.map] = k end
 					if type(s.name) == "string" and not EXTRA[k] then INGLES[k] = s.name end
 					completar(k, s)
 				end
@@ -119,9 +123,38 @@ function N.EngancharCalabozos()
 	if D.Meta and D.Meta() and D.ForMap then
 		for _, d in ipairs(N.CALABOZOS or {}) do
 			local ok, k = pcall(D.ForMap, d.map)
-			if ok and k and not EXTRA[k] then cubiertas.mapa[d.map] = true; cubiertas.clave[k] = true end
+			if ok and k and not EXTRA[k] then cubiertas.mapa[d.map] = k; cubiertas.clave[k] = true end
+		end
+		-- y las del Codex sin zona (Dalaran): su resumen otra vez, con la zona (solo si no trae entrada: Get ya
+		-- eligió la del bando y se perdería la otra)
+		for k, h in pairs(HUECO) do
+			local ok, s = pcall(D.Get, k)
+			if ok and type(s) == "table" and s.zone == nil and s.zoneName == nil and s.entrance == nil and h.zone then
+				s.key, s.zone, s.zoneName = nil, h.zone, h.zoneName
+				pcall(original, "dungeon", { [k] = s }, nil)
+			end
 		end
 		registrarFaltantes(D, original)
+	end
+	-- Lo dado de baja (BAJA) no sale en la lista ni responde por su mapa: manda la clave del Codex.
+	local list, forMap = D.List, D.ForMap
+	if type(list) == "function" then
+		D.List = function(...)
+			local out = list(...)
+			if next(BAJA) and type(out) == "table" then
+				for i = #out, 1, -1 do
+					if type(out[i]) == "table" and BAJA[out[i].key] then table.remove(out, i) end
+				end
+			end
+			return out
+		end
+	end
+	if type(forMap) == "function" then
+		D.ForMap = function(mapID, ...)
+			local k = forMap(mapID, ...)
+			if k and BAJA[k] then return cubiertas.mapa[mapID] or nil end
+			return k
+		end
 	end
 	-- /polestar dungeons <nombre>: si Polestar no la encuentra, sin tildes y por cualquier palabra.
 	local find = D.Find
@@ -170,8 +203,8 @@ function N.SinDatos(key, que)
 	end
 	if not d.entrance then
 		t = t .. " La entrada tampoco" .. (d.zoneName and (" (está en " .. d.zoneName .. ")") or "") .. ", así que no hay «Llévame» todavía."
-	elseif d.entradaFuente and d.entradaFuente:find("^aprox") then
-		t = t .. " La entrada es aproximada: " .. d.entradaFuente:gsub("^aprox%.:%s*", "") .. "."
+	elseif d.approx then
+		t = t .. " La entrada es aproximada" .. (d.entradaLugar and (" (el paso de " .. d.entradaLugar .. ")") or "") .. ": confírmala en el mapa."
 	end
 	return t
 end

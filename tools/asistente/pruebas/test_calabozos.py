@@ -52,13 +52,23 @@ def tabla(nombre, idioma=""):
         return f, list(csv.DictReader(h))
 
 
-L = LuaRuntime(unpack_returned_tuples=True)
-G = L.globals()
-L.execute("""
+def lua(rel):
+    return (ADDON / rel).read_text(encoding="utf-8")
+
+
+def montar(codex_antes=False, romper=False):
+    """Un cliente nuevo: Dungeons.lua real, el Codex real (de carga a pedido) y Mamba_Panel en el orden del .toc.
+    codex_antes: el Codex ya está cargado cuando carga Mamba_Panel (otro addon lo pidió antes)."""
+    L = LuaRuntime(unpack_returned_tuples=True)
+    G = L.globals()
+    # string.lower solo para A-Z, sin tocar los bytes de UTF-8: es lo que asume Mamba (Asistente/Llevame.lua,
+    # LL.Normal) y lo que modela test_llevame; en el cliente NO está medido. El lower de Windows con locale
+    # Latin-1 sí rompe UTF-8, por eso no se usa el de lupa tal cual.
+    L.execute("""
 local lower0 = string.lower
 string.lower = function(s) return (tostring(s):gsub("%u", function(c) if c:byte() < 128 then return lower0(c) end return c end)) end
-""")  # como en el juego: string.lower no toca los bytes de UTF-8 (el de Windows con locale Latin-1 los rompe)
-L.execute("""
+""")
+    L.execute("""
 NAVEGADO = {}
 local ns = {}
 Polestar = ns
@@ -80,25 +90,24 @@ ns.Nav = {
 CODEX_CARGADO = false
 ns.Codex = { Load = function() if not CODEX_CARGADO then CODEX_CARGADO = true; CARGAR_CODEX() end return true end }
 """)
-ld = L.eval('function(src, name, addon, ns) local f, e = loadstring(src, "@"..name); if not f then error(e) end; return f(addon, ns) end')
+    ld = L.eval('function(src, name, addon, ns) local f, e = loadstring(src, "@"..name); if not f then error(e) end; return f(addon, ns) end')
+    G.CARGAR_CODEX = lambda: ld(lua("Polestar_Codex/Dungeons1.lua"), "Polestar_Codex/Dungeons1.lua", "Polestar_Codex", G.Polestar)
+    ld(lua("Polestar/Dungeons/Dungeons.lua"), "Polestar/Dungeons/Dungeons.lua", "Polestar", G.Polestar)
+    if codex_antes:
+        G.Polestar.Dungeons.Load()
+    NP = L.table()
+    ld(lua("Mamba_Panel/Datos_Calabozos.lua"), "Mamba_Panel/Datos_Calabozos.lua", "Mamba_Panel", NP)
+    if romper:  # control negativo: sin La Ciudad Anegada en los datos de Mamba
+        L.eval("""function(N) for i = #N.CALABOZOS, 1, -1 do if N.CALABOZOS[i].map == 2970 then table.remove(N.CALABOZOS, i) end end end""")(NP)
+    ld(lua("Mamba_Panel/Calabozos.lua"), "Mamba_Panel/Calabozos.lua", "Mamba_Panel", NP)
+    return L, G, G.Polestar.Dungeons, NP
 
 
-def lua(rel):
-    return (ADDON / rel).read_text(encoding="utf-8")
-
-
-G.CARGAR_CODEX = lambda: ld(lua("Polestar_Codex/Dungeons1.lua"), "Polestar_Codex/Dungeons1.lua", "Polestar_Codex", G.Polestar)
-ld(lua("Polestar/Dungeons/Dungeons.lua"), "Polestar/Dungeons/Dungeons.lua", "Polestar", G.Polestar)
-D = G.Polestar.Dungeons
 # Mamba_Panel en el orden del .toc (Datos_Calabozos antes de Calabozos), ANTES de que se cargue el Codex, como en el juego
 toc = [l.strip() for l in lua("Mamba_Panel/Mamba_Panel.toc").splitlines() if l.strip().endswith(".lua")]
 check("Datos_Calabozos.lua" in toc and "Calabozos.lua" in toc and toc.index("Datos_Calabozos.lua") < toc.index("Calabozos.lua"),
       f"Mamba_Panel.toc carga Datos_Calabozos.lua y después Calabozos.lua ({toc})")
-NP = L.table()
-ld(lua("Mamba_Panel/Datos_Calabozos.lua"), "Mamba_Panel/Datos_Calabozos.lua", "Mamba_Panel", NP)
-if ROMPER:  # control negativo: sin La Ciudad Anegada en los datos de Mamba
-    L.eval("""function(N) for i = #N.CALABOZOS, 1, -1 do if N.CALABOZOS[i].map == 2970 then table.remove(N.CALABOZOS, i) end end end""")(NP)
-ld(lua("Mamba_Panel/Calabozos.lua"), "Mamba_Panel/Calabozos.lua", "Mamba_Panel", NP)
+L, G, D, NP = montar(romper=ROMPER)
 check(G.Polestar.UI.MambaCalce is not None and G.Polestar.UI.MambaSinDatos is not None, "Calabozos.lua publica Polestar.UI.MambaCalce y MambaSinDatos")
 check(not G.CODEX_CARGADO, "Mamba no fuerza la carga del Codex al entrar (es de carga a pedido)")
 
@@ -140,7 +149,12 @@ for mapa in forever:
     nombre = f"{d.name} ({key})"
     check(d.name and d.minLevel and d.maxLevel and d.minLevel <= d.maxLevel, f"{nombre}: nombre y niveles ({d.minLevel}-{d.maxLevel})")
     t_ent = NP.SinDatos(key, "entrance")
-    check(d.zoneName or d.zone or t_ent == "Zona y entrada: datos en camino", f"{nombre}: zona (o «Zona y entrada: datos en camino»)")
+    if d.zoneName or d.zone:
+        check(True, "")
+    else:
+        # sin zona solo puede quedar una del Codex que ninguna fuente libre ubica (Naxxramas), y tiene que decirlo
+        check(mapa in codex and t_ent == "Zona y entrada: datos en camino",
+              f"{nombre}: sin zona (solo vale para una del Codex que lo diga: «{t_ent}»)")
     if mapa not in codex:
         nivel_min = min(int(r["MinLevel"]) for r in por_mapa[mapa])
         nivel_max = max(int(r["MaxLevelSuggestion"]) for r in por_mapa[mapa])
@@ -184,7 +198,6 @@ check(buscar("anegada") == ["the-drowned-city"], f"«anegada» da SOLO La Ciudad
 check(buscar("zzzz") == [], "una búsqueda sin coincidencias no da nada")
 check(buscar("'") == [] and buscar("-") == [], f"una búsqueda de solo signos no da todas (revisor; {len(buscar(chr(39)))})")
 check("kroldok-stronghold" in buscar("Krol´dok"), "«Krol´dok» (tilde suelta) da Bastión de Krol'dok")
-check(len(buscar("")) == 0 or True, "")
 check(set(buscar("prision")) == {"alcaz-prison"} and "blackmaw-hold" in buscar("faucenegra"), "«prision» y «faucenegra» (sin tilde)")
 check("scarlet-monastery" in buscar("scarlet monastery"), "las del Codex se encuentran por su nombre (inglés en la prueba)")
 check(D.Find("anegada") == "the-drowned-city" and D.Find("bastion krol") == "kroldok-stronghold",
@@ -196,6 +209,29 @@ d = D.Get("the-drowned-city")
 check(d and d.name == "The Drowned City (Codex)" and d.quests.H == 3, f"si el Codex la trae, manda la del Codex ({d and d.name})")
 check(NP.SinDatos("the-drowned-city", "quests") is None, "y ya no dice «datos en camino»")
 check(sum(1 for x in lista(D.List()) if x.map == 2970) == 1, "sin duplicarla")
+
+# 4) la entrada aproximada se le dice al jugador sin nombres de archivos
+t = NP.SinDatos("blackmaw-hold", "quests") or ""
+check("aproximada (el paso de Bastión Faucenegra)" in t and "Polestar_Nav" not in t, f"Bastión Faucenegra: entrada aproximada, en palabras del jugador ({t})")
+check(any(x.approx for x in lista(NP.CALABOZOS) if x.key == "blackmaw-hold"), "Bastión Faucenegra lleva approx = true en los datos")
+
+# 5) el Codex trae una de las de Mamba con OTRA clave en una segunda tanda: sale UNA vez, la del Codex
+L.execute('Polestar.Dungeons.Register("dungeon", { ["krol-dok"] = { name = "Krol dok (Codex)", map = 3039, kind = "dungeon", minLevel = 40, maxLevel = 47, quests = { A = 2, H = 2 }, bosses = 5 } }, {})')
+del_mapa = [x.key for x in lista(D.List()) if x.map == 3039]
+check(del_mapa == ["krol-dok"], f"mapa 3039 con otra clave en el Codex: una sola entrada, la del Codex ({del_mapa})")
+check(D.ForMap(3039) == "krol-dok", f"ForMap(3039) da la del Codex ({D.ForMap(3039)})")
+check(NP.SinDatos("kroldok-stronghold", "quests") is None, "la de Mamba ya no dice «datos en camino»")
+r = [x.key for x in lista(D.List()) if MATCHES(x, "krol")]
+check(r == ["krol-dok"], f"y el buscador da solo la del Codex ({r})")
+
+# 6) el Codex ya estaba cargado cuando cargó Mamba_Panel (otro addon lo pidió antes)
+L2, G2, D2, NP2 = montar(codex_antes=True)
+dal = D2.Get("city-of-dalaran")
+check(dal and dal.zone == 1416 and dal.zoneName == "Montañas de Alterac", f"Codex ya cargado: Dalaran igual recibe su zona ({dal and dal.zoneName})")
+check(D2.ForMap(2970) == "the-drowned-city" and sum(1 for x in lista(D2.List()) if x.map == 2970) == 1,
+      "Codex ya cargado: La Ciudad Anegada sale una vez")
+q = dal and (dal.quests.A, dal.quests.H)
+check(q == (2, 3), f"Codex ya cargado: Dalaran conserva sus misiones ({q})")
 
 print(f"{ok} OK, {fail} fallas")
 sys.exit(1 if fail else 0)

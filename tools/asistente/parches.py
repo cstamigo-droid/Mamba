@@ -131,17 +131,17 @@ PARCHES = [
      '\t-- English (Polestar.UI.MambaCalce, Mamba_Panel/Calabozos.lua): "anegada", "ANEGADA" and "ciudad anegada" find La Ciudad Anegada.\n'
      '\tlocal mc = q and UI.MambaCalce\n\tif mc then\n\t\tlocal ok, r = pcall(mc, d, q)\n\t\tif ok and r ~= nil then return r and true or false end\n\tend\n'
      '\treturn not q or find(lower(d.name), q, 1, true) ~= nil\nend\n'),
-    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+    ('P17-misiones', 'Polestar/UI/Dungeons.lua',
      '\t\tlocal text = L["No quests are known for this dungeon yet."]\n',
      '\t\tlocal text = L["No quests are known for this dungeon yet."]\n'
      '\t\tlocal sd = UI.MambaSinDatos -- Mamba (PARCHES.md P17): "datos en camino" for Forever\'s dungeons the Codex lacks\n'
      '\t\tif sd then\n\t\t\tlocal ok, t = pcall(sd, key, "quests")\n\t\t\tif ok and type(t) == "string" then text = t end\n\t\tend\n'),
-    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+    ('P17-jefes', 'Polestar/UI/Dungeons.lua',
      '\t\ty = emptyPage(L["No bosses known yet"], L["The sources Polestar reads list no bosses for this dungeon."], 28)\n',
      '\t\tlocal note, sd = L["The sources Polestar reads list no bosses for this dungeon."], UI.MambaSinDatos -- Mamba (PARCHES.md P17)\n'
      '\t\tif sd then\n\t\t\tlocal ok, t = pcall(sd, key, "bosses")\n\t\t\tif ok and type(t) == "string" then note = t end\n\t\tend\n'
      '\t\ty = emptyPage(L["No bosses known yet"], note, 28)\n'),
-    ('P17-buscar', 'Polestar/UI/Dungeons.lua',
+    ('P17-entrada', 'Polestar/UI/Dungeons.lua',
      '\tif z then facts[#facts + 1] = z end\n',
      '\tif z then facts[#facts + 1] = z end\n'
      '\tlocal sd = not e and UI.MambaSinDatos -- Mamba (PARCHES.md P17): "Entrada: datos en camino" when the way in is unknown\n'
