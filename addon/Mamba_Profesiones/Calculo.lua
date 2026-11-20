@@ -28,7 +28,9 @@ end
 
 -- Nivel y bando del personaje, profesiones con su habilidad.
 function C.Personaje()
-	local p = { nivel = UnitLevel and UnitLevel("player") or 1, bando = UnitFactionGroup and UnitFactionGroup("player"),
+	local nv = UnitLevel and UnitLevel("player")
+	if issecretvalue and issecretvalue(nv) then nv = nil end
+	local p = { nivel = nv or 1, bando = UnitFactionGroup and UnitFactionGroup("player"),
 		raza = UnitRace and select(2, UnitRace("player")), profs = {} }
 	if GetProfessions then
 		local t = { GetProfessions() }

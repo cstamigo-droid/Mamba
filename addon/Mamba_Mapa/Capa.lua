@@ -30,7 +30,7 @@ end
 function M.Filtro()
 	local d = db()
 	local h, v = habilidades()
-	if not h and UnitRace and select(2, UnitRace("player")) == "Tauren" then h = (UnitLevel("player") or 1) * 5 end
+	if not h and UnitRace and select(2, UnitRace("player")) == "Tauren" then h = (M.Claro(UnitLevel("player")) or 1) * 5 end
 	local f = { hierbas = d.verHierbas, vetas = d.verVetas }
 	if d.soloMios then
 		f.hierbas = f.hierbas and h ~= nil

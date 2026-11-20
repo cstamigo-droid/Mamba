@@ -287,8 +287,9 @@ function M.MostrarSegun()
 	if enCombate() then pendiente = true; return end
 	local m, d = M.forzado, M.DB()
 	local ver
-	if m ~= nil then ver = m
-	elseif d.mostrar == "nunca" then ver = false
+	-- «Nunca» (Opciones, K124) manda sobre el rol de los modos de pelea
+	if d.mostrar == "nunca" then ver = false
+	elseif m ~= nil then ver = m
 	elseif d.mostrar == "siempre" then ver = true
 	else ver = (IsInGroup and IsInGroup()) or false end
 	if ver then cabecera:Show() else cabecera:Hide() end

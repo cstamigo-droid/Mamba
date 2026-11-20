@@ -162,6 +162,9 @@ G.EN_GRUPO = True; Cu.MostrarSegun()
 check(cab.visible, "en grupo: a la vista")
 Cu.Mostrar(False)
 check(not cab.visible, "el modo de pelea puede esconderlos")
+Cu.DB().mostrar = "nunca"; Cu.Mostrar(True)
+check(not cab.visible, "«Nunca» manda sobre el rol (el modo sanar no los vuelve a mostrar)")
+Cu.DB().mostrar = "grupo"
 Cu.Mostrar(None)
 # panel
 padre = L.eval('CreateFrame("Frame")')
