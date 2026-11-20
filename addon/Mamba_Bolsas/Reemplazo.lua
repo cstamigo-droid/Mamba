@@ -138,16 +138,9 @@ local function enganchar()
 	gancho("OpenBag", "abrir")
 	gancho("CloseAllBags", "cerrar")
 	gancho("CloseBackpack", "cerrar")
-	-- el banquero
-	if type(ShowUIPanel) == "function" then
-		hooksecurefunc("ShowUIPanel", function(panel)
-			if panel and panel == _G.BankFrame and M.Activa() then
-				panel:SetParent(diminuto)
-				M.AbrirBanco(M.Clave())
-				M.AbrirInventario(true, true)
-			end
-		end)
-	end
+	-- el banquero: SIN gancho en ShowUIPanel (auditoría 20-11, D15). Mover el BankFrame dentro de la cadena del
+	-- gestor de paneles del juego podía manchar (taint) el banco; se esconde solo desde el evento BANKFRAME_OPENED
+	-- (alCambiar "banco-abierto", abajo), en código propio, fuera de la llamada del juego.
 end
 
 -- K121: con el vendedor, el banco, la subasta, el correo o un intercambio las bolsas se abren solas y se cierran al

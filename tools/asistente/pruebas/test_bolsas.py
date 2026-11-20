@@ -191,8 +191,7 @@ def nuevo(antes=""):
         if ROMPER and n == "Bolsas.lua":
             src = src.replace("if E and E.CharacterBankTab_1 then", "if false then").replace("return E and E.CharacterBankTab_1 or nil", "return nil")
         if ROMPER and n == "Reemplazo.lua":
-            src = src.replace('and not M.Op("abrirSolas") then', 'and false then')
-        if ROMPER and n == "Ventana.lua":
+            src = src.replace('and not M.Op("abrirSolas") then', 'and false then')        if ROMPER and n == "Ventana.lua":
             src = src.replace('if not M.Op("oro") then oro = nil end', '')
         if ROMPER and n == "Reemplazo.lua":
             src = src.replace('if j.alternar then M.AbrirInventario(nil)', 'if j.alternar then M.AbrirInventario(nil); M.AbrirInventario(nil)')
@@ -599,6 +598,7 @@ for n in ARCHIVOS:
     if n != "Ordenar.lua":
         check(not re.search(r"\b(PickupContainerItem|UseContainerItem|SplitContainerItem)\b", src), n + ": solo Ordenar.lua mueve objetos")
     check(not re.search(r"\bDeleteCursorItem\b", src), n + ": nunca borra objetos")
+    check(not re.search(r'hooksecurefunc\(\s*"ShowUIPanel"', src), n + ": sin gancho en ShowUIPanel (D15: mover el BankFrame ahí puede manchar el banco)")
     check(not re.search(r"SLASH_|SlashCmdList", src), n + ": sin comandos")
     check(not re.search(r"\bBagnon\b.*(function|local)", src) or n == "Reemplazo.lua", n + ": código propio")
 print(f"{ok} OK, {fail} FALLAN")
