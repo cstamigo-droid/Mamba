@@ -38,7 +38,8 @@ Hub.Grupo({ clave = "MambaGrupoErrores", nombre = "Errores", icono = "bug", orde
 ---------------------------------------------------------------- API pública (_G.MambaAPI)
 -- Para «Mi plan» (Mamba_Plan) y cualquier otro módulo: solo lectura, y cada función devuelve nil si el dato
 -- todavía no está (módulo sin cargar, en combate, sin escaneo). Ninguna escribe en el chat.
-local API = {}
+-- revisor t9: se reusa la tabla si un módulo ya la creó (no se pierde lo que haya colgado antes)
+local API = type(_G.MambaAPI) == "table" and _G.MambaAPI or {}
 _G.MambaAPI = API
 
 local function cargar(addon)

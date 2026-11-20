@@ -27,6 +27,28 @@ for i, g in ipairs(GRUPOS) do ordenGrupo[g] = i end
 
 local lista, porId = {}, {}
 
+-- Los interruptores que ya están dibujados en Ajustes se repintan (revisor t9: el mismo ajuste también se cambia
+-- desde la ventana de Mamba, y el dibujado quedaba viejo). Solo los de estado (sin clave de Polestar).
+function A.RefrescarAjustes()
+	local P = _G.Polestar
+	local O = P and P.UI and P.UI.Options
+	local v = O and O.view
+	for _, w in pairs(v and v.cache or {}) do
+		if w.psControl and not w.psControl.key and w.Refresh then pcall(w.Refresh, w) end
+	end
+end
+
+-- Los bloques en el orden de GRUPOS (revisor t9): Polestar ordena las secciones por la primera vez que llegan,
+-- así que se declaran todas aquí, vacías (Polestar no dibuja una sección sin controles).
+do
+	local P = _G.Polestar
+	if P and P.RegisterOptions then
+		for _, g in ipairs(GRUPOS) do
+			pcall(P.RegisterOptions, { page = PAGINA, tab = PESTANA, lead = true, section = g, controls = {} })
+		end
+	end
+end
+
 local function aPolestar(x)
 	local P = _G.Polestar
 	if not (P and P.RegisterOptions) then return false end
@@ -39,6 +61,8 @@ local function aPolestar(x)
 			set = function(v)
 				local ok2, e = pcall(x.set, v and true or false)
 				if not ok2 and geterrorhandler then geterrorhandler()(e) end
+				-- la ventana de Mamba muestra algunos de los mismos interruptores (Capa, Servicios)
+				if A.Hub and A.Hub.Redibujar then A.Hub.Redibujar() end
 			end },
 	} })
 	if not ok and geterrorhandler then geterrorhandler()(err) end

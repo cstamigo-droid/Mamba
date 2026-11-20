@@ -452,7 +452,11 @@ function V:Interruptor(txt, valor, fn)
 		return f
 	end)
 	o.C:SetChecked(valor and true or false)
-	o.C:SetScript("OnClick", function(c) pcall(fn, c:GetChecked() and true or false); Hub.Redibujar() end)
+	o.C:SetScript("OnClick", function(c)
+		pcall(fn, c:GetChecked() and true or false)
+		Hub.Redibujar()
+		if A.RefrescarAjustes then A.RefrescarAjustes() end -- K124: el mismo ajuste en «Qué se muestra»
+	end)
 	o.T:SetText(txt)
 	self:_colocar(o, 28)
 end

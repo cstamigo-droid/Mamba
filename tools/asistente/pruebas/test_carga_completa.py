@@ -317,8 +317,11 @@ function IsShiftKeyDown() return false end; function IsControlKeyDown() return f
 function IsModifiedClick() return false end; function IsModifierKeyDown() return false end; falto("Is*KeyDown")
 function GetScreenWidth() return 1920 end; function GetScreenHeight() return 1080 end; falto("GetScreenWidth/Height")
 function GetFramerate() return 60 end; function GetNetStats() return 0, 0, 30, 30 end; function debugprofilestop() return (NOW or 0) * 1000 end
-function GetCVar() return "0" end; function GetCVarBool() return false end; function SetCVar() end; falto("GetCVar")
-C_CVar = { GetCVar = function() return "0" end, GetCVarBool = function() return false end, SetCVar = function() end }; falto("C_CVar")
+-- K124: las CVars guardan lo que se les pone (el cliente las guarda en Config.wtf, como una SavedVariable)
+CVARS = {}
+function GetCVar(n) return CVARS[n] or "0" end; function GetCVarBool(n) return GetCVar(n) == "1" end
+function SetCVar(n, v) if v == true then v = "1" elseif v == false then v = "0" end CVARS[n] = v ~= nil and tostring(v) or nil end; falto("GetCVar")
+C_CVar = { GetCVar = GetCVar, GetCVarBool = GetCVarBool, SetCVar = SetCVar }; falto("C_CVar")
 function GetNumSkillLines() return 0 end; function GetSkillLineInfo() return nil end; falto("GetNumSkillLines")
 function GetProfessions() return nil end
 function GetNumSpellTabs() return 0 end; function GetSpellTabInfo() return nil end; falto("GetNumSpellTabs")
@@ -1351,6 +1354,9 @@ if ROMPER:
     if MambaAPI and MambaAPI.Interruptor then
       MambaAPI.Interruptor({ id = "zz.roto", addon = "ZZ_Romper", nombre = "Roto", grupo = "Otros",
         get = function() return true end, set = function() end })
+      local zz = true
+      MambaAPI.Interruptor({ id = "zz.sinGuardar", addon = "ZZ_Romper", nombre = "Sin guardar", grupo = "Otros",
+        get = function() return zz end, set = function(v) zz = v end })
     end
     H.actual = "(prueba)"
     """)
@@ -1410,6 +1416,149 @@ for x in interruptores:
     m = probar_k124(x["id"])
     if m is not None:
         k124_contrato.append((x["id"], str(m)))
+# revisor t9: que set y get coincidan no basta. Cada interruptor tiene que GUARDARSE (cambia alguna SavedVariable:
+# o una CVar, que el cliente guarda en Config.wtf; si no, se pierde al salir del juego) y, en los de Asistente, Tasador, Medidor y Errores, tener EFECTO medido (el
+# marco o el gancho dejan de actuar). Un interruptor sin prueba de efecto aquí sale como NO VERIFICADO.
+L.execute(r"""
+function H.k124Foto(nombres)
+  local partes = {}
+  local function ser(v, prof, vistos)
+    local t = type(v)
+    if t ~= "table" then return t == "string" and ("%q"):format(v) or tostring(v) end
+    if prof > 14 or vistos[v] then return "{...}" end
+    vistos[v] = true
+    local ks = {}
+    for k in pairs(v) do ks[#ks + 1] = k end
+    table.sort(ks, function(a, b) return tostring(a) < tostring(b) end)
+    local o = {}
+    for _, k in ipairs(ks) do o[#o + 1] = tostring(k) .. "=" .. ser(v[k], prof + 1, vistos) end
+    vistos[v] = nil
+    return "{" .. table.concat(o, ",") .. "}"
+  end
+  for _, n in ipairs(nombres) do partes[#partes + 1] = n .. "=" .. ser(rawget(_G, n) or _G[n], 0, {}) end
+  partes[#partes + 1] = "CVars=" .. ser(CVARS, 0, {})
+  return table.concat(partes, ";")
+end
+function H.k124Spec(id)
+  for _, x in ipairs(MambaAPI._InterruptoresCrudos()) do if x.id == id then return x end end
+end
+-- Efecto de cada interruptor propio: fn(encendido) -> nil si se comporta como dice, o el motivo.
+local function espiar(t, k, fn)
+  local orig = t[k]
+  local llamado = false
+  t[k] = function(...) llamado = true; if fn then return fn(...) end return orig(...) end
+  return function() t[k] = orig; return llamado end
+end
+local function mostrado(nombre)
+  local f = rawget(_G, nombre) or _G[nombre]
+  if type(f) ~= "table" or not f.IsShown then return nil end
+  return f:IsShown() and true or false
+end
+H.k124Efecto = {
+  ["tasador.cuadro"] = function(en)
+    local T = Tasador
+    local fin = espiar(T, "TextosDeDatos", function() error("espía") end)
+    pcall(T.AgregarLineas, GameTooltip, "item:6948", nil)
+    if fin() ~= en then return "el bloque del cuadro " .. (en and "no se agrega" or "se sigue agregando") end
+  end,
+  ["tasador.recompensa"] = function(en)
+    local R = Polestar and Polestar.QoL and Polestar.QoL.Rewards
+    if not (R and R.Rank) then return "NO VERIFICADO" end
+    local fin = espiar(Tasador, "RecompensaDe", function() return nil end)
+    pcall(R.Rank, {})
+    if fin() ~= en then return "la recomendación " .. (en and "no se calcula" or "se sigue calculando") end
+  end,
+  ["tasador.escanear"] = function(en)
+    local habia = rawget(_G, "AuctionHouseFrame")
+    if not habia then rawset(_G, "AuctionHouseFrame", CreateFrame("Frame")) end
+    pcall(Tasador.AplicarBotonEscanear)
+    local v = mostrado("TasadorBotonEscanear")
+    if not habia then rawset(_G, "AuctionHouseFrame", nil) end
+    if v == nil and en then return "el botón no aparece con la subasta abierta" end
+    if v ~= nil and v ~= en then return "el botón " .. (en and "no se ve" or "se sigue viendo") end
+  end,
+  ["ventana.boton"] = function(en)
+    local v = mostrado("MambaBotonMinimapa")
+    if v ~= nil and v ~= en then return "el botón del minimapa " .. (en and "no se ve" or "se sigue viendo") end
+    if v == nil and en then return "no hay botón del minimapa" end
+  end,
+  ["capa.cuadro"] = function(en)
+    local v = mostrado("AsistenteCapa")
+    if v ~= nil and v ~= en then return "el cuadro de la capa " .. (en and "no se ve" or "se sigue viendo") end
+    if v == nil and en then return "no hay cuadro de la capa" end
+  end,
+  ["capa.aviso"] = function(en)
+    local A = Asistente
+    local C = A.Capa
+    local mapa = A.MapaActual and A.MapaActual() or nil
+    local antesC, antesG = C.actual, UnitGUID
+    C.actual = { zona = "1", clave = "1:2:1", cuando = 0, mapa = mapa }
+    UnitGUID = function() return "Creature-0-1-2-99-3-4" end
+    local fin = espiar(A, "Decir", function() end)
+    pcall(C.Observar, "target")
+    local dijo = fin()
+    UnitGUID, C.actual = antesG, antesC
+    if dijo ~= en then return "el aviso de cambio de capa " .. (en and "no sale" or "sigue saliendo") end
+  end,
+  ["medidor.reloj"] = function(en)
+    local M = Medidor
+    M.pausa = false -- como al entrar al juego: lo que manda es lo guardado
+    pcall(M.Iniciar)
+    if (not M.pausa) ~= en then return "al volver a entrar el reloj queda " .. (M.pausa and "en pausa" or "andando") end
+  end,
+  ["errores.anotar"] = function(en)
+    local db = MambaErroresDB
+    if type(db) ~= "table" or type(db.lista) ~= "table" then return "NO VERIFICADO" end
+    local n = #db.lista
+    H.k124n = (H.k124n or 0) + 1
+    H.disparar("ADDON_ACTION_BLOCKED", "ZZ_K124", "Prueba" .. H.k124n)
+    local anoto = #db.lista > n
+    if anoto ~= en then return "el error " .. (en and "no se anota" or "se sigue anotando") end
+  end,
+}
+""")
+svs_de = {n: [str(x) for x in ADDONS[n]["sv"] + ADDONS[n]["svpj"]] for n in ADDONS}
+todas_svs = sorted({s for v in svs_de.values() for s in v})
+foto = L.eval("function(t) return H.k124Foto(t) end")
+spec_de = L.eval("function(id) return H.k124Spec(id) end")
+efecto_de = L.eval("function(id) return H.k124Efecto[id] end")
+fijar_k124 = L.eval("function(s, v) pcall(s.set, v) end")
+leer_k124 = L.eval("function(s) local ok, v = pcall(s.get); return ok and v and true or false end")
+correr_efecto = L.eval("function(f, en) local ok, m = pcall(f, en); if not ok then return 'la prueba de efecto falla: ' .. tostring(m) end; return m end")
+k124_sin_efecto = []
+for x in interruptores:
+    s = spec_de(x["id"])
+    if s is None:
+        continue
+    v0 = bool(leer_k124(s))
+    propias = L.table_from(svs_de.get(x["addon"], []))
+    antes_p = foto(propias)
+    fijar_k124(s, not v0)
+    cambio = foto(propias) != antes_p
+    if not cambio:
+        # puede guardarlo en las SavedVariables de otro addon (p. ej. AsistenteDB): se miran todas
+        todas = L.table_from(todas_svs)
+        fijar_k124(s, v0)
+        antes_t = foto(todas)
+        fijar_k124(s, not v0)
+        cambio = foto(todas) != antes_t
+    if not cambio:
+        k124_contrato.append((x["id"], "set no guarda nada en SavedVariables: se pierde al salir del juego"))
+    fn = efecto_de(x["id"])
+    if fn is not None:
+        for en in (not v0, v0):
+            fijar_k124(s, en)
+            m = correr_efecto(fn, en)
+            if m == "NO VERIFICADO":
+                k124_sin_efecto.append(x["id"])
+                break
+            if m is not None:
+                k124_contrato.append((x["id"], f"{'encendido' if en else 'apagado'}: {m}"))
+                break
+    else:
+        k124_sin_efecto.append(x["id"])
+    fijar_k124(s, v0)
+
 # y que llegan a la ventana de ajustes de Polestar: Ajustes › Mamba › «Qué se muestra», un control por interruptor
 en_ajustes = L.eval("""function()
   local W = Polestar and Polestar.Widgets
@@ -1426,13 +1575,15 @@ if en_ajustes != -1 and en_ajustes != len(interruptores):
     k124_contrato.append(("(Ajustes)", f"«Qué se muestra» tiene {en_ajustes} controles y hay {len(interruptores)} interruptores"))
 print(f"\n== K124: TODO SE APAGA DESDE «QUÉ SE MUESTRA»: {len(interruptores)} interruptores de {len(con_interruptor)} addons · "
       f"sin interruptor: {len(k124_sin)} · pendientes con dueño: {len([a for a in PENDIENTES_K124 if a not in con_interruptor])} · "
-      f"lista vieja: {len(k124_viejos)} · contrato roto: {len(k124_contrato)} · en Ajustes: {en_ajustes if en_ajustes != -1 else 'NO VERIFICADO'}")
+      f"lista vieja: {len(k124_viejos)} · contrato roto: {len(k124_contrato)} · en Ajustes: {en_ajustes if en_ajustes != -1 else 'NO VERIFICADO'} · efecto sin medir: {len(k124_sin_efecto)}")
 for a, m in k124_sin:
     print(f"  - FALLA {a}: {m} y no publicó ningún interruptor (MambaAPI.Interruptor)")
 for a in k124_viejos:
     print(f"  - FALLA {a} ya tiene interruptor: sacarlo de tools/asistente/interruptores_pendientes.json")
 for i, m in k124_contrato:
     print(f"  - FALLA interruptor {i}: {m}")
+if k124_sin_efecto:
+    print("  (NO VERIFICADO, efecto sin prueba aquí; sí se miden el contrato y el guardado) " + ", ".join(k124_sin_efecto))
 for a, d in sorted(PENDIENTES_K124.items()):
     if a not in con_interruptor:
         print(f"  (pendiente) {a}: {act_k124.get(a, 'sin actividad en el simulado')} · dueño: {d}")

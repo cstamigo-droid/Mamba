@@ -60,7 +60,7 @@ function M.Comando(msg)
 			Decir("actividad desconocida. Usa una de: " .. Lista() .. ".")
 		end
 	elseif cmd == "pausa" then
-		M.pausa = not M.pausa
+		M.FijarReloj(M.pausa) -- revisor t9: lo mismo que el interruptor, también entre sesiones
 		Decir(M.pausa and "reloj en pausa." or "reloj andando.")
 	elseif cmd == "borrar" then
 		if resto == "si" or resto == "sí" then
@@ -81,6 +81,14 @@ SlashCmdList.MEDIDOR = M.Comando
 -- La sección «Medidor» de la ventana de Mamba lee los datos desde aquí.
 _G.Medidor = M
 
+-- El reloj, encendido o apagado: lo usan el interruptor de «Qué se muestra» y /medidor pausa, y queda guardado
+-- (MedidorDB.apagado) para la próxima sesión.
+function M.FijarReloj(encendido)
+	M.pausa = not encendido
+	MedidorDB = MedidorDB or {}
+	MedidorDB.apagado = (not encendido) or nil
+end
+
 -- K124: interruptor en Ajustes › Mamba › Qué se muestra (registro: Asistente/Interruptores.lua).
 local function publicar(spec)
 	local api = _G.MambaAPI
@@ -95,8 +103,4 @@ end
 publicar({ id = "medidor.reloj", addon = "Medidor", nombre = "Medir oro y experiencia por hora", grupo = "Oro",
 	ayuda = "Cuenta, mientras juegas, cuánto oro y experiencia ganas por hora en cada actividad.",
 	get = function() return not M.pausa end,
-	set = function(v)
-		M.pausa = not v
-		MedidorDB = MedidorDB or {}
-		MedidorDB.apagado = (not v) or nil
-	end })
+	set = function(v) M.FijarReloj(v) end })

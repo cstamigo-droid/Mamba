@@ -405,8 +405,5 @@ ev:SetScript("OnEvent", function(_, e)
 	end
 end)
 
-A.Opciones("Ventanas", "Encabezado de Mamba", {
-	{ kind = "toggle", label = "Serpiente animada",
-		help = "La mamba negra que rodea POLESTAR y se acuesta junto a \"Mamba\". Solo se mueve con la ventana abierta y se queda quieta en combate.",
-		get = function() return S.Encendida() end, set = function(v) S.Fijar(v) end },
-})
+-- El interruptor «Serpiente animada» está en Ajustes › Mamba › Qué se muestra (Interruptores.lua, K124): aquí había
+-- un segundo control para la misma clave que no se repintaba (revisor t9).
